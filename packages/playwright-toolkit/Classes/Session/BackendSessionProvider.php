@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Session;
 
+use Plan2net\PlaywrightToolkit\Compatibility\SessionCookieValue;
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 use Plan2net\PlaywrightToolkit\Database\DatabaseName;
@@ -84,17 +85,17 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
             $preseededSessionId = $this->configurationFactory->create()->preseededSessionId;
             $userSessionManager = UserSessionManager::create('BE');
             $userSession = $userSessionManager->createSessionFromStorage($preseededSessionId);
-            $jwt = $userSession->getJwt();
+            $cookieValue = SessionCookieValue::of($userSession);
 
             return new JsonResponse([
                 'success' => true,
                 'message' => 'Backend session retrieved from fixture',
                 'sessionId' => $userSession->getIdentifier(),
                 'cookieName' => self::COOKIE_NAME,
-                'cookieValue' => $jwt,
+                'cookieValue' => $cookieValue,
                 'userId' => $userSession->getUserId(),
                 'testId' => $testId,
-                'tokens' => $this->routeTokens($request, $jwt),
+                'tokens' => $this->routeTokens($request, $cookieValue),
             ]);
         } catch (\Throwable $e) {
             $this->logger?->error('Could not create the pre-seeded backend session.', ['exception' => $e]);
@@ -116,14 +117,14 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
 
     /**
      * Core mints the token from the session data of `$GLOBALS['BE_USER']`, hence
-     * the round trip through the JWT rather than an assembled user.
+     * the round trip through the cookie rather than an assembled user.
      *
      * @return array<string, string> route identifier => token
      */
-    private function routeTokens(ServerRequestInterface $request, string $jwt): array
+    private function routeTokens(ServerRequestInterface $request, string $cookieValue): array
     {
         $authenticated = $request->withCookieParams(
-            [...$request->getCookieParams(), self::COOKIE_NAME => $jwt]
+            [...$request->getCookieParams(), self::COOKIE_NAME => $cookieValue]
         );
 
         $backendUser = GeneralUtility::makeInstance(BackendUserAuthentication::class);

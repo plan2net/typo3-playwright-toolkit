@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Http;
 
+use Plan2net\PlaywrightToolkit\Compatibility\SessionCookieValue;
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use Plan2net\PlaywrightToolkit\Database\BorrowedConnection;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
@@ -81,15 +82,15 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
 
     private function openBackend(string $testId): ResponseInterface
     {
-        $jwt = $this->sessionCookieFor($testId);
-        if (null === $jwt) {
+        $cookieValue = $this->sessionCookieFor($testId);
+        if (null === $cookieValue) {
             return TestApi::error('No seeded session in that test database', 404);
         }
 
         return new RedirectResponse('/typo3/', 302, [
             'Set-Cookie' => [
                 self::cookieHeader(TestContext::TEST_ID_COOKIE, $testId),
-                self::cookieHeader(self::BACKEND_COOKIE, $jwt),
+                self::cookieHeader(self::BACKEND_COOKIE, $cookieValue),
             ],
         ]);
     }
@@ -106,9 +107,9 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
             $driver->connectionOverrides($testId),
             function () use ($preseededSessionId): ?string {
                 try {
-                    return UserSessionManager::create('BE')
-                        ->createSessionFromStorage($preseededSessionId)
-                        ->getJwt();
+                    return SessionCookieValue::of(
+                        UserSessionManager::create('BE')->createSessionFromStorage($preseededSessionId)
+                    );
                 } catch (\Throwable $e) {
                     $this->logger?->warning('Could not open the seeded session.', ['exception' => $e]);
 
