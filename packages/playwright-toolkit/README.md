@@ -115,10 +115,23 @@ fixturesPath    = fixtures
 fixtureManifest = pages.sql,sys_template.sql
 ```
 
-The files load in the order you list them, so put parent records first.
+The files load in the order you list them, so put parent records first. A fixture is
+plain SQL against the schema TYPO3 just built, so `fixtures/pages.sql` can be as
+small as a site root and one page under it:
 
-Your fixtures may set their own uid values. You do not have to reset any sequences
-afterwards; the extension does that for you.
+```sql
+INSERT INTO pages (uid, pid, doktype, title, slug, is_siteroot) VALUES
+    (1, 0, 1, 'Home', '/', 1),
+    (2, 1, 1, 'Products', '/products', 0);
+```
+
+Your fixtures may set their own uid values, as this one does. You do not have to
+reset any sequences afterwards; the extension does that for you, so the first record
+a test writes does not collide with uid 2.
+
+Keep the manifest to what every test needs — a site root, a TypoScript template, the
+storages your content references. Everything else is faster and clearer built through
+the builders in the test that needs it.
 
 ## Using the package
 

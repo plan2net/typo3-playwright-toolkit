@@ -51,12 +51,13 @@ Call `defineToolkitConfig(...)` at the top of your `playwright.config.ts`, befor
 other file from this package is loaded. Two values are enough:
 
 ```ts
-// playwright.config.ts
+// <project>/tests/playwright/playwright.config.ts
+import { fileURLToPath } from 'url'
 import { defineToolkitConfig, defineBasePlaywrightConfig } from '@plan2net/typo3-playwright-toolkit/playwright'
 
 const toolkitConfig = defineToolkitConfig({
     testingURL: 'https://example-testing.test',
-    paths: { consumerRoot: new URL('..', import.meta.url).pathname },
+    paths: { consumerRoot: fileURLToPath(new URL('../..', import.meta.url)) },
 })
 
 export default defineBasePlaywrightConfig(toolkitConfig, {
@@ -69,7 +70,11 @@ this package uses, because the test database exists nowhere else.
 
 `consumerRoot` is the root of your TYPO3 project. The package derives the state and
 session folders from it, so it works from `node_modules` without knowing its own
-location.
+location. Count the `..` from where your config actually sits — the example assumes
+`<project>/tests/playwright/`, so it climbs two levels. Pointing it at the wrong
+directory is not an error: the run works and writes its state somewhere you did not
+expect. Use `fileURLToPath` rather than `new URL(...).pathname`, which
+percent-encodes a project path containing spaces or non-ASCII characters.
 
 Important: `defineToolkitConfig` must run before the first import from this package.
 Everything else reads the values it stores.
@@ -115,6 +120,21 @@ reason instead of failing because content is missing.
 
 The setup runs once per file, even when the file runs in several browser projects.
 The other projects use the state and the test database that the first one created.
+
+Besides `builders`, the setup receives `testId` (the database this attempt runs
+against), `attempt` (`1` on the first try), `signal` (aborted when the attempt times
+out, so pass it to your own long requests), and a `page` and `request` that already
+carry the toolkit headers. Your tests get `testId` beside `state`, which is the
+database name without its `db` prefix and what the backend shows in brackets behind
+the site name:
+
+```ts
+test('reports which database it used', async ({ page, state, testId }) => {
+    await page.goto(state.slug)
+
+    console.log(`built in db${testId}`)
+})
+```
 
 ### Your own content types
 
@@ -278,6 +298,11 @@ report as a JSON file when the test fails.
 | `accessibility.auto` | `false` | Scan after every test that opened a page, instead of calling `runAccessibilityScan` yourself |
 | `csp.mode` | `any` | Which policy header a page must send: `any`, `report-only` or `enforced` |
 | `csp.expectedOrigin` | origin of `testingURL` | Whose violations count |
+| `setup.attemptTimeoutMs` | `90000` | How long one setup attempt may take |
+| `setup.waitTimeoutMs` | `300000` | How long a test waits for its pair in total, lock included |
+| `setup.attempts` | `2` | Attempts per setup, so `2` means one retry |
+| `setup.lockStaleMs` | `15000` | Silence after which another worker may take over the setup |
+| `setup.pollMs` | `100` | Gap between polls while waiting for a pair |
 | `cleanup.preserveOnFailure` | `failed` | Which test databases to keep after a failure: `failed`, `all` or `none` |
 | `cleanup.failOnLeak` | true in CI | Fail the run if a test database could not be deleted |
 | `cleanup.orphanAgeMs` | 24 hours | How old a leftover database must be before cleanup deletes it |
@@ -298,6 +323,22 @@ other TCA column. Types with images add `withFile` and `withFiles`, which write 
 `sys_file_reference` rows for you, plus `withColumns`, `withOrientation` and
 `withImageSize`.
 
+### The inspect command
+
+The package installs `typo3-playwright-inspect`. Run it from your project root
+after a failed run to print a backend link for every test database that was kept,
+optionally filtered by a part of the test file name:
+
+```bash
+npx typo3-playwright-inspect            # every kept database
+npx typo3-playwright-inspect accordion  # only matching test files
+```
+
+It reads the API secret from `var/playwright/api-secret` or from
+`PLAYWRIGHT_TOOLKIT_SECRET`. On DDEV, `ddev playwright-inspect` wraps it. The links
+log in as the pre-seeded backend user and live five minutes, so treat one like a
+password.
+
 ## Troubleshooting
 
 **"No test ID for this request".** The builder received a page that the toolkit
@@ -308,6 +349,12 @@ first thing in `playwright.config.ts`.
 
 **Cleanup refuses a path.** `stateDir` and `sessionDir` must be absolute and inside
 `consumerRoot`, because cleanup deletes files in both.
+
+**"Timed out after 300000ms waiting for the setup".** A setup that builds a lot of
+content can outgrow the defaults on a slow machine. Raise `setup.attemptTimeoutMs`
+for the setup itself and `setup.waitTimeoutMs` for the tests waiting on it — the
+second has to stay comfortably above the first, since it covers every attempt plus
+the time spent waiting for the lock.
 
 **Test databases stay after a failed run.** That is intended: the databases of the
 failed test files are kept for debugging, and the run prints a link for each one

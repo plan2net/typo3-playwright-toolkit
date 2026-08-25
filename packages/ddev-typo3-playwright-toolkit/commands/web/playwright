@@ -30,7 +30,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     exit 0
 fi
 
-cd test/playwright || exit 1
+cd tests/playwright || exit 1
 
 . /mnt/ddev_config/playwright-lib.sh || exit 1
 

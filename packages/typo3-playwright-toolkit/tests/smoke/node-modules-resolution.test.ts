@@ -101,6 +101,17 @@ describe('package resolved from node_modules', () => {
         expect(source).toContain('axe')
     })
 
+    // npm links the bin by the path in package.json without checking it exists,
+    // so a wrong one is only found by running the command from a consumer.
+    it('installs a working typo3-playwright-inspect command', () => {
+        const command = path.join(consumerDir, 'node_modules/.bin/typo3-playwright-inspect')
+
+        expect(fs.existsSync(command)).toBe(true)
+        expect(() => execFileSync(command, { cwd: consumerDir, stdio: 'pipe' })).toThrow(
+            /No \.test-state directory found/,
+        )
+    })
+
     // Without NodeNext resolution the exports map is invisible to TypeScript and
     // every fixture types as `any`, which is what a consumer sees with no tsconfig.
     it('type-checks a consumer test that extends the shipped tsconfig', () => {

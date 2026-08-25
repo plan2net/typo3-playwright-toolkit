@@ -29,7 +29,7 @@ afterEach(() => {
 describe('findStateDir', () => {
     it('finds the state directory from a directory below it', () => {
         fs.mkdirSync(path.join(root, '.test-state'), { recursive: true })
-        const deep = path.join(root, 'test', 'playwright')
+        const deep = path.join(root, 'tests', 'playwright')
         fs.mkdirSync(deep, { recursive: true })
 
         expect(findStateDir(deep)).toBe(path.join(root, '.test-state'))

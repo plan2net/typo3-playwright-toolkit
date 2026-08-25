@@ -114,7 +114,7 @@ setup() {
 }
 
 # `--help` has to answer in any project, including one that has not created
-# test/playwright yet — that is exactly when someone reads it.
+# tests/playwright yet — that is exactly when someone reads it.
 @test "every command with help answers before changing directory" {
     for command in "${ADDON_DIR}"/commands/web/*; do
         grep -q -- '"--help"' "${command}" || continue

@@ -104,11 +104,16 @@ ddev restart
 # 2. The extension
 ddev composer require --dev plan2net/playwright-toolkit
 
-# 3. The npm package
-ddev exec 'cd test/playwright && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'
+# 3. The npm package, in a directory of your own for the Playwright tests
+ddev exec 'mkdir -p tests/playwright && cd tests/playwright && npm init -y && npm pkg set type=module'
+ddev exec 'cd tests/playwright && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'
 ```
 
-Then three files of your own. `test/playwright/tsconfig.json`, so your editor and
+The `npm init` matters: without a `package.json` of its own, `npm i` walks up and
+installs into whatever project it finds above. `type: module` matters because the
+config below uses `import.meta.url`.
+
+Then three files of your own. `tests/playwright/tsconfig.json`, so your editor and
 `tsc` can see the package's types — without `NodeNext` resolution everything in your
 tests is `any`:
 
@@ -127,14 +132,15 @@ tests is `any`:
 Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
 ```
 
-And `test/playwright/playwright.config.ts`:
+And `tests/playwright/playwright.config.ts`:
 
 ```ts
+import { fileURLToPath } from 'url'
 import { defineToolkitConfig, defineBasePlaywrightConfig } from '@plan2net/typo3-playwright-toolkit/playwright'
 
 const toolkit = defineToolkitConfig({
     testingURL: 'https://example-testing.ddev.site',
-    paths: { consumerRoot: new URL('../..', import.meta.url).pathname },
+    paths: { consumerRoot: fileURLToPath(new URL('../..', import.meta.url)) },
 })
 
 export default defineBasePlaywrightConfig(toolkit, { testDir: './tests' })
