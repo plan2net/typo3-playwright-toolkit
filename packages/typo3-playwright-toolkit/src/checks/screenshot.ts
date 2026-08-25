@@ -45,6 +45,16 @@ export async function waitForAnimations(page: Page, selector?: string, timeout =
     )
 }
 
+// fullPage captures past the viewport instead of scrolling to it, so a lazy
+// element below the fold never starts loading at all.
+export async function loadLazyElements(page: Page): Promise<void> {
+    await page.evaluate(() =>
+        document
+            .querySelectorAll<HTMLImageElement | HTMLIFrameElement>('[loading="lazy"]')
+            .forEach((element) => (element.loading = 'eager')),
+    )
+}
+
 async function waitForImagesDecoded(page: Page, timeout = 15000): Promise<void> {
     await page.evaluate(async (timeout) => {
         const images = Array.from(document.querySelectorAll('img'))
@@ -140,6 +150,7 @@ export async function takeScreenshot(
     await applyDeferredStylesheets(page)
     await page.evaluate(() => document.fonts.ready)
     await waitForAnimations(page, undefined, 3000)
+    await loadLazyElements(page)
     await waitForImagesDecoded(page)
 
     // Playwright creates a missing reference itself and has --update-snapshots
