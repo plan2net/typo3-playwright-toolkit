@@ -268,7 +268,15 @@ final class DatabaseCleanupTest extends FunctionalTestCase
             /** @var list<string> */
             public array $lines = [];
 
-            public function log($level, string|\Stringable $message, array $context = []): void
+            /**
+             * Untyped $message on purpose: psr/log 1, which TYPO3 11 pins, declares
+             * it untyped, and narrowing it here is a fatal.
+             *
+             * @param mixed             $level
+             * @param string|\Stringable $message
+             * @param array<mixed>      $context
+             */
+            public function log($level, $message, array $context = []): void
             {
                 $this->lines[] = $level . ' ' . $message . ' ' . json_encode($context);
             }
