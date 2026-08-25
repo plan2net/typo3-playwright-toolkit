@@ -121,9 +121,12 @@ setup() {
 
         local help_line cd_line
         help_line=$(grep -n -- '"--help"' "${command}" | head -1 | cut -d: -f1)
-        cd_line=$(grep -n '^cd ' "${command}" | head -1 | cut -d: -f1)
+        cd_line=$(grep -n '^playwright_enter_test_dir' "${command}" | head -1 | cut -d: -f1)
 
-        [ -n "${cd_line}" ] || continue
+        [ -n "${cd_line}" ] || {
+            echo "$(basename "${command}") never enters the test directory — this test now covers nothing"
+            false
+        }
         [ "${help_line}" -lt "${cd_line}" ] || {
             echo "$(basename "${command}") cds on line ${cd_line} before handling --help on line ${help_line}"
             false

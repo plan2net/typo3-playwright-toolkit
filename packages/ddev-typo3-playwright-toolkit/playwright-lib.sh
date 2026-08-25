@@ -11,6 +11,19 @@
 # colouring from a run a developer is watching.
 unset NO_COLOR
 
+# Where the project keeps its Playwright tests. An environment variable rather
+# than a flag: this one belongs to the project, not to a single run, so it is set
+# once in web_environment or .ddev/.env.web.
+playwright_enter_test_dir() {
+    local directory="${PW_TEST_DIR:-tests/playwright}"
+
+    if ! cd "${directory}" 2>/dev/null; then
+        echo "[playwright] No '${directory}' directory under $(pwd)." >&2
+        echo "[playwright] Set PW_TEST_DIR in web_environment or .ddev/.env.web to point at your Playwright tests." >&2
+        return 1
+    fi
+}
+
 # Sets PW_ARGS to everything Playwright should receive, taking out only the flags
 # this add-on handles itself.
 #

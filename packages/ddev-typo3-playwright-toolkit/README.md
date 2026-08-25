@@ -47,6 +47,16 @@ of a monorepo.
 The test databases need no configuration. `ddev playwright` prepares the template
 database itself before every test run.
 
+### Where your tests live
+
+The commands run in `tests/playwright`. If yours are somewhere else, say so in
+`.ddev/config.yaml` and `ddev restart`:
+
+```yaml
+web_environment:
+    - PW_TEST_DIR=e2e
+```
+
 ### A different database system
 
 Install picks the `db-test` service that matches your project. If you change your
@@ -148,6 +158,7 @@ does not work, because these are DDEV web commands.
 
 | Name | Default | Purpose |
 |---|---|---|
+| `PW_TEST_DIR` | `tests/playwright` | Where your Playwright tests live, relative to the project root |
 | `PW_RUN_ID` | generated | Names the run, so cleanup can tell runs apart |
 | `PW_UI_PORT` | `3000` | Port for UI mode |
 | `PW_SKIP_PREPARE` | unset | Same as `--skip-prepare`; use the flag instead |

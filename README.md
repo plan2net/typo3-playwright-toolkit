@@ -113,6 +113,10 @@ The `npm init` matters: without a `package.json` of its own, `npm i` walks up an
 installs into whatever project it finds above. `type: module` matters because the
 config below uses `import.meta.url`.
 
+`tests/playwright` is only the default. To keep your tests somewhere else, put
+`PW_TEST_DIR=<your directory>` in the `web_environment` of `.ddev/config.yaml` and
+adjust the paths below to match.
+
 Then three files of your own. `tests/playwright/tsconfig.json`, so your editor and
 `tsc` can see the package's types — without `NodeNext` resolution everything in your
 tests is `any`:
