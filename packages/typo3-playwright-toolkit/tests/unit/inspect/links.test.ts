@@ -28,7 +28,7 @@ afterEach(() => {
 
 describe('findStateDir', () => {
     it('finds the state directory from a directory below it', () => {
-        fs.mkdirSync(path.join(root, '.test-state'), { recursive: true })
+        fs.mkdirSync(path.join(root, '.test-state', 'runs'), { recursive: true })
         const deep = path.join(root, 'tests', 'playwright')
         fs.mkdirSync(deep, { recursive: true })
 
@@ -37,6 +37,21 @@ describe('findStateDir', () => {
 
     it('is undefined when there is none', () => {
         expect(findStateDir(root)).toBeUndefined()
+    })
+
+    it('walks past a .test-state that holds no runs', () => {
+        fs.mkdirSync(path.join(root, '.test-state', 'runs'), { recursive: true })
+        const deep = path.join(root, 'tests', 'playwright')
+        fs.mkdirSync(path.join(deep, '.test-state'), { recursive: true })
+
+        expect(findStateDir(deep)).toBe(path.join(root, '.test-state'))
+    })
+
+    it('is undefined when the only candidate holds no runs', () => {
+        const deep = path.join(root, 'tests', 'playwright')
+        fs.mkdirSync(path.join(deep, '.test-state', '__statuses'), { recursive: true })
+
+        expect(findStateDir(deep)).toBeUndefined()
     })
 })
 

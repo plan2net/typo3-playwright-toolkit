@@ -16,7 +16,9 @@ export function findStateDir(from: string): string | undefined {
 
     for (;;) {
         const candidate = path.join(directory, '.test-state')
-        if (fs.existsSync(candidate)) {
+        // The API secret is read from the parent of whatever matches here, so a
+        // directory without runs/ resolves it against the wrong root.
+        if (fs.existsSync(path.join(candidate, 'runs'))) {
             return candidate
         }
 
