@@ -1,0 +1,8 @@
+{
+    "_comment": "The exact body POST /typo3/test-api/databases/sweep returns. cutoffMs is the age actually applied after the server clamped the request up to its floor.",
+    "ok": true,
+    "engine": "sqlite",
+    "results": [{ "testId": "OLDOLD11OLDOLD11", "outcome": "dropped" }],
+    "kept": 2,
+    "cutoffMs": 3600000
+}

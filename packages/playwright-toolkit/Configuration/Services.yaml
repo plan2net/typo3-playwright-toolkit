@@ -1,0 +1,62 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Plan2net\PlaywrightToolkit\:
+    resource: '../Classes/*'
+
+  Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory:
+    public: true
+
+  Plan2net\PlaywrightToolkit\Session\BackendSessionProvider:
+    public: true
+
+  Plan2net\PlaywrightToolkit\Http\HealthCheckProvider:
+    public: true
+
+  Plan2net\PlaywrightToolkit\Http\DatabaseCleanupProvider:
+    public: true
+
+  Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles:
+    factory: ['Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles', 'inVarPath']
+    public: true
+
+  Plan2net\PlaywrightToolkit\Security\TestApiSecret:
+    factory: ['Plan2net\PlaywrightToolkit\Security\TestApiSecret', 'inVarPath']
+    public: true
+
+  Plan2net\PlaywrightToolkit\Database\Cleanup\DatabaseCleanup:
+    public: true
+
+  Plan2net\PlaywrightToolkit\Database\DatabaseInitializer:
+    public: true
+    tags:
+      - name: event.listener
+        identifier: 'plan2net/playwright-toolkit/database-create'
+        event: TYPO3\CMS\Core\Core\Event\BootCompletedEvent
+
+  Plan2net\PlaywrightToolkit\SiteName:
+    public: true
+    tags:
+      - name: event.listener
+        identifier: 'plan2net/playwright-toolkit/site-name'
+        event: TYPO3\CMS\Core\Core\Event\BootCompletedEvent
+
+  Plan2net\PlaywrightToolkit\Database\ResolvedSchema:
+    public: true
+
+  Plan2net\PlaywrightToolkit\Database\SeedSources:
+    public: true
+
+  Plan2net\PlaywrightToolkit\Database\TemplatePreparer:
+    public: true
+
+  Plan2net\PlaywrightToolkit\Command\PrepareCommand:
+    public: true
+    tags:
+      - name: 'console.command'
+        command: 'playwright:prepare'
+        description: 'Builds the Playwright test database template.'
+        schedulable: false

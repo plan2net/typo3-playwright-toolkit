@@ -1,0 +1,57 @@
+#!/bin/bash
+#ddev-generated
+
+## Description: Run Playwright against fresh per-test databases
+## Usage: playwright [subcommand] [options]
+## Example: "ddev playwright test" or "ddev playwright test accordion --build"
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo "Usage: ddev playwright [subcommand] [options]"
+    echo ""
+    echo "Everything is forwarded to 'npx playwright', so any subcommand and flag"
+    echo "works. Before 'test' the test database template is rebuilt, so a TCA or"
+    echo "ext_tables.sql change never runs against a stale schema."
+    echo ""
+    echo "Options this command handles itself:"
+    echo "  --build             Build frontend assets first (npm run build)"
+    echo "  --no-cleanup        Keep test databases and state after the run"
+    echo "  --skip-prepare      Reuse the existing test database template"
+    echo ""
+    echo "Env (set these in web_environment or .ddev/.env.web to reach this command):"
+    echo "  PW_RUN_ID           Pins the run namespace used for cleanup bookkeeping"
+    echo ""
+    echo "Examples:"
+    echo "  ddev playwright test                                  # everything"
+    echo "  ddev playwright test accordion                        # one file, by path"
+    echo "  ddev playwright test --grep 'three facts'              # by test title"
+    echo "  ddev playwright test --project=chromium-desktop        # one browser"
+    echo "  ddev playwright test -c playwright.local.config.ts     # another config"
+    echo "  ddev playwright show-report"
+    exit 0
+fi
+
+cd test/playwright || exit 1
+
+. /mnt/ddev_config/playwright-lib.sh || exit 1
+
+playwright_collect_args "$@"
+
+if [ "${PW_BUILD}" = "1" ]; then
+    playwright_build_assets || exit 1
+fi
+
+# Only `test` prepares: subcommands like show-report and codegen do not need a
+# database, and rebuilding the template for them would cost 30-60s for nothing.
+if [ "${PW_ARGS[0]:-}" != "test" ]; then
+    exec npx playwright "${PW_ARGS[@]}"
+fi
+
+playwright_prepare_template || exit 1
+
+# Stale processed images survive a database drop, so we clear them here
+processed="/var/www/html/${DDEV_DOCROOT:-public}/fileadmin/_processed_"
+if [ -d "${processed}" ] && ! rm -rf "${processed:?}"/*; then
+    echo "[playwright] Could not clear ${processed} — screenshots may compare against stale images." >&2
+fi
+
+exec npx playwright "${PW_ARGS[@]}"

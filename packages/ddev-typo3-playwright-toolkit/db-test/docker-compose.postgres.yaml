@@ -1,0 +1,72 @@
+#ddev-generated
+services:
+  # The extension reads the test service from here rather than carrying a copy.
+  # No port: it follows the engine the project uses, so pinning one here would
+  # hand a mysql consumer the postgres port.
+  web:
+    environment:
+      - PLAYWRIGHT_DB_TEST_HOST=db-test
+      - PLAYWRIGHT_DB_TEST_USER=db
+      - PLAYWRIGHT_DB_TEST_PASSWORD=db
+
+  db-test:
+    container_name: ddev-${DDEV_SITENAME}-db-test
+    image: postgres:16-alpine
+    restart: 'unless-stopped'
+    stop_grace_period: 60s
+
+    volumes:
+      - type: volume
+        source: db-test-data
+        target: /var/lib/postgresql/data
+      - type: tmpfs
+        target: /tmp
+        tmpfs: { size: 1G }
+      - '.:/mnt/ddev_config:ro'
+      - ddev-global-cache:/mnt/ddev-global-cache
+      - './postgres/db-test-init.sql:/docker-entrypoint-initdb.d/db-test-init.sql:ro'
+
+    environment:
+      - POSTGRES_PASSWORD=db
+      - POSTGRES_DB=db
+      - POSTGRES_USER=db
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - DDEV_DATABASE=postgres:16
+      - DDEV_UID=$DDEV_UID
+      - DDEV_GID=$DDEV_GID
+      - DDEV_SKIP_RESTORE=true
+      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --lc-collate=C --lc-ctype=C
+        --no-sync
+
+    # Optimized for speed
+    command: [
+        'postgres',
+        '-c', 'fsync=off',
+        '-c', 'synchronous_commit=off',
+        '-c', 'full_page_writes=off',
+        '-c', 'wal_level=minimal',
+        '-c', 'max_wal_senders=0',
+        '-c', 'max_replication_slots=0',
+        '-c', 'autovacuum=off',
+        '-c', 'jit=off',
+        '-c', 'max_connections=100',
+        '-c', 'tcp_keepalives_idle=600',
+        '-c', 'tcp_keepalives_interval=10',
+        '-c', 'tcp_keepalives_count=6',
+      ]
+
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  db-test-data:
+  ddev-global-cache:
+    external: true

@@ -1,0 +1,150 @@
+import { Page } from '@playwright/test'
+import { CropConfig } from '../types/common.js'
+import { saveRecord, type RecordDataMap } from '../http/record-edit.js'
+import { requireTestId, resolveRequestContext, type RequestContext } from './request-context.js'
+import { coerceFields } from './fields.js'
+import { newRecordIdentifier } from './identifier.js'
+
+interface Fields {
+    [key: string]: string | number | boolean | undefined | CropConfig
+}
+
+const DEFAULT_CROP =
+    '{"default":{"cropArea":{"x":0,"y":0,"width":1,"height":1},"selectedRatio":"NaN","focusArea":null}}'
+
+export class PageBuilder {
+    protected fields: Fields = {
+        doktype: 1,
+        shortcut_mode: 0,
+        pid: 1,
+        hidden: false,
+        layout: 0,
+        subtitle: '',
+    }
+
+    private page: Page
+    private imageFileId?: number
+    private imageCropConfig?: CropConfig
+    private mediaIdentifierValue?: string
+    private readonly requestContext?: Partial<RequestContext>
+
+    constructor(page: Page, requestContext?: Partial<RequestContext>) {
+        this.page = page
+        this.requestContext = requestContext
+    }
+
+    withTitle(title: string): this {
+        this.fields.title = title
+        return this
+    }
+
+    /** Any other TCA column — doktype, layout, backend_layout, shortcut_mode, … */
+    withField(column: string, value: string | number | boolean): this {
+        this.fields[column] = value
+        return this
+    }
+
+    /** The test ID is appended so two runs never claim the same URL. */
+    withSlug(slug: string): this {
+        const testId = requireTestId(this.page, this.requestContext?.testId)
+
+        let normalizedSlug = slug.startsWith('/') ? slug : `/${slug}`
+        normalizedSlug = normalizedSlug.endsWith('/') ? normalizedSlug.slice(0, -1) : normalizedSlug
+
+        this.fields.slug = `${normalizedSlug}-${testId.toLowerCase()}`
+        return this
+    }
+
+    withExistingImage(fileId: number): this {
+        this.imageFileId = fileId
+        return this
+    }
+
+    withImageCropFocus(cropConfig: CropConfig): this {
+        this.imageCropConfig = cropConfig
+        return this
+    }
+
+    atParentId(id: number): this {
+        this.fields.pid = id
+        return this
+    }
+
+    async create(): Promise<{ id: string; slug: string }> {
+        const context = resolveRequestContext(this.page, this.requestContext)
+        const identifier = newRecordIdentifier()
+
+        const uid = await saveRecord(this.page.request, context, {
+            table: 'pages',
+            identifier,
+            target: Number(this.fields.pid),
+            data: {
+                pages: { [identifier]: this.pageFields() },
+                ...this.mediaRecords(identifier),
+            },
+        })
+
+        return { id: String(uid), slug: (this.fields.slug as string) || '' }
+    }
+
+    async update(pageId: string): Promise<{ id: string; slug: string }> {
+        const context = resolveRequestContext(this.page, this.requestContext)
+
+        await saveRecord(this.page.request, context, {
+            table: 'pages',
+            identifier: pageId,
+            target: Number(pageId),
+            data: {
+                pages: { [pageId]: this.pageFields() },
+                ...this.mediaRecords(pageId),
+            },
+        })
+
+        return { id: pageId, slug: (this.fields.slug as string) || '' }
+    }
+
+    /**
+     * A second record the page's own `media` field lists, which is what makes
+     * DataHandler link it once the page has a uid.
+     */
+    private mediaRecords(pageIdentifier: string): RecordDataMap {
+        if (!this.imageFileId) {
+            return {}
+        }
+
+        return {
+            sys_file_reference: {
+                [this.mediaIdentifier()]: {
+                    uid_local: this.imageFileId,
+                    pid: pageIdentifier,
+                    tablenames: 'pages',
+                    fieldname: 'media',
+                    hidden: 0,
+                    sys_language_uid: 0,
+                    alternative: '',
+                    description: '',
+                    title: '',
+                    crop: this.imageCropConfig ? JSON.stringify(this.imageCropConfig) : DEFAULT_CROP,
+                },
+            },
+        }
+    }
+
+    private pageFields(): Record<string, unknown> {
+        const fields = coerceFields(this.fields)
+
+        if (this.imageFileId) {
+            fields.media = this.mediaIdentifier()
+        }
+
+        return fields
+    }
+
+    // Minted once: pageFields() lists it in `media` and mediaRecords() keys the
+    // reference by it, and the two must agree.
+    private mediaIdentifier(): string {
+        this.mediaIdentifierValue ??= newRecordIdentifier()
+
+        return this.mediaIdentifierValue
+    }
+}

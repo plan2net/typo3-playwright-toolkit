@@ -1,0 +1,23 @@
+{
+    "_comment": "What the toolkit posts to /typo3/record/edit for an image element with two files. The npm side asserts create() produces exactly this; the extension feeds it to a real DataHandler and asserts both references come back linked. The NEW identifiers are minted per request, so they are named here for a reader and renamed in the posted body before comparing.",
+    "data[tt_content][NEWcontent][pid]": "1",
+    "data[tt_content][NEWcontent][sys_language_uid]": "0",
+    "data[tt_content][NEWcontent][CType]": "image",
+    "data[tt_content][NEWcontent][colPos]": "0",
+    "data[tt_content][NEWcontent][header]": "Gallery",
+    "data[tt_content][NEWcontent][image]": "NEWimage0,NEWimage1",
+    "data[sys_file_reference][NEWimage0][uid_local]": "1",
+    "data[sys_file_reference][NEWimage0][pid]": "1",
+    "data[sys_file_reference][NEWimage0][tablenames]": "tt_content",
+    "data[sys_file_reference][NEWimage0][fieldname]": "image",
+    "data[sys_file_reference][NEWimage0][sys_language_uid]": "0",
+    "data[sys_file_reference][NEWimage0][sorting_foreign]": "1",
+    "data[sys_file_reference][NEWimage1][uid_local]": "2",
+    "data[sys_file_reference][NEWimage1][pid]": "1",
+    "data[sys_file_reference][NEWimage1][tablenames]": "tt_content",
+    "data[sys_file_reference][NEWimage1][fieldname]": "image",
+    "data[sys_file_reference][NEWimage1][sys_language_uid]": "0",
+    "data[sys_file_reference][NEWimage1][sorting_foreign]": "2",
+    "doSave": "1",
+    "_savedok": "1"
+}

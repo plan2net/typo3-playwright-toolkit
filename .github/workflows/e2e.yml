@@ -1,0 +1,65 @@
+name: e2e
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  header-chain:
+    name: header chain in DDEV
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ddev/github-action-setup-ddev@v1
+        with:
+          autostart: false
+
+      - name: Install bats
+        run: sudo apt-get update && sudo apt-get install -y bats
+
+      # Proves the invariant the whole design rests on: the test-ID header reaches
+      # PHP with no webserver configuration, and selects the derived database. The
+      # suite covers apache-fpm and nginx-fpm itself, creating and deleting its own
+      # DDEV project for each.
+      - name: Header chain
+        working-directory: packages/ddev-typo3-playwright-toolkit
+        run: bats tests/test.bats
+
+  consumer-install:
+    name: install the packed tarball into a consumer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: packages/typo3-playwright-toolkit/package-lock.json
+
+      - name: Install toolkit dependencies
+        working-directory: packages/typo3-playwright-toolkit
+        run: npm ci
+
+      # Deliberately the tarball, never the working tree. The exports-map failure
+      # that broke a real consumer only appeared through a packed install; a job
+      # importing from source would have stayed green through it.
+      - name: Pack and consume
+        working-directory: packages/typo3-playwright-toolkit
+        run: npm run test:pack
+
+# Not yet covered here, and worth naming rather than implying otherwise: a full
+# TYPO3 install driven by definePair against a real backend. That was proven by
+# hand against an existing project; reproducing it in CI needs a TYPO3 project
+# fixture to install the extension into, which does not exist in this repository
+# yet. Until it does, the chain is verified in two halves — the transport above,
+# and the extension's own suites in checks.yml and engines.yml.

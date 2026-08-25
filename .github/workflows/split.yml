@@ -1,0 +1,64 @@
+name: split
+
+# Packagist serves one package per repository root, and the extension lives in a
+# subdirectory — so it is mirrored, history and all, to a repository of its own.
+# That mirror is what `composer require plan2net/playwright-toolkit` resolves.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: split-${{ github.ref }}
+
+jobs:
+  playwright-toolkit:
+    name: mirror the extension to its own repository
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'plan2net'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mirror
+        env:
+          SPLIT_DEPLOY_KEY: ${{ secrets.SPLIT_DEPLOY_KEY }}
+          TARGET: git@github.com:plan2net/playwright-toolkit.git
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SPLIT_DEPLOY_KEY}" ]; then
+            echo "SPLIT_DEPLOY_KEY is not set — cannot push to the mirror."
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${SPLIT_DEPLOY_KEY}" > ~/.ssh/mirror
+          chmod 600 ~/.ssh/mirror
+
+          # GitHub's own published host key, so the push cannot be talked to by
+          # whatever answers on port 22.
+          printf '%s\n' 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' > ~/.ssh/known_hosts
+
+          export GIT_SSH_COMMAND='ssh -i ~/.ssh/mirror -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes'
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          cp -R contract packages/playwright-toolkit/contract
+          git add -f packages/playwright-toolkit/contract
+          git commit --amend --no-edit
+
+          split=$(git subtree split --prefix=packages/playwright-toolkit)
+
+          git push --force "${TARGET}" "${split}:refs/heads/main"
+
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            git push "${TARGET}" "${split}:refs/tags/${GITHUB_REF_NAME}"
+          fi

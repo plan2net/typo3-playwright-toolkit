@@ -1,0 +1,71 @@
+#ddev-generated
+services:
+  web:
+    environment:
+      - PLAYWRIGHT_DB_TEST_HOST=db-test
+      - PLAYWRIGHT_DB_TEST_USER=db
+      - PLAYWRIGHT_DB_TEST_PASSWORD=db
+
+  db-test:
+    container_name: ddev-${DDEV_SITENAME}-db-test
+    image: mariadb:11
+    restart: 'unless-stopped'
+    stop_grace_period: 60s
+
+    volumes:
+      - type: volume
+        source: db-test-data
+        target: /var/lib/mysql
+      - type: tmpfs
+        target: /tmp
+        tmpfs: { size: 1G }
+      - '.:/mnt/ddev_config:ro'
+      - ddev-global-cache:/mnt/ddev-global-cache
+      - './mysql/db-test-init.sql:/docker-entrypoint-initdb.d/db-test-init.sql:ro'
+
+    environment:
+      - MARIADB_ROOT_PASSWORD=root
+      - MARIADB_DATABASE=db
+      - MARIADB_USER=db
+      - MARIADB_PASSWORD=db
+      - DDEV_DATABASE=mariadb:11
+      - DDEV_UID=$DDEV_UID
+      - DDEV_GID=$DDEV_GID
+      - DDEV_SKIP_RESTORE=true
+
+    # Optimized for speed
+    command:
+      [
+        'mariadbd',
+        '--innodb-flush-log-at-trx-commit=0',
+        '--innodb-doublewrite=0',
+        '--skip-log-bin',
+        '--sync-binlog=0',
+        '--innodb-buffer-pool-size=256M',
+        '--innodb-log-buffer-size=16M',
+        '--innodb-flush-method=nosync',
+        '--innodb-file-per-table=1',
+        '--max-connections=50',
+        '--performance-schema=0',
+        '--skip-name-resolve',
+        '--general-log=0',
+        '--slow-query-log=0',
+        '--character-set-server=utf8mb4',
+        '--collation-server=utf8mb4_unicode_ci',
+      ]
+
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+
+    healthcheck:
+      test: ['CMD-SHELL', 'healthcheck.sh --connect --innodb_initialized']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  db-test-data:
+  ddev-global-cache:
+    external: true

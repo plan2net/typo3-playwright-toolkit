@@ -1,0 +1,17 @@
+parameters:
+    level: 8
+    # The floor the package ships against, not the one it is developed on: the
+    # dev toolchain needs 8.3 (phpunit 12), consumers only need 8.1. This is what
+    # fails the build when an 8.2/8.3-only feature creeps back in.
+    phpVersion: 80100
+    paths:
+        - Classes
+        - Tests
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        # Every connection this package opens sets PDO::ERRMODE_EXCEPTION, so
+        # query() and prepare() throw rather than returning false. Narrowing 20
+        # call sites for a branch that cannot be reached would only add noise.
+        -
+            message: '#Cannot call method \w+\(\) on PDOStatement\|false\.#'
+            identifier: method.nonObject

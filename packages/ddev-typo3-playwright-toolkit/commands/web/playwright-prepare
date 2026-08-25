@@ -1,0 +1,23 @@
+#!/bin/bash
+#ddev-generated
+
+## Description: Build the Playwright test database template
+## Usage: playwright-prepare
+
+set -e
+
+if [ ! -x "/var/www/html/vendor/bin/typo3" ]; then
+    echo "[playwright] vendor/bin/typo3 not found. Run 'ddev composer install' first." >&2
+    exit 1
+fi
+
+. /mnt/ddev_config/playwright-lib.sh
+
+# The ungated helper: someone running this by hand wants the template rebuilt,
+# whatever PW_SKIP_PREPARE tells the test commands.
+playwright_run_prepare || {
+    echo "[playwright] Could not build the test database template." >&2
+    exit 1
+}
+
+echo "[playwright] Test database template ready."

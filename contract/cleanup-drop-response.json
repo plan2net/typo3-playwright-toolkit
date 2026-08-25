@@ -1,0 +1,11 @@
+{
+    "_comment": "The exact body POST /typo3/test-api/databases/drop returns. The extension asserts its real response matches this shape; the toolkit asserts its client can parse it. Neither side may change it alone.",
+    "ok": true,
+    "engine": "sqlite",
+    "results": [
+        { "testId": "AAAA1111AAAA1111", "outcome": "dropped" },
+        { "testId": "BBBB2222BBBB2222", "outcome": "unclaimed" },
+        { "testId": "CCCC3333CCCC3333", "outcome": "absent" },
+        { "testId": "not-a-test-id", "outcome": "refused" }
+    ]
+}

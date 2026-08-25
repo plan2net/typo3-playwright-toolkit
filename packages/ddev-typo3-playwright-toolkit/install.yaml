@@ -1,0 +1,30 @@
+name: typo3-playwright-toolkit
+
+ddev_version_constraint: '>= v1.25.0'
+
+dependencies: []
+
+project_files:
+  - db-test/docker-compose.postgres.yaml
+  - db-test/docker-compose.mariadb.yaml
+  - db-test/docker-compose.mysql.yaml
+  - db-test/select-service.sh
+  - postgres/db-test-init.sql
+  - mysql/db-test-init.sql
+  - playwright-lib.sh
+  - commands/web/playwright
+  - commands/web/playwright-inspect
+  - commands/web/playwright-prepare
+  - commands/web/playwright-ui
+  - config.playwright-toolkit.yaml
+
+global_files: []
+
+pre_install_actions: []
+
+# Only the matching database service is copied to the top level
+post_install_actions:
+  - bash db-test/select-service.sh
+
+removal_actions:
+  - rm -f docker-compose.db-test.yaml

@@ -1,0 +1,72 @@
+#ddev-generated
+services:
+  # The extension reads the test service from here rather than carrying a copy.
+  web:
+    environment:
+      - PLAYWRIGHT_DB_TEST_HOST=db-test
+      - PLAYWRIGHT_DB_TEST_USER=db
+      - PLAYWRIGHT_DB_TEST_PASSWORD=db
+
+  db-test:
+    container_name: ddev-${DDEV_SITENAME}-db-test
+    image: mysql:8
+    restart: 'unless-stopped'
+    stop_grace_period: 60s
+
+    volumes:
+      - type: volume
+        source: db-test-data
+        target: /var/lib/mysql
+      - type: tmpfs
+        target: /tmp
+        tmpfs: { size: 1G }
+      - '.:/mnt/ddev_config:ro'
+      - ddev-global-cache:/mnt/ddev-global-cache
+      - './mysql/db-test-init.sql:/docker-entrypoint-initdb.d/db-test-init.sql:ro'
+
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=db
+      - MYSQL_PASSWORD=db
+      - DDEV_DATABASE=mysql:8
+      - DDEV_UID=$DDEV_UID
+      - DDEV_GID=$DDEV_GID
+      - DDEV_SKIP_RESTORE=true
+
+    # Optimized for speed
+    # Optimized for speed
+    command:
+      [
+        'mysqld',
+        '--innodb-flush-log-at-trx-commit=0',
+        '--innodb-doublewrite=0',
+        '--skip-log-bin',
+        '--sync-binlog=0',
+        '--innodb-buffer-pool-size=256M',
+        '--innodb-log-buffer-size=16M',
+        '--innodb-flush-method=nosync',
+        '--max-connections=50',
+        '--performance-schema=0',
+        '--skip-name-resolve',
+        '--general-log=0',
+        '--slow-query-log=0',
+        '--character-set-server=utf8mb4',
+        '--collation-server=utf8mb4_unicode_ci',
+      ]
+
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 -uroot -proot --silent']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  db-test-data:
+  ddev-global-cache:
+    external: true

@@ -1,0 +1,88 @@
+{
+    "name": "@plan2net/typo3-playwright-toolkit",
+    "version": "0.1.0",
+    "description": "Playwright toolkit for TYPO3 end-to-end tests: fixtures, content builders, per-test databases.",
+    "keywords": [
+        "typo3",
+        "playwright",
+        "testing",
+        "e2e"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/plan2net/typo3-playwright-toolkit.git",
+        "directory": "packages/typo3-playwright-toolkit"
+    },
+    "engines": {
+        "node": ">=22.12"
+    },
+    "license": "GPL-2.0-or-later",
+    "type": "module",
+    "files": [
+        "dist",
+        "tsconfig.base.json",
+        "README.md",
+        "LICENSE"
+    ],
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "imports": {
+        "#src/*": "./src/*"
+    },
+    "bin": {
+        "typo3-playwright-inspect": "./dist/cli/inspect.js"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "default": "./dist/index.js"
+        },
+        "./contract": {
+            "types": "./dist/contract.d.ts",
+            "import": "./dist/contract.js",
+            "default": "./dist/contract.js"
+        },
+        "./playwright": {
+            "types": "./dist/playwright/index.d.ts",
+            "import": "./dist/playwright/index.js",
+            "default": "./dist/playwright/index.js"
+        },
+        "./global-setup": {
+            "types": "./dist/global-setup.d.ts",
+            "import": "./dist/global-setup.js",
+            "default": "./dist/global-setup.js"
+        },
+        "./global-teardown": {
+            "types": "./dist/global-teardown.d.ts",
+            "import": "./dist/global-teardown.js",
+            "default": "./dist/global-teardown.js"
+        },
+        "./tsconfig.base.json": "./tsconfig.base.json"
+    },
+    "scripts": {
+        "build": "tsc -p tsconfig.build.json",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:pack": "vitest run --config /dev/null tests/smoke/node-modules-resolution.test.ts",
+        "typecheck": "tsc -p tsconfig.json --noEmit",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "qa": "npm run typecheck && npm run lint",
+        "prepack": "npm run build"
+    },
+    "peerDependencies": {
+        "@playwright/test": "^1.56.0"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.56.0",
+        "@types/node": "^24.10.1",
+        "eslint": "^9.39.5",
+        "typescript": "^5.9.0",
+        "typescript-eslint": "^8.67.0",
+        "vitest": "^3.2.0"
+    },
+    "dependencies": {
+        "axe-core": "^4.13.0"
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "secret": "contract-fixture-secret",
+    "testId": "ABCD1234EFGH5678",
+    "expiresAt": 1800000000,
+    "token": "1800000000.9bed2442eb01d735259dfa87837637bab0e0e263d1dd717f230e2a9f05b99853"
+}

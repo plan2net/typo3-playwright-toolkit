@@ -1,0 +1,123 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  # Manual runs build and check the asset without uploading, so the packing can
+  # be exercised before a tag exists.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# The DDEV add-on lives in a subdirectory of this monorepo, so
+# `ddev add-on get plan2net/typo3-playwright-toolkit` cannot install it: given a
+# repository, DDEV takes the latest release tarball and expects the add-on inside
+# it. This job therefore ships a tarball containing only the add-on, which is the
+# URL the add-on README tells consumers to use.
+jobs:
+  ddev-addon:
+    name: ddev add-on tarball
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # One top-level directory, verified against DDEV itself: a tarball whose
+      # files sit at the root makes DDEV treat the alphabetically first entry as
+      # the add-on directory and fail looking for install.yaml inside it.
+      - name: Pack the add-on
+        run: |
+          tar -czf ddev-typo3-playwright-toolkit.tar.gz \
+            -C packages ddev-typo3-playwright-toolkit
+          tar -tzf ddev-typo3-playwright-toolkit.tar.gz | head -1
+
+      # A tarball that installs nothing is worse than a missing one, so the shape
+      # is asserted here rather than discovered by the first consumer.
+      - name: Assert the tarball has the shape DDEV requires
+        run: |
+          entries=$(tar -tzf ddev-typo3-playwright-toolkit.tar.gz \
+            | awk -F/ '{print $1}' | sort -u)
+          if [ "$(printf '%s\n' "${entries}" | wc -l | tr -d ' ')" != "1" ]; then
+            echo "Expected exactly one top-level directory, got:"
+            printf '%s\n' "${entries}"
+            exit 1
+          fi
+          # A tarball packed with `-C <dir> .` has "." as its only top-level
+          # entry, and DDEV then looks for install.yaml inside the first file it
+          # finds instead of the add-on root.
+          if [ "${entries}" = "." ]; then
+            echo "Files sit at the tarball root; DDEV needs one wrapping directory"
+            exit 1
+          fi
+          tar -tzf ddev-typo3-playwright-toolkit.tar.gz \
+            | grep -qx "${entries}/install.yaml" || {
+              echo "install.yaml is not directly inside ${entries}"
+              exit 1
+            }
+          # AppleDouble files sort before real entries, so DDEV picks one as the
+          # add-on directory. They appear when packing on macOS without
+          # COPYFILE_DISABLE=1, and can be at the top level, so match anywhere.
+          if tar -tzf ddev-typo3-playwright-toolkit.tar.gz | grep -q '\._'; then
+            echo "Tarball contains AppleDouble (._*) files"
+            exit 1
+          fi
+
+      # Created here when it does not exist yet, so pushing a tag is the whole
+      # release procedure. `upload` alone fails on a tag nobody made a release for.
+      - name: Attach the tarball to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1 \
+            || gh release create "${GITHUB_REF_NAME}" --generate-notes
+          gh release upload "${GITHUB_REF_NAME}" \
+            ddev-typo3-playwright-toolkit.tar.gz --clobber
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ddev-typo3-playwright-toolkit
+          path: ddev-typo3-playwright-toolkit.tar.gz
+
+  # Composer and the add-on take their version from the tag; package.json is the
+  # one place it is written down twice, so the tag decides and this checks it.
+  npm:
+    name: npm package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+          cache-dependency-path: packages/typo3-playwright-toolkit/package-lock.json
+
+      - name: Assert package.json matches the tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        working-directory: packages/typo3-playwright-toolkit
+        run: |
+          declared=$(node -p 'require("./package.json").version')
+          tagged="${GITHUB_REF_NAME#v}"
+          if [ "${declared}" != "${tagged}" ]; then
+            echo "package.json says ${declared}, tag says ${tagged}"
+            exit 1
+          fi
+
+      - name: Install and verify
+        working-directory: packages/typo3-playwright-toolkit
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run typecheck
+          npm test
+
+      - name: Publish
+        if: startsWith(github.ref, 'refs/tags/v')
+        working-directory: packages/typo3-playwright-toolkit
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public

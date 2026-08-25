@@ -1,0 +1,4 @@
+-- #ddev-generated
+ALTER USER db CREATEDB;
+GRANT ALL PRIVILEGES ON DATABASE db TO db;
+GRANT ALL ON SCHEMA public TO db;

@@ -1,0 +1,325 @@
+# @plan2net/typo3-playwright-toolkit
+
+[![npm](https://img.shields.io/npm/v/@plan2net/typo3-playwright-toolkit)](https://www.npmjs.com/package/@plan2net/typo3-playwright-toolkit)
+[![Node](https://img.shields.io/badge/Node-22.12%2B-5fa04e)](https://nodejs.org)
+[![Playwright](https://img.shields.io/badge/Playwright-1.56%2B-2ead33)](https://playwright.dev)
+[![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
+
+An npm package. It provides the Playwright fixtures, the content builders that
+create TYPO3 records, and the accessibility and CSP checks.
+
+It needs the [Composer extension](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit), which creates the test
+databases, and the [DDEV add-on](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/ddev-typo3-playwright-toolkit), which provides
+the database service and the commands.
+
+[Requirements](#requirements) · [Install](#install) · [Configure](#configure) ·
+[Using the package](#using-the-package) · [Reference](#reference) ·
+[Troubleshooting](#troubleshooting) · [Related packages](#related-packages)
+
+## Requirements
+
+- Node 22.12 or newer
+- `@playwright/test` 1.56 or newer
+- The Composer extension, installed in the same project
+
+You do not need a database client. This package never talks to the database; it asks
+the extension to create and delete them. That is why PHP and Node may run in
+different containers.
+
+## Install
+
+```bash
+npm i -D @plan2net/typo3-playwright-toolkit @playwright/test
+```
+
+Add a `tsconfig.json` next to your tests that extends the one shipped here:
+
+```json
+{
+    "extends": "@plan2net/typo3-playwright-toolkit/tsconfig.base.json",
+    "include": ["**/*.ts"]
+}
+```
+
+Important: this package is ESM and needs `"moduleResolution": "NodeNext"`. Without
+it TypeScript cannot read the package's exports, so `page` and `state` in your tests
+type as `any` and you lose every check your editor could give you.
+
+## Configure
+
+Call `defineToolkitConfig(...)` at the top of your `playwright.config.ts`, before any
+other file from this package is loaded. Two values are enough:
+
+```ts
+// playwright.config.ts
+import { defineToolkitConfig, defineBasePlaywrightConfig } from '@plan2net/typo3-playwright-toolkit/playwright'
+
+const toolkitConfig = defineToolkitConfig({
+    testingURL: 'https://example-testing.test',
+    paths: { consumerRoot: new URL('..', import.meta.url).pathname },
+})
+
+export default defineBasePlaywrightConfig(toolkitConfig, {
+    testDir: './tests',
+})
+```
+
+`testingURL` is the host name that runs in the Testing context. It is the only URL
+this package uses, because the test database exists nowhere else.
+
+`consumerRoot` is the root of your TYPO3 project. The package derives the state and
+session folders from it, so it works from `node_modules` without knowing its own
+location.
+
+Important: `defineToolkitConfig` must run before the first import from this package.
+Everything else reads the values it stores.
+
+## Using the package
+
+### Writing a test
+
+One test file is one pair: a setup function that creates content through the real
+TYPO3 backend, and the tests that read it.
+
+```ts
+// tests/my-feature.spec.ts
+import { definePair, expect } from '@plan2net/typo3-playwright-toolkit'
+
+const test = definePair(async ({ builders }) => {
+    const { id, slug } = await builders
+        .page()
+        .withTitle('My Page')
+        .withSlug('/my-page')
+        .create()
+
+    await builders
+        .content()
+        .onPage(id)
+        .ofType('textmedia')
+        .configure((element) => element.withHeader('Hello').withBodyText('<p>Copy.</p>'))
+        .create()
+
+    return { slug }
+})
+
+test('renders the page title', async ({ page, state }) => {
+    await page.goto(state.slug)
+
+    await expect(page.locator('h1')).toHaveText('My Page')
+})
+```
+
+`state` is whatever your setup returned. The first test that needs it runs the
+setup, and the other tests wait. If the setup fails, the tests are skipped with the
+reason instead of failing because content is missing.
+
+The setup runs once per file, even when the file runs in several browser projects.
+The other projects use the state and the test database that the first one created.
+
+### Your own content types
+
+Every CType of a normal TYPO3 installation already has a builder. For your own,
+extend `CoreContent` to get the shared setters, then register the class:
+
+```ts
+import { CoreContent } from '@plan2net/typo3-playwright-toolkit'
+
+export class ArticleContent extends CoreContent {
+    readonly type = 'article'
+
+    withTeaser(text: string): this {
+        return this.withField('tx_myext_teaser', text)
+    }
+}
+```
+
+```ts
+// playwright.config.ts
+contentTypes: { article: ArticleContent }
+```
+
+To get typed setters in `.configure()`, add the class to `ContentTypeMap`:
+
+```ts
+declare module '@plan2net/typo3-playwright-toolkit' {
+    interface ContentTypeMap {
+        article: ArticleContent
+    }
+}
+```
+
+A key with the name of a core CType replaces the built-in builder, and the other
+core types stay as they are. That works for the type too: `ContentTypeMap` starts
+empty, so your `text: MyTextContent` is what `.configure()` hands you.
+
+### Calling the site directly
+
+The `request` client — the one `definePair` hands your setup, and the `request`
+fixture in your tests — carries the test ID for `testingURL`, so it reads and
+writes the same throwaway database the browser does. Requests to any other host
+get neither toolkit header.
+
+### Stubbing a third-party script
+
+A cookie banner or a tracking script can swallow the clicks your test makes.
+`prepareContext` runs on every context a test uses, after the toolkit's own
+routes are in place:
+
+```ts
+// playwright.config.ts
+prepareContext: async (context) => {
+    await context.route('**/vendor-widget.js', (route) => route.fulfill({ body: '' }))
+},
+```
+
+### Screenshots
+
+`takeScreenshot` waits for fonts, images and animations, hides the selectors from
+`hideBeforeScreenshot`, and then compares against the stored image.
+
+```ts
+import { takeScreenshot } from '@plan2net/typo3-playwright-toolkit'
+
+await takeScreenshot(page, 'my-page')                             // the whole page
+await takeScreenshot(page, 'accordion', { include: '.accordion' }) // one element
+```
+
+The name carries no file extension; Playwright adds `.png` and the platform suffix
+itself. The first run writes the missing image and fails, as Playwright always does.
+Every other option is passed on to `toHaveScreenshot`.
+
+`takeScreenshot` waits for animations itself. When you interact and then assert
+without a screenshot — an accessibility scan after opening an accordion, say — wait
+first:
+
+```ts
+import { waitForAnimations } from '@plan2net/typo3-playwright-toolkit'
+
+await page.locator('summary').first().click()
+await waitForAnimations(page, '.accordion')
+await runAccessibilityScan(page, { include: '.accordion' })
+```
+
+### Accessibility checks
+
+`runAccessibilityScan` checks the current page with axe and fails the test if it
+finds a problem.
+
+```ts
+import { runAccessibilityScan } from '@plan2net/typo3-playwright-toolkit'
+
+await runAccessibilityScan(page)                       // the whole page
+await runAccessibilityScan(page, { include: '.card' }) // one component
+await runAccessibilityScan(page, { exclude: '#ads' })
+await runAccessibilityScan(page, { disabledRules: ['color-contrast'] })
+```
+
+Important: the test also fails when the check ran no rules at all. An empty area
+would otherwise pass without testing anything.
+
+A check with `include` turns off the `heading-order` rule, because axe compares the
+headings of a part of the page with the structure of the whole page. Checks of a
+whole page do test the heading structure.
+
+To check every test without writing the call each time, turn it on in the config:
+
+```ts
+accessibility: { auto: true },
+```
+
+Every test that opened a page is then scanned after it finishes. A test that never
+navigated is skipped, because there is nothing to check, and a test that already
+failed is skipped too, so the first failure stays the one you read.
+
+`scanAccessibility(page, options)` returns the raw axe result instead of failing the
+test. It returns `null` when the current project does not run checks.
+
+### CSP violations
+
+`CspVerifier` collects policy violations from your own pages and fails the test if
+there were any.
+
+```ts
+import { CspVerifier } from '@plan2net/typo3-playwright-toolkit'
+
+const verifier = new CspVerifier(context)
+await verifier.install()          // before the first page is opened
+
+await page.goto('/')
+
+await verifier.assertNoViolations(testInfo)  // testInfo is optional
+```
+
+Important: `install()` must run before anything is loaded. A page that is already
+open reports nothing.
+
+The test also fails if pages were requested but none of your own pages ever arrived,
+so a navigation that never loaded cannot pass. Pass `testInfo` to attach the full
+report as a JSON file when the test fails.
+
+## Reference
+
+### Configuration options
+
+| Name | Default | Purpose |
+|---|---|---|
+| `testingURL` | required | Host name that runs in the Testing context |
+| `paths.consumerRoot` | required | Absolute path to your TYPO3 project root |
+| `paths.stateDir` | `<consumerRoot>/.test-state` | Folder for setup state |
+| `paths.sessionDir` | `<consumerRoot>/var/session` | TYPO3 session folder, cleaned after a run |
+| `contentTypes` | `{}` | Your own content builders, one per CType |
+| `screenshot.threshold` | `0.2` | How different one pixel may be, from 0 to 1 |
+| `screenshot.maxDiffPixelRatio` | `0.005` | How many pixels may differ, as a share of the image |
+| `hideBeforeScreenshot` | `[]` | CSS selectors hidden before every screenshot |
+| `prepareContext` | none | Runs on every context a test uses, for your own routes and stubs |
+| `accessibility.projects` | all projects | Projects that run axe checks |
+| `accessibility.tags` | `DEFAULT_SCAN_TAGS` | Which axe rule sets to run |
+| `accessibility.disabledRules` | `[]` | axe rules turned off for the whole project |
+| `accessibility.auto` | `false` | Scan after every test that opened a page, instead of calling `runAccessibilityScan` yourself |
+| `csp.mode` | `any` | Which policy header a page must send: `any`, `report-only` or `enforced` |
+| `csp.expectedOrigin` | origin of `testingURL` | Whose violations count |
+| `cleanup.preserveOnFailure` | `failed` | Which test databases to keep after a failure: `failed`, `all` or `none` |
+| `cleanup.failOnLeak` | true in CI | Fail the run if a test database could not be deleted |
+| `cleanup.orphanAgeMs` | 24 hours | How old a leftover database must be before cleanup deletes it |
+
+`defineBasePlaywrightConfig` sets Playwright's `baseURL` to `testingURL` and adds
+this package's setup and cleanup functions. Values in its second argument win, and
+`use` and `expect` are merged instead of replaced.
+
+### Content types
+
+Every CType of a normal TYPO3 installation has a builder, and you register nothing:
+`header`, `text`, `textmedia`, `textpic`, `image`, `bullets`, `table`, `uploads`,
+`html`, `div`, `shortcut`, and the eleven `menu_*` types.
+
+All builders share `withHeader`, `withSubheader`, `withHeaderLayout`,
+`withHeaderLink`, `withColPos`, `setHidden`, and `withField(column, value)` for any
+other TCA column. Types with images add `withFile` and `withFiles`, which write the
+`sys_file_reference` rows for you, plus `withColumns`, `withOrientation` and
+`withImageSize`.
+
+## Troubleshooting
+
+**"No test ID for this request".** The builder received a page that the toolkit
+fixtures did not create. Use the `builders` argument of `definePair`.
+
+**Settings seem to be ignored.** `defineToolkitConfig` ran too late. It must be the
+first thing in `playwright.config.ts`.
+
+**Cleanup refuses a path.** `stateDir` and `sessionDir` must be absolute and inside
+`consumerRoot`, because cleanup deletes files in both.
+
+**Test databases stay after a failed run.** That is intended: the databases of the
+failed test files are kept for debugging, and the run prints a link for each one
+that opens it in the TYPO3 backend. Set `cleanup.preserveOnFailure` to `none` to
+turn this off.
+
+**You want to look at what a failing test built.** Open the link the run printed
+under "Kept for debugging". It logs you into that test's backend, and the frontend
+is reachable from there. The link is signed with the API secret and lives five
+minutes, so treat it like a password.
+
+## Related packages
+
+- [`plan2net/playwright-toolkit`](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit) — Composer extension
+- [DDEV add-on](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/ddev-typo3-playwright-toolkit) — database service and commands

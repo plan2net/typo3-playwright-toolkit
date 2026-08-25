@@ -1,0 +1,66 @@
+{
+    "name": "plan2net/playwright-toolkit",
+    "type": "typo3-cms-extension",
+    "description": "Playwright testing toolkit for TYPO3: a throwaway database per test, pre-seeded backend sessions, health and cleanup endpoints.",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": "^8.1",
+        "typo3/cms-core": "^12.4 || ^13.4 || ^14.3",
+        "typo3/cms-backend": "^12.4 || ^13.4 || ^14.3",
+        "ext-pdo": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.5",
+        "typo3/testing-framework": "^9.0",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/extension-installer": "^1.4",
+        "saschaegerer/phpstan-typo3": "^2.1",
+        "friendsofphp/php-cs-fixer": "^3.65",
+        "rector/rector": "^2.6"
+    },
+    "suggest": {
+        "ext-pdo_pgsql": "Needed to provision PostgreSQL test databases, even when the project queries through pgsql",
+        "ext-pdo_mysql": "Needed to provision MySQL/MariaDB test databases, even when the project queries through mysqli",
+        "ext-pdo_sqlite": "Needed to provision SQLite test databases"
+    },
+    "autoload": {
+        "psr-4": {
+            "Plan2net\\PlaywrightToolkit\\": "Classes"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Plan2net\\PlaywrightToolkit\\Tests\\": "Tests"
+        }
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "playwright_toolkit"
+        }
+    },
+    "scripts": {
+        "test": "phpunit -c phpunit.xml.dist",
+        "test:functional": "phpunit -c phpunit.functional.xml.dist",
+        "phpstan": "phpstan analyse -c phpstan.neon.dist",
+        "php-cs-fixer": "php-cs-fixer fix --config=php-cs-fixer.config.php --dry-run --diff",
+        "php-cs-fixer:fix": "php-cs-fixer fix --config=php-cs-fixer.config.php",
+        "rector": "rector process --dry-run",
+        "rector:fix": "rector process",
+        "qa": [
+            "@php-cs-fixer",
+            "@rector",
+            "@phpstan"
+        ],
+        "qa:fix": [
+            "@rector:fix",
+            "@php-cs-fixer:fix"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "typo3/cms-composer-installers": true,
+            "typo3/class-alias-loader": true,
+            "phpstan/extension-installer": true
+        }
+    }
+}

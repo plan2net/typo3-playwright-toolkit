@@ -1,0 +1,21 @@
+# Only the project definition is source. Everything else under .ddev is written
+# by DDEV or by installing the add-on into this repository's own project.
+.ddev/*
+!.ddev/config.yaml
+
+vendor/
+var/
+.phpunit.result.cache
+.php-cs-fixer.cache
+.DS_Store
+node_modules/
+dist/
+packages/*/dist/
+packages/*/*.tgz
+public/
+composer.lock
+test-results/
+playwright-report/
+blob-report/
+.test-state/
+*.tar.gz

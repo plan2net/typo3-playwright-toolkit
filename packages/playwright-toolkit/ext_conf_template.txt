@@ -1,0 +1,15 @@
+
+# cat=playwright; type=string; label=Base directory of the SQL seed fixtures (relative to project root)
+fixturesPath =
+
+# cat=playwright; type=string; label=Ordered, comma-separated list of seed fixture filenames (FK dependency order)
+fixtureManifest =
+
+# cat=playwright; type=string; label=Pre-seeded backend session identifier (plain, pre-hash)
+preseededSessionId = playwright_test_session
+
+# cat=playwright; type=int+; label=Backend user id the pre-seeded session belongs to
+sessionUserId = 1
+
+# cat=playwright; type=int+; label=Youngest test database the cleanup sweep may reclaim, in milliseconds. A request can ask for older, never younger.
+cleanupMinimumAgeMs = 3600000

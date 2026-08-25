@@ -1,0 +1,13 @@
+"be_users",,,,,,,
+,"uid","pid","username","password","admin","disable","deleted"
+,1,0,"admin","*",1,0,0
+"pages",,,,,,,
+,"uid","pid","title","doktype","slug","deleted","hidden"
+,1,0,"Root",1,"/",0,0
+"sys_file_storage",,,,,,,
+,"uid","pid","name","driver","configuration","is_default","is_browsable","is_public","is_writable","is_online"
+,1,0,"fileadmin","Local","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?><T3FlexForms><data><sheet index=""sDEF""><language index=""lDEF""><field index=""basePath""><value index=""vDEF"">fileadmin/</value></field><field index=""pathType""><value index=""vDEF"">relative</value></field></language></sheet></data></T3FlexForms>",1,1,1,1,1
+"sys_file",,,,,,,
+,"uid","pid","storage","type","identifier","identifier_hash","folder_hash","extension","mime_type","name","sha1","size","missing"
+,1,0,1,2,"/user_upload/first.jpg","6e0b7a5b6c0f8f4e2d1a3c5b7d9e1f3a5c7b9d1e","2c8e9b1d4f6a8c0e2b4d6f8a0c2e4b6d8f0a2c4e","jpg","image/jpeg","first.jpg","11f6ad8ec52a2984abaafd7c3b516503785c2072",1,0
+,2,0,1,2,"/user_upload/second.jpg","7f1c8b6c7d1a9a5f3e2b4d6c8e0a2c4e6b8d0f2a","2c8e9b1d4f6a8c0e2b4d6f8a0c2e4b6d8f0a2c4e","jpg","image/jpeg","second.jpg","11f6ad8ec52a2984abaafd7c3b516503785c2072",1,0

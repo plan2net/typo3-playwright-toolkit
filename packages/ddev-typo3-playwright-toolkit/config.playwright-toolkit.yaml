@@ -1,0 +1,7 @@
+#ddev-generated
+# Playwright's UI mode port
+web_extra_exposed_ports:
+  - name: playwright-ui
+    container_port: 3000
+    http_port: 3001
+    https_port: 3000

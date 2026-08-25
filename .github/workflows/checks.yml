@@ -1,0 +1,185 @@
+name: checks
+
+on:
+  push:
+    branches: [main, 'fix/**', 'feature/**']
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  toolkit:
+    name: toolkit (npm)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/typo3-playwright-toolkit
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: packages/typo3-playwright-toolkit/package-lock.json
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run typecheck
+
+      - run: npm run lint
+
+      - run: npm test
+
+      # Packs and installs the tarball into a temp consumer, so a publish that
+      # would ship no dist, or exports a CommonJS consumer cannot resolve, fails
+      # here rather than at a consumer.
+      - run: npm run test:pack
+
+  extension:
+    name: extension (php ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4']
+    defaults:
+      run:
+        working-directory: packages/playwright-toolkit
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo, pdo_sqlite, intl
+          coverage: none
+
+      - run: composer update --no-interaction --no-progress
+
+      - run: composer qa
+
+      - run: composer test
+
+      - run: composer test:functional
+
+      # --abandoned=ignore because TYPO3 13 still requires doctrine/annotations,
+      # which is abandoned but not vulnerable; without it this is red forever and
+      # a real advisory would be indistinguishable from that noise.
+      - name: Security advisories
+        run: composer audit --locked --abandoned=ignore
+
+  # The package ships against PHP 8.1 while its own toolchain needs 8.3 (phpunit
+  # 12), so the floor cannot be proven by running the suite. It is proven twice
+  # instead: the syntax has to parse on a real 8.1, and rector has to find nothing
+  # left to downgrade. phpstan's phpVersion pins it a third time inside `qa`.
+  php-floor:
+    name: extension (php 8.1 floor)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/playwright-toolkit
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+
+      - name: Every shipped file parses on 8.1
+        run: find Classes Configuration Tests -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
+
+  # Compatibility is a claim about other people's TYPO3, so it is checked against
+  # the real thing: the package is installed next to each supported core and
+  # analysed against its actual API. This is what caught v14 making SchemaMigrator
+  # a readonly class, which no test of ours would have noticed.
+  typo3-versions:
+    name: extension (typo3 ${{ matrix.typo3 }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - typo3: '12.4'
+            php: '8.1'
+          - typo3: '13.4'
+            php: '8.2'
+          - typo3: '14.3'
+            php: '8.2'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo, pdo_sqlite, intl
+          coverage: none
+
+      - name: Install the package beside TYPO3 ${{ matrix.typo3 }}
+        run: |
+          mkdir -p /tmp/matrix && cd /tmp/matrix
+          composer init --no-interaction --name=tmp/matrix
+          composer config repositories.pkg path "$GITHUB_WORKSPACE/packages/playwright-toolkit"
+          composer config allow-plugins.typo3/class-alias-loader true
+          composer config allow-plugins.typo3/cms-composer-installers true
+          # Supported releases of an older core carry advisories that ELTS covers;
+          # they must not stop us from checking the API against them.
+          composer config policy.advisories.block false
+          composer require --no-interaction --no-scripts --no-audit \
+            plan2net/playwright-toolkit:@dev \
+            "typo3/cms-core:^${{ matrix.typo3 }}" \
+            "typo3/cms-backend:^${{ matrix.typo3 }}" \
+            phpstan/phpstan:^2.1
+
+      - name: Analyse against the real ${{ matrix.typo3 }} API
+        run: |
+          cd /tmp/matrix
+          php -d memory_limit=1G vendor/bin/phpstan analyse \
+            "$GITHUB_WORKSPACE/packages/playwright-toolkit/Classes" \
+            --level=5 --autoload-file=vendor/autoload.php \
+            --no-progress --error-format=table
+
+  addon:
+    name: add-on (bats)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/ddev-typo3-playwright-toolkit
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install bats
+        run: sudo apt-get update && sudo apt-get install -y bats
+
+      # Every hermetic suite: they source the shared lib, stub the typo3 binary and
+      # need no Docker. tests/test.bats drives DDEV itself and runs in e2e.yml.
+      - run: >-
+          bats tests/argument-forwarding.bats tests/prepare-template.bats
+          tests/db-test-service.bats tests/install-manifest.bats
+
+  shell:
+    name: add-on (shellcheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      # No -s: each file declares its own shell, and the commands are a mix of
+      # sh and bash. Forcing one dialect reports fictional problems.
+      - name: Check the shared library and commands
+        working-directory: packages/ddev-typo3-playwright-toolkit
+        run: shellcheck -S warning playwright-lib.sh commands/web/*

@@ -1,0 +1,48 @@
+#!/bin/bash
+#ddev-generated
+
+## Description: Open Playwright's UI mode in the browser
+## Usage: playwright-ui [test-file-pattern] [options]
+## Example: "ddev playwright-ui" or "ddev playwright-ui accordion"
+
+set -e
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo "Usage: ddev playwright-ui [test-file-pattern] [options]"
+    echo ""
+    echo "Serves Playwright's UI mode at https://<project>.ddev.site:3000"
+    echo ""
+    echo "Options this command handles itself:"
+    echo "  --build              Build frontend assets first (npm run build)"
+    echo "  --no-cleanup         Keep test databases and state after the run"
+    echo "  --skip-prepare       Reuse the existing test database template"
+    echo ""
+    echo "Env (set these in web_environment or .ddev/.env.web to reach this command):"
+    echo "  PW_UI_PORT           Port to serve on, default 3000"
+    echo ""
+    echo "Browsers must be installed in this container: ddev exec 'npx playwright install --with-deps'"
+    exit 0
+fi
+
+cd test/playwright || exit 1
+
+. /mnt/ddev_config/playwright-lib.sh
+
+playwright_collect_args "$@"
+
+if [ "${PW_BUILD}" = "1" ]; then
+    playwright_build_assets || exit 1
+fi
+
+playwright_prepare_template || exit 1
+
+PORT="${PW_UI_PORT:-3000}"
+URL="https://${DDEV_HOSTNAME:-${DDEV_SITENAME}.ddev.site}:${PORT}"
+
+echo ""
+echo "[playwright-ui] Open ${URL}"
+echo "[playwright-ui] Stop with Ctrl-C."
+echo ""
+
+# --ui-host=0.0.0.0 so the host browser can reach it
+exec npx playwright test --ui-port="${PORT}" --ui-host=0.0.0.0 "${PW_ARGS[@]}"
