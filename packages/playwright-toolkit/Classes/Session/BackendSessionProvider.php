@@ -18,8 +18,9 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Core\Environment;
-use TYPO3\CMS\Core\FormProtection\FormProtectionFactory;
+use TYPO3\CMS\Core\FormProtection\BackendFormProtection;
 use TYPO3\CMS\Core\Http\JsonResponse;
+use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Session\UserSessionManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -47,7 +48,6 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
     public function __construct(
         private readonly ToolkitConfigurationFactory $configurationFactory,
         private readonly TestApiSecret $secret,
-        private readonly FormProtectionFactory $formProtectionFactory,
     ) {
     }
 
@@ -133,7 +133,13 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
         $GLOBALS['BE_USER'] = $backendUser;
 
         try {
-            $formProtection = $this->formProtectionFactory->createFromRequest($authenticated);
+            // Not the factory: v11 has no createFromRequest() and does not register
+            // it as a service. This constructor is the same on 11 through 14.
+            $formProtection = GeneralUtility::makeInstance(
+                BackendFormProtection::class,
+                $backendUser,
+                GeneralUtility::makeInstance(Registry::class),
+            );
 
             $tokens = [];
             foreach (self::TOKENED_ROUTES as $route) {

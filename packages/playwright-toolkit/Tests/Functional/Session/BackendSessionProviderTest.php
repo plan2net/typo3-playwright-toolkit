@@ -14,7 +14,10 @@ use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Core\ApplicationContext;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\FormProtection\FormProtectionFactory;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\FormProtection\BackendFormProtection;
+use TYPO3\CMS\Core\Registry;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
@@ -94,7 +97,17 @@ final class BackendSessionProviderTest extends FunctionalTestCase
         $token = $payload['tokens']['record_edit'] ?? null;
         self::assertIsString($token);
 
-        $formProtection = $this->get(FormProtectionFactory::class)->createFromRequest($request);
+        $backendUser = GeneralUtility::makeInstance(BackendUserAuthentication::class);
+        $backendUser->start($request->withCookieParams(
+            [...$request->getCookieParams(), 'be_typo_user' => $payload['cookieValue']]
+        ));
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $formProtection = GeneralUtility::makeInstance(
+            BackendFormProtection::class,
+            $backendUser,
+            GeneralUtility::makeInstance(Registry::class),
+        );
         self::assertTrue($formProtection->validateToken($token, 'route', 'record_edit'));
     }
 
