@@ -1,7 +1,7 @@
 # plan2net/playwright-toolkit
 
 [![Packagist](https://img.shields.io/packagist/v/plan2net/playwright-toolkit)](https://packagist.org/packages/plan2net/playwright-toolkit)
-[![TYPO3](https://img.shields.io/badge/TYPO3-12.4%20%7C%2013.4%20%7C%2014.3-orange)](https://get.typo3.org)
+[![TYPO3](https://img.shields.io/badge/TYPO3-11.5%20%7C%2012.4%20%7C%2013.4%20%7C%2014.3-orange)](https://get.typo3.org)
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
 [![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
 
@@ -23,9 +23,12 @@ service.
 
 ## Requirements
 
-- TYPO3 12.4, 13.4 or 14.3
+- TYPO3 11.5, 12.4, 13.4 or 14.3
 - PHP 8.1 or newer
 - PostgreSQL, MySQL, MariaDB or SQLite
+
+TYPO3 11.5 is ELTS. CI verifies against the last public release, 11.5.41; ELTS
+releases are behind credentials and cannot be tested here.
 
 ## Install
 

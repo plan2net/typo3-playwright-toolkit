@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Unit tests for the TYPO3 11 lane. Delete with typo3-11.yml.
+
+    Copied into the throwaway v11 project before it runs, so the relative paths
+    resolve there. It cannot reuse the package's own phpunit.xml.dist: that one
+    bootstraps packages/playwright-toolkit/vendor, a PHPUnit 12 tree, and loading
+    it from this project's PHPUnit 10 dies in Configuration.
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         failOnWarning="true">
+    <testsuites>
+        <testsuite name="unit">
+            <directory>public/typo3conf/ext/playwright_toolkit/Tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

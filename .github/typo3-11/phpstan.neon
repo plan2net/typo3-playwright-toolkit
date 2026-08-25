@@ -1,0 +1,16 @@
+# Static analysis for the TYPO3 11 lane only. Delete with typo3-11.yml.
+#
+# Not phpstan.neon.dist: neither entry below is an error on 12-14, so putting
+# them there would be reported as unmatched and fail the main lane instead.
+parameters:
+    # SessionCookieValue's method_exists() guard is redundant on 12+ and carries
+    # an inline ignore for it. Here the guard is load-bearing, so that ignore
+    # matches nothing — and ignore.unmatchedIdentifier is itself non-ignorable.
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # v11 documents SchemaMigrator::install() as returning array[] where 12+
+        # says array<string, string>. Both return strings; the docblock is wrong.
+        -
+            message: '#^Parameter \#2 \$array of function implode expects array<string>, array<array> given\.$#'
+            identifier: argument.type
+            path: '*/Database/TemplatePreparer.php'

@@ -1,0 +1,87 @@
+name: typo3-11
+
+# TYPO3 11.5 is ELTS. Everything specific to it lives in this file and in
+# .github/typo3-11/; dropping the version deletes both.
+#
+# CI can only install the last public release, 11.5.41. Actual ELTS releases sit
+# behind subscriber credentials, so this lane proves the API shape against that
+# release rather than against what a subscriber runs.
+
+on:
+  push:
+    branches: [main, 'fix/**', 'feature/**']
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: typo3-11-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  v11:
+    name: extension (typo3 11.5 ELTS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 8.1 is the package's declared floor, and the only lane that runs its
+      # tests there: php-floor parses the shipped files but executes nothing.
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: pdo, pdo_sqlite, intl
+          coverage: none
+
+      - name: Install the package beside TYPO3 11.5
+        run: |
+          mkdir -p /tmp/v11 && cd /tmp/v11
+          composer init --no-interaction --name=tmp/v11
+          composer config repositories.pkg path "$GITHUB_WORKSPACE/packages/playwright-toolkit"
+          composer config allow-plugins.typo3/class-alias-loader true
+          composer config allow-plugins.typo3/cms-composer-installers true
+          composer config minimum-stability dev
+          composer config prefer-stable true
+          # 11.5 carries advisories that ELTS covers for subscribers; they must
+          # not stop us checking the API against it.
+          composer config policy.advisories.block false
+          composer require --no-interaction --no-scripts --no-audit \
+            plan2net/playwright-toolkit:@dev \
+            "typo3/cms-core:^11.5" \
+            "typo3/cms-backend:^11.5" \
+            "typo3/testing-framework:^7.1" \
+            "phpunit/phpunit:^10.1" \
+            "phpstan/phpstan:^2.1"
+          # The package's autoload-dev only applies when it is the root package,
+          # and `composer config autoload-dev.psr-4` is not a supported key.
+          php -r '$f = "composer.json";
+          $d = json_decode(file_get_contents($f), true);
+          $d["autoload-dev"]["psr-4"]["Plan2net\\PlaywrightToolkit\\Tests\\"] = "public/typo3conf/ext/playwright_toolkit/Tests";
+          file_put_contents($f, json_encode($d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));'
+          composer dump-autoload
+
+      - name: Analyse against the real 11.5 API
+        run: |
+          cd /tmp/v11
+          php -d memory_limit=1G vendor/bin/phpstan analyse \
+            "$GITHUB_WORKSPACE/packages/playwright-toolkit/Classes" \
+            -c "$GITHUB_WORKSPACE/.github/typo3-11/phpstan.neon" \
+            --level=5 --autoload-file=vendor/autoload.php \
+            --no-progress --error-format=table
+
+      # The configs are copied in rather than passed from the workspace so their
+      # relative bootstrap and test paths resolve inside this project. The
+      # package's own phpunit.xml.dist cannot be used at all: it bootstraps
+      # packages/playwright-toolkit/vendor, which is a PHPUnit 12 tree.
+      - name: Unit tests
+        run: |
+          cd /tmp/v11
+          cp "$GITHUB_WORKSPACE/.github/typo3-11/phpunit.xml" .
+          vendor/bin/phpunit -c phpunit.xml
+
+      - name: Functional tests
+        run: |
+          cd /tmp/v11
+          cp "$GITHUB_WORKSPACE/.github/typo3-11/phpunit.functional.xml" .
+          vendor/bin/phpunit -c phpunit.functional.xml
