@@ -28,7 +28,7 @@ final class TemplatePreparer
             $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? []
         );
 
-        $snapshot = $this->seedSources->snapshot($configuration, $this->encryptionKey());
+        $snapshot = $this->seedSources->snapshot($configuration);
 
         $handle = $this->lockFiles->open($this->lockFiles->templateLock());
 
@@ -64,8 +64,4 @@ final class TemplatePreparer
         });
     }
 
-    private function encryptionKey(): string
-    {
-        return (string) ($GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] ?? '');
-    }
 }

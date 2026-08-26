@@ -72,7 +72,6 @@ final class DatabaseInitializer implements LoggerAwareInterface
         $databaseName = DatabaseName::forTestId($testId);
         DatabaseName::assertProvisionable($databaseName);
 
-        $encryptionKey = (string) ($GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] ?? '');
         $this->lockFiles->ensureDirectory();
         $seedMarker = $this->lockFiles->claim($databaseName);
 
@@ -101,7 +100,7 @@ final class DatabaseInitializer implements LoggerAwareInterface
                     return;
                 }
 
-                $this->assertTemplatePrepared($driver, $configuration, $encryptionKey);
+                $this->assertTemplatePrepared($driver, $configuration);
 
                 // Claim the name before the database exists. A crash inside
                 // materialise() would otherwise leave a database no claim names,
@@ -165,8 +164,7 @@ final class DatabaseInitializer implements LoggerAwareInterface
 
     private function assertTemplatePrepared(
         TestDatabaseDriver $driver,
-        ToolkitConfiguration $configuration,
-        string $encryptionKey
+        ToolkitConfiguration $configuration
     ): void {
         // The fingerprint is written last, so an absent one also covers a
         // preparation that died partway through. Checked first because working out
@@ -181,7 +179,7 @@ final class DatabaseInitializer implements LoggerAwareInterface
             ));
         }
 
-        if ($stored !== $this->expectedFingerprint($driver, $configuration, $encryptionKey)) {
+        if ($stored !== $this->expectedFingerprint($driver, $configuration)) {
             throw new \RuntimeException(
                 'The Playwright test database template is out of date. Run "ddev playwright-prepare" to build it.'
             );
@@ -190,12 +188,11 @@ final class DatabaseInitializer implements LoggerAwareInterface
 
     private function expectedFingerprint(
         TestDatabaseDriver $driver,
-        ToolkitConfiguration $configuration,
-        string $encryptionKey
+        ToolkitConfiguration $configuration
     ): string {
         return $this->borrowedConnection->use(
             $driver->schemaConnectionOverrides(),
-            fn(): string => $this->seedSources->snapshot($configuration, $encryptionKey)->fingerprint
+            fn(): string => $this->seedSources->snapshot($configuration)->fingerprint
         );
     }
 }

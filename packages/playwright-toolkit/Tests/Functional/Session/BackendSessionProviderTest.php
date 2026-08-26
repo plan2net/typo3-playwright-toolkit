@@ -225,7 +225,6 @@ final class BackendSessionProviderTest extends FunctionalTestCase
     private function seedSessionAndBackendUser(): void
     {
         $connectionPool = $this->get(ConnectionPool::class);
-        $encryptionKey = (string) ($GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] ?? '');
 
         $connectionPool->getConnectionForTable(SeededBackendUser::TABLE)
             ->insert(SeededBackendUser::TABLE, SeededBackendUser::row(1));

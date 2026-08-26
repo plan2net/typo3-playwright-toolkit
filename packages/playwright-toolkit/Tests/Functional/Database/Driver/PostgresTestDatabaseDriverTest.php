@@ -175,7 +175,6 @@ final class PostgresTestDatabaseDriverTest extends ServerTestDatabaseDriverTestC
             ],
             plainSessionId: 'playwright_test_session',
             sessionUserId: $userId,
-            encryptionKey: 'the-key',
         );
     }
 

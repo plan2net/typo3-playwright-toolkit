@@ -12,18 +12,16 @@ final class SeedFingerprint
     public static function compute(
         string $schemaSql,
         array $fixtures,
-        string $plainSessionId,
+        string $hashedSessionId,
         int $sessionUserId,
-        string $encryptionKey,
     ): string {
         $parts = [$schemaSql];
         foreach ($fixtures as $name => $contents) {
             $parts[] = $name;
             $parts[] = $contents;
         }
-        $parts[] = $plainSessionId;
+        $parts[] = $hashedSessionId;
         $parts[] = (string) $sessionUserId;
-        $parts[] = $encryptionKey;
 
         return hash('sha256', implode("\0", $parts));
     }

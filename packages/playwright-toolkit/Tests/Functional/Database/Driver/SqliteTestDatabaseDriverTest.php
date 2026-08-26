@@ -241,7 +241,6 @@ final class SqliteTestDatabaseDriverTest extends FunctionalTestCase
             fixtures: ['pages.sql' => 'CREATE TABLE pages (uid INTEGER PRIMARY KEY); INSERT INTO pages VALUES (1);'],
             plainSessionId: 'playwright_test_session',
             sessionUserId: $userId,
-            encryptionKey: 'the-key',
         );
     }
 

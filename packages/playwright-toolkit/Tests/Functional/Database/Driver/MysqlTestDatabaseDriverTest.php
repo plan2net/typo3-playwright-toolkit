@@ -221,7 +221,6 @@ final class MysqlTestDatabaseDriverTest extends ServerTestDatabaseDriverTestCase
             ],
             plainSessionId: 'playwright_test_session',
             sessionUserId: $userId,
-            encryptionKey: 'the-key',
         );
     }
 

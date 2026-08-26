@@ -51,7 +51,6 @@ final class DatabaseInitializerSeedingTest extends FunctionalTestCase
             ],
             plainSessionId: 'playwright_test_session',
             sessionUserId: 1,
-            encryptionKey: 'the-key',
         ));
 
         $connection = new \PDO('sqlite:' . $this->directory . '/playwright_db_template.sqlite');

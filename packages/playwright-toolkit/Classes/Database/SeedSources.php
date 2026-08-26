@@ -16,7 +16,7 @@ final class SeedSources
     ) {
     }
 
-    public function snapshot(ToolkitConfiguration $configuration, string $encryptionKey): SeedSnapshot
+    public function snapshot(ToolkitConfiguration $configuration): SeedSnapshot
     {
         $schemaStatements = array_values($this->sqlReader->getCreateTableStatementArray(
             $this->sqlReader->getTablesDefinitionString()
@@ -31,13 +31,11 @@ final class SeedSources
             fixtures: $fixtures,
             plainSessionId: $configuration->preseededSessionId,
             sessionUserId: $configuration->sessionUserId,
-            encryptionKey: $encryptionKey,
             fingerprint: SeedFingerprint::compute(
                 $this->resolvedSchema->fingerprintSource($schemaStatements),
                 $fixtures,
-                $configuration->preseededSessionId,
-                $configuration->sessionUserId,
-                $encryptionKey
+                SeededSession::hashedSessionId($configuration->preseededSessionId),
+                $configuration->sessionUserId
             ),
         );
     }

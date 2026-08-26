@@ -18,7 +18,6 @@ final class SeedSnapshot
         public readonly array $fixtures,
         public readonly string $plainSessionId,
         public readonly int $sessionUserId,
-        public readonly string $encryptionKey,
         public readonly string $fingerprint,
     ) {
     }
@@ -29,7 +28,6 @@ final class SeedSnapshot
             fixtures: $this->fixtures,
             plainSessionId: $this->plainSessionId,
             sessionUserId: $this->sessionUserId,
-            encryptionKey: $this->encryptionKey,
         );
     }
 }

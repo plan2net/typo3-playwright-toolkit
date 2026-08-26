@@ -13,7 +13,6 @@ final class TemplateSeed
         public readonly array $fixtures,
         public readonly string $plainSessionId,
         public readonly int $sessionUserId,
-        public readonly string $encryptionKey,
     ) {
     }
 }
