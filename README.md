@@ -150,23 +150,16 @@ tests is `any`:
 }
 ```
 
-Two files under `config/system/`. TYPO3 loads `additional.php` and nothing else, so
-the Testing configuration is reached from there or not at all:
+And `config/system/additional.php`. TYPO3 loads that file and nothing else, so the
+Testing configuration is reached from there or not at all:
 
 ```php
 <?php
 // config/system/additional.php
 
 if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {
-    require __DIR__ . '/additional-testing.php';
+    \Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
 }
-```
-
-```php
-<?php
-// config/system/additional-testing.php
-
-Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
 ```
 
 Keep the context check. It is what stops a request carrying a test-ID header from

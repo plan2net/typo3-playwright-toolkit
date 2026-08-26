@@ -42,26 +42,20 @@ and the replay run below, which is the one exception and says so.
 
 ## The project's own file
 
-`config/system/additional-testing.php` belongs to the project and contains:
-
-```php
-Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
-```
-
 TYPO3 auto-loads one additional-configuration file and no context-suffixed variant, so
-the project requires the file from there, behind the context check. Under Composer on
-12.4, 13.4 and 14.3 that file is `config/system/additional.php`; the extension README
-lists the two older layouts.
+the project puts the call there, behind the context check. Under Composer on 12.4,
+13.4 and 14.3 that file is `config/system/additional.php`; the extension README lists
+the two older layouts.
 
 ```php
 if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {
-    require __DIR__ . '/additional-testing.php';
+    \Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
 }
 ```
 
-**The check is load-bearing.** `applyDatabaseConnectionOverrides()` acts on the test
-ID alone; called outside the Testing context it would let a request carrying that
-header redirect the connection on an ordinary hostname.
+**The check must stay.** `applyDatabaseConnectionOverrides()` acts on the test ID
+alone; called outside the Testing context it would let a request carrying that header
+switch the connection on an ordinary hostname.
 
 If a project needs its own merge, `databaseConnectionOverrides($defaultConnection)`
 returns the values instead. Those are paths like `DB/Connections/Default/dbname`,

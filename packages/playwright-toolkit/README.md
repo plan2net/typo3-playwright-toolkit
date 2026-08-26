@@ -92,31 +92,25 @@ your config again.
 
 ### Database selection
 
-Point TYPO3 at the test database of the current request in
-`config/system/additional-testing.php`. If the project has no such file yet, one line
-is enough:
-
-```php
-<?php
-
-Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
-```
-
-**TYPO3 does not load that file by itself.** It auto-loads `config/system/additional.php`
-and no context-suffixed variant, so require it from there:
+Point TYPO3 at the test database of the current request from
+`config/system/additional.php`. TYPO3 auto-loads that file and no context-suffixed
+variant, so this is the place:
 
 ```php
 <?php
 
 if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {
-    require __DIR__ . '/additional-testing.php';
+    \Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
 }
 ```
 
-Without those three lines the overrides never run, and every test silently uses your
-ordinary database. Keep the context check too: `applyDatabaseConnectionOverrides()`
-acts on the test ID alone, so outside the Testing context it would let a request
-carrying that header redirect the connection on your ordinary hostname.
+Without those lines the overrides never run and every test uses your ordinary
+database. Keep the context check: `applyDatabaseConnectionOverrides()` acts on the
+test ID alone, so outside the Testing context a request carrying that header would
+switch the connection on your ordinary hostname too.
+
+If your project already keeps a separate file per context, put the call in the
+Testing one and require that from `additional.php` behind the same check.
 
 > [!NOTE]
 > `config/system/additional.php` is the Composer-mode path, which is where TYPO3 12.4,

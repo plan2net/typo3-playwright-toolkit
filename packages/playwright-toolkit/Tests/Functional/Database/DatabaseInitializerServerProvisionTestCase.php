@@ -16,9 +16,9 @@ use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 /**
- * Provisioning as a real request reaches it: additional-testing.php has already
- * pointed the Default connection at the per-test database, and nothing has created
- * it yet. Sqlite cannot show this — it creates a missing file on connect.
+ * Provisioning as a real request reaches it: additional.php has already pointed the
+ * Default connection at the per-test database, and nothing has created it yet.
+ * Sqlite cannot show this — it creates a missing file on connect.
  */
 abstract class DatabaseInitializerServerProvisionTestCase extends FunctionalTestCase
 {
@@ -193,7 +193,7 @@ abstract class DatabaseInitializerServerProvisionTestCase extends FunctionalTest
         return is_string($value) && '' !== $value ? $value : $fallback;
     }
 
-    /** Exactly what the consumer's additional-testing.php does, and just as early. */
+    /** Exactly what the consumer's additional.php does, and just as early. */
     protected function applyTestConnectionOverrides(): void
     {
         foreach ($this->driver()->connectionOverrides(self::TEST_ID) as $path => $value) {
