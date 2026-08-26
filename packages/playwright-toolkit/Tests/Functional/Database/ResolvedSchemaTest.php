@@ -6,6 +6,7 @@ namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database;
 
 use Plan2net\PlaywrightToolkit\Database\ResolvedSchema;
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Schema\TcaSchemaFactory;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class ResolvedSchemaTest extends FunctionalTestCase
@@ -36,6 +37,7 @@ final class ResolvedSchemaTest extends FunctionalTestCase
             'ctrl' => ['title' => 'Thing'],
             'columns' => [],
         ];
+        $this->applyTca();
     }
 
     protected function tearDown(): void
@@ -79,6 +81,7 @@ final class ResolvedSchemaTest extends FunctionalTestCase
 
         // TCA ctrl fields become real columns inside the migrator, not here.
         $GLOBALS['TCA'][self::TABLE]['ctrl']['delete'] = 'deleted';
+        $this->applyTca();
 
         self::assertNotSame($before, $resolved->fingerprintSource([self::CREATE]));
     }
@@ -87,9 +90,19 @@ final class ResolvedSchemaTest extends FunctionalTestCase
     public function theResolvedSchemaCarriesColumnsOnlyTcaDeclares(): void
     {
         $GLOBALS['TCA'][self::TABLE]['ctrl']['delete'] = 'deleted';
+        $this->applyTca();
 
         $described = $this->get(ResolvedSchema::class)->fingerprintSource([self::CREATE]);
 
         self::assertStringContainsString('COLUMN deleted', $described);
+    }
+
+    // Up to 13.4 the schema is enriched straight from $GLOBALS['TCA']; 14.3 reads
+    // an already-built TcaSchemaFactory, which a mutation has to be pushed into.
+    private function applyTca(): void
+    {
+        if (class_exists(TcaSchemaFactory::class)) {
+            $this->get(TcaSchemaFactory::class)->rebuild($GLOBALS['TCA']);
+        }
     }
 }
