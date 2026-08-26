@@ -93,7 +93,7 @@ abstract class ServerTestDatabaseDriver implements TestDatabaseDriver
 
         $statement = $template->prepare($this->seededSessionInsert());
         $statement->execute(
-            SeededSession::row($seed->plainSessionId, $seed->sessionUserId, $seed->encryptionKey)
+            SeededSession::row($seed->plainSessionId, $seed->sessionUserId)
         );
 
         $statement = $template->prepare($this->seededBackendUserInsert());
@@ -148,14 +148,13 @@ abstract class ServerTestDatabaseDriver implements TestDatabaseDriver
         string $testId,
         string $plainSessionId,
         int $sessionUserId,
-        string $encryptionKey,
     ): bool {
         try {
             $statement = $this->connect($this->databaseFor($testId))->prepare(
                 'SELECT count(*) FROM ' . SeededSession::TABLE
                 . ' WHERE ses_id = :ses_id AND ses_iplock = :ses_iplock AND ses_userid = :ses_userid'
             );
-            $statement->execute(SeededSession::criteria($plainSessionId, $sessionUserId, $encryptionKey));
+            $statement->execute(SeededSession::criteria($plainSessionId, $sessionUserId));
         } catch (\PDOException) {
             return false;
         }

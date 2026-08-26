@@ -51,7 +51,6 @@ interface TestDatabaseDriver
         string $testId,
         string $plainSessionId,
         int $sessionUserId,
-        string $encryptionKey,
     ): bool;
 
     /**

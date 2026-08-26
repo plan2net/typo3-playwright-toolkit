@@ -226,7 +226,7 @@ final class BackendSessionProviderTest extends FunctionalTestCase
         $connectionPool->getConnectionForTable(SeededBackendUser::TABLE)
             ->insert(SeededBackendUser::TABLE, SeededBackendUser::row(1));
         $connectionPool->getConnectionForTable(SeededSession::TABLE)
-            ->insert(SeededSession::TABLE, SeededSession::row('playwright_test_session', 1, $encryptionKey));
+            ->insert(SeededSession::TABLE, SeededSession::row('playwright_test_session', 1));
     }
 
     private function passThroughHandler(): RequestHandlerInterface

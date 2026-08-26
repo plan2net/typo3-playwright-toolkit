@@ -84,7 +84,7 @@ final class TemplatePreparerTest extends FunctionalTestCase
         $this->get(TemplatePreparer::class)->prepare();
 
         $statement = $this->template()->prepare('SELECT count(*) FROM be_sessions WHERE ses_id = ?');
-        $statement->execute([SeededSession::hashedSessionId(self::SESSION_ID, self::ENCRYPTION_KEY)]);
+        $statement->execute([SeededSession::hashedSessionId(self::SESSION_ID)]);
 
         self::assertSame('1', (string) $statement->fetchColumn());
     }

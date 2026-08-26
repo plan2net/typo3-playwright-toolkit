@@ -76,7 +76,7 @@ final class DatabaseInitializer implements LoggerAwareInterface
         $this->lockFiles->ensureDirectory();
         $seedMarker = $this->lockFiles->claim($databaseName);
 
-        if ($this->isAlreadySeeded($driver, $testId, $configuration, $encryptionKey, $seedMarker)) {
+        if ($this->isAlreadySeeded($driver, $testId, $configuration, $seedMarker)) {
             return;
         }
 
@@ -97,7 +97,7 @@ final class DatabaseInitializer implements LoggerAwareInterface
                     throw new \RuntimeException('Could not acquire the database create lock');
                 }
 
-                if ($this->isAlreadySeeded($driver, $testId, $configuration, $encryptionKey, $seedMarker)) {
+                if ($this->isAlreadySeeded($driver, $testId, $configuration, $seedMarker)) {
                     return;
                 }
 
@@ -153,15 +153,13 @@ final class DatabaseInitializer implements LoggerAwareInterface
         TestDatabaseDriver $driver,
         string $testId,
         ToolkitConfiguration $configuration,
-        string $encryptionKey,
         string $seedMarker
     ): bool {
         return file_exists($seedMarker)
             && $driver->hasSeededSession(
                 $testId,
                 $configuration->preseededSessionId,
-                $configuration->sessionUserId,
-                $encryptionKey
+                $configuration->sessionUserId
             );
     }
 

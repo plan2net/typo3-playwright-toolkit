@@ -131,7 +131,7 @@ abstract class DatabaseInitializerServerProvisionTest extends FunctionalTestCase
         $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
 
         self::assertTrue(
-            $this->driver()->hasSeededSession(self::TEST_ID, self::SESSION_ID, 1, self::ENCRYPTION_KEY)
+            $this->driver()->hasSeededSession(self::TEST_ID, self::SESSION_ID, 1)
         );
     }
 

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Database;
 
+use TYPO3\CMS\Core\Session\Backend\DatabaseSessionBackend;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 final class SeededSession
 {
     /**
@@ -25,10 +28,10 @@ final class SeededSession
     /**
      * @return array<string, string|int>
      */
-    public static function row(string $plainSessionId, int $sessionUserId, string $encryptionKey): array
+    public static function row(string $plainSessionId, int $sessionUserId): array
     {
         return [
-            ...self::criteria($plainSessionId, $sessionUserId, $encryptionKey),
+            ...self::criteria($plainSessionId, $sessionUserId),
             'ses_tstamp' => self::NEVER_EXPIRES,
             'ses_data' => serialize([]),
         ];
@@ -40,21 +43,17 @@ final class SeededSession
      *
      * @return array<string, string|int>
      */
-    public static function criteria(string $plainSessionId, int $sessionUserId, string $encryptionKey): array
+    public static function criteria(string $plainSessionId, int $sessionUserId): array
     {
         return [
-            'ses_id' => self::hashedSessionId($plainSessionId, $encryptionKey),
+            'ses_id' => self::hashedSessionId($plainSessionId),
             'ses_iplock' => self::IPLOCK,
             'ses_userid' => $sessionUserId,
         ];
     }
 
-    public static function hashedSessionId(string $plainSessionId, string $encryptionKey): string
+    public static function hashedSessionId(string $plainSessionId): string
     {
-        return hash_hmac(
-            'sha256',
-            $plainSessionId,
-            sha1($encryptionKey . 'core-session-backend')
-        );
+        return GeneralUtility::makeInstance(DatabaseSessionBackend::class)->hash($plainSessionId);
     }
 }

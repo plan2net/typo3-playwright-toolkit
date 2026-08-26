@@ -105,16 +105,18 @@ final class SqliteTestDatabaseDriverTest extends FunctionalTestCase
         $driver = $this->prepareTemplate();
         $driver->materialise(self::TEST_ID);
 
-        self::assertTrue($driver->hasSeededSession(self::TEST_ID, 'playwright_test_session', 1, 'the-key'));
+        self::assertTrue($driver->hasSeededSession(self::TEST_ID, 'playwright_test_session', 1));
     }
 
     #[Test]
-    public function theSeededSessionIsRejectedForAnotherEncryptionKey(): void
+    public function theSeededSessionIsRejectedAfterTheEncryptionKeyRotates(): void
     {
         $driver = $this->prepareTemplate();
         $driver->materialise(self::TEST_ID);
 
-        self::assertFalse($driver->hasSeededSession(self::TEST_ID, 'playwright_test_session', 1, 'other-key'));
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] = 'a-rotated-key';
+
+        self::assertFalse($driver->hasSeededSession(self::TEST_ID, 'playwright_test_session', 1));
     }
 
     #[Test]
@@ -123,7 +125,7 @@ final class SqliteTestDatabaseDriverTest extends FunctionalTestCase
         $driver = $this->prepareTemplate(userId: 1);
         $driver->materialise(self::TEST_ID);
 
-        self::assertFalse($driver->hasSeededSession(self::TEST_ID, 'playwright_test_session', 2, 'the-key'));
+        self::assertFalse($driver->hasSeededSession(self::TEST_ID, 'playwright_test_session', 2));
     }
 
     #[Test]
@@ -134,7 +136,7 @@ final class SqliteTestDatabaseDriverTest extends FunctionalTestCase
         $driver->finaliseTemplate('abc');
         $driver->materialise(self::TEST_ID);
 
-        self::assertFalse($driver->hasSeededSession(self::TEST_ID, 'playwright_test_session', 1, 'the-key'));
+        self::assertFalse($driver->hasSeededSession(self::TEST_ID, 'playwright_test_session', 1));
     }
 
     #[Test]

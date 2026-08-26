@@ -119,7 +119,7 @@ final class SqliteTestDatabaseDriver implements TestDatabaseDriver
              VALUES (:ses_id, :ses_iplock, :ses_userid, :ses_tstamp, :ses_data)'
         );
         $statement->execute(
-            SeededSession::row($seed->plainSessionId, $seed->sessionUserId, $seed->encryptionKey)
+            SeededSession::row($seed->plainSessionId, $seed->sessionUserId)
         );
 
         $connection->exec(
@@ -183,7 +183,6 @@ final class SqliteTestDatabaseDriver implements TestDatabaseDriver
         string $testId,
         string $plainSessionId,
         int $sessionUserId,
-        string $encryptionKey,
     ): bool {
         $file = $this->fileFor($testId);
         if (!is_file($file)) {
@@ -197,7 +196,7 @@ final class SqliteTestDatabaseDriver implements TestDatabaseDriver
                 'SELECT count(*) FROM ' . SeededSession::TABLE
                 . ' WHERE ses_id = :ses_id AND ses_iplock = :ses_iplock AND ses_userid = :ses_userid'
             );
-            $statement->execute(SeededSession::criteria($plainSessionId, $sessionUserId, $encryptionKey));
+            $statement->execute(SeededSession::criteria($plainSessionId, $sessionUserId));
         } catch (\PDOException) {
             return false;
         }
