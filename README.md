@@ -107,7 +107,15 @@ ddev composer require --dev plan2net/playwright-toolkit
 # 3. The npm package, in a directory of your own for the Playwright tests
 ddev exec 'mkdir -p tests/playwright && cd tests/playwright && npm init -y && npm pkg set type=module'
 ddev exec 'cd tests/playwright && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'
+
+# 4. The browsers, in the container that runs the tests
+ddev exec 'cd tests/playwright && npx playwright install --with-deps chromium'
 ```
+
+Step 4 puts the browsers in the web container, which is where `ddev playwright` runs
+them. To keep them in a container of their own instead — another architecture, or a
+browser image you already have — see [browsers in a container of their
+own](packages/ddev-typo3-playwright-toolkit/README.md#browsers-in-a-container-of-their-own).
 
 The `npm init` matters: without a `package.json` of its own, `npm i` walks up and
 installs into whatever project it finds above. `type: module` matters because the
