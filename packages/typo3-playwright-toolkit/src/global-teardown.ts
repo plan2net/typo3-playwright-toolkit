@@ -360,7 +360,8 @@ async function globalTeardown(): Promise<void> {
             console.log(`  ${summary.replayUrl}\n`)
         }
 
-        if ('none' !== preserve.mode) {
+        // Replay keeps its one database regardless, so there is nothing to report.
+        if ('none' !== preserve.mode && !config.replay) {
             console.log(`[teardown] Kept for debugging (${preserve.reason}).`)
             console.log(
                 describePreservedRun(
