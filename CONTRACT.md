@@ -87,7 +87,7 @@ an endpoint of our own.
 `POST /typo3/test-api/session` returns the session cookie and the tokens:
 
 ```json
-{ "cookieName": "be_typo_user", "cookieValue": "<jwt>", "tokens": { "record_edit": "…" } }
+{ "cookieName": "be_typo_user", "cookieValue": "<cookie>", "tokens": { "record_edit": "…" } }
 ```
 
 The request may send a readable name for the test:

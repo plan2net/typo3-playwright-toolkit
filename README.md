@@ -72,7 +72,7 @@ sequenceDiagram
         PW->>PW: create a test ID and write it down first
         PW->>EXT: POST /typo3/test-api/session
         EXT->>DB: copy the template → dbABCD…
-        EXT-->>PW: JWT cookie + record_edit request token
+        EXT-->>PW: backend cookie + record_edit request token
         PW->>EXT: POST /typo3/record/edit — the fields FormEngine uses
         EXT-->>PW: 302 Location that contains the new uid
     end
