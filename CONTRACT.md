@@ -47,6 +47,19 @@ gate and must stay in front of both.
 Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
 ```
 
+TYPO3 auto-loads `config/system/additional.php` and no context-suffixed variant, so
+the project requires the file from there, behind the context check:
+
+```php
+if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {
+    require __DIR__ . '/additional-testing.php';
+}
+```
+
+**The check is load-bearing.** `applyDatabaseConnectionOverrides()` acts on the test
+ID alone; called outside the Testing context it would let a request carrying that
+header redirect the connection on an ordinary hostname.
+
 If a project needs its own merge, `databaseConnectionOverrides($defaultConnection)`
 returns the values instead. Those are paths like `DB/Connections/Default/dbname`,
 not keys. Merging them as keys creates a setting with a slash in its name, and every

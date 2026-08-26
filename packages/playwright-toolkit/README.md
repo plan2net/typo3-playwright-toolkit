@@ -89,6 +89,22 @@ is enough:
 Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
 ```
 
+**TYPO3 does not load that file by itself.** It auto-loads `config/system/additional.php`
+and no context-suffixed variant, so require it from there:
+
+```php
+<?php
+
+if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {
+    require __DIR__ . '/additional-testing.php';
+}
+```
+
+Without those three lines the overrides never run, and every test silently uses your
+ordinary database. Keep the context check too: `applyDatabaseConnectionOverrides()`
+acts on the test ID alone, so outside the Testing context it would let a request
+carrying that header redirect the connection on your ordinary hostname.
+
 It reads your `Default` connection and writes the per-test one back. If a request
 carries no test ID, nothing changes and nothing is created: the site uses its normal
 database.
