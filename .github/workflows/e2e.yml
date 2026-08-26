@@ -82,7 +82,7 @@ jobs:
       # runner's usual cache paths are never written. Both are redirected into the
       # project directory (see .ddev/config.yaml) and cached from there.
       - name: Cache composer downloads
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: tests/e2e/consumer/.cache/composer
           key: e2e-composer-${{ matrix.typo3 }}-${{ hashFiles('tests/e2e/consumer/composer.json') }}
@@ -90,7 +90,7 @@ jobs:
 
       # Keyed on the lock file, which is where run.sh reads the exact version from.
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: tests/e2e/consumer/.cache/ms-playwright
           key: e2e-browsers-${{ hashFiles('packages/typo3-playwright-toolkit/package-lock.json') }}
