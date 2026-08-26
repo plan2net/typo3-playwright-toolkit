@@ -114,11 +114,9 @@ you run one:
 | Name | Default | Purpose |
 |---|---|---|
 | `PLAYWRIGHT_DB_TEST_HOST` | `db-test` | Host name of the test database server |
+| `PLAYWRIGHT_DB_TEST_PORT` | the engine's own | Port, when your server does not use the default |
 | `PLAYWRIGHT_DB_TEST_USER` | `db` | User name |
 | `PLAYWRIGHT_DB_TEST_PASSWORD` | `db` | Password |
-
-There is no setting for the port. The extension uses the default port of your
-database system.
 
 ### UI mode port
 
