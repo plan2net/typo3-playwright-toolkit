@@ -138,6 +138,14 @@ abstract class ServerTestDatabaseDriver implements TestDatabaseDriver
         $this->dropDatabase($this->admin(), $this->databaseFor($testId));
     }
 
+    public function replaceBaseDatabase(string $database): void
+    {
+        DatabaseName::assertProvisionable($database);
+
+        $this->dropDatabase($this->admin(), $database);
+        $this->cloneTemplateInto($database);
+    }
+
     public function dropTemplate(): void
     {
         $this->dropDatabase($this->admin(), $this->templateDatabase);

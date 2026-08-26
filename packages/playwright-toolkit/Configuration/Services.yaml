@@ -53,10 +53,21 @@ services:
   Plan2net\PlaywrightToolkit\Database\TemplatePreparer:
     public: true
 
+  Plan2net\PlaywrightToolkit\Database\ReplayPreparer:
+    public: true
+
   Plan2net\PlaywrightToolkit\Command\PrepareCommand:
     public: true
     tags:
       - name: 'console.command'
         command: 'playwright:prepare'
         description: 'Builds the Playwright test database template.'
+        schedulable: false
+
+  Plan2net\PlaywrightToolkit\Command\ReplayPrepareCommand:
+    public: true
+    tags:
+      - name: 'console.command'
+        command: 'playwright:replay-prepare'
+        description: 'Rebuilds the testing site database from the template for a replay run.'
         schedulable: false

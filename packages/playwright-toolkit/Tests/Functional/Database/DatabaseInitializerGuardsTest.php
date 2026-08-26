@@ -9,6 +9,7 @@ use Plan2net\PlaywrightToolkit\Database\BorrowedConnection;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 use Plan2net\PlaywrightToolkit\Database\DatabaseInitializer;
 use Plan2net\PlaywrightToolkit\Database\SeedSources;
+use Plan2net\PlaywrightToolkit\Database\TemplateReadiness;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\TestContext;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -180,10 +181,12 @@ final class DatabaseInitializerGuardsTest extends FunctionalTestCase
 
         return new DatabaseInitializer(
             new ToolkitConfigurationFactory($extensionConfiguration),
-            $this->get(SeedSources::class),
             LockFiles::inVarPath(),
             $this->get(TestApiSecret::class),
-            new BorrowedConnection($this->get(ConnectionPool::class))
+            new TemplateReadiness(
+                $this->get(SeedSources::class),
+                new BorrowedConnection($this->get(ConnectionPool::class))
+            )
         );
     }
 }

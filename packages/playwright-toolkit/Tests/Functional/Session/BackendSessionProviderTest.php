@@ -21,6 +21,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Http\ServerRequest;
+use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class BackendSessionProviderTest extends FunctionalTestCase
@@ -145,6 +146,35 @@ final class BackendSessionProviderTest extends FunctionalTestCase
     // What the other three endpoints answer, so a wrong verb on a toolkit path is
     // not reported as a missing route.
     #[Test]
+    public function createsASessionForAReplayRequestWithoutATestId(): void
+    {
+        $this->seedSessionAndBackendUser();
+
+        $request = (new ServerRequest('https://example.test/test-api/session', 'POST'))
+            ->withHeader(TestApiSecret::HEADER, $this->authenticate())
+            ->withBody($this->streamFor((string) json_encode(['name' => 'replay', 'replay' => true])));
+
+        $response = $this->get(BackendSessionProvider::class)->process($request, $this->passThroughHandler());
+
+        $payload = json_decode((string) $response->getBody(), true);
+        self::assertSame(200, $response->getStatusCode(), (string) $response->getBody());
+        self::assertTrue($payload['success'] ?? false);
+        self::assertSame('', $payload['testId'] ?? null);
+        self::assertIsString($payload['tokens']['record_edit'] ?? null);
+    }
+
+    #[Test]
+    public function refusesAReplayRequestThatCarriesNoSecret(): void
+    {
+        $request = (new ServerRequest('https://example.test/test-api/session', 'POST'))
+            ->withBody($this->streamFor((string) json_encode(['replay' => true])));
+
+        $response = $this->get(BackendSessionProvider::class)->process($request, $this->passThroughHandler());
+
+        self::assertSame(401, $response->getStatusCode());
+    }
+
+    #[Test]
     public function rejectsNonPostRequestsOnTheSessionPath(): void
     {
         $request = (new ServerRequest('https://example.test/test-api/session', 'GET'))
@@ -230,6 +260,15 @@ final class BackendSessionProviderTest extends FunctionalTestCase
             ->insert(SeededBackendUser::TABLE, SeededBackendUser::row(1));
         $connectionPool->getConnectionForTable(SeededSession::TABLE)
             ->insert(SeededSession::TABLE, SeededSession::row('playwright_test_session', 1));
+    }
+
+    private function streamFor(string $body): Stream
+    {
+        $stream = new Stream('php://temp', 'rw');
+        $stream->write($body);
+        $stream->rewind();
+
+        return $stream;
     }
 
     private function passThroughHandler(): RequestHandlerInterface

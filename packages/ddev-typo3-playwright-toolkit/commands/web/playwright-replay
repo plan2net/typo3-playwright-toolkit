@@ -1,0 +1,57 @@
+#!/bin/bash
+#ddev-generated
+
+## Description: Replay every scenario setup into the testing site's own database
+## Usage: playwright-replay [options]
+## Example: "ddev playwright-replay" or "ddev playwright-replay --grep accordion"
+## ExecRaw: true
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo "Usage: ddev playwright-replay [options]"
+    echo ""
+    echo "Rebuilds the testing site's own database from the template, then runs every"
+    echo "scenario's setup into it. Each scenario gets a folder named after it under"
+    echo "the fixture root, holding everything that scenario creates."
+    echo ""
+    echo "The tests themselves are skipped: their assertions and screenshots belong"
+    echo "to a per-test database. Use 'ddev playwright test' for those."
+    echo ""
+    echo "The run ends by printing a link that logs you into that database's backend."
+    echo ""
+    echo "Options this command handles itself:"
+    echo "  --build             Build frontend assets first (npm run build)"
+    echo "  --skip-prepare      Reuse the existing test database template"
+    echo ""
+    echo "Everything else is forwarded to 'npx playwright test', so --grep and a path"
+    echo "filter pick which scenarios replay. --workers is refused: every scenario"
+    echo "shares one database."
+    echo ""
+    echo "Env (set these in web_environment or .ddev/.env.web to reach this command):"
+    echo "  PW_TEST_DIR         Where your Playwright tests live, default tests/playwright"
+    exit 0
+fi
+
+. /mnt/ddev_config/playwright-lib.sh || exit 1
+
+playwright_enter_test_dir || exit 1
+
+playwright_collect_args "$@"
+
+playwright_refuse_worker_override "${PW_ARGS[@]}" || exit 1
+
+if [ "${PW_BUILD}" = "1" ]; then
+    playwright_build_assets || exit 1
+fi
+
+playwright_prepare_template || exit 1
+playwright_replay_prepare || exit 1
+
+# Stale processed images survive a database drop, so we clear them here
+processed="/var/www/html/${DDEV_DOCROOT:-public}/fileadmin/_processed_"
+if [ -d "${processed}" ] && ! rm -rf "${processed:?}"/*; then
+    echo "[playwright] Could not clear ${processed}." >&2
+fi
+
+export PW_REPLAY=1
+
+exec npx playwright test --workers=1 "${PW_ARGS[@]}"

@@ -109,6 +109,36 @@ final class InspectTokenTest extends TestCase
     }
 
     #[Test]
+    public function mintsExactlyTheReplayTokenTheContractFixtureRecords(): void
+    {
+        /** @var array{secret: string, subject: string, expiresAt: int, token: string} $fixture */
+        $fixture = ContractFixture::read('inspect-replay-token');
+
+        self::assertSame(InspectToken::REPLAY_SUBJECT, $fixture['subject']);
+        self::assertSame(
+            $fixture['token'],
+            InspectToken::mint($fixture['secret'], InspectToken::REPLAY_SUBJECT, $fixture['expiresAt'])
+        );
+    }
+
+    // A replay link must not open a test database, and vice versa.
+    #[Test]
+    public function aReplayTokenIsNotValidForATestId(): void
+    {
+        $token = InspectToken::mint(self::SECRET, InspectToken::REPLAY_SUBJECT, 1_000_000);
+
+        self::assertFalse(InspectToken::verify(self::SECRET, self::TEST_ID, $token, 999_999));
+    }
+
+    #[Test]
+    public function aTestIdTokenIsNotValidForAReplayLink(): void
+    {
+        $token = InspectToken::mint(self::SECRET, self::TEST_ID, 1_000_000);
+
+        self::assertFalse(InspectToken::verify(self::SECRET, InspectToken::REPLAY_SUBJECT, $token, 999_999));
+    }
+
+    #[Test]
     public function refusesEverythingWhenNoSecretIsConfigured(): void
     {
         $token = InspectToken::mint(self::SECRET, self::TEST_ID, 1_000_000);

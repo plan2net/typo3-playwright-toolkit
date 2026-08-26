@@ -4,6 +4,12 @@ import { ContextWithTestId, PageWithTestId } from '../types/playwright-extension
 /** TYPO3's own default for `BE/entryPoint`, which 11.5 and 12.4 have no setting for. */
 export const DEFAULT_BACKEND_PATH = '/typo3'
 
+/** Replay only: the scenario's folder and the pages it created inside it. */
+export interface ReplayFolder {
+    id: string
+    ownPages: Set<string>
+}
+
 export interface RequestContext {
     baseUrl: string
     /** Where the backend routes answer, from `BE/entryPoint`; the session endpoint reports it. */
@@ -11,6 +17,7 @@ export interface RequestContext {
     testId: string
     /** For `record_edit`; the session endpoint hands it out. */
     routeToken: string
+    replayFolder?: ReplayFolder
 }
 
 export interface RequestContextSource {
@@ -34,6 +41,11 @@ export function ambientTestId(page: RequestContextSource): string | undefined {
 export function requireTestId(page: RequestContextSource, explicit?: string): string {
     const testId = explicit || ambientTestId(page) || ''
 
+    // Replay runs against the base database on purpose.
+    if (!testId && getToolkitConfig().replay) {
+        return ''
+    }
+
     if (!testId) {
         throw new Error(
             '[typo3-playwright-toolkit] No test ID for this request. Pass one in, or use a page from the ' +
@@ -44,11 +56,19 @@ export function requireTestId(page: RequestContextSource, explicit?: string): st
     return testId
 }
 
+/** A fixture page as parent means the record moves into the folder; one the scenario made keeps it. */
+export function replayParentId(context: RequestContext, parentId: string): string {
+    const folder = context.replayFolder
+
+    return folder && !folder.ownPages.has(parentId) ? folder.id : parentId
+}
+
 export function resolveRequestContext(
     page: RequestContextSource,
     explicit: Partial<RequestContext> = {},
 ): RequestContext {
     return {
+        replayFolder: explicit.replayFolder,
         // Never derived from page.url(): the request carries the API secret, and a
         // page that navigated off-site must not decide where the builder posts it.
         baseUrl: explicit.baseUrl ?? getToolkitConfig().testingURL,

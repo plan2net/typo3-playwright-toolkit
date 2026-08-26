@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
-import { openAuthenticatedPage, scenarioName } from '#src/scenario.js'
+import { buildScenarioContext, createScenarioFolder, openAuthenticatedPage, scenarioName } from '#src/scenario.js'
+import type { RecordDataMap } from '#src/http/record-edit.js'
 
 function config(): ToolkitConfig {
     return {
@@ -20,6 +21,7 @@ function fakeBrowser(failAt: 'newPage' | 'session' | 'json' | 'cookies' | 'never
         closed: false,
         contextOptions: undefined as undefined | { extraHTTPHeaders?: Record<string, string> },
         postedHeaders: undefined as undefined | Record<string, string>,
+        postedData: undefined as undefined | Record<string, unknown>,
     }
 
     const context = {
@@ -39,8 +41,12 @@ function fakeBrowser(failAt: 'newPage' | 'session' | 'json' | 'cookies' | 'never
 
             return {
                 request: {
-                    post: async (_url: string, options: { headers: Record<string, string> }) => {
+                    post: async (
+                        _url: string,
+                        options: { headers: Record<string, string>; data: Record<string, unknown> },
+                    ) => {
                         state.postedHeaders = options.headers
+                        state.postedData = options.data
                         if ('session' === failAt) {
                             throw new Error('connection refused')
                         }
@@ -118,6 +124,127 @@ describe('openAuthenticatedPage', () => {
 
         expect(state.postedHeaders).toHaveProperty('X-Playwright-Toolkit-Secret')
         expect(state.postedHeaders).toHaveProperty('X-Playwright-Test-Id', 'ABCD1234EFGH5678')
+    })
+})
+
+describe('openAuthenticatedPage in replay mode', () => {
+    const replayConfig = (): ToolkitConfig => ({ ...config(), replay: true })
+
+    it('asks for a replay session and sends no test-ID header', async () => {
+        const { browser, state } = fakeBrowser('never')
+
+        await openAuthenticatedPage(browser as never, replayConfig(), '')
+
+        expect(state.postedData).toMatchObject({ replay: true })
+        expect(state.postedHeaders).not.toHaveProperty('X-Playwright-Test-Id')
+        expect(state.postedHeaders).toHaveProperty('X-Playwright-Toolkit-Secret')
+    })
+
+    it('says nothing about replay on a normal run', async () => {
+        const { browser, state } = fakeBrowser('never')
+
+        await openAuthenticatedPage(browser as never, config(), 'ABCD1234EFGH5678')
+
+        expect(state.postedData).not.toHaveProperty('replay')
+    })
+})
+
+describe('createScenarioFolder', () => {
+    function folderPage(uid: number) {
+        const posted: { fields: Record<string, string> }[] = []
+
+        const page = {
+            url: () => 'https://example-testing.test/typo3',
+            context: () => ({}),
+            request: {
+                post: async (_url: string, options: { multipart: Record<string, string> }) => {
+                    posted.push({ fields: options.multipart })
+
+                    return {
+                        status: () => 302,
+                        headers: () => ({ location: `/typo3/record/edit?edit[pages][${uid}]=edit` }),
+                        text: async () => '',
+                    }
+                },
+            },
+        }
+
+        return { posted, page }
+    }
+
+    function dataMap(fields: Record<string, string>): RecordDataMap {
+        const map: RecordDataMap = {}
+        for (const [name, value] of Object.entries(fields)) {
+            const match = name.match(/^data\[([^\]]+)\]\[([^\]]+)\]\[([^\]]+)\]$/)
+            if (null !== match) {
+                const [, table, identifier, column] = match
+                map[table] ??= {}
+                map[table][identifier] ??= {}
+                map[table][identifier][column] = value
+            }
+        }
+
+        return map
+    }
+
+    beforeEach(() => {
+        setToolkitConfig({ ...config(), replay: true })
+    })
+
+    it('creates a sysfolder named after the scenario under the fixture root', async () => {
+        const { posted, page } = folderPage(900)
+
+        await createScenarioFolder(page as never, { routeToken: 'tok' }, 'news')
+
+        const record = Object.values(dataMap(posted[0].fields).pages)[0]
+        expect(record).toMatchObject({ doktype: '254', title: 'news', pid: '1' })
+    })
+
+    it('answers the folder uid with nothing claimed yet', async () => {
+        const { page } = folderPage(900)
+
+        const folder = await createScenarioFolder(page as never, { routeToken: 'tok' }, 'news')
+
+        expect(folder.id).toBe('900')
+        expect(folder.ownPages.size).toBe(0)
+    })
+
+    describe('the context a scenario setup receives', () => {
+        const session = { backendPath: '/typo3', routeToken: 'tok' }
+        const replayConfig = (): ToolkitConfig => ({ ...config(), replay: true })
+
+        it('carries the folder in replay mode', async () => {
+            const { page } = folderPage(900)
+
+            const context = await buildScenarioContext(page as never, replayConfig(), session, '', 'news')
+
+            expect(context.replayFolder?.id).toBe('900')
+        })
+
+        // Otherwise the folder would be created inside itself.
+        it('creates the folder without an anchor of its own', async () => {
+            const { posted, page } = folderPage(900)
+
+            await buildScenarioContext(page as never, replayConfig(), session, '', 'news')
+
+            expect(Object.values(dataMap(posted[0].fields).pages)[0]).toMatchObject({ pid: '1' })
+        })
+
+        it('creates no folder outside replay mode', async () => {
+            setToolkitConfig(config())
+            const { posted, page } = folderPage(900)
+
+            const context = await buildScenarioContext(
+                page as never,
+                { ...config(), replay: false },
+                session,
+                'ABCD1234EFGH5678',
+                'news',
+            )
+
+            expect(context.replayFolder).toBeUndefined()
+            expect(posted).toHaveLength(0)
+        })
     })
 })
 

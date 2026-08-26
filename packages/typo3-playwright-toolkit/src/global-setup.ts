@@ -139,6 +139,12 @@ async function globalSetup(): Promise<void> {
     // Order matters: verify the engine before minting an ID, or a mismatch leaves
     // behind a database teardown can no longer reach.
     await verifyApiVersion(config)
+
+    // Minting an ID here would create a database replay's teardown never drops.
+    if (config.replay) {
+        return
+    }
+
     await runHealthCheck(config.testingURL, {
         testId: preflightTestId(config),
         secret: resolveApiSecret(config),

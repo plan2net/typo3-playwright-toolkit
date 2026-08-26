@@ -2,19 +2,23 @@ import type { ToolkitConfig } from '../config.js'
 import type { EnsureStateOutcome } from './ensure-state.js'
 import { recordScenarioFailure } from './scenario-state.js'
 
+const REPLAY_REASON = 'replay: the setup ran, the tests belong to a per-test database'
+
 export function applyScenarioOutcome<S>(
     outcome: EnsureStateOutcome<S>,
     skip: (reason: string) => void,
+    replay = false,
 ): S {
-    if (outcome.status === 'ready') {
+    if (outcome.status === 'ready' && !replay) {
         return outcome.data
     }
 
-    skip(outcome.reason)
+    const reason = 'ready' === outcome.status ? REPLAY_REASON : outcome.reason
+    skip(reason)
 
     // Playwright's skip throws; anything else must not fall through into a test
     // that has no state to work with.
-    throw new Error(`[typo3-playwright-toolkit] ${outcome.reason}`)
+    throw new Error(`[typo3-playwright-toolkit] ${reason}`)
 }
 
 /**

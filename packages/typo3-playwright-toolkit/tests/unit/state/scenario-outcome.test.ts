@@ -51,6 +51,38 @@ describe('applyScenarioOutcome', () => {
     it('throws if skipping did not stop the test', () => {
         expect(() => applyScenarioOutcome({ status: 'skip', reason: 'nope' }, () => {})).toThrow(/nope/)
     })
+
+    describe('in replay mode', () => {
+        const ready = {
+            status: 'ready',
+            testId: '',
+            attempt: 1,
+            data: { a: 1 },
+            setupRan: true,
+            waitedMs: 0,
+        } as const
+
+        it('skips the test even though the setup succeeded', () => {
+            const skipped: string[] = []
+
+            expect(() =>
+                applyScenarioOutcome(
+                    ready,
+                    (reason) => {
+                        skipped.push(reason)
+                        throw new Error('skipped')
+                    },
+                    true,
+                ),
+            ).toThrow(/skipped/)
+
+            expect(skipped[0]).toMatch(/replay/)
+        })
+
+        it('throws if skipping did not stop the test', () => {
+            expect(() => applyScenarioOutcome(ready, () => {}, true)).toThrow(/replay/)
+        })
+    })
 })
 
 describe('recordTestFailure', () => {

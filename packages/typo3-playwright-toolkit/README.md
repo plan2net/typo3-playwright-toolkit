@@ -371,6 +371,22 @@ It reads the API secret from `var/playwright/api-secret` or from
 `PLAYWRIGHT_TOOLKIT_SECRET`. On DDEV, `ddev playwright-inspect` wraps it. The links
 log in as the pre-seeded backend user and live 15 minutes.
 
+`--replay` prints a link into the database a replay run built, instead of the kept
+test databases. Use it when the link that run printed has expired — it mints a new
+one rather than rebuilding anything.
+
+### Replay mode
+
+`PW_REPLAY=1` runs every scenario's setup against the site's own database rather
+than a per-test one, so all the content the suite builds ends up in one place you
+can browse and export. `ddev playwright-replay` sets it, rebuilds that database from
+the template first, and prints a backend link when the run ends.
+
+What changes while it is set: no test ID goes on the wire, each scenario's content
+goes into a sysfolder named after it under the fixture root, slugs keep no test-ID
+suffix, setups run once with no retry, the tests themselves are skipped, and teardown
+drops nothing.
+
 ## Troubleshooting
 
 **"No test ID for this request".** The builder received a page that the toolkit

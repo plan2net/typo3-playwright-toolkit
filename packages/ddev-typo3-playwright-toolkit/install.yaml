@@ -15,6 +15,7 @@ project_files:
   - commands/web/playwright
   - commands/web/playwright-inspect
   - commands/web/playwright-prepare
+  - commands/web/playwright-replay
   - commands/web/playwright-ui
   - config.playwright-toolkit.yaml
 

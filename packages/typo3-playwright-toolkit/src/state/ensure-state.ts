@@ -163,7 +163,8 @@ export async function ensureState<S>(
     const now = options.now ?? (() => Date.now())
     const sleep = options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)))
 
-    const tuning = { ...SETUP_DEFAULTS, ...config.setup }
+    // One attempt in replay: a retry would leave the failed folder beside a second one.
+    const tuning = { ...SETUP_DEFAULTS, ...config.setup, ...(config.replay ? { attempts: 1 } : {}) }
     const paths = ensureRunNamespace(config)
     const startedAt = now()
     const failures: ScenarioAttemptFailure[] = []

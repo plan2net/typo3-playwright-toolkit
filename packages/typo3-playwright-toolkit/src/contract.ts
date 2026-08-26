@@ -26,5 +26,5 @@ export function toolkitHeaders(config: ToolkitConfig, testId: string): Record<st
 
 /** What routing and the request client add. No secret: that stays explicit. */
 export function browserHeaders(testId: string): Record<string, string> {
-    return { [TEST_ID_HEADER]: testId }
+    return '' === testId ? {} : { [TEST_ID_HEADER]: testId }
 }

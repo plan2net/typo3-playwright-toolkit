@@ -2,6 +2,9 @@ import { createHmac } from 'node:crypto'
 
 const PURPOSE = 'inspect'
 
+/** Where a test ID goes for a replay link; no test ID can be this. */
+export const REPLAY_SUBJECT = 'replay'
+
 /** Long enough to pick a link from the list, short enough that a pasted one dies. */
 export const INSPECT_TOKEN_LIFETIME_MS = 900_000
 
@@ -18,5 +21,14 @@ export function inspectUrl(testingURL: string, secret: string, testId: string, n
         `${testingURL}/typo3/test-api/inspect` +
         `?id=${encodeURIComponent(testId)}` +
         `&t=${encodeURIComponent(mintInspectToken(secret, testId, expiresAt))}`
+    )
+}
+
+export function replayInspectUrl(testingURL: string, secret: string, now: number): string {
+    const expiresAt = Math.floor((now + INSPECT_TOKEN_LIFETIME_MS) / 1000)
+
+    return (
+        `${testingURL}/typo3/test-api/inspect` +
+        `?replay=1&t=${encodeURIComponent(mintInspectToken(secret, REPLAY_SUBJECT, expiresAt))}`
     )
 }

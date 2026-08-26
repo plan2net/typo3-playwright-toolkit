@@ -158,6 +158,23 @@ describe('getToolkitConfig before configuration', () => {
     })
 })
 
+describe('defineToolkitConfig replay mode', () => {
+    it('reads PW_REPLAY=1 into the resolved config', () => {
+        process.env.PW_REPLAY = '1'
+        try {
+            expect(defineToolkitConfig(baseConfig()).replay).toBe(true)
+        } finally {
+            delete process.env.PW_REPLAY
+        }
+    })
+
+    it('is off without PW_REPLAY', () => {
+        delete process.env.PW_REPLAY
+
+        expect(defineToolkitConfig(baseConfig()).replay).toBe(false)
+    })
+})
+
 describe('defineToolkitConfig run id', () => {
     it('puts the resolved run id on the config', () => {
         delete process.env.PW_RUN_ID

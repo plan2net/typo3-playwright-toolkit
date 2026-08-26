@@ -65,18 +65,26 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
             return $refusal;
         }
 
+        $payload = json_decode((string) $request->getBody(), true);
+        $payload = is_array($payload) ? $payload : [];
+
         $testId = $request->getHeaderLine(TestContext::TEST_ID_HEADER);
-        if ('' === $testId) {
+        // Replay sends no test ID, so it has to say so: a lost header still gets 401.
+        $replay = '' === $testId && true === ($payload['replay'] ?? null);
+
+        if ('' === $testId && !$replay) {
             return TestApi::error('Missing ' . TestContext::TEST_ID_HEADER . ' header', 401);
         }
 
         // The same rule the database layer applies, so a header it would reject
         // cannot mint a backend session here. Never echo the value back.
-        if (1 !== preg_match(TestContext::TEST_ID_PATTERN, $testId)) {
+        if (!$replay && 1 !== preg_match(TestContext::TEST_ID_PATTERN, $testId)) {
             return TestApi::error('Malformed ' . TestContext::TEST_ID_HEADER . ' header', 401);
         }
 
-        $this->rememberTestName($request, $testId);
+        if (!$replay) {
+            $this->rememberTestName($payload, $testId);
+        }
 
         try {
             $preseededSessionId = $this->configurationFactory->create()->preseededSessionId;
@@ -102,11 +110,14 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
         }
     }
 
-    /** Stored, not sent per request: an inspect session has cookies and no headers. */
-    private function rememberTestName(ServerRequestInterface $request, string $testId): void
+    /**
+     * Stored, not sent per request: an inspect session has cookies and no headers.
+     *
+     * @param array<string, mixed> $payload
+     */
+    private function rememberTestName(array $payload, string $testId): void
     {
-        $payload = json_decode((string) $request->getBody(), true);
-        if (!is_array($payload) || !is_string($payload['name'] ?? null)) {
+        if (!is_string($payload['name'] ?? null)) {
             return;
         }
 

@@ -142,6 +142,24 @@ describe('globalSetup', () => {
     })
 })
 
+// The health check needs a test ID, and minting one would leave a database behind.
+describe('globalSetup in replay mode', () => {
+    it('probes the version but runs no preflight', async () => {
+        const seen: Record<string, string>[] = []
+        vi.stubGlobal('fetch', async (_url: string, init?: { headers?: Record<string, string> }) => {
+            seen.push(init?.headers ?? {})
+            return new Response(JSON.stringify({ ok: true, api: 1, checks: {} }), { status: 200 })
+        })
+        setToolkitConfig({ ...config, replay: true })
+
+        await globalSetup()
+
+        expect(seen).toHaveLength(1)
+        expect(seen[0][TEST_ID_HEADER]).toBeUndefined()
+        expect(readAttempts({ ...config, replay: true })).toEqual([])
+    })
+})
+
 describe('preflightTestId', () => {
     it('mints an id the contract accepts', () => {
         expect(preflightTestId(config)).toMatch(TEST_ID_PATTERN)

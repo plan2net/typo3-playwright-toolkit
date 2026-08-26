@@ -72,6 +72,28 @@ playwright_run_prepare() {
     (cd "${prepare_root}" && TYPO3_CONTEXT=Testing ./vendor/bin/typo3 playwright:prepare) || return 1
 }
 
+playwright_replay_prepare() {
+    # $1 optional project root, so this is testable outside the web container.
+    replay_root="${1:-/var/www/html}"
+
+    echo "[playwright] Rebuilding the testing site database from the template…"
+    (cd "${replay_root}" && TYPO3_CONTEXT=Testing ./vendor/bin/typo3 playwright:replay-prepare) || return 1
+}
+
+# One database and one pre-seeded session are shared by every scenario, so a
+# second worker would clobber the first one's route token.
+playwright_refuse_worker_override() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --workers|--workers=*|-j|-j[0-9]*)
+                echo "[playwright] replay runs with --workers=1; remove '$1'." >&2
+                return 1
+                ;;
+        esac
+        shift
+    done
+}
+
 playwright_prepare_template() {
     if [ "${PW_SKIP_PREPARE:-}" = "1" ]; then
         echo "[playwright] PW_SKIP_PREPARE=1 — keeping the existing test database template"

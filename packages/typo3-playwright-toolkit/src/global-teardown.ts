@@ -5,7 +5,8 @@ import { httpCleanup, type CleanupClient } from './http/cleanup-client.js'
 import { readAttemptsFrom, readRegisteredTestIds } from './state/attempt-registry.js'
 import { listRunIds, runLastActiveMs, runPaths, runsRoot } from './state/run-namespace.js'
 import { assertDeletableDirectory, safeJoin } from './state/safe-paths.js'
-import { inspectUrl } from './inspect/token.js'
+import { inspectUrl, replayInspectUrl } from './inspect/token.js'
+import { recordReplayTarget } from './inspect/replay-target.js'
 import { resolveApiSecret } from './http/api-secret.js'
 
 export const DEFAULT_ORPHAN_AGE_MS = 86_400_000
@@ -94,6 +95,8 @@ export interface TeardownOptions {
     /** Injectable so tests need no site; see httpCleanup for the real one. */
     cleanup: CleanupClient
     preserve: PreservePlan
+    /** Signs the replay login link; resolved from the file when omitted. */
+    secret?: string
 }
 
 export interface TeardownSummary {
@@ -101,6 +104,8 @@ export interface TeardownSummary {
     /** Test IDs whose database may still exist, so the caller can fail the run. */
     leaked: string[]
     preserved: string[]
+    /** Replay only: the backend login link for the replayed database. */
+    replayUrl?: string
 }
 
 /** Only live runs go in `keepTestIds`; an abandoned run's databases are dropped. */
@@ -203,11 +208,26 @@ export function describePreservedRun(
 export async function runTeardown(config: ToolkitConfig, options: TeardownOptions): Promise<TeardownSummary> {
     const { stateDir, sessionDir } = config.paths
     const { cleanup, preserve } = options
+    const secret = options.secret ?? inspectSecret(config)
 
     // setToolkitConfig bypasses defineToolkitConfig, so re-check here: everything
     // below this line deletes recursively.
     assertDeletableDirectory('stateDir', stateDir, config.paths.consumerRoot)
     assertDeletableDirectory('sessionDir', sessionDir, config.paths.consumerRoot)
+
+    // Nothing to drop, but the state has to go: a pinned run id would otherwise
+    // make the next replay skip every setup on this run's committed state.
+    if (config.replay) {
+        removeRunState(config, false)
+        recordReplayTarget(stateDir, config.testingURL)
+
+        return {
+            dropped: 0,
+            leaked: [],
+            preserved: [],
+            replayUrl: '' === secret ? undefined : replayInspectUrl(config.testingURL, secret, Date.now()),
+        }
+    }
 
     const kept = 'all' === preserve.mode ? readRegisteredTestIds(config) : preserveList(preserve)
 
@@ -331,6 +351,12 @@ async function globalTeardown(): Promise<void> {
     let summary: TeardownSummary
     try {
         summary = await runTeardown(config, { cleanup: httpCleanup(config), preserve })
+
+        if (undefined !== summary.replayUrl) {
+            console.log(`\n[replay] Everything was replayed into the testing site's own database.`)
+            console.log(`[replay] This link logs you into its backend for the next 15 minutes:\n`)
+            console.log(`  ${summary.replayUrl}\n`)
+        }
 
         if ('none' !== preserve.mode) {
             console.log(`[teardown] Kept for debugging (${preserve.reason}).`)

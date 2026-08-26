@@ -97,6 +97,8 @@ export interface ToolkitConfig {
     paths: ToolkitPaths
     /** Pins the run ID. Normally omitted — taken from PW_RUN_ID or minted. */
     runId?: string
+    /** Set by PW_REPLAY=1: run every setup into the base database instead of per-test ones. */
+    replay?: boolean
     cleanup?: ToolkitCleanupConfig
     accessibility?: ToolkitAccessibilityConfig
     csp?: ToolkitCspConfig
@@ -166,6 +168,7 @@ export function defineToolkitConfig(config: ToolkitConfigInput): ToolkitConfig {
         testingURL: resolveTestingURL(config.testingURL),
         paths: resolvePaths(config.paths),
         runId: resolveRunId(config.runId),
+        replay: '1' === process.env.PW_REPLAY,
     }
     setToolkitConfig(resolved)
     registerContentTypes(config.contentTypes ?? {})

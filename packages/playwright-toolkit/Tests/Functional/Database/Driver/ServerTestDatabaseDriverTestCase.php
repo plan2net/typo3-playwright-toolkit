@@ -20,6 +20,16 @@ abstract class ServerTestDatabaseDriverTestCase extends FunctionalTestCase
      * @var string
      */
     protected const TEST_ID = 'ABCD1234EFGH5678';
+    /**
+     * Never a real `db`. Test-ID shaped, so drop() reaches it in tearDown.
+     *
+     * @var string
+     */
+    protected const BASE_TEST_ID = 'REPLAYPHPUNIT000';
+    /**
+     * @var string
+     */
+    protected const BASE_DATABASE = 'db' . self::BASE_TEST_ID;
     protected array $testExtensionsToLoad = [
         'plan2net/playwright-toolkit',
     ];
@@ -50,6 +60,7 @@ abstract class ServerTestDatabaseDriverTestCase extends FunctionalTestCase
         if ($this->serverIsReachable) {
             $driver = $this->driver();
             $driver->drop(self::TEST_ID);
+            $driver->drop(self::BASE_TEST_ID);
             $driver->dropTemplate();
         }
 
@@ -156,6 +167,43 @@ abstract class ServerTestDatabaseDriverTestCase extends FunctionalTestCase
         $this->expectException(\InvalidArgumentException::class);
 
         $this->driver()->materialise('DROP DATABASE db');
+    }
+
+    #[Test]
+    public function replacingTheBaseDatabaseClonesTheTemplateIntoIt(): void
+    {
+        $driver = $this->prepareTemplate(fingerprint: 'abc');
+
+        $driver->replaceBaseDatabase(self::BASE_DATABASE);
+
+        self::assertTrue($this->databaseExists(self::BASE_DATABASE));
+        self::assertSame(
+            'abc',
+            $this->connectTo(self::BASE_DATABASE)->query('SELECT fingerprint FROM playwright_seed')->fetchColumn()
+        );
+    }
+
+    #[Test]
+    public function replacingTheBaseDatabaseDiscardsWhatWasThere(): void
+    {
+        $driver = $this->prepareTemplate();
+        $driver->replaceBaseDatabase(self::BASE_DATABASE);
+        $this->connectTo(self::BASE_DATABASE)->exec('DROP TABLE pages');
+
+        $driver->replaceBaseDatabase(self::BASE_DATABASE);
+
+        self::assertSame(
+            '1',
+            (string) $this->connectTo(self::BASE_DATABASE)->query('SELECT count(*) FROM pages')->fetchColumn()
+        );
+    }
+
+    #[Test]
+    public function refusesToReplaceADatabaseThatIsNotATestOne(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->driver()->replaceBaseDatabase('postgres');
     }
 
     #[Test]

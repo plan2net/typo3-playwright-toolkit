@@ -154,6 +154,28 @@ ddev playwright-inspect accordion  # one test file
 Opening a link logs you into the TYPO3 backend of that database, and the frontend is
 reachable from there. Links are signed and expire after 15 minutes.
 
+## Looking at everything the suite builds
+
+A test run spreads its content over one throwaway database per test, and drops them
+when it passes. To see it all at once — to click through it, or to export a branch of
+it — replay every scenario into the testing site's own database instead:
+
+```bash
+ddev playwright-replay                   # every scenario
+ddev playwright-replay --grep accordion  # a subset
+```
+
+Each scenario gets a folder named after it under the fixture root, holding the pages
+and records that scenario creates, images included. The tests themselves are skipped:
+their assertions and screenshot baselines belong to a per-test database.
+
+The run ends by printing a link that logs you into that database's backend. The
+database is rebuilt from the template on every replay, so nothing accumulates.
+
+That database is the one the testing site uses when no test is running, and the
+`db-test` service exists for exactly this. It is never the database you develop
+against — that one lives in DDEV's own `db` service and is not touched.
+
 UI mode runs in the web container, so the browsers must be installed there:
 
 ```bash
@@ -172,6 +194,7 @@ Then open `https://<project>.ddev.site:3000`.
 | `ddev playwright` | Runs `npx playwright` with the arguments you pass |
 | `ddev playwright-inspect` | Prints links that open a kept test database in the backend |
 | `ddev playwright-prepare` | Builds the template database on its own |
+| `ddev playwright-replay` | Replays every scenario's content into one browsable database |
 | `ddev playwright-ui` | Serves Playwright UI mode from the web container |
 
 ### Flags

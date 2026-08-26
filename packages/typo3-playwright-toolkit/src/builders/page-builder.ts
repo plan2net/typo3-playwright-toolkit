@@ -1,7 +1,7 @@
 import { Page } from '@playwright/test'
 import { CropConfig } from '../types/common.js'
 import { saveRecord, type RecordDataMap } from '../http/record-edit.js'
-import { requireTestId, resolveRequestContext, type RequestContext } from './request-context.js'
+import { replayParentId, requireTestId, resolveRequestContext, type RequestContext } from './request-context.js'
 import { coerceFields } from './fields.js'
 import { newRecordIdentifier } from './identifier.js'
 
@@ -44,14 +44,14 @@ export class PageBuilder {
         return this
     }
 
-    /** The test ID is appended so two runs never claim the same URL. */
+    /** The test ID is appended so two runs never claim the same URL; replay has none. */
     withSlug(slug: string): this {
         const testId = requireTestId(this.page, this.requestContext?.testId)
 
         let normalizedSlug = slug.startsWith('/') ? slug : `/${slug}`
         normalizedSlug = normalizedSlug.endsWith('/') ? normalizedSlug.slice(0, -1) : normalizedSlug
 
-        this.fields.slug = `${normalizedSlug}-${testId.toLowerCase()}`
+        this.fields.slug = testId ? `${normalizedSlug}-${testId.toLowerCase()}` : normalizedSlug
         return this
     }
 
@@ -73,16 +73,20 @@ export class PageBuilder {
     async create(): Promise<{ id: string; slug: string }> {
         const context = resolveRequestContext(this.page, this.requestContext)
         const identifier = newRecordIdentifier()
+        const parentId = replayParentId(context, String(Number(this.fields.pid)))
 
         const uid = await saveRecord(this.page.request, context, {
             table: 'pages',
             identifier,
-            target: Number(this.fields.pid),
+            target: Number(parentId),
             data: {
-                pages: { [identifier]: this.pageFields() },
+                pages: { [identifier]: { ...this.pageFields(), pid: parentId } },
                 ...this.mediaRecords(identifier),
             },
         })
+
+        // So its children keep it as their parent.
+        context.replayFolder?.ownPages.add(String(uid))
 
         return { id: String(uid), slug: (this.fields.slug as string) || '' }
     }

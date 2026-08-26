@@ -69,6 +69,59 @@ describe('runTeardown', () => {
         expect(fs.existsSync(otherRun)).toBe(true)
     })
 
+    describe('in replay mode', () => {
+        function replayConfig(): ToolkitConfig {
+            return { ...configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa'), replay: true }
+        }
+
+        it('drops nothing and sweeps nothing', async () => {
+            const config = replayConfig()
+            ensureRunNamespace(config)
+            registerAttempt(config, { key: 'news', attempt: 1, testId: 'ABCD1234EFGH5678', nonce: 'n' })
+            const cleanup = fakeCleanup()
+
+            await runTeardown(config, { cleanup, preserve: { mode: 'none' } as const })
+
+            expect(cleanup.dropped).toEqual([])
+            expect(cleanup.swept).toEqual([])
+        })
+
+        it('removes its own run directory', async () => {
+            const config = replayConfig()
+            ensureRunNamespace(config)
+
+            await runTeardown(config, { cleanup: fakeCleanup(), preserve: { mode: 'none' } as const })
+
+            expect(fs.existsSync(runPaths(config).runDir)).toBe(false)
+        })
+
+        it('reports the login link for the replayed database', async () => {
+            const config = replayConfig()
+            ensureRunNamespace(config)
+
+            const summary = await runTeardown(config, {
+                cleanup: fakeCleanup(),
+                preserve: { mode: 'none' } as const,
+                secret: 'shh',
+            })
+
+            expect(summary.replayUrl).toContain('/typo3/test-api/inspect?replay=1&t=')
+        })
+
+        it('reports no leak, so a replay never fails the run', async () => {
+            const config = replayConfig()
+            ensureRunNamespace(config)
+            registerAttempt(config, { key: 'news', attempt: 1, testId: 'ABCD1234EFGH5678', nonce: 'n' })
+
+            const summary = await runTeardown(config, {
+                cleanup: fakeCleanup({ ABCD1234EFGH5678: 'failed' }),
+                preserve: { mode: 'none' } as const,
+            })
+
+            expect(summary).toMatchObject({ dropped: 0, leaked: [] })
+        })
+    })
+
     it('keeps the run directory when preserve is true', async () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
         ensureRunNamespace(config)

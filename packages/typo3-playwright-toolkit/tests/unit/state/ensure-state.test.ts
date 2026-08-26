@@ -240,6 +240,28 @@ describe('ensureState — retries', () => {
         expect(seen[0]).not.toBe(seen[1])
     })
 
+    // A retry would mint a second folder beside the first attempt's half-built one.
+    it('does not retry in replay mode', async () => {
+        let runs = 0
+
+        await expect(
+            ensureState(
+                { ...config, replay: true },
+                {
+                    key: 'scenario',
+                    triggerId: 't1',
+                    setup: async () => {
+                        runs++
+                        throw new Error('always fails')
+                    },
+                    ...noWait,
+                },
+            ),
+        ).rejects.toThrow(/always fails/)
+
+        expect(runs).toBe(1)
+    })
+
     it('records every attempt in the registry', async () => {
         await ensureState(config, {
             key: 'scenario',

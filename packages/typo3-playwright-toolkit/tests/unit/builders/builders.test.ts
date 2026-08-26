@@ -63,13 +63,13 @@ function toDataMap(fields: Record<string, string>): RecordDataMap {
  * and `request.post()`. Answers the way the backend does — a redirect naming the
  * saved uid, or a rendered page when it refused the save.
  */
-function fakePage(uid: number, refusalBody?: string) {
+function fakePage(uid: number, refusalBody?: string, testId: string | undefined = TEST_ID) {
     const posted: Posted[] = []
 
     const page = {
         url: () => 'https://example-testing.test/typo3/module/web/layout',
-        context: () => ({ testId: TEST_ID }),
-        testId: TEST_ID,
+        context: () => ({ testId }),
+        testId,
         request: {
             async post(url: string, options: { headers: Record<string, string>; multipart: Record<string, string> }) {
                 posted.push({ url, fields: options.multipart, dataMap: toDataMap(options.multipart) })
@@ -219,6 +219,88 @@ describe('PageBuilder', () => {
         await pageBuilder(page).withTitle('A page').withSlug('/my-page').create()
 
         expect(only(posted[0].dataMap.pages).slug).toBe(`/my-page-${TEST_ID.toLowerCase()}`)
+    })
+
+    it('keeps the slug unsuffixed in replay mode', async () => {
+        setToolkitConfig({ ...config(), replay: true })
+        const { posted, page } = fakePage(1, undefined, '')
+
+        await pageBuilder(page).withTitle('A page').withSlug('/my-page').create()
+
+        expect(only(posted[0].dataMap.pages).slug).toBe('/my-page')
+    })
+})
+
+describe('replay folder redirect', () => {
+    function anchored() {
+        return { routeToken: ROUTE_TOKEN, replayFolder: { id: '900', ownPages: new Set<string>() } }
+    }
+
+    beforeEach(() => {
+        setToolkitConfig({ ...config(), replay: true })
+    })
+
+    it('moves a page anchored at a fixture page into the folder', async () => {
+        const { posted, page } = fakePage(1, undefined, '')
+
+        await new PageBuilder(page, anchored()).withTitle('A page').atParentId(1).create()
+
+        expect(only(posted[0].dataMap.pages).pid).toBe('900')
+    })
+
+    it('keeps a page anchored at one the scenario created', async () => {
+        const { posted, page } = fakePage(1, undefined, '')
+        const context = anchored()
+        context.replayFolder.ownPages.add('42')
+
+        await new PageBuilder(page, context).withTitle('A child').atParentId(42).create()
+
+        expect(only(posted[0].dataMap.pages).pid).toBe('42')
+    })
+
+    it('records the pages it creates so their children stay put', async () => {
+        const { page } = fakePage(77, undefined, '')
+        const context = anchored()
+
+        await new PageBuilder(page, context).withTitle('A page').create()
+
+        expect(context.replayFolder.ownPages.has('77')).toBe(true)
+    })
+
+    // uids are per table, so a tt_content 42 must not make a fixture page 42 look owned.
+    it('does not record content elements as pages', async () => {
+        const { page } = fakePage(42, undefined, '')
+        const context = anchored()
+
+        await new ContentBuilder(page, context).onPage('900').ofType('header').create()
+
+        expect(context.replayFolder.ownPages.has('42')).toBe(false)
+    })
+
+    it('does not record an updated page', async () => {
+        const { page } = fakePage(5, undefined, '')
+        const context = anchored()
+
+        await new PageBuilder(page, context).withTitle('Renamed').update('5')
+
+        expect(context.replayFolder.ownPages.has('5')).toBe(false)
+    })
+
+    it('moves a content element anchored at a fixture page into the folder', async () => {
+        const { posted, page } = fakePage(3, undefined, '')
+
+        await new ContentBuilder(page, anchored()).onPage('1').ofType('header').create()
+
+        expect(only(posted[0].dataMap.tt_content).pid).toBe('900')
+    })
+
+    it('leaves everything where it is outside replay', async () => {
+        setToolkitConfig(config())
+        const { posted, page } = fakePage(1)
+
+        await pageBuilder(page).withTitle('A page').atParentId(1).create()
+
+        expect(only(posted[0].dataMap.pages).pid).toBe('1')
     })
 })
 

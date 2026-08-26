@@ -11,6 +11,12 @@ final class InspectToken
      * @var string
      */
     public const PURPOSE = 'inspect';
+    /**
+     * Where a test ID goes for a replay link; no test ID can be this.
+     *
+     * @var string
+     */
+    public const REPLAY_SUBJECT = 'replay';
 
     public static function mint(string $secret, string $testId, int $expiresAt): string
     {

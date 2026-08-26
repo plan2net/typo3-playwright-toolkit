@@ -25,6 +25,22 @@ project_files() {
     [[ "$output" == *"commands/web/playwright"* ]]
 }
 
+# The other direction: a command that is not listed is never installed, and the
+# test above cannot see it missing.
+@test "every command is listed in install.yaml" {
+    local unlisted="" listed
+    listed=$(project_files)
+
+    for command in "${ADDON_DIR}"/commands/web/*; do
+        [[ "${listed}" == *"commands/web/$(basename "${command}")"* ]] || unlisted="${unlisted} $(basename "${command}")"
+    done
+
+    [ -z "${unlisted}" ] || {
+        echo "commands missing from install.yaml:${unlisted}"
+        false
+    }
+}
+
 @test "every file listed in install.yaml project_files exists" {
     local missing=""
     while IFS= read -r file; do

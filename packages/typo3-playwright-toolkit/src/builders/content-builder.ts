@@ -4,7 +4,7 @@ import { createContent } from './content-factory.js'
 import type { ContentTypeFor, ContentTypeKey } from './core-content.js'
 import { saveRecord } from '../http/record-edit.js'
 import { coerceFields } from './fields.js'
-import { resolveRequestContext, type RequestContext } from './request-context.js'
+import { replayParentId, resolveRequestContext, type RequestContext } from './request-context.js'
 import { newRecordIdentifier } from './identifier.js'
 
 export class ContentBuilder {
@@ -60,6 +60,7 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
     async create(): Promise<{ id: string }> {
         const context = resolveRequestContext(this.page, this.requestContext)
         const identifier = newRecordIdentifier()
+        const pageId = replayParentId(context, this.pageId)
         const fields = this.builder.getFields()
 
         // CType and colPos are set below; an empty string means "the type did not
@@ -71,7 +72,7 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         )
 
         const record: Record<string, unknown> = {
-            pid: this.pageId,
+            pid: pageId,
             sys_language_uid: 0,
             CType: fields.CType || this.builder.type,
             colPos: fields.colPos ?? 0,
@@ -81,10 +82,10 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         const uid = await saveRecord(this.page.request, context, {
             table: 'tt_content',
             identifier: identifier,
-            target: Number(this.pageId),
+            target: Number(pageId),
             data: {
                 tt_content: { [identifier]: record },
-                ...(this.builder.getAdditionalRecords?.(identifier, this.pageId) ?? {}),
+                ...(this.builder.getAdditionalRecords?.(identifier, pageId) ?? {}),
             },
         })
 
