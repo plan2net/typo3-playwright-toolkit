@@ -15,8 +15,14 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
+      # Minor and patch only. Grouping majors too put four of them in one
+      # unmergeable pull request: typescript 7 alongside a typescript-eslint that
+      # peer-requires below 6. Majors arrive one at a time and get judged one at a time.
       dev-dependencies:
         dependency-type: development
+        update-types:
+          - minor
+          - patch
 
   - package-ecosystem: github-actions
     directory: /
