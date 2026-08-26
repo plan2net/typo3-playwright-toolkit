@@ -4,7 +4,7 @@ import type { ToolkitConfig } from '../config.js'
 import { assertJsonSafe } from './json-safe.js'
 import { ensureRunNamespace } from './run-namespace.js'
 
-export interface PairStateRecord<S> {
+export interface ScenarioStateRecord<S> {
     runId: string
     key: string
     testId: string
@@ -14,21 +14,21 @@ export interface PairStateRecord<S> {
     data: S
 }
 
-export interface PairAttemptFailure {
+export interface ScenarioAttemptFailure {
     attempt: number
     testId: string
     error: string
     durationMs: number
 }
 
-export interface PairFailureRecord {
+export interface ScenarioFailureRecord {
     runId: string
-    pairKey: string
-    /** File name stem: a setup and a verify failure of one pair both need one. */
+    scenarioKey: string
+    /** File name stem: a setup and a test failure of one scenario both need one. */
     key: string
     triggeringTestId: string
     recordedAt: string
-    attempts: PairAttemptFailure[]
+    attempts: ScenarioAttemptFailure[]
 }
 
 function atomicWrite(target: string, content: string): void {
@@ -45,14 +45,14 @@ function readJson<T>(file: string): T | undefined {
     }
 }
 
-export function commitPairState<S>(
+export function commitScenarioState<S>(
     config: ToolkitConfig,
     input: { key: string; testId: string; attempt: number; setupMs: number; data: S },
 ): void {
     assertJsonSafe(input.data, `setup state for "${input.key}"`)
 
     const paths = ensureRunNamespace(config)
-    const record: PairStateRecord<S> = {
+    const record: ScenarioStateRecord<S> = {
         runId: paths.runId,
         key: input.key,
         testId: input.testId,
@@ -62,21 +62,21 @@ export function commitPairState<S>(
         data: input.data,
     }
 
-    atomicWrite(path.join(paths.pairsDir, `${input.key}.json`), JSON.stringify(record, null, 2))
+    atomicWrite(path.join(paths.scenariosDir, `${input.key}.json`), JSON.stringify(record, null, 2))
 }
 
-export function readPairState<S>(config: ToolkitConfig, key: string): PairStateRecord<S> | undefined {
-    return readJson<PairStateRecord<S>>(path.join(ensureRunNamespace(config).pairsDir, `${key}.json`))
+export function readScenarioState<S>(config: ToolkitConfig, key: string): ScenarioStateRecord<S> | undefined {
+    return readJson<ScenarioStateRecord<S>>(path.join(ensureRunNamespace(config).scenariosDir, `${key}.json`))
 }
 
-export function recordPairFailure(
+export function recordScenarioFailure(
     config: ToolkitConfig,
-    input: { key: string; pairKey?: string; triggeringTestId: string; attempts: PairAttemptFailure[] },
+    input: { key: string; scenarioKey?: string; triggeringTestId: string; attempts: ScenarioAttemptFailure[] },
 ): void {
     const paths = ensureRunNamespace(config)
-    const record: PairFailureRecord = {
+    const record: ScenarioFailureRecord = {
         runId: paths.runId,
-        pairKey: input.pairKey ?? input.key,
+        scenarioKey: input.scenarioKey ?? input.key,
         key: input.key,
         triggeringTestId: input.triggeringTestId,
         recordedAt: new Date().toISOString(),
@@ -86,6 +86,6 @@ export function recordPairFailure(
     atomicWrite(path.join(paths.failuresDir, `${input.key}.json`), JSON.stringify(record, null, 2))
 }
 
-export function readPairFailure(config: ToolkitConfig, key: string): PairFailureRecord | undefined {
-    return readJson<PairFailureRecord>(path.join(ensureRunNamespace(config).failuresDir, `${key}.json`))
+export function readScenarioFailure(config: ToolkitConfig, key: string): ScenarioFailureRecord | undefined {
+    return readJson<ScenarioFailureRecord>(path.join(ensureRunNamespace(config).failuresDir, `${key}.json`))
 }

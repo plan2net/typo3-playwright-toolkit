@@ -5,6 +5,6 @@
     "description": "No dependencies are declared: run.sh installs the packed toolkit and the exact @playwright/test the toolkit's own lock file pins.",
     "devDependencies": {
         "@plan2net/typo3-playwright-toolkit": "file:../../.artifacts/plan2net-typo3-playwright-toolkit-0.1.0.tgz",
-        "@playwright/test": "^1.61.1"
+        "@playwright/test": "^1.62.1"
     }
 }

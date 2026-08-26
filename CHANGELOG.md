@@ -21,7 +21,7 @@ the package a change belongs to.
   `record_edit` route token, plus health, records, inspect and cleanup endpoints.
   Every endpoint is gated on the Testing context and then on `TestApiSecret`.
 - **@plan2net/typo3-playwright-toolkit** — Playwright fixtures and helpers: the
-  `definePair` setup/test pattern, page and content builders for every core
+  `defineScenario` setup/test pattern, page and content builders for every core
   CType, run bookkeeping, screenshot and accessibility checks, and the global
   setup and teardown that provision and drop the test databases over HTTP.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape

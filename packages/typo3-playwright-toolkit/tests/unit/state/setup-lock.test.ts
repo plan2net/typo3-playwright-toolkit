@@ -29,22 +29,22 @@ afterEach(() => {
 
 describe('acquireSetupLock', () => {
     it('succeeds when the lock is free', () => {
-        expect(acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })).toBe(true)
+        expect(acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })).toBe(true)
     })
 
     it('fails when someone else holds it', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })
 
-        expect(acquireSetupLock(locksDir, 'pair', { nonce: 'b', attempt: 2 })).toBe(false)
+        expect(acquireSetupLock(locksDir, 'scenario', { nonce: 'b', attempt: 2 })).toBe(false)
     })
 
     it('records who holds it', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 3 })
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 3 })
 
-        expect(readLockOwner(locksDir, 'pair')).toMatchObject({ nonce: 'a', attempt: 3 })
+        expect(readLockOwner(locksDir, 'scenario')).toMatchObject({ nonce: 'a', attempt: 3 })
     })
 
-    it('leaves another pair free', () => {
+    it('leaves another scenario free', () => {
         acquireSetupLock(locksDir, 'one', { nonce: 'a', attempt: 1 })
 
         expect(acquireSetupLock(locksDir, 'two', { nonce: 'b', attempt: 1 })).toBe(true)
@@ -53,108 +53,108 @@ describe('acquireSetupLock', () => {
 
 describe('readLockOwner', () => {
     it('is undefined when no lock is held', () => {
-        expect(readLockOwner(locksDir, 'pair')).toBeUndefined()
+        expect(readLockOwner(locksDir, 'scenario')).toBeUndefined()
     })
 })
 
 describe('stillOwns', () => {
     it('is true for the holder', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })
 
-        expect(stillOwns(locksDir, 'pair', 'a')).toBe(true)
+        expect(stillOwns(locksDir, 'scenario', 'a')).toBe(true)
     })
 
     it('is false for anyone else', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })
 
-        expect(stillOwns(locksDir, 'pair', 'b')).toBe(false)
+        expect(stillOwns(locksDir, 'scenario', 'b')).toBe(false)
     })
 
     it('is false when the lock is gone', () => {
-        expect(stillOwns(locksDir, 'pair', 'a')).toBe(false)
+        expect(stillOwns(locksDir, 'scenario', 'a')).toBe(false)
     })
 })
 
 describe('heartbeatSetupLock', () => {
     it('moves the lock age back to zero', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })
         const longAgo = new Date(Date.now() - 60_000)
-        fs.utimesSync(path.join(locksDir, 'pair.lock'), longAgo, longAgo)
+        fs.utimesSync(path.join(locksDir, 'scenario.lock'), longAgo, longAgo)
 
-        expect(heartbeatSetupLock(locksDir, 'pair', 'a')).toBe(true)
-        expect(lockAgeMs(locksDir, 'pair')).toBeLessThan(5_000)
+        expect(heartbeatSetupLock(locksDir, 'scenario', 'a')).toBe(true)
+        expect(lockAgeMs(locksDir, 'scenario')).toBeLessThan(5_000)
     })
 
     it('refuses once the lock was taken away', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })
-        ageLock('pair')
-        stealSetupLock(locksDir, 'pair', 'b', 15_000)
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })
+        ageLock('scenario')
+        stealSetupLock(locksDir, 'scenario', 'b', 15_000)
 
-        expect(heartbeatSetupLock(locksDir, 'pair', 'a')).toBe(false)
+        expect(heartbeatSetupLock(locksDir, 'scenario', 'a')).toBe(false)
     })
 })
 
 describe('stealSetupLock', () => {
     it('does nothing while the lock is fresh', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })
 
-        expect(stealSetupLock(locksDir, 'pair', 'b', 15_000)).toBe(false)
-        expect(stillOwns(locksDir, 'pair', 'a')).toBe(true)
+        expect(stealSetupLock(locksDir, 'scenario', 'b', 15_000)).toBe(false)
+        expect(stillOwns(locksDir, 'scenario', 'a')).toBe(true)
     })
 
     it('frees the lock for the next holder', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })
-        ageLock('pair')
-        stealSetupLock(locksDir, 'pair', 'b', 15_000)
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })
+        ageLock('scenario')
+        stealSetupLock(locksDir, 'scenario', 'b', 15_000)
 
-        expect(acquireSetupLock(locksDir, 'pair', { nonce: 'b', attempt: 2 })).toBe(true)
+        expect(acquireSetupLock(locksDir, 'scenario', { nonce: 'b', attempt: 2 })).toBe(true)
     })
 
     it('leaves nothing behind', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })
-        ageLock('pair')
-        stealSetupLock(locksDir, 'pair', 'b', 15_000)
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })
+        ageLock('scenario')
+        stealSetupLock(locksDir, 'scenario', 'b', 15_000)
 
         expect(fs.readdirSync(locksDir).filter((f) => f.includes('stale'))).toEqual([])
     })
 
     it('only lets one stealer through', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })
-        ageLock('pair')
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })
+        ageLock('scenario')
 
-        const first = stealSetupLock(locksDir, 'pair', 'b', 15_000)
-        const second = stealSetupLock(locksDir, 'pair', 'c', 15_000)
+        const first = stealSetupLock(locksDir, 'scenario', 'b', 15_000)
+        const second = stealSetupLock(locksDir, 'scenario', 'c', 15_000)
 
         expect(first).toBe(true)
         expect(second).toBe(false)
     })
 
     it('is false when there is no lock at all', () => {
-        expect(stealSetupLock(locksDir, 'pair', 'b', 0)).toBe(false)
+        expect(stealSetupLock(locksDir, 'scenario', 'b', 0)).toBe(false)
     })
 })
 
 describe('releaseSetupLock', () => {
     it('frees the lock for the next holder', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })
 
-        releaseSetupLock(locksDir, 'pair', 'a')
+        releaseSetupLock(locksDir, 'scenario', 'a')
 
-        expect(acquireSetupLock(locksDir, 'pair', { nonce: 'b', attempt: 2 })).toBe(true)
+        expect(acquireSetupLock(locksDir, 'scenario', { nonce: 'b', attempt: 2 })).toBe(true)
     })
 
     it('does not touch a lock that now belongs to someone else', () => {
-        acquireSetupLock(locksDir, 'pair', { nonce: 'a', attempt: 1 })
-        ageLock('pair')
-        stealSetupLock(locksDir, 'pair', 'b', 15_000)
-        acquireSetupLock(locksDir, 'pair', { nonce: 'b', attempt: 2 })
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'a', attempt: 1 })
+        ageLock('scenario')
+        stealSetupLock(locksDir, 'scenario', 'b', 15_000)
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'b', attempt: 2 })
 
-        releaseSetupLock(locksDir, 'pair', 'a')
+        releaseSetupLock(locksDir, 'scenario', 'a')
 
-        expect(stillOwns(locksDir, 'pair', 'b')).toBe(true)
+        expect(stillOwns(locksDir, 'scenario', 'b')).toBe(true)
     })
 
     it('is quiet when the lock is already gone', () => {
-        expect(() => releaseSetupLock(locksDir, 'pair', 'a')).not.toThrow()
+        expect(() => releaseSetupLock(locksDir, 'scenario', 'a')).not.toThrow()
     })
 })

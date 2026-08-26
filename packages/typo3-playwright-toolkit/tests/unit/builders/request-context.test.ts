@@ -36,7 +36,7 @@ describe('resolveRequestContext', () => {
         expect(resolved.baseUrl).toBe('https://example-testing.test')
     })
 
-    // The session endpoint reports it; a builder used outside a pair has none.
+    // The session endpoint reports it; a builder used outside a scenario has none.
     it('assumes the stock backend path when none is given', () => {
         const resolved = resolveRequestContext(pageAt('https://site.test'), { testId: 'ABCD1234EFGH5678' })
 

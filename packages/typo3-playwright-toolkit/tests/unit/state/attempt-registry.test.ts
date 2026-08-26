@@ -50,7 +50,7 @@ describe('registerAttempt', () => {
         expect(fs.existsSync(runPaths(config).attemptsFile)).toBe(true)
     })
 
-    it('keeps every attempt of a pair', () => {
+    it('keeps every attempt of a scenario', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
 
         registerAttempt(config, { key: 'k', attempt: 1, testId: 'AAAA1111BBBB2222', nonce: 'n1' })

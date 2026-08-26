@@ -124,8 +124,8 @@ describe('package resolved from node_modules', () => {
         )
         fs.writeFileSync(
             path.join(consumerDir, 'probe.ts'),
-            "import { definePair, expect } from '@plan2net/typo3-playwright-toolkit'\n" +
-                'const test = definePair(async () => ({ slug: "/x" }))\n' +
+            "import { defineScenario, expect } from '@plan2net/typo3-playwright-toolkit'\n" +
+                'const test = defineScenario(async () => ({ slug: "/x" }))\n' +
                 "test('typed', async ({ page, state }) => {\n" +
                 '    await page.goto(state.slug)\n' +
                 '    await expect(page.locator("h1")).toBeVisible()\n' +
@@ -144,7 +144,7 @@ describe('package resolved from node_modules', () => {
         fs.writeFileSync(
             probe,
             "const toolkit = require('@plan2net/typo3-playwright-toolkit')\n" +
-                'process.stdout.write(typeof toolkit.definePair)\n',
+                'process.stdout.write(typeof toolkit.defineScenario)\n',
         )
 
         const resolved = execFileSync('node', [probe], { cwd: consumerDir }).toString()

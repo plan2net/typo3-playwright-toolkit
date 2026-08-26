@@ -7,7 +7,7 @@ import { resolveRunId, RUN_ID_PATTERN } from './run-id.js'
 export interface RunPaths {
     runId: string
     runDir: string
-    pairsDir: string
+    scenariosDir: string
     failuresDir: string
     locksDir: string
     attemptsFile: string
@@ -25,7 +25,7 @@ export function runPaths(config: ToolkitConfig): RunPaths {
     return {
         runId,
         runDir,
-        pairsDir: path.join(runDir, 'pairs'),
+        scenariosDir: path.join(runDir, 'scenarios'),
         failuresDir: path.join(runDir, 'failures'),
         locksDir: path.join(runDir, 'locks'),
         attemptsFile: path.join(runDir, 'attempts.jsonl'),
@@ -36,7 +36,7 @@ export function runPaths(config: ToolkitConfig): RunPaths {
 export function ensureRunNamespace(config: ToolkitConfig): RunPaths {
     const paths = runPaths(config)
 
-    for (const dir of [paths.runDir, paths.pairsDir, paths.failuresDir, paths.locksDir]) {
+    for (const dir of [paths.runDir, paths.scenariosDir, paths.failuresDir, paths.locksDir]) {
         fs.mkdirSync(dir, { recursive: true })
     }
 
@@ -170,7 +170,7 @@ export function listRunIds(stateDir: string): string[] {
 }
 
 /** The hash suffix keeps two paths apart when sanitizing collapses them. */
-export function sanitizePairKey(key: string): string {
+export function sanitizeScenarioKey(key: string): string {
     const base = key.replace(/[^A-Za-z0-9_-]/g, '_')
     const digest = createHash('sha256').update(key).digest('hex').slice(0, 8)
 

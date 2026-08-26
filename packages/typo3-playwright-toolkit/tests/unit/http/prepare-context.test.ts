@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { BrowserContext } from '@playwright/test'
 import type { ToolkitConfig } from '#src/config.js'
-import { preparePairContext } from '#src/http/prepare-context.js'
+import { prepareScenarioContext } from '#src/http/prepare-context.js'
 
 const TEST_ID = 'ABCD1234EFGH5678'
 
@@ -26,11 +26,11 @@ function fakeContext(routed: string[]): BrowserContext {
     } as unknown as BrowserContext
 }
 
-describe('preparing the context every pair test runs in', () => {
+describe('preparing the context every scenario test runs in', () => {
     it('routes the toolkit headers even when the consumer set no hook', async () => {
         const routed: string[] = []
 
-        await preparePairContext(fakeContext(routed), config(), TEST_ID)
+        await prepareScenarioContext(fakeContext(routed), config(), TEST_ID)
 
         expect(routed).toEqual(['toolkit-headers'])
     })
@@ -40,7 +40,7 @@ describe('preparing the context every pair test runs in', () => {
         const seen: BrowserContext[] = []
         const context = fakeContext(routed)
 
-        await preparePairContext(context, config((given) => void seen.push(given)), TEST_ID)
+        await prepareScenarioContext(context, config((given) => void seen.push(given)), TEST_ID)
 
         expect(seen).toEqual([context])
     })
@@ -49,7 +49,7 @@ describe('preparing the context every pair test runs in', () => {
         const order: string[] = []
         const context = fakeContext(order)
 
-        await preparePairContext(context, config(() => void order.push('consumer-hook')), TEST_ID)
+        await prepareScenarioContext(context, config(() => void order.push('consumer-hook')), TEST_ID)
 
         expect(order).toEqual(['consumer-hook', 'toolkit-headers'])
     })
@@ -58,7 +58,7 @@ describe('preparing the context every pair test runs in', () => {
         const order: string[] = []
         const context = fakeContext(order)
 
-        await preparePairContext(
+        await prepareScenarioContext(
             context,
             config(async () => {
                 await Promise.resolve()

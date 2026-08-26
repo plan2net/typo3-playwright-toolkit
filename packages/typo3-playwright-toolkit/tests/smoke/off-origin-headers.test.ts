@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import * as http from 'http'
 import { chromium, type Browser } from '@playwright/test'
 import { applyToolkitHeaders } from '#src/http/off-site-headers.js'
-import { preparePairContext } from '#src/http/prepare-context.js'
+import { prepareScenarioContext } from '#src/http/prepare-context.js'
 import { toolkitRequest } from '#src/http/toolkit-request.js'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
 
@@ -126,7 +126,7 @@ describe('a consumer route added through prepareContext', () => {
     it('cannot take the test id off a request it continues', async () => {
         setToolkitConfig(config(origin))
         const context = await browser.newContext()
-        await preparePairContext(
+        await prepareScenarioContext(
             context,
             {
                 ...config(origin),
@@ -149,7 +149,7 @@ describe('a consumer route added through prepareContext', () => {
     it('still gets to fulfil a request itself', async () => {
         setToolkitConfig(config(origin))
         const context = await browser.newContext()
-        await preparePairContext(
+        await prepareScenarioContext(
             context,
             {
                 ...config(origin),

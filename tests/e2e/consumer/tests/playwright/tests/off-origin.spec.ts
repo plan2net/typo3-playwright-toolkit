@@ -1,10 +1,10 @@
-import { definePair, expect } from '@plan2net/typo3-playwright-toolkit'
+import { defineScenario, expect } from '@plan2net/typo3-playwright-toolkit'
 
 // The project's ordinary hostname. Only the -testing one is bound to the Testing
 // context, and nothing else in the suite ever visits this one.
 const ORDINARY_URL = 'https://t3pw-e2e.ddev.site'
 
-export const test = definePair()
+export const test = defineScenario()
 
 test('leaves the ordinary hostname outside the test run', async ({ page }) => {
     const sent: Record<string, string>[] = []

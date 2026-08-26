@@ -1,8 +1,8 @@
 import type { ToolkitConfig } from '../config.js'
 import type { EnsureStateOutcome } from './ensure-state.js'
-import { recordPairFailure } from './pair-state.js'
+import { recordScenarioFailure } from './scenario-state.js'
 
-export function applyPairOutcome<S>(
+export function applyScenarioOutcome<S>(
     outcome: EnsureStateOutcome<S>,
     skip: (reason: string) => void,
 ): S {
@@ -18,13 +18,13 @@ export function applyPairOutcome<S>(
 }
 
 /**
- * Recorded so teardown preserves the databases of a pair whose verification
+ * Recorded so teardown preserves the databases of a scenario whose tests
  * failed, the way it does for a failed setup.
  */
-export function recordPairVerifyFailure(config: ToolkitConfig, key: string, error: string): void {
-    recordPairFailure(config, {
-        key: `${key}__verify`,
-        pairKey: key,
+export function recordTestFailure(config: ToolkitConfig, key: string, error: string): void {
+    recordScenarioFailure(config, {
+        key: `${key}__test`,
+        scenarioKey: key,
         triggeringTestId: '',
         attempts: [{ attempt: 1, testId: '', error, durationMs: 0 }],
     })

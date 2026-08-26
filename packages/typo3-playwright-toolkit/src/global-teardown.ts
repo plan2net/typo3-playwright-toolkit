@@ -13,9 +13,9 @@ export const DEFAULT_ORPHAN_AGE_MS = 86_400_000
 /** Age at which a TYPO3 session directory is no longer any run's. */
 const STALE_SESSION_AGE_MS = 60 * 60 * 1000
 
-const ALL_PAIRS = '*'
+const ALL_SCENARIOS = '*'
 
-export function failedPairKeys(config: ToolkitConfig): string[] {
+export function failedScenarioKeys(config: ToolkitConfig): string[] {
     const directory = runPaths(config).failuresDir
     if (!fs.existsSync(directory)) {
         return []
@@ -28,13 +28,13 @@ export function failedPairKeys(config: ToolkitConfig): string[] {
         }
         try {
             const record = JSON.parse(fs.readFileSync(path.join(directory, entry), 'utf-8')) as {
-                pairKey?: unknown
+                scenarioKey?: unknown
             }
-            keys.add('string' === typeof record.pairKey ? record.pairKey : ALL_PAIRS)
+            keys.add('string' === typeof record.scenarioKey ? record.scenarioKey : ALL_SCENARIOS)
         } catch {
             // The run we cannot read is the one most likely to need its databases.
             console.error(`[teardown] Unreadable failure record ${entry}: keeping every database.`)
-            keys.add(ALL_PAIRS)
+            keys.add(ALL_SCENARIOS)
         }
     }
 
@@ -42,13 +42,13 @@ export function failedPairKeys(config: ToolkitConfig): string[] {
 }
 
 export function preservedTestIds(config: ToolkitConfig): string[] {
-    const failed = new Set(failedPairKeys(config))
+    const failed = new Set(failedScenarioKeys(config))
     if (failed.size === 0) {
         return []
     }
 
     const attempts = readAttemptsFrom(runPaths(config).attemptsFile)
-    const keepAll = failed.has(ALL_PAIRS)
+    const keepAll = failed.has(ALL_SCENARIOS)
 
     return [
         ...new Set(
@@ -69,12 +69,12 @@ export function resolvePreservePlan(config: ToolkitConfig, cleanupSwitchedOff: b
         return { mode: 'all', reason: 'NO_DATABASE_CLEANUP=1' }
     }
 
-    const failed = failedPairKeys(config)
+    const failed = failedScenarioKeys(config)
     if (failed.length === 0) {
         return { mode: 'none' }
     }
 
-    const reason = `${failed.length} failed pair${failed.length === 1 ? '' : 's'}`
+    const reason = `${failed.length} failed scenario${failed.length === 1 ? '' : 's'}`
 
     switch (config.cleanup?.preserveOnFailure ?? 'failed') {
         case 'none':

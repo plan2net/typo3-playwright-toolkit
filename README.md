@@ -72,7 +72,7 @@ sequenceDiagram
     end
 
     rect rgba(127,127,127,0.12)
-        note over PW,DB: once per test file — the definePair setup
+        note over PW,DB: once per test file — the defineScenario setup
         PW->>PW: create a test ID and write it down first
         PW->>EXT: POST /typo3/test-api/session
         EXT->>DB: copy the template → dbABCD…
@@ -202,13 +202,13 @@ yourself with `tests/e2e/run.sh`.
 
 ## Writing a test
 
-One file is one pair: a setup function that creates content through the real
+One file is one scenario: a setup function that creates content through the real
 backend, and the tests that read it.
 
 ```ts
-import { definePair, expect } from '@plan2net/typo3-playwright-toolkit'
+import { defineScenario, expect } from '@plan2net/typo3-playwright-toolkit'
 
-const test = definePair(async ({ builders }) => {
+const test = defineScenario(async ({ builders }) => {
     const { id, slug } = await builders.page().withTitle('My Page').withSlug('/my-page').create()
 
     // Every TYPO3 core CType already has a builder. You do not have to register it.

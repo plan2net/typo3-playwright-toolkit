@@ -1,8 +1,8 @@
-import { definePair, expect } from '@plan2net/typo3-playwright-toolkit'
+import { defineScenario, expect } from '@plan2net/typo3-playwright-toolkit'
 
 const HEADER = 'Hello from the toolkit'
 
-export const test = definePair(async ({ builders }) => {
+export const test = defineScenario(async ({ builders }) => {
     const page = await builders.page().withTitle('E2E').withSlug('/e2e').atParentId(1).create()
 
     await builders

@@ -1,4 +1,9 @@
-export { definePair, type PairBuilders, type PairFixtures, type SetupTools } from './pair.js'
+export {
+    defineScenario,
+    type ScenarioBuilders,
+    type ScenarioFixtures,
+    type SetupTools,
+} from './scenario.js'
 export { expect } from '@playwright/test'
 export {
     defineToolkitConfig,

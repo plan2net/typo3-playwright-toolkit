@@ -47,7 +47,7 @@ function headersOf(calls: Call[]): Record<string, string> {
     return calls[0]?.options?.headers ?? {}
 }
 
-describe('the request client a pair hands out', () => {
+describe('the request client a scenario hands out', () => {
     it('gives the site under test its test id', async () => {
         const calls: Call[] = []
 
@@ -104,7 +104,7 @@ describe('the request client a pair hands out', () => {
         expect((calls[0]?.options as { data?: unknown })?.data).toEqual({ a: 1 })
     })
 
-    it('adds no header at all when the pair has no test id', async () => {
+    it('adds no header at all when the scenario has no test id', async () => {
         const calls: Call[] = []
 
         await toolkitRequest(fakeRequest(calls), config(), '').get('https://site-testing.test/api')

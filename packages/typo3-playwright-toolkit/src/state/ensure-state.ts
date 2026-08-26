@@ -1,7 +1,13 @@
 import { createHash, randomBytes } from 'node:crypto'
 import type { ToolkitConfig } from '../config.js'
 import { registerAttempt, recordAttemptOutcome } from './attempt-registry.js'
-import { commitPairState, readPairState, readPairFailure, recordPairFailure, type PairAttemptFailure } from './pair-state.js'
+import {
+    commitScenarioState,
+    readScenarioState,
+    readScenarioFailure,
+    recordScenarioFailure,
+    type ScenarioAttemptFailure,
+} from './scenario-state.js'
 import { ensureRunNamespace, runSalt } from './run-namespace.js'
 import {
     acquireSetupLock,
@@ -40,7 +46,7 @@ export type EnsureStateOutcome<S> =
     | { status: 'skip'; reason: string }
 
 /**
- * Same salt, pair and attempt always give the same ID, so a claimed attempt gets
+ * Same salt, scenario and attempt always give the same ID, so a claimed attempt gets
  * its own database without anyone coordinating; a retry gets a different one.
  * The salt is the run's, not the run ID — see runSalt().
  */
@@ -62,12 +68,12 @@ function giveUp(
     config: ToolkitConfig,
     key: string,
     triggerId: string,
-    failures: PairAttemptFailure[],
+    failures: ScenarioAttemptFailure[],
     reason: string,
     durationMs: number,
 ): Error {
     const attempts = failures.length > 0 ? failures : [{ attempt: 0, testId: '', error: reason, durationMs }]
-    recordPairFailure(config, { key, triggeringTestId: triggerId, attempts })
+    recordScenarioFailure(config, { key, triggeringTestId: triggerId, attempts })
 
     return statusError(reason)
 }
@@ -121,7 +127,7 @@ function settledOutcome<S>(
     // State first: a worker that gave up may have written a status while another
     // one went on to succeed, and content that exists beats a report that it does
     // not.
-    const committed = readPairState<S>(config, key)
+    const committed = readScenarioState<S>(config, key)
     if (committed) {
         return {
             status: 'ready',
@@ -133,7 +139,7 @@ function settledOutcome<S>(
         }
     }
 
-    const failure = readPairFailure(config, key)
+    const failure = readScenarioFailure(config, key)
     if (!failure) {
         return undefined
     }
@@ -157,7 +163,7 @@ export async function ensureState<S>(
     const tuning = { ...SETUP_DEFAULTS, ...config.setup }
     const paths = ensureRunNamespace(config)
     const startedAt = now()
-    const failures: PairAttemptFailure[] = []
+    const failures: ScenarioAttemptFailure[] = []
 
     for (;;) {
         const settled = settledOutcome<S>(config, key, triggerId, now() - startedAt)
@@ -166,7 +172,7 @@ export async function ensureState<S>(
         }
 
         // No status here: whoever holds the lock may still succeed, and a status
-        // would skip every remaining test on a pair that then works.
+        // would skip every remaining test on a scenario that then works.
         if (now() - startedAt > tuning.waitTimeoutMs) {
             throw statusError(
                 `Timed out after ${tuning.waitTimeoutMs}ms waiting for the setup of "${key}". ` +
@@ -215,7 +221,7 @@ export async function ensureState<S>(
         }
 
         if (result.ok) {
-            commitPairState(config, { key, testId, attempt, setupMs: durationMs, data: result.data })
+            commitScenarioState(config, { key, testId, attempt, setupMs: durationMs, data: result.data })
             recordAttemptOutcome(config, { testId, outcome: 'committed', durationMs })
             releaseSetupLock(paths.locksDir, key, nonce)
 
@@ -234,7 +240,7 @@ export async function ensureState<S>(
         releaseSetupLock(paths.locksDir, key, nonce)
 
         if (attempt >= tuning.attempts) {
-            recordPairFailure(config, { key, triggeringTestId: triggerId, attempts: failures })
+            recordScenarioFailure(config, { key, triggeringTestId: triggerId, attempts: failures })
             throw statusError(`setup for "${key}" failed: ${result.error}`)
         }
     }

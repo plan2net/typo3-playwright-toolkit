@@ -7,7 +7,7 @@ import { configForRun } from '../../helpers.js'
 import { deriveTestId, ensureState } from '#src/state/ensure-state.js'
 import { TEST_ID_PATTERN } from '#src/contract.js'
 import { readAttempts } from '#src/state/attempt-registry.js'
-import { commitPairState, readPairState, readPairFailure, recordPairFailure } from '#src/state/pair-state.js'
+import { commitScenarioState, readScenarioState, readScenarioFailure, recordScenarioFailure } from '#src/state/scenario-state.js'
 import { ensureRunNamespace, runPaths, runSalt } from '#src/state/run-namespace.js'
 import { acquireSetupLock, readLockOwner, releaseSetupLock, stealSetupLock } from '#src/state/setup-lock.js'
 import { claimNextAttempt, highestClaimedAttempt } from '#src/state/attempt-claim.js'
@@ -32,27 +32,27 @@ afterEach(() => {
 
 describe('deriveTestId', () => {
     it('matches the wire contract', () => {
-        expect(deriveTestId('run', 'pair', 1)).toMatch(TEST_ID_PATTERN)
+        expect(deriveTestId('run', 'scenario', 1)).toMatch(TEST_ID_PATTERN)
     })
 
-    it('is the same for the same run, pair and attempt', () => {
-        expect(deriveTestId('run', 'pair', 1)).toBe(deriveTestId('run', 'pair', 1))
+    it('is the same for the same run, scenario and attempt', () => {
+        expect(deriveTestId('run', 'scenario', 1)).toBe(deriveTestId('run', 'scenario', 1))
     })
 
     it('differs per attempt, so a retry gets a fresh database', () => {
-        expect(deriveTestId('run', 'pair', 1)).not.toBe(deriveTestId('run', 'pair', 2))
+        expect(deriveTestId('run', 'scenario', 1)).not.toBe(deriveTestId('run', 'scenario', 2))
     })
 
-    it('differs per pair and per run', () => {
+    it('differs per scenario and per run', () => {
         expect(deriveTestId('run', 'one', 1)).not.toBe(deriveTestId('run', 'two', 1))
-        expect(deriveTestId('run-a', 'pair', 1)).not.toBe(deriveTestId('run-b', 'pair', 1))
+        expect(deriveTestId('run-a', 'scenario', 1)).not.toBe(deriveTestId('run-b', 'scenario', 1))
     })
 })
 
 describe('ensureState', () => {
     it('runs the setup and returns its data', async () => {
         const outcome = await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => ({ slug: '/accordion' }),
             ...noWait,
@@ -65,7 +65,7 @@ describe('ensureState', () => {
     it('runs the setup once for repeated calls', async () => {
         let runs = 0
         const options = {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => {
                 runs++
@@ -83,10 +83,10 @@ describe('ensureState', () => {
     })
 
     it('returns state another worker already committed', async () => {
-        commitPairState(config, { key: 'pair', testId: 'ABCD1234EFGH5678', attempt: 1, setupMs: 1, data: { a: 1 } })
+        commitScenarioState(config, { key: 'scenario', testId: 'ABCD1234EFGH5678', attempt: 1, setupMs: 1, data: { a: 1 } })
 
         const outcome = await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => {
                 throw new Error('must not run')
@@ -98,22 +98,22 @@ describe('ensureState', () => {
     })
 
     it('records each attempt before running the setup', async () => {
-        await ensureState(config, { key: 'pair', triggerId: 't1', setup: async () => ({}), ...noWait })
+        await ensureState(config, { key: 'scenario', triggerId: 't1', setup: async () => ({}), ...noWait })
 
         const [record] = readAttempts(config)
-        expect(record).toMatchObject({ key: 'pair', attempt: 1 })
+        expect(record).toMatchObject({ key: 'scenario', attempt: 1 })
         expect(record.testId).toMatch(TEST_ID_PATTERN)
     })
 
     it('commits under the test id the winning attempt used', async () => {
         const outcome = await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => ({}),
             ...noWait,
         })
 
-        expect(outcome.status === 'ready' && outcome.testId).toBe(deriveTestId(runSalt(config), 'pair', 1))
+        expect(outcome.status === 'ready' && outcome.testId).toBe(deriveTestId(runSalt(config), 'scenario', 1))
     })
 
     /**
@@ -124,26 +124,26 @@ describe('ensureState', () => {
      */
     it('records a status when the attempts were exhausted elsewhere', async () => {
         const locksDir = runPaths(config).locksDir
-        claimNextAttempt(locksDir, 'pair')
-        claimNextAttempt(locksDir, 'pair')
+        claimNextAttempt(locksDir, 'scenario')
+        claimNextAttempt(locksDir, 'scenario')
 
         await expect(
-            ensureState(config, { key: 'pair', triggerId: 't1', setup: async () => ({}), ...noWait }),
+            ensureState(config, { key: 'scenario', triggerId: 't1', setup: async () => ({}), ...noWait }),
         ).rejects.toThrow(/gave up/)
 
-        expect(readPairFailure(config, 'pair')?.pairKey).toBe('pair')
+        expect(readScenarioFailure(config, 'scenario')?.scenarioKey).toBe('scenario')
     })
 
     it('lets the next test skip with the reason instead of erroring', async () => {
         const locksDir = runPaths(config).locksDir
-        claimNextAttempt(locksDir, 'pair')
-        claimNextAttempt(locksDir, 'pair')
-        await ensureState(config, { key: 'pair', triggerId: 't1', setup: async () => ({}), ...noWait }).catch(
+        claimNextAttempt(locksDir, 'scenario')
+        claimNextAttempt(locksDir, 'scenario')
+        await ensureState(config, { key: 'scenario', triggerId: 't1', setup: async () => ({}), ...noWait }).catch(
             () => undefined,
         )
 
         const outcome = await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't2',
             setup: async () => ({}),
             ...noWait,
@@ -156,28 +156,28 @@ describe('ensureState', () => {
     // PW_RUN_ID must not be enough to work them out.
     it('derives an id the run id alone does not give away', async () => {
         const outcome = await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => ({}),
             ...noWait,
         })
 
         expect(outcome.status === 'ready' && outcome.testId).not.toBe(
-            deriveTestId('aaaaaaaaaaaaaaaa', 'pair', 1),
+            deriveTestId('aaaaaaaaaaaaaaaa', 'scenario', 1),
         )
     })
 
     it('frees the lock once it is done', async () => {
-        await ensureState(config, { key: 'pair', triggerId: 't1', setup: async () => ({}), ...noWait })
+        await ensureState(config, { key: 'scenario', triggerId: 't1', setup: async () => ({}), ...noWait })
 
-        expect(readLockOwner(runPaths(config).locksDir, 'pair')).toBeUndefined()
+        expect(readLockOwner(runPaths(config).locksDir, 'scenario')).toBeUndefined()
     })
 })
 
-describe('ensureState — a pair that already failed', () => {
+describe('ensureState — a scenario that already failed', () => {
     beforeEach(() => {
-        recordPairFailure(config, {
-            key: 'pair',
+        recordScenarioFailure(config, {
+            key: 'scenario',
             triggeringTestId: 'trigger',
             attempts: [{ attempt: 1, testId: 'ABCD1234EFGH5678', error: 'content build failed', durationMs: 3 }],
         })
@@ -185,7 +185,7 @@ describe('ensureState — a pair that already failed', () => {
 
     it('tells a sibling test to skip', async () => {
         const outcome = await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 'someone-else',
             setup: async () => ({}),
             ...noWait,
@@ -197,14 +197,14 @@ describe('ensureState — a pair that already failed', () => {
 
     it('rethrows for the test that triggered the setup', async () => {
         await expect(
-            ensureState(config, { key: 'pair', triggerId: 'trigger', setup: async () => ({}), ...noWait }),
+            ensureState(config, { key: 'scenario', triggerId: 'trigger', setup: async () => ({}), ...noWait }),
         ).rejects.toThrow(/content build failed/)
     })
 
     it('does not run the setup again', async () => {
         let runs = 0
         await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 'someone-else',
             setup: async () => {
                 runs++
@@ -222,7 +222,7 @@ describe('ensureState — retries', () => {
     it('retries with a fresh test id and succeeds', async () => {
         const seen: string[] = []
         const outcome = await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async ({ testId }) => {
                 seen.push(testId)
@@ -242,7 +242,7 @@ describe('ensureState — retries', () => {
 
     it('records every attempt in the registry', async () => {
         await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async ({ attempt }) => {
                 if (attempt === 1) {
@@ -262,7 +262,7 @@ describe('ensureState — retries', () => {
 
         await expect(
             ensureState(config, {
-                key: 'pair',
+                key: 'scenario',
                 triggerId: 't1',
                 setup: async () => {
                     runs++
@@ -277,7 +277,7 @@ describe('ensureState — retries', () => {
 
     it('writes a terminal status naming the trigger and every error', async () => {
         await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 'trigger',
             setup: async ({ attempt }) => {
                 throw new Error(`failure ${attempt}`)
@@ -285,7 +285,7 @@ describe('ensureState — retries', () => {
             ...noWait,
         }).catch(() => {})
 
-        const status = readPairFailure(config, 'pair')
+        const status = readScenarioFailure(config, 'scenario')
         expect(status?.triggeringTestId).toBe('trigger')
         expect(status?.attempts.map((a) => a.error)).toEqual([
             expect.stringContaining('failure 1'),
@@ -298,7 +298,7 @@ describe('ensureState — retries', () => {
         const once = { ...config, setup: { ...config.setup, attempts: 1 } }
 
         await ensureState(once, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => {
                 runs++
@@ -313,11 +313,11 @@ describe('ensureState — retries', () => {
 
 describe('ensureState — waiting for another worker', () => {
     it('returns the state that appears while it waits', async () => {
-        acquireSetupLock(runPaths(config).locksDir, 'pair', { nonce: 'other', attempt: 1 })
+        acquireSetupLock(runPaths(config).locksDir, 'scenario', { nonce: 'other', attempt: 1 })
         let polls = 0
 
         const outcome = await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => {
                 throw new Error('must not run')
@@ -325,8 +325,8 @@ describe('ensureState — waiting for another worker', () => {
             sleep: async () => {
                 polls++
                 if (polls === 2) {
-                    commitPairState(config, {
-                        key: 'pair',
+                    commitScenarioState(config, {
+                        key: 'scenario',
                         testId: 'ABCD1234EFGH5678',
                         attempt: 1,
                         setupMs: 1,
@@ -342,18 +342,18 @@ describe('ensureState — waiting for another worker', () => {
 
     it('does not burn attempt numbers while it waits', async () => {
         const locksDir = runPaths(config).locksDir
-        acquireSetupLock(locksDir, 'pair', { nonce: 'other', attempt: 1 })
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'other', attempt: 1 })
         let polls = 0
 
         await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => ({}),
             sleep: async () => {
                 polls++
                 if (polls === 5) {
-                    commitPairState(config, {
-                        key: 'pair',
+                    commitScenarioState(config, {
+                        key: 'scenario',
                         testId: 'ABCD1234EFGH5678',
                         attempt: 1,
                         setupMs: 1,
@@ -363,22 +363,22 @@ describe('ensureState — waiting for another worker', () => {
             },
         })
 
-        expect(highestClaimedAttempt(locksDir, 'pair')).toBe(0)
+        expect(highestClaimedAttempt(locksDir, 'scenario')).toBe(0)
     })
 
     it('starts at attempt 1 when a waiter finally gets the lock', async () => {
         const locksDir = runPaths(config).locksDir
-        acquireSetupLock(locksDir, 'pair', { nonce: 'other', attempt: 1 })
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'other', attempt: 1 })
         let polls = 0
 
         await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => ({}),
             sleep: async () => {
                 polls++
                 if (polls === 3) {
-                    releaseSetupLock(locksDir, 'pair', 'other')
+                    releaseSetupLock(locksDir, 'scenario', 'other')
                 }
             },
         })
@@ -386,13 +386,13 @@ describe('ensureState — waiting for another worker', () => {
         expect(readAttempts(config).map((a) => a.attempt)).toEqual([1])
     })
 
-    it('gives up with an error naming the pair', async () => {
-        acquireSetupLock(runPaths(config).locksDir, 'pair', { nonce: 'other', attempt: 1 })
+    it('gives up with an error naming the scenario', async () => {
+        acquireSetupLock(runPaths(config).locksDir, 'scenario', { nonce: 'other', attempt: 1 })
         let clock = 0
 
         await expect(
             ensureState(config, {
-                key: 'pair',
+                key: 'scenario',
                 triggerId: 't1',
                 setup: async () => ({}),
                 sleep: async () => {
@@ -400,17 +400,17 @@ describe('ensureState — waiting for another worker', () => {
                 },
                 now: () => clock,
             }),
-        ).rejects.toThrow(/pair/)
+        ).rejects.toThrow(/scenario/)
     })
 
     it('takes over a lock whose holder went silent', async () => {
         const locksDir = runPaths(config).locksDir
-        acquireSetupLock(locksDir, 'pair', { nonce: 'dead', attempt: 1 })
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'dead', attempt: 1 })
         const longAgo = new Date(Date.now() - 60_000)
-        fs.utimesSync(path.join(locksDir, 'pair.lock'), longAgo, longAgo)
+        fs.utimesSync(path.join(locksDir, 'scenario.lock'), longAgo, longAgo)
 
         const outcome = await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => ({ recovered: true }),
             ...noWait,
@@ -423,12 +423,12 @@ describe('ensureState — waiting for another worker', () => {
     it('carries on from the dead attempt number', async () => {
         const locksDir = runPaths(config).locksDir
         // A real holder claims its number, then dies still holding the lock.
-        const dead = claimNextAttempt(locksDir, 'pair')
-        acquireSetupLock(locksDir, 'pair', { nonce: 'dead-holder', attempt: dead })
+        const dead = claimNextAttempt(locksDir, 'scenario')
+        acquireSetupLock(locksDir, 'scenario', { nonce: 'dead-holder', attempt: dead })
         const longAgo = new Date(Date.now() - 60_000)
-        fs.utimesSync(path.join(locksDir, 'pair.lock'), longAgo, longAgo)
+        fs.utimesSync(path.join(locksDir, 'scenario.lock'), longAgo, longAgo)
 
-        await ensureState(config, { key: 'pair', triggerId: 't1', setup: async () => ({}), ...noWait })
+        await ensureState(config, { key: 'scenario', triggerId: 't1', setup: async () => ({}), ...noWait })
 
         expect(readAttempts(config).map((a) => a.attempt)).toEqual([2])
     })
@@ -439,12 +439,12 @@ describe('ensureState — a holder that was fenced out', () => {
         const locksDir = runPaths(config).locksDir
 
         await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => {
                 const longAgo = new Date(Date.now() - 60_000)
-                fs.utimesSync(path.join(locksDir, 'pair.lock'), longAgo, longAgo)
-                stealSetupLock(locksDir, 'pair', 'thief', 15_000)
+                fs.utimesSync(path.join(locksDir, 'scenario.lock'), longAgo, longAgo)
+                stealSetupLock(locksDir, 'scenario', 'thief', 15_000)
 
                 return { written: 'by a fenced holder' }
             },
@@ -456,19 +456,19 @@ describe('ensureState — a holder that was fenced out', () => {
             })(),
         }).catch(() => {})
 
-        expect(readPairState(config, 'pair')).toBeUndefined()
+        expect(readScenarioState(config, 'scenario')).toBeUndefined()
     })
 
     it('does not write a terminal status after its lock was taken', async () => {
         const locksDir = runPaths(config).locksDir
 
         await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async () => {
                 const longAgo = new Date(Date.now() - 60_000)
-                fs.utimesSync(path.join(locksDir, 'pair.lock'), longAgo, longAgo)
-                stealSetupLock(locksDir, 'pair', 'thief', 15_000)
+                fs.utimesSync(path.join(locksDir, 'scenario.lock'), longAgo, longAgo)
+                stealSetupLock(locksDir, 'scenario', 'thief', 15_000)
                 throw new Error('failed while fenced')
             },
             ...noWait,
@@ -479,7 +479,7 @@ describe('ensureState — a holder that was fenced out', () => {
             })(),
         }).catch(() => {})
 
-        expect(readPairFailure(config, 'pair')).toBeUndefined()
+        expect(readScenarioFailure(config, 'scenario')).toBeUndefined()
     })
 })
 
@@ -489,7 +489,7 @@ describe('ensureState — a setup that hangs', () => {
         config = { ...config, setup: { ...config.setup, attemptTimeoutMs: 30 } }
 
         const outcome = await ensureState(config, {
-            key: 'pair',
+            key: 'scenario',
             triggerId: 't1',
             setup: async ({ signal }) => {
                 starts++

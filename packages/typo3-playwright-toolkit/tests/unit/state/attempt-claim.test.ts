@@ -17,17 +17,17 @@ afterEach(() => {
 
 describe('claimNextAttempt', () => {
     it('starts at attempt 1', () => {
-        expect(claimNextAttempt(locksDir, 'pair')).toBe(1)
+        expect(claimNextAttempt(locksDir, 'scenario')).toBe(1)
     })
 
     it('counts up so a replacement never reuses a dead attempt', () => {
-        claimNextAttempt(locksDir, 'pair')
+        claimNextAttempt(locksDir, 'scenario')
 
-        expect(claimNextAttempt(locksDir, 'pair')).toBe(2)
-        expect(claimNextAttempt(locksDir, 'pair')).toBe(3)
+        expect(claimNextAttempt(locksDir, 'scenario')).toBe(2)
+        expect(claimNextAttempt(locksDir, 'scenario')).toBe(3)
     })
 
-    it('keeps counts separate per pair', () => {
+    it('keeps counts separate per scenario', () => {
         claimNextAttempt(locksDir, 'one')
         claimNextAttempt(locksDir, 'one')
 
@@ -35,28 +35,28 @@ describe('claimNextAttempt', () => {
     })
 
     it('survives the death of the process that claimed', () => {
-        claimNextAttempt(locksDir, 'pair')
+        claimNextAttempt(locksDir, 'scenario')
 
         // Nothing is cleaned up on exit; the files on disk are the record.
-        expect(highestClaimedAttempt(locksDir, 'pair')).toBe(1)
+        expect(highestClaimedAttempt(locksDir, 'scenario')).toBe(1)
     })
 
     it('creates the locks directory when missing', () => {
         const missing = path.join(locksDir, 'nested', 'locks')
 
-        expect(claimNextAttempt(missing, 'pair')).toBe(1)
+        expect(claimNextAttempt(missing, 'scenario')).toBe(1)
     })
 })
 
 describe('highestClaimedAttempt', () => {
     it('is 0 when nothing was claimed', () => {
-        expect(highestClaimedAttempt(locksDir, 'pair')).toBe(0)
+        expect(highestClaimedAttempt(locksDir, 'scenario')).toBe(0)
     })
 
-    it('ignores another pair whose name shares a prefix', () => {
-        claimNextAttempt(locksDir, 'pair-extra')
+    it('ignores another scenario whose name shares a prefix', () => {
+        claimNextAttempt(locksDir, 'scenario-extra')
 
-        expect(highestClaimedAttempt(locksDir, 'pair')).toBe(0)
+        expect(highestClaimedAttempt(locksDir, 'scenario')).toBe(0)
     })
 })
 
@@ -70,12 +70,12 @@ describe('claimNextAttempt across processes', () => {
             for (let i = 0; i < 20; i++) {
                 let attempt = 0
                 for (const entry of fs.readdirSync(dir)) {
-                    const match = /^pair\\.attempt-(\\d+)$/.exec(entry)
+                    const match = /^scenario\\.attempt-(\\d+)$/.exec(entry)
                     if (match) attempt = Math.max(attempt, Number(match[1]))
                 }
                 for (let next = attempt + 1; ; next++) {
                     try {
-                        const fd = fs.openSync(dir + '/pair.attempt-' + next, 'wx')
+                        const fd = fs.openSync(dir + '/scenario.attempt-' + next, 'wx')
                         fs.writeFileSync(fd, JSON.stringify({ nonce: crypto.randomBytes(16).toString('hex') }))
                         fs.closeSync(fd)
                         results.push(next)

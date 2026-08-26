@@ -2,18 +2,18 @@ import { test as base, type APIRequestContext, type Browser, type Page, type Tes
 import { toolkitHeaders } from './contract.js'
 import { getToolkitConfig, type ToolkitConfig } from './config.js'
 import { ensureState } from './state/ensure-state.js'
-import { applyPairOutcome, recordPairVerifyFailure } from './state/pair-outcome.js'
-import { sanitizePairKey } from './state/run-namespace.js'
+import { applyScenarioOutcome, recordTestFailure } from './state/scenario-outcome.js'
+import { sanitizeScenarioKey } from './state/run-namespace.js'
 import { DEFAULT_BACKEND_PATH } from './builders/request-context.js'
 import { ContentBuilder } from './builders/content-builder.js'
 import { PageBuilder } from './builders/page-builder.js'
 import { ContextWithTestId, PageWithTestId } from './types/playwright-extensions.js'
 import { applyToolkitHeaders } from './http/off-site-headers.js'
-import { preparePairContext } from './http/prepare-context.js'
+import { prepareScenarioContext } from './http/prepare-context.js'
 import { toolkitRequest } from './http/toolkit-request.js'
 import { runAccessibilityScan, shouldScanAutomatically } from './checks/accessibility.js'
 
-export interface PairBuilders {
+export interface ScenarioBuilders {
     page(): PageBuilder
     content(): ContentBuilder
 }
@@ -24,15 +24,15 @@ export interface SetupTools {
     signal: AbortSignal
     page: Page
     request: APIRequestContext
-    builders: PairBuilders
+    builders: ScenarioBuilders
 }
 
-export interface PairFixtures<S> {
+export interface ScenarioFixtures<S> {
     state: S
     testId: string
 }
 
-interface ResolvedPair<S> {
+interface ResolvedScenario<S> {
     data: S
     testId: string
 }
@@ -97,16 +97,16 @@ export async function openAuthenticatedPage(
 }
 
 /**
- * One test file is one pair: the first test that needs state runs the setup,
+ * One test file is one scenario: the first test that needs state runs the setup,
  * the rest wait for it or are skipped if it failed.
  */
-export function definePair<S = Record<string, never>>(setup?: (tools: SetupTools) => Promise<S>) {
+export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupTools) => Promise<S>) {
     return base.extend<
-        PairFixtures<S> & { resolvedPair: ResolvedPair<S>; automaticAccessibilityScan: void }
+        ScenarioFixtures<S> & { resolvedScenario: ResolvedScenario<S>; automaticAccessibilityScan: void }
     >({
-        resolvedPair: async ({ browser }, use, testInfo: TestInfo) => {
+        resolvedScenario: async ({ browser }, use, testInfo: TestInfo) => {
             const config = getToolkitConfig()
-            const key = sanitizePairKey(testInfo.file)
+            const key = sanitizeScenarioKey(testInfo.file)
 
             const outcome = await ensureState<S>(config, {
                 key,
@@ -141,25 +141,25 @@ export function definePair<S = Record<string, never>>(setup?: (tools: SetupTools
                 },
             })
 
-            const data = applyPairOutcome(outcome, (reason) => testInfo.skip(true, reason))
+            const data = applyScenarioOutcome(outcome, (reason) => testInfo.skip(true, reason))
 
             await use({ data, testId: outcome.status === 'ready' ? outcome.testId : '' })
 
             if (testInfo.status !== testInfo.expectedStatus) {
-                recordPairVerifyFailure(config, key, testInfo.error?.message ?? `test ${testInfo.status}`)
+                recordTestFailure(config, key, testInfo.error?.message ?? `test ${testInfo.status}`)
             }
         },
 
-        state: async ({ resolvedPair }, use) => {
-            await use(resolvedPair.data)
+        state: async ({ resolvedScenario }, use) => {
+            await use(resolvedScenario.data)
         },
 
-        testId: async ({ resolvedPair }, use) => {
-            await use(resolvedPair.testId)
+        testId: async ({ resolvedScenario }, use) => {
+            await use(resolvedScenario.testId)
         },
 
         context: async ({ context, testId }, use) => {
-            await preparePairContext(context, getToolkitConfig(), testId)
+            await prepareScenarioContext(context, getToolkitConfig(), testId)
             await use(context)
         },
 

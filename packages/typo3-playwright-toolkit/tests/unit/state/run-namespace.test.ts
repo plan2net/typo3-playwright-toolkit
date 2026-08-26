@@ -9,7 +9,7 @@ import {
     runLastActiveMs,
     runPaths,
     runSalt,
-    sanitizePairKey,
+    sanitizeScenarioKey,
     touchRunLiveness,
 } from '#src/state/run-namespace.js'
 import { configForRun } from '../../helpers.js'
@@ -29,7 +29,7 @@ describe('runPaths', () => {
         const paths = runPaths(configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa'))
 
         expect(paths.runDir).toBe(path.join(tmpRoot, '.test-state', 'runs', 'aaaaaaaaaaaaaaaa'))
-        expect(paths.pairsDir).toBe(path.join(paths.runDir, 'pairs'))
+        expect(paths.scenariosDir).toBe(path.join(paths.runDir, 'scenarios'))
         expect(paths.failuresDir).toBe(path.join(paths.runDir, 'failures'))
         expect(paths.locksDir).toBe(path.join(paths.runDir, 'locks'))
         expect(paths.attemptsFile).toBe(path.join(paths.runDir, 'attempts.jsonl'))
@@ -41,7 +41,7 @@ describe('ensureRunNamespace', () => {
     it('creates every subdirectory', () => {
         const paths = ensureRunNamespace(configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa'))
 
-        expect(fs.existsSync(paths.pairsDir)).toBe(true)
+        expect(fs.existsSync(paths.scenariosDir)).toBe(true)
         expect(fs.existsSync(paths.failuresDir)).toBe(true)
         expect(fs.existsSync(paths.locksDir)).toBe(true)
     })
@@ -55,11 +55,11 @@ describe('ensureRunNamespace', () => {
 
     it('leaves another run untouched', () => {
         const first = ensureRunNamespace(configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa'))
-        fs.writeFileSync(path.join(first.pairsDir, 'demo.json'), '{}')
+        fs.writeFileSync(path.join(first.scenariosDir, 'demo.json'), '{}')
 
         ensureRunNamespace(configForRun(tmpRoot, 'bbbbbbbbbbbbbbbb'))
 
-        expect(fs.existsSync(path.join(first.pairsDir, 'demo.json'))).toBe(true)
+        expect(fs.existsSync(path.join(first.scenariosDir, 'demo.json'))).toBe(true)
     })
 })
 
@@ -93,7 +93,7 @@ describe('prepareRun', () => {
 
 describe('prepareRun — a namespace another run is using', () => {
     /**
-     * Two runs sharing one PW_RUN_ID share pair state and databases, and each
+     * Two runs sharing one PW_RUN_ID share scenario state and databases, and each
      * teardown deletes the other's registry. The ddev help suggests setting it in
      * web_environment, where it stays the same for every run.
      */
@@ -194,16 +194,16 @@ describe('runLastActiveMs', () => {
     })
 })
 
-describe('sanitizePairKey', () => {
+describe('sanitizeScenarioKey', () => {
     it('replaces path separators and dots', () => {
-        expect(sanitizePairKey('tests/accordion.test.ts')).toMatch(/^tests_accordion_test_ts-[0-9a-f]{8}$/)
+        expect(sanitizeScenarioKey('tests/accordion.test.ts')).toMatch(/^tests_accordion_test_ts-[0-9a-f]{8}$/)
     })
 
     it('keeps apart two keys that sanitize to the same base', () => {
-        expect(sanitizePairKey('a/b.ts')).not.toBe(sanitizePairKey('a_b.ts'))
+        expect(sanitizeScenarioKey('a/b.ts')).not.toBe(sanitizeScenarioKey('a_b.ts'))
     })
 
     it('is stable for the same input', () => {
-        expect(sanitizePairKey('tests/x.test.ts')).toBe(sanitizePairKey('tests/x.test.ts'))
+        expect(sanitizeScenarioKey('tests/x.test.ts')).toBe(sanitizeScenarioKey('tests/x.test.ts'))
     })
 })

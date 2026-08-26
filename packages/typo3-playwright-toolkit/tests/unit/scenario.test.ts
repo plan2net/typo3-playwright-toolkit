@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
-import { openAuthenticatedPage, testName } from '#src/pair.js'
+import { openAuthenticatedPage, testName } from '#src/scenario.js'
 
 function config(): ToolkitConfig {
     return {
@@ -82,7 +82,7 @@ beforeEach(() => {
 describe('openAuthenticatedPage', () => {
     // The caller only gets a close handle when this resolves, so anything that
     // throws after newContext() would otherwise leave the context open until the
-    // worker's browser exits. A site that is down does that once per pair file.
+    // worker's browser exits. A site that is down does that once per scenario file.
     it.each(['newPage', 'session', 'json', 'cookies'] as const)(
         'closes the context when %s fails',
         async (failAt) => {
@@ -122,7 +122,7 @@ describe('openAuthenticatedPage', () => {
 })
 
 describe('testName', () => {
-    it('is the pair key on the first attempt', () => {
+    it('is the scenario key on the first attempt', () => {
         expect(testName('accordion-simple', 1)).toBe('accordion-simple')
     })
 

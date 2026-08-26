@@ -8,7 +8,7 @@ import {
     TEST_ID_PATTERN,
     type ToolkitConfig,
     type ContentBuilderInterface,
-    definePair,
+    defineScenario,
     expect as playwrightExpect,
 } from '#src/index.js'
 import { expect as playwrightsOwnExpect } from '@playwright/test'
@@ -33,7 +33,7 @@ describe('public API smoke', () => {
         expect(ContentBuilder).toBeTypeOf('function')
         expect(createContent).toBeTypeOf('function')
         expect(takeScreenshot).toBeTypeOf('function')
-        expect(definePair).toBeTypeOf('function')
+        expect(defineScenario).toBeTypeOf('function')
         expect(defineToolkitConfig).toBeTypeOf('function')
         expect(TEST_ID_HEADER).toBe('X-Playwright-Test-Id')
         expect(TEST_ID_PATTERN).toBeInstanceOf(RegExp)

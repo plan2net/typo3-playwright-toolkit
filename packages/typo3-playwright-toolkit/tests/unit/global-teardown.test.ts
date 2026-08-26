@@ -6,14 +6,14 @@ import {
     runTeardown,
     describePreservedRun,
     sweepOrphans,
-    failedPairKeys,
+    failedScenarioKeys,
     preservedTestIds,
     resolvePreservePlan,
 } from '#src/global-teardown.js'
 import type { ToolkitConfig } from '#src/config.js'
 import type { CleanupClient, CleanupOutcome, CleanupResult, SweepReport } from '#src/http/cleanup-client.js'
 import { readAttempts, registerAttempt } from '#src/state/attempt-registry.js'
-import { recordPairFailure } from '#src/state/pair-state.js'
+import { recordScenarioFailure } from '#src/state/scenario-state.js'
 import { ensureRunNamespace, runPaths } from '#src/state/run-namespace.js'
 import { configForRun } from '../helpers.js'
 
@@ -336,8 +336,8 @@ describe('sweepOrphans', () => {
     })
 })
 
-function failPair(config: ToolkitConfig, key: string, testId = 'ABCD1234EFGH5678'): void {
-    recordPairFailure(config, {
+function failScenario(config: ToolkitConfig, key: string, testId = 'ABCD1234EFGH5678'): void {
+    recordScenarioFailure(config, {
         key,
         triggeringTestId: testId,
         attempts: [{ attempt: 1, testId, error: 'boom', durationMs: 1 }],
@@ -347,7 +347,7 @@ function failPair(config: ToolkitConfig, key: string, testId = 'ABCD1234EFGH5678
 describe('describePreservedRun', () => {
     // The test IDs alone do not say which file they belong to, and a browser
     // cannot send the header, so the line has to carry a clickable link.
-    it('names the pair and gives a link that opens it', () => {
+    it('names the scenario and gives a link that opens it', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
         registerAttempt(config, { key: 'checkout', attempt: 1, testId: 'AAAAAAAAAAAAAAA1', nonce: 'n' })
 
@@ -369,54 +369,54 @@ describe('describePreservedRun', () => {
     })
 })
 
-describe('failedPairKeys', () => {
+describe('failedScenarioKeys', () => {
     it('is empty when nothing failed', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
 
-        expect(failedPairKeys(config)).toEqual([])
+        expect(failedScenarioKeys(config)).toEqual([])
     })
 
-    it('names the pair that recorded a failure', () => {
+    it('names the scenario that recorded a failure', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
-        failPair(config, 'demo')
+        failScenario(config, 'demo')
 
-        expect(failedPairKeys(config)).toEqual(['demo'])
+        expect(failedScenarioKeys(config)).toEqual(['demo'])
     })
 
-    it('reads the pair key out of the record, not the file name', () => {
+    it('reads the scenario key out of the record, not the file name', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
-        recordPairFailure(config, {
-            key: 'demo__verify',
-            pairKey: 'demo',
+        recordScenarioFailure(config, {
+            key: 'demo__test',
+            scenarioKey: 'demo',
             triggeringTestId: '',
             attempts: [{ attempt: 1, testId: '', error: 'assertion', durationMs: 0 }],
         })
 
-        expect(failedPairKeys(config)).toEqual(['demo'])
+        expect(failedScenarioKeys(config)).toEqual(['demo'])
     })
 
     // Deciding "nothing failed" from a record we cannot read throws the evidence away.
-    it('treats an unreadable record as a failure of every pair', () => {
+    it('treats an unreadable record as a failure of every scenario', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
         ensureRunNamespace(config)
         fs.writeFileSync(path.join(runPaths(config).failuresDir, 'broken.json'), '{not json')
 
-        expect(failedPairKeys(config)).toEqual(['*'])
+        expect(failedScenarioKeys(config)).toEqual(['*'])
     })
 })
 
 describe('preservedTestIds', () => {
-    it('keeps every database of a failed pair, including earlier attempts', () => {
+    it('keeps every database of a failed scenario, including earlier attempts', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
         registerAttempt(config, { key: 'broken', attempt: 1, testId: 'AAAAAAAAAAAAAAA1', nonce: 'n' })
         registerAttempt(config, { key: 'broken', attempt: 2, testId: 'AAAAAAAAAAAAAAA2', nonce: 'n' })
         registerAttempt(config, { key: 'fine', attempt: 1, testId: 'BBBBBBBBBBBBBBB1', nonce: 'n' })
-        failPair(config, 'broken')
+        failScenario(config, 'broken')
 
         expect(preservedTestIds(config).sort()).toEqual(['AAAAAAAAAAAAAAA1', 'AAAAAAAAAAAAAAA2'])
     })
 
-    it('keeps nothing when every pair passed', () => {
+    it('keeps nothing when every scenario passed', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
         registerAttempt(config, { key: 'fine', attempt: 1, testId: 'BBBBBBBBBBBBBBB1', nonce: 'n' })
 
@@ -433,16 +433,16 @@ describe('preservedTestIds', () => {
 })
 
 describe('resolvePreservePlan', () => {
-    it('keeps only the failed pair by default', () => {
+    it('keeps only the failed scenario by default', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
         registerAttempt(config, { key: 'broken', attempt: 1, testId: 'AAAAAAAAAAAAAAA1', nonce: 'n' })
         registerAttempt(config, { key: 'fine', attempt: 1, testId: 'BBBBBBBBBBBBBBB1', nonce: 'n' })
-        failPair(config, 'broken')
+        failScenario(config, 'broken')
 
         expect(resolvePreservePlan(config, false)).toEqual({
             mode: 'some',
             testIds: ['AAAAAAAAAAAAAAA1'],
-            reason: '1 failed pair',
+            reason: '1 failed scenario',
         })
     })
 
@@ -464,17 +464,17 @@ describe('resolvePreservePlan', () => {
 
     it('keeps everything on failure when the consumer asked for that', () => {
         const config = { ...configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa'), cleanup: { preserveOnFailure: 'all' as const } }
-        failPair(config, 'broken')
+        failScenario(config, 'broken')
 
         expect(resolvePreservePlan(config, false)).toEqual({
             mode: 'all',
-            reason: '1 failed pair',
+            reason: '1 failed scenario',
         })
     })
 
     it('keeps nothing on failure when the consumer switched preserving off', () => {
         const config = { ...configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa'), cleanup: { preserveOnFailure: 'none' as const } }
-        failPair(config, 'broken')
+        failScenario(config, 'broken')
 
         expect(resolvePreservePlan(config, false)).toEqual({ mode: 'none' })
     })
@@ -573,7 +573,7 @@ describe('runTeardown — reporting leaks', () => {
 })
 
 describe('describePreservedRun', () => {
-    it('names the run, its pairs and its databases', () => {
+    it('names the run, its scenarios and its databases', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
         registerAttempt(config, { key: 'demo', attempt: 1, testId: 'ABCD1234EFGH5678', nonce: 'n' })
 

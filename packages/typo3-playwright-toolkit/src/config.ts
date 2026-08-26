@@ -51,7 +51,7 @@ export interface ToolkitPaths {
 export interface ToolkitSetupConfig {
     /** One setup attempt. */
     attemptTimeoutMs?: number
-    /** Whole wait for a pair, lock waiting plus every attempt. */
+    /** Whole wait for a scenario, lock waiting plus every attempt. */
     waitTimeoutMs?: number
     /** Total attempts, so 2 means one retry. */
     attempts?: number
@@ -89,7 +89,7 @@ export interface ToolkitConfig {
     /** Selectors hidden before each screenshot. Defaults to []. */
     hideBeforeScreenshot?: string[]
     /**
-     * Runs on every context a pair test uses, after the toolkit's own headers are
+     * Runs on every context a scenario test uses, after the toolkit's own headers are
      * in place. Where a consumer stubs a third-party script or adds its own routes.
      */
     prepareContext?: (context: BrowserContext) => Promise<void> | void

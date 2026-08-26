@@ -189,7 +189,7 @@ protected forever and never cleaned up.
 `PW_RUN_ID` separates the records of one run from another. Two runs must not share
 one: `prepareRun` refuses a run ID that another running process already uses.
 
-A test ID is `sha256(runSalt:pairKey:attempt)`. `runSalt` is 16 random bytes, made
+A test ID is `sha256(runSalt:scenarioKey:attempt)`. `runSalt` is 16 random bytes, made
 once per run.
 
 **Never derive a test ID from the run ID.** A run ID can be set by hand and guessed.

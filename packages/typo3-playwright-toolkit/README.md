@@ -88,14 +88,14 @@ Everything else reads the values it stores.
 
 ### Writing a test
 
-One test file is one pair: a setup function that creates content through the real
+One test file is one scenario: a setup function that creates content through the real
 TYPO3 backend, and the tests that read it.
 
 ```ts
 // tests/my-feature.spec.ts
-import { definePair, expect } from '@plan2net/typo3-playwright-toolkit'
+import { defineScenario, expect } from '@plan2net/typo3-playwright-toolkit'
 
-const test = definePair(async ({ builders }) => {
+const test = defineScenario(async ({ builders }) => {
     const { id, slug } = await builders
         .page()
         .withTitle('My Page')
@@ -200,7 +200,7 @@ empty, so your `text: MyTextContent` is what `.configure()` hands you.
 
 ### Calling the site directly
 
-The `request` client — the one `definePair` hands your setup, and the `request`
+The `request` client — the one `defineScenario` hands your setup, and the `request`
 fixture in your tests — carries the test ID for `testingURL`, so it reads and
 writes the same throwaway database the browser does. Requests to any other host
 get neither toolkit header.
@@ -337,8 +337,8 @@ Everything else:
 | `setup.attemptTimeoutMs` | `90000` | How long one setup attempt may take |
 | `setup.attempts` | `2` | Attempts per setup, so `2` means one retry |
 | `setup.lockStaleMs` | `15000` | Silence after which another worker may take over the setup |
-| `setup.pollMs` | `100` | Gap between polls while waiting for a pair |
-| `setup.waitTimeoutMs` | `300000` | How long a test waits for its pair in total, lock included |
+| `setup.pollMs` | `100` | Gap between polls while waiting for a scenario |
+| `setup.waitTimeoutMs` | `300000` | How long a test waits for its scenario in total, lock included |
 
 `defineBasePlaywrightConfig` sets Playwright's `baseURL` to `testingURL` and adds
 this package's setup and cleanup functions. Values in its second argument win, and
@@ -374,7 +374,7 @@ log in as the pre-seeded backend user and live 15 minutes.
 ## Troubleshooting
 
 **"No test ID for this request".** The builder received a page that the toolkit
-fixtures did not create. Use the `builders` argument of `definePair`.
+fixtures did not create. Use the `builders` argument of `defineScenario`.
 
 **Settings seem to be ignored.** `defineToolkitConfig` ran too late. It must be the
 first thing in `playwright.config.ts`.
