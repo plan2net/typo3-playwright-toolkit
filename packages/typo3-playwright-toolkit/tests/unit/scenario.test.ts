@@ -126,24 +126,20 @@ describe('openAuthenticatedPage', () => {
 // do that job: it is a sanitised path with a hash on the end.
 describe('scenarioName', () => {
     it('is the file name without its directory or suffix', () => {
-        expect(scenarioName('/srv/project/tests/news-archive-filter.spec.ts', 1)).toBe(
+        expect(scenarioName('/srv/project/tests/news-archive-filter.spec.ts')).toBe(
             'news-archive-filter',
         )
     })
 
     it('drops the test suffix too', () => {
-        expect(scenarioName('tests/news.test.ts', 1)).toBe('news')
+        expect(scenarioName('tests/news.test.ts')).toBe('news')
     })
 
     it('leaves everything else alone', () => {
-        expect(scenarioName('tests/my_page.editorial.spec.ts', 1)).toBe('my_page.editorial')
-    })
-
-    it('says which retry it is on a later attempt', () => {
-        expect(scenarioName('tests/checkout.spec.ts', 2)).toBe('checkout #2')
+        expect(scenarioName('tests/my_page.editorial.spec.ts')).toBe('my_page.editorial')
     })
 
     it('keeps the file name when there is nothing else left', () => {
-        expect(scenarioName('tests/.spec.ts', 1)).toBe('.spec.ts')
+        expect(scenarioName('tests/.spec.ts')).toBe('.spec.ts')
     })
 })

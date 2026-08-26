@@ -8,6 +8,8 @@ export type AttemptOutcome = 'committed' | 'failed' | 'abandoned'
 export interface AttemptRecord {
     type: 'attempt'
     key: string
+    /** What a person calls the scenario. Absent in runs recorded before it existed. */
+    name?: string
     attempt: number
     testId: string
     nonce: string
@@ -30,13 +32,14 @@ function appendLine(paths: RunPaths, record: AttemptRecord | AttemptOutcomeRecor
 
 export function registerAttempt(
     config: ToolkitConfig,
-    input: { key: string; attempt: number; testId: string; nonce: string },
+    input: { key: string; name?: string; attempt: number; testId: string; nonce: string },
 ): void {
     const paths = ensureRunNamespace(config)
 
     appendLine(paths, {
         type: 'attempt',
         key: input.key,
+        name: input.name ?? input.key,
         attempt: input.attempt,
         testId: input.testId,
         nonce: input.nonce,

@@ -6,7 +6,11 @@ import { findStateDir, inspectLinks } from '#src/inspect/links.js'
 
 let root: string
 
-function writeRun(runId: string, testingURL: string, attempts: { key: string; testId: string }[]): string {
+function writeRun(
+    runId: string,
+    testingURL: string,
+    attempts: { key: string; testId: string; name?: string }[],
+): string {
     const runDir = path.join(root, '.test-state', 'runs', runId)
     fs.mkdirSync(runDir, { recursive: true })
     fs.writeFileSync(path.join(runDir, 'meta.json'), JSON.stringify({ runId, testingURL }))
@@ -79,6 +83,26 @@ describe('inspectLinks', () => {
         const links = inspectLinks(path.join(root, '.test-state'), 'the-secret', 0)
 
         expect(links.map((link) => link.key)).toEqual(['checkout'])
+    })
+
+    // The heading above each link is what a person picks from, and what they
+    // filter on — the scenario key is a sanitised path with a hash on the end.
+    it('heads each link with the scenario name', () => {
+        writeRun('bbbbbbbbbbbbbbbb', 'https://site-testing.test', [
+            { key: 'tests_checkout_spec_ts-4bbd2527', name: 'checkout', testId: 'AAAAAAAAAAAAAAA1' },
+        ])
+
+        expect(inspectLinks(path.join(root, '.test-state'), 'the-secret', 0)[0].name).toBe('checkout')
+    })
+
+    it('falls back to the key for a run recorded before names existed', () => {
+        writeRun('bbbbbbbbbbbbbbbb', 'https://site-testing.test', [
+            { key: 'tests_checkout_spec_ts-4bbd2527', testId: 'AAAAAAAAAAAAAAA1' },
+        ])
+
+        expect(inspectLinks(path.join(root, '.test-state'), 'the-secret', 0)[0].name).toBe(
+            'tests_checkout_spec_ts-4bbd2527',
+        )
     })
 
     it('is empty when a run recorded no testing url', () => {

@@ -42,12 +42,11 @@ interface ResolvedScenario<S> {
  * can tell which scenario they are looking at. The scenario key cannot do that
  * job: it is a sanitised path with a hash on the end.
  */
-export function scenarioName(file: string, attempt: number): string {
+export function scenarioName(file: string): string {
     const fileName = file.split('/').pop() ?? file
     const stripped = fileName.replace(/\.(spec|test)\.[cm]?[jt]sx?$/i, '')
-    const name = '' === stripped ? fileName : stripped
 
-    return attempt > 1 ? `${name} #${attempt}` : name
+    return '' === stripped ? fileName : stripped
 }
 
 export async function openAuthenticatedPage(
@@ -116,21 +115,19 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
         resolvedScenario: async ({ browser }, use, testInfo: TestInfo) => {
             const config = getToolkitConfig()
             const key = sanitizeScenarioKey(testInfo.file)
+            const name = scenarioName(testInfo.file)
 
             const outcome = await ensureState<S>(config, {
                 key,
+                name,
                 triggerId: testInfo.testId,
                 setup: async ({ testId, attempt, signal }) => {
                     if (!setup) {
                         return {} as S
                     }
 
-                    const session = await openAuthenticatedPage(
-                        browser,
-                        config,
-                        testId,
-                        scenarioName(testInfo.file, attempt),
-                    )
+                    const label = attempt > 1 ? `${name} #${attempt}` : name
+                    const session = await openAuthenticatedPage(browser, config, testId, label)
                     const builderContext = {
                         testId,
                         baseUrl: config.testingURL,

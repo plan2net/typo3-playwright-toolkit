@@ -34,6 +34,8 @@ export interface SetupContext {
 
 export interface EnsureStateOptions<S> {
     key: string
+    /** What the inspect listing and the backend call this scenario; the key otherwise. */
+    name?: string
     /** Identifies the caller, so its own retries rethrow instead of skipping. */
     triggerId: string
     setup: (context: SetupContext) => Promise<S>
@@ -157,6 +159,7 @@ export async function ensureState<S>(
     options: EnsureStateOptions<S>,
 ): Promise<EnsureStateOutcome<S>> {
     const { key, triggerId, setup } = options
+    const name = options.name ?? key
     const now = options.now ?? (() => Date.now())
     const sleep = options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)))
 
@@ -200,7 +203,7 @@ export async function ensureState<S>(
         }
 
         const testId = deriveTestId(runSalt(config), key, attempt)
-        registerAttempt(config, { key, attempt, testId, nonce })
+        registerAttempt(config, { key, name, attempt, testId, nonce })
 
         const heartbeat = setInterval(() => heartbeatSetupLock(paths.locksDir, key, nonce), 1_000)
         const attemptStartedAt = now()

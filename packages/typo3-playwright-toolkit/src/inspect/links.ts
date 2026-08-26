@@ -7,6 +7,7 @@ import { inspectUrl } from './token.js'
 export interface InspectLink {
     runId: string
     key: string
+    name: string
     testId: string
     url: string
 }
@@ -46,6 +47,7 @@ export function inspectLinks(stateDir: string, secret: string, now: number = Dat
             .map((attempt) => ({
                 runId,
                 key: attempt.key,
+                name: attempt.name ?? attempt.key,
                 testId: attempt.testId,
                 url: inspectUrl(testingURL, secret, attempt.testId, now),
             }))

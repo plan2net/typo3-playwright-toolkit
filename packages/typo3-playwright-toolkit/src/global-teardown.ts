@@ -184,7 +184,7 @@ export function describePreservedRun(
     }
 
     const lines = kept.map((attempt) => {
-        const line = `  ${attempt.key} → db${attempt.testId}`
+        const line = `  ${attempt.name ?? attempt.key} → db${attempt.testId}`
         if ('' === secret) {
             return line
         }

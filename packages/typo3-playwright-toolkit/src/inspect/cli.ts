@@ -35,11 +35,11 @@ if (0 === links.length) {
 }
 
 const filter = process.argv[2]
-const shown = undefined === filter ? links : links.filter((link) => link.key.includes(filter))
+const shown = undefined === filter ? links : links.filter((link) => link.name.includes(filter))
 
 console.log(
     `Links log you into the backend and expire in ${INSPECT_TOKEN_LIFETIME_MS / 60_000} minutes.\n`,
 )
 for (const link of shown) {
-    console.log(`${link.key}\n  db${link.testId}\n  ${link.url}\n`)
+    console.log(`${link.name}\n  db${link.testId}\n  ${link.url}\n`)
 }
