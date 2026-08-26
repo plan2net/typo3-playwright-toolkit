@@ -57,6 +57,39 @@ web_environment:
     - PW_TEST_DIR=e2e
 ```
 
+### Browsers in a container of their own
+
+Browsers run in the web container by default. To run them somewhere else — another
+image, another architecture — start a Playwright server and point the test run at
+it in `.ddev/config.yaml`:
+
+```yaml
+web_environment:
+    - PW_TEST_CONNECT_WS_ENDPOINT=ws://playwright-server:3000/
+    - PW_TEST_CONNECT_EXPOSE_NETWORK=*
+```
+
+Playwright reads both variables itself, so the commands need no flag and no change.
+Only the browser moves: the test run stays in the web container with your
+`node_modules`, the API secret and the state directory, and
+`PW_TEST_CONNECT_EXPOSE_NETWORK` tunnels the browser's requests back out through
+it — so the browser container needs no route to your site and no DDEV certificate.
+
+The server is one container of your own, in `.ddev/docker-compose.playwright-server.yaml`:
+
+```yaml
+services:
+    playwright-server:
+        image: mcr.microsoft.com/playwright:v1.61.1-noble
+        command:
+            ['npx', '-y', 'playwright@1.61.1', 'run-server', '--port', '3000', '--host', '0.0.0.0']
+```
+
+The version has to match the `@playwright/test` your project installed. Add
+`platform: linux/amd64` if you compare screenshots across machines: rasterisation
+happens where the browser runs, so an arm64 laptop and an amd64 runner disagree on
+the same page.
+
 ### A different database system
 
 Install picks the `db-test` service that matches your project. If you change your

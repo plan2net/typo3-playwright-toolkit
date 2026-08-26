@@ -168,7 +168,7 @@ jobs:
       - run: >-
           bats tests/argument-forwarding.bats tests/prepare-template.bats
           tests/db-test-service.bats tests/install-manifest.bats
-          tests/test-directory.bats
+          tests/test-directory.bats tests/browser-server.bats
 
   shell:
     name: add-on (shellcheck)
