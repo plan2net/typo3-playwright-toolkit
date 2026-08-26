@@ -3,6 +3,7 @@
 </p>
 <h1 align="center">typo3-playwright-toolkit</h1>
 <p align="center"><em>Playwright end-to-end tests for TYPO3, with one test database per test.</em></p>
+<p align="center"><a href="https://plan2net.github.io/typo3-playwright-toolkit/"><strong>plan2net.github.io/typo3-playwright-toolkit</strong></a></p>
 <br>
 
 [![checks](https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/checks.yml/badge.svg)](https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/checks.yml)

@@ -10,6 +10,8 @@ var/
 .DS_Store
 node_modules/
 dist/
+site/
+design/typo3-playwright-toolkit-site.html
 packages/*/dist/
 packages/*/*.tgz
 public/

@@ -1,0 +1,29 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1280, "h": 4300, "title": "Landing page", "print": "flow" }
+  ],
+  "annotations": [
+    {
+      "id": "numbers",
+      "x": 0,
+      "y": -230,
+      "w": 620,
+      "text": "Numbers a reader can use\n\nWas: CI jobs per push, version combinations — repository vanity.\nNow: what a private database costs (27 ms), how many content builders ship (22),\nhow much config is mandatory (2), how much webserver config (0)."
+    },
+    {
+      "id": "closing",
+      "x": 680,
+      "y": -230,
+      "w": 620,
+      "text": "The closing section is a close, not a manual\n\nWas: \"Four commands, then never click through a relaunch again\" — a slogan and nothing to act on.\nThen an install block, which turned out to be both incomplete and the README's job anyway.\nNow: the payoff in one paragraph — an upgrade that renames a field fails a test instead of\npassing quietly, and the failed test leaves a backend you can open. Two links, one line of\nversion support. Setup lives in the README."
+    },
+    {
+      "id": "identifiers",
+      "x": 1360,
+      "y": -230,
+      "w": 620,
+      "text": "Every identifier is real\n\nDatabase names are deriveTestId(salt, scenarioKey, attempt) run for real, prefixed db.\nThe backend marker and the inspect listing show the scenario name — the spec file name\nwithout its directory or suffix — which is what the toolkit now writes."
+    }
+  ],
+  "launch": { "view": "focused", "file": "Main.dc.html" }
+}

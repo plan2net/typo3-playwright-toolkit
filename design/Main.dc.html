@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&amp;family=Source+Code+Pro:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+:root { --org:#FF8700; --org-d:#E67A00; --ink:#1A1E24; --dim:#5B6570; --line:#E3E7EC; --soft:#F7F8FA; --term:#1D2129; --pass:#2FBF71; --fail:#E5484D; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:#fff; color:#1A1E24; font-family:'Open Sans',sans-serif; -webkit-font-smoothing:antialiased; }
+a { color:var(--org-d); text-decoration:none; }
+a:hover { color:var(--org); }
+a:focus-visible, button:focus-visible { outline:2px solid var(--org); outline-offset:3px; border-radius:4px; }
+.skip { position:absolute; left:-9999px; background:var(--ink); color:#fff; padding:12px 20px; z-index:40; }
+.skip:focus { left:16px; top:16px; }
+h1,h2,h3 { text-wrap:balance; }
+p { text-wrap:pretty; }
+@keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+.grid-4 { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:20px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+.split { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:64px; align-items:center; }
+.split-start { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:56px; align-items:start; }
+@media (max-width:1000px) {
+  .grid-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .grid-3, .split, .split-start { grid-template-columns:minmax(0,1fr); gap:32px; }
+}
+@media (max-width:620px) {
+  .grid-4 { grid-template-columns:minmax(0,1fr); }
+  .pad { padding-left:20px !important; padding-right:20px !important; }
+  .h1 { font-size:32px !important; }
+  .h2 { font-size:23px !important; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+</style>
+</helmet>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<nav data-screen-label="Nav" aria-label="Primary" style="position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:24px; padding:16px 40px; background:rgba(255,255,255,0.92); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); flex-wrap:wrap;" class="pad">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <img src="logo.svg" width="36" height="36" alt="" style="display:block;">
+    <div style="font-weight:800; font-size:15px;">TYPO3 Playwright Toolkit</div>
+  </div>
+  <div style="display:flex; align-items:center; gap:24px; font-size:14px; font-weight:600; flex-wrap:wrap;">
+    <a href="#why" style="color:var(--dim);" style-hover="color:var(--ink);">Why</a>
+    <a href="#packages" style="color:var(--dim);" style-hover="color:var(--ink);">Packages</a>
+    <a href="#example" style="color:var(--dim);" style-hover="color:var(--ink);">Example</a>
+    <a href="#failure" style="color:var(--dim);" style-hover="color:var(--ink);">When it fails</a>
+    <a href="#proof" style="color:var(--dim);" style-hover="color:var(--ink);">Proof</a>
+    <a href="https://github.com/plan2net/typo3-playwright-toolkit" style="color:#fff; background:var(--org); padding:9px 18px; border-radius:6px; font-weight:700; font-size:13.5px;" style-hover="background:var(--org-d); color:#fff;">GitHub ↗</a>
+  </div>
+</nav>
+
+<main id="main">
+
+<header data-screen-label="Hero" class="split pad" style="max-width:1160px; margin:0 auto; padding:88px 40px 72px;">
+  <div>
+    <div style="display:inline-flex; align-items:center; gap:8px; background:#FFF3E4; color:#9A5B00; border-radius:100px; padding:6px 16px; font-size:13px; font-weight:700; margin-bottom:24px;">TYPO3 11.5 · 12.4 · 13.4 · 14.3 &nbsp;|&nbsp; PHP 8.1+</div>
+    <h1 class="h1" style="font-weight:800; font-size:44px; line-height:1.15; margin:0 0 14px; letter-spacing:-0.01em;">End-to-end tests for TYPO3, with <span style="display:inline-grid; max-width:100%; vertical-align:top;"><sc-for list="{{ claims }}" as="c" hint-placeholder-count="3"><span data-claim aria-hidden="{{ c.hidden }}" style="grid-area:1/1; color:var(--org); opacity:{{ c.opacity }}; transition:opacity 900ms ease-in-out;">{{ c.text }}<span style="color:var(--ink);">.</span></span></sc-for></span></h1>
+    <div style="display:flex; justify-content:flex-end;">
+    <sc-if value="{{ rotates }}" hint-placeholder-val="{{ true }}">
+      <button type="button" data-rotate-toggle onClick="{{ toggleRotation }}" style="background:none; border:none; padding:4px 0; margin:0 0 12px; color:var(--dim); font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:7px; cursor:pointer;" style-hover="color:var(--ink);">
+        <sc-if value="{{ running }}" hint-placeholder-val="{{ true }}">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" aria-hidden="true" style="display:block;"><path d="M4.5 2.5h2.5v11H4.5zM9 2.5h2.5v11H9z"/></svg>
+          Pause the headline
+        </sc-if>
+        <sc-if value="{{ paused }}" hint-placeholder-val="{{ false }}">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" aria-hidden="true" style="display:block;"><path d="M4.5 2.5 13 8l-8.5 5.5z"/></svg>
+          Resume the headline
+        </sc-if>
+      </button>
+    </sc-if>
+    </div>
+    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">Every spec file gets its own database, cloned from a prepared template in milliseconds. Files run at the same time without sharing data, so they cannot break each other — and content is created through the real TYPO3 backend, not from SQL fixtures.</p>
+    <div style="display:flex; gap:14px; flex-wrap:wrap;">
+      <a href="#packages" style="background:var(--org); color:#fff; font-weight:700; padding:13px 26px; border-radius:6px; font-size:15px;" style-hover="background:var(--org-d); color:#fff;">Get started</a>
+      <a href="#example" style="border:1.5px solid var(--line); color:var(--ink); padding:13px 26px; border-radius:6px; font-size:15px; font-weight:600;" style-hover="border-color:var(--org); color:var(--org-d);">See a test</a>
+    </div>
+  </div>
+  <div style="background:var(--term); border-radius:10px; box-shadow:0 20px 50px rgba(26,30,36,0.18); overflow:hidden;">
+    <div style="display:flex; align-items:center; gap:8px; padding:12px 16px; border-bottom:1px solid #2C323C;">
+      <span style="width:11px; height:11px; border-radius:50%; background:#FF5F57;"></span>
+      <span style="width:11px; height:11px; border-radius:50%; background:#FEBC2E;"></span>
+      <span style="width:11px; height:11px; border-radius:50%; background:#28C840;"></span>
+      <span style="margin-left:10px; font-family:'Source Code Pro',monospace; font-size:12px; color:#7B8494;">ddev playwright test</span>
+    </div>
+    <div style="padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.85; min-height:330px; overflow-x:auto;">
+      <div style="color:#AEB7C4;"><span style="color:#7B8494;">$</span> ddev playwright test</div>
+      <div style="color:#7B8494;">[playwright] Preparing the test database template…</div>
+      <div style="color:#7B8494; margin-bottom:6px;">Running 6 tests using 3 workers</div>
+      <sc-for list="{{ runLines }}" as="r" hint-placeholder-count="6">
+        <div style="display:flex; gap:10px; align-items:baseline; white-space:nowrap;">
+          <span style="color:#2FBF71; min-width:12px;">{{ r.mark }}</span>
+          <span style="color:#E6EBF2; overflow:hidden; text-overflow:ellipsis;">{{ r.spec }}</span>
+          <span style="color:#7B8494;">{{ r.time }}</span>
+          <span style="margin-left:auto; color:#FFB151; background:rgba(255,135,0,0.12); padding:0 8px; border-radius:4px; font-size:11px;">{{ r.db }}</span>
+        </div>
+      </sc-for>
+      <sc-if value="{{ showSummary }}" hint-placeholder-val="{{ false }}">
+        <div style="color:#7B8494; margin-top:10px;">[teardown] Cleaned 3 DBs.</div>
+        <div style="color:#2FBF71; font-weight:600;">6 passed <span style="color:#7B8494; font-weight:400;">(14.8s)</span></div>
+      </sc-if>
+      <span style="display:inline-block; width:8px; height:14px; background:#AEB7C4; animation:blink 1s steps(1) infinite;"></span>
+    </div>
+    <div style="padding:10px 20px; border-top:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:11.5px; color:#7B8494;">Three files, three databases — six tests. Two tests from one file share that file's database and nothing else.</div>
+  </div>
+</header>
+
+<section id="why" data-screen-label="Value" style="background:var(--soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="pad" style="max-width:1160px; margin:0 auto; padding:72px 40px;">
+    <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px;">Why this toolkit</h2>
+    <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">The value is in what your tests exercise — and what they can't do to each other.</p>
+    <div class="grid-4">
+      <sc-for list="{{ values }}" as="v" hint-placeholder-count="4">
+        <div style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:26px 24px; display:flex; flex-direction:column; gap:12px;">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#1A1E24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:block;" aria-hidden="true"><path d="{{ v.d }}"></path></svg>
+          <div style="font-weight:800; font-size:16px;">{{ v.title }}</div>
+          <div style="font-size:14px; line-height:1.65; color:var(--dim);">{{ v.body }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="packages" data-screen-label="Packages" class="pad" style="max-width:1160px; margin:0 auto; padding:72px 40px;">
+  <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px;">Three packages</h2>
+  <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">You need all three.</p>
+  <div class="grid-3">
+    <sc-for list="{{ packages }}" as="p" hint-placeholder-count="3">
+      <div style="border:1px solid var(--line); border-radius:10px; display:flex; flex-direction:column; overflow:hidden;">
+        <div style="padding:22px 24px 0; display:flex; align-items:center; gap:10px;">
+          <span style="font-size:11px; font-weight:800; letter-spacing:0.08em; color:var(--org-d); background:#FFF3E4; padding:4px 10px; border-radius:4px;">{{ p.kind }}</span>
+        </div>
+        <div style="padding:16px 24px 0; font-weight:800; font-size:16px; line-height:1.4; word-break:break-word; font-family:'Source Code Pro',monospace;">{{ p.name }}</div>
+        <div style="padding:10px 24px 22px; font-size:14px; line-height:1.65; color:var(--dim); flex:1;">{{ p.gives }}</div>
+        <div style="background:var(--term); padding:14px 18px; display:flex; gap:12px; align-items:flex-start;">
+          <div style="font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.65; color:#E6EBF2; white-space:pre-wrap; overflow-wrap:anywhere; flex:1;"><span style="color:#7B8494;">$ </span>{{ p.cmd }}</div>
+          <button type="button" onClick="{{ p.onCopy }}" title="Copy command" aria-label="Copy command" style="flex-shrink:0; background:none; border:1px solid #3C434F; border-radius:5px; color:#AEB7C4; padding:5px; cursor:pointer; display:grid; place-items:center; width:28px; height:28px;" style-hover="border-color:var(--org); color:var(--org);">
+            <sc-if value="{{ p.isCopied }}" hint-placeholder-val="{{ false }}">
+              <svg viewBox="0 0 16 16" width="15" height="15" fill="#2FBF71" style="display:block;" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg>
+            </sc-if>
+            <sc-if value="{{ p.notCopied }}" hint-placeholder-val="{{ true }}">
+              <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" style="display:block;" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg>
+            </sc-if>
+          </button>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+<section id="example" data-screen-label="Example" style="background:var(--soft); border-top:1px solid var(--line);">
+  <div class="split-start pad" style="max-width:1160px; margin:0 auto; padding:72px 40px;">
+    <div>
+      <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 20px;">One file is one scenario</h2>
+      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">A setup that builds content once, and the tests that read it. Between the two sits one header, and nothing routes it: Apache and nginx hand <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">X-Playwright-Test-Id</span> to PHP by themselves. No <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">SetEnvIf</span> mapping it to an environment variable, and nothing to keep in sync when it changes.</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+          <div style="display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:13px 16px;">
+            <div style="width:26px; height:26px; border-radius:50%; background:var(--org); color:#fff; display:grid; place-items:center; font-size:12.5px; font-weight:800; flex-shrink:0;">{{ s.n }}</div>
+            <div style="font-size:13.5px; font-weight:600; font-family:'Source Code Pro',monospace; overflow-wrap:anywhere;">{{ s.code }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.14);">
+      <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:12px; color:#7B8494;">tests/news.spec.ts</div>
+      <pre style="margin:0; padding:20px 22px; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.8; color:#C9D2DE; overflow-x:auto;"><span style="color:#FFB151;">import</span> { defineScenario, expect } <span style="color:#FFB151;">from</span> <span style="color:#8FD48A;">'@plan2net/typo3-playwright-toolkit'&#10;&#10;</span><span style="color:#7FB8E8;">export const</span> test = defineScenario(<span style="color:#FFB151;">async</span> ({ builders }) =&gt; {
+    <span style="color:#7FB8E8;">const</span> page = <span style="color:#FFB151;">await</span> builders.page()
+        .withTitle(<span style="color:#8FD48A;">'Newsroom'</span>).withSlug(<span style="color:#8FD48A;">'/newsroom'</span>).create()
+
+    <span style="color:#7B8494;">// Every TYPO3 core CType already has a builder.&#10;</span>    <span style="color:#FFB151;">await</span> builders.content().onPage(page.id).ofType(<span style="color:#8FD48A;">'textmedia'</span>)
+        .configure((element) =&gt; element.withHeader(<span style="color:#8FD48A;">'Latest'</span>))
+        .create()
+
+    <span style="color:#FFB151;">return</span> { slug: page.slug }
+})
+
+test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span style="color:#FFB151;">async</span> ({ page, state }) =&gt; {
+    <span style="color:#FFB151;">await</span> page.goto(state.slug)
+
+    <span style="color:#FFB151;">await</span> expect(page.getByRole(<span style="color:#8FD48A;">'heading'</span>, { name: <span style="color:#8FD48A;">'Latest'</span> })).toBeVisible()
+})</pre>
+      <div style="padding:12px 18px; border-top:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:12px; color:#7B8494;">Content is posted to <span style="color:#C9D2DE;">/typo3/record/edit</span> — the route the backend itself uses on save, request token included.</div>
+    </div>
+  </div>
+</section>
+
+<section id="failure" data-screen-label="When it fails" style="border-top:1px solid var(--line);">
+  <div class="split-start pad" style="max-width:1160px; margin:0 auto; padding:72px 40px;">
+    <div>
+      <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 20px;">When a test fails, walk into the scene</h2>
+      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 20px;">A screenshot tells you something broke. It never tells you what the database looked like when it did.</p>
+      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">So a failed file keeps its database instead of dropping it, and <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">ddev playwright-inspect</span> prints a signed link for each one. Open it and you are inside the TYPO3 backend of that exact run — already logged in, page tree intact, content exactly as the test left it, the frontend one click away. The scenario name and its test ID sit beside the site name, so two open tabs are never confused.</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ failNotes }}" as="f" hint-placeholder-count="3">
+          <div style="display:flex; align-items:flex-start; gap:12px; font-size:14.5px; color:var(--dim);">
+            <span aria-hidden="true" style="color:var(--org); font-weight:800; line-height:1.6;">›</span>
+            <span>{{ f.t }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:18px;">
+      <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.14);">
+        <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:12px; color:#7B8494;">ddev playwright-inspect</div>
+        <div style="padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:12px; line-height:1.9; overflow-x:auto;">
+          <div style="color:#E5484D;">  ✘  1 tests/checkout.spec.ts:12:1 › cart keeps its line items (2.4s)</div>
+          <div style="color:#7B8494; margin-bottom:10px;">[teardown] Kept 1 DB for a failed scenario.</div>
+          <div style="color:#AEB7C4;"><span style="color:#7B8494;">$</span> ddev playwright-inspect</div>
+          <div style="color:#7B8494; margin-bottom:8px;">Links log you into the backend and expire in 15 minutes.</div>
+          <div style="color:#E6EBF2;">checkout</div>
+          <div style="color:#FFB151;">&nbsp;&nbsp;db09D933A1066CD448</div>
+          <div style="color:#7FB8E8; overflow-wrap:anywhere; white-space:normal;">&nbsp;&nbsp;https://acme-testing.ddev.site/typo3/test-api/inspect?id=09D933A1066CD448&amp;t=…</div>
+        </div>
+      </div>
+      <figure style="margin:0; border:1px solid var(--line); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.10);">
+        <!-- browser chrome -->
+        <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--soft); border-bottom:1px solid var(--line);">
+          <span aria-hidden="true" style="width:9px; height:9px; border-radius:50%; background:#D6DAE0; display:block;"></span>
+          <span aria-hidden="true" style="width:9px; height:9px; border-radius:50%; background:#D6DAE0; display:block;"></span>
+          <span aria-hidden="true" style="width:9px; height:9px; border-radius:50%; background:#D6DAE0; display:block;"></span>
+          <span style="font-family:'Source Code Pro',monospace; font-size:11px; color:var(--dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">acme-testing.ddev.site/typo3/</span>
+        </div>
+
+        <!-- TYPO3 topbar: SYS/sitename lives here, and SiteName appends the marker -->
+        <div style="display:flex; align-items:center; gap:10px; padding:0 12px; height:42px; background:#1D2129;">
+          <span aria-hidden="true" style="width:20px; height:20px; border-radius:4px; background:var(--org); flex-shrink:0;"></span>
+          <span style="font-weight:700; font-size:13px; color:#fff; white-space:nowrap; flex-shrink:0;">Acme Relaunch</span>
+          <span style="font-family:'Source Code Pro',monospace; font-size:10.5px; color:var(--org); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">[checkout · 09D933A1066CD448]</span>
+          <span style="margin-left:auto; flex-shrink:0;" aria-hidden="true">
+            <span style="width:18px; height:18px; border-radius:50%; background:#3C434F; display:block;"></span>
+          </span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:44px minmax(0,1fr);">
+          <!-- module rail, suggested rather than drawn out -->
+          <div aria-hidden="true" style="background:#171A1F; padding:12px 0; display:flex; flex-direction:column; align-items:center; gap:14px;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#FF8700" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7Zm0 0 4 4h-4Z"></path></svg>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#5B6570" stroke-width="1.9" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"></path></svg>
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#5B6570" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"></path></svg>
+          </div>
+
+          <!-- page tree -->
+          <div style="background:#fff; padding:10px 0 12px;">
+            <sc-for list="{{ tree }}" as="t" hint-placeholder-count="4">
+              <div style="display:flex; align-items:center; gap:7px; padding:5px 12px 5px {{ t.indent }}; background:{{ t.bg }}; border-left:2px solid {{ t.border }};">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="{{ t.stroke }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;" aria-hidden="true"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7Zm0 0 4 4h-4Z"></path></svg>
+                <span style="font-size:11.5px; color:{{ t.color }}; font-weight:{{ t.weight }}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="proof" data-screen-label="Proof" style="background:var(--soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="pad" style="max-width:1160px; margin:0 auto; padding:72px 40px;">
+    <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px;">Nothing here is a promise</h2>
+    <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">Every number below is countable in the repository, or measured against it.</p>
+    <dl class="grid-4" style="margin:0 0 40px;">
+      <sc-for list="{{ stats }}" as="st" hint-placeholder-count="4">
+        <div style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:24px; display:flex; flex-direction:column; gap:8px;">
+          <dt style="font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--dim);">{{ st.label }}</dt>
+          <dd style="margin:0; font-weight:800; font-size:34px; line-height:1; color:var(--org-d);">{{ st.value }}</dd>
+          <dd style="margin:0; font-size:13.5px; line-height:1.6; color:var(--dim);">{{ st.note }}</dd>
+        </div>
+      </sc-for>
+    </dl>
+    <div style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:30px 32px; display:flex; flex-direction:column; gap:14px;">
+      <h3 style="font-weight:800; font-size:19px; margin:0;">There is a whole TYPO3 project in the repository, and CI reinstalls it on every push</h3>
+      <p style="margin:0; font-size:15px; line-height:1.7; color:var(--dim); max-width:88ch;">Site configuration, seed fixture, web-server binding, Playwright config — a real consumer, not a snippet. Every push, CI installs all three packages into it on TYPO3 13.4 and 14.3, builds a page through the backend and checks the frontend renders it. Which means the setup instructions cannot quietly go stale: they are executed.</p>
+      <a href="https://github.com/plan2net/typo3-playwright-toolkit/tree/main/tests/e2e/consumer" style="font-size:15px; font-weight:700;">Read the fixture ↗</a>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="CTA" class="pad" style="max-width:1160px; margin:0 auto; padding:88px 40px;">
+  <div style="max-width:760px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:24px; text-align:center;">
+    <div>
+      <h2 class="h2" style="font-weight:800; font-size:30px; margin:0 0 12px; line-height:1.25;">The next upgrade tells you what broke</h2>
+      <p style="color:var(--dim); font-size:17px; line-height:1.7; margin:0 auto; max-width:62ch;">Your content is built through the backend's own save route, so a TYPO3 release that renames a field fails a test instead of passing quietly. And when one does fail, its database is still standing — one signed link and you are inside that backend, on that content, looking at what the test saw.</p>
+    </div>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+      <a href="https://github.com/plan2net/typo3-playwright-toolkit#setup" style="background:var(--org); color:#fff; font-weight:700; padding:15px 32px; border-radius:6px; font-size:15.5px;" style-hover="background:var(--org-d); color:#fff;">Set it up</a>
+      <a href="https://github.com/plan2net/typo3-playwright-toolkit/tree/main/tests/e2e/consumer" style="border:1px solid var(--line); font-weight:700; padding:14px 28px; border-radius:6px; font-size:15.5px;" style-hover="border-color:var(--ink); color:var(--ink);">See a project using it ↗</a>
+    </div>
+
+    <p style="color:var(--dim); font-size:14px; line-height:1.7; margin:0; max-width:56ch;">TYPO3 11.5, 12.4, 13.4 and 14.3 on PHP 8.1 to 8.4. MariaDB, MySQL, PostgreSQL and SQLite each have a driver. Installs as a dev dependency; every endpoint it adds exists only in the Testing context.</p>
+  </div>
+</section>
+
+</main>
+
+<footer data-screen-label="Footer" style="border-top:1px solid var(--line);">
+  <div class="pad" style="max-width:1160px; margin:0 auto; padding:28px 40px; display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; font-size:13.5px; color:var(--dim);">
+    <div>Built by <a href="https://github.com/plan2net">plan2net</a> · Vienna, Austria</div>
+    <div style="display:flex; gap:24px;">
+      <a href="https://github.com/plan2net/typo3-playwright-toolkit">GitHub</a>
+      <a href="https://packagist.org/packages/plan2net/playwright-toolkit" style="color:var(--dim);" style-hover="color:var(--ink);">Packagist</a>
+      <a href="https://www.npmjs.com/package/@plan2net/typo3-playwright-toolkit" style="color:var(--dim);" style-hover="color:var(--ink);">npm</a>
+    </div>
+  </div>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;accent&quot;: { &quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#FF8700&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;#FF8700&quot;, &quot;#F49800&quot;, &quot;#0080C9&quot;], &quot;section&quot;: &quot;Theme&quot; },
+  &quot;reducedMotion&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Theme&quot; }
+}">
+class Component extends DCLogic {
+  state = { shown: 0, copied: -1, claim: 0, rotating: true };
+  // Long enough to read the line before the next one.
+  CLAIM_MS = 6800;
+  claimTexts = [
+    'a throwaway database per test file',
+    'content built through the real backend',
+    'a signed link into every failure',
+  ];
+  copy(i, cmd) {
+    const done = () => {
+      this.setState({ copied: i });
+      clearTimeout(this.copyTimer);
+      this.copyTimer = setTimeout(() => this.setState({ copied: -1 }), 1600);
+    };
+    if (navigator.clipboard) { navigator.clipboard.writeText(cmd).then(done, done); return; }
+    const ta = document.createElement('textarea');
+    ta.value = cmd; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove(); done();
+  }
+  // Database names are deriveTestId(salt, scenarioKey, attempt) for a real salt:
+  // sha256(`${salt}:${key}:${attempt}`).hex.slice(0,16).toUpperCase(), prefixed "db".
+  // Two tests from one file share one database because a file is one scenario.
+  runs = [
+    { mark: '✓', spec: 'tests/login.spec.ts:8:1 › backend user can log in', time: '(3.1s)', db: 'db362498EB57BE1B11' },
+    { mark: '✓', spec: 'tests/news.spec.ts:14:1 › editor publishes a news page', time: '(4.6s)', db: 'dbF75A83B46445273A' },
+    { mark: '✓', spec: 'tests/forms.spec.ts:9:1 › contact form sends mail', time: '(3.8s)', db: 'db7239A9827781F332' },
+    { mark: '✓', spec: 'tests/news.spec.ts:31:1 › hidden page returns 404', time: '(2.2s)', db: 'dbF75A83B46445273A' },
+    { mark: '✓', spec: 'tests/login.spec.ts:24:1 › wrong password is rejected', time: '(1.9s)', db: 'db362498EB57BE1B11' },
+    { mark: '✓', spec: 'tests/forms.spec.ts:21:1 › required field blocks submit', time: '(4.1s)', db: 'db7239A9827781F332' },
+  ];
+  componentDidMount() {
+    this.applyTweaks();
+    this.systemStill = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    this.claimTimer = setInterval(() => {
+      if (!this.state.rotating || this.stillHeadline()) return;
+      this.setState(s => ({ claim: (s.claim + 1) % this.claimTexts.length }));
+    }, this.CLAIM_MS);
+    this.timer = setInterval(() => {
+      this.setState(s => {
+        if (this.props.reducedMotion) return { shown: this.runs.length + 1 };
+        const next = s.shown + 1;
+        return { shown: next > this.runs.length + 4 ? 0 : next };
+      });
+    }, 800);
+  }
+  componentWillUnmount() { clearInterval(this.timer); clearInterval(this.claimTimer); }
+  stillHeadline() { return this.props.reducedMotion || this.systemStill; }
+  componentDidUpdate() { this.applyTweaks(); }
+  applyTweaks() {
+    document.documentElement.style.setProperty('--org', this.props.accent ?? '#FF8700');
+  }
+  renderVals() {
+    const shown = Math.min(this.state.shown, this.runs.length);
+    const still = this.stillHeadline();
+    return {
+      runLines: this.runs.slice(0, shown),
+      showSummary: this.state.shown >= this.runs.length + 1,
+      claims: this.claimTexts.map((text, i) => {
+        const active = still ? 0 === i : i === this.state.claim;
+        return { text, opacity: active ? '1' : '0', hidden: active ? 'false' : 'true' };
+      }),
+      rotates: !still,
+      running: this.state.rotating,
+      paused: !this.state.rotating,
+      toggleRotation: () => this.setState(s => ({ rotating: !s.rotating })),
+      values: [
+        { d: 'M3 8h14m0 0-3-3m3 3-3 3M21 16H7m0 0 3-3m-3 3 3 3', title: 'Real end-to-end', body: 'Pages and content elements are posted to /typo3/record/edit, the route the backend uses on save. Rename a field in TCA and the suite fails instead of passing against a shape the product no longer has.' },
+        { d: 'M12 3c-4.4 0-8 1.3-8 3s3.6 3 8 3 8-1.3 8-3-3.6-3-8-3Zm-8 3v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', title: 'A database per test file', body: 'The template is built once per run and cloned in 27 ms, so every spec file can afford its own database. Run order stops mattering, because nothing is shared to get the order wrong.' },
+        { d: 'M12 3 4 6v5c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-3Zm-3.5 8.5 2.5 2.5 4.5-4.5', title: 'Cleans up after itself', body: 'Teardown drops only the databases this run recorded, so two runs can happen at once. A run that leaks one fails in CI rather than filling a disk quietly.' },
+        { d: 'm12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5m-18 4 9 5 9-5', title: 'TYPO3 11.5 – 14.3', body: 'One codebase across four releases on PHP 8.1 and up. Everything version-dependent lives in one directory, so dropping a version is a deletion rather than an audit.' },
+      ],
+      packages: [
+        { kind: 'DDEV ADD-ON', name: 'ddev-typo3-playwright-toolkit', cmd: 'ddev add-on get https://github.com/plan2net/typo3-playwright-toolkit/releases/latest/download/ddev-typo3-playwright-toolkit.tar.gz', gives: 'The db-test database service and the ddev playwright, playwright-prepare, playwright-ui and playwright-inspect commands.' },
+        { kind: 'COMPOSER', name: 'plan2net/playwright-toolkit', cmd: 'ddev composer require --dev plan2net/playwright-toolkit', gives: 'Clones the databases, hands out a ready-made backend session and a real record_edit token, and drops the databases again.' },
+        { kind: 'NPM', name: '@plan2net/typo3-playwright-toolkit', cmd: "ddev exec 'cd tests/playwright && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'", gives: 'defineScenario, the page and content builders for every core CType, screenshots, axe, and the setup and teardown that provision and drop the databases.' },
+      ].map((p, i) => ({
+        ...p,
+        isCopied: this.state.copied === i,
+        notCopied: this.state.copied !== i,
+        onCopy: () => this.copy(i, p.cmd),
+      })),
+      steps: [
+        { n: '1', code: 'X-Playwright-Test-Id: F75A83B46445273A' },
+        { n: '2', code: 'HTTP_X_PLAYWRIGHT_TEST_ID — forwarded unaided' },
+        { n: '3', code: 'dbF75A83B46445273A ← playwright_db_template' },
+        { n: '4', code: 'page.goto() lands in that same database' },
+      ],
+      tree: [
+        { label: 'Acme Relaunch', indent: '10px', bg: 'transparent', border: 'transparent', color: '#1A1E24', weight: '700', stroke: '#FF8700' },
+        { label: 'Home', indent: '24px', bg: 'transparent', border: 'transparent', color: '#5B6570', weight: '400', stroke: '#9AA3AE' },
+        { label: 'Checkout', indent: '24px', bg: '#FFF3E4', border: '#FF8700', color: '#1A1E24', weight: '700', stroke: '#E67A00' },
+        { label: 'Cart', indent: '38px', bg: 'transparent', border: 'transparent', color: '#5B6570', weight: '400', stroke: '#9AA3AE' },
+      ],
+      failNotes: [
+        { t: 'Only the failed file keeps its database. Everything that passed is dropped, so the disk does not fill up with successes.' },
+        { t: 'The link is signed with the API secret and dies after fifteen minutes. The secret is never in the URL.' },
+        { t: 'A browser cannot send the test-ID header, which is the whole reason the link exists.' },
+      ],
+      stats: [
+        { label: 'Per test file', value: '27 ms', note: 'What a private database costs, cloned from a seeded template on PostgreSQL 15+. Isolation stops being a trade-off.' },
+        { label: 'Content builders included', value: '22', note: 'Every content type a stock TYPO3 registers, typed. You write builders for your own elements only.' },
+        { label: 'Values you must configure', value: '2', note: 'The testing URL and your project root. Everything else has a default you can leave alone.' },
+        { label: 'Login steps in your tests', value: '0', note: 'The backend session is seeded into the template database. No login form to drive, no auth fixture, no stored session to refresh.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
