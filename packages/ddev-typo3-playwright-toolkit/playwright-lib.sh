@@ -17,9 +17,12 @@ unset NO_COLOR
 playwright_enter_test_dir() {
     local directory="${PW_TEST_DIR:-tests/playwright}"
 
+    # Not created here on purpose: an empty directory gets past this message and
+    # fails inside Playwright instead, which is a worse place to find out.
     if ! cd "${directory}" 2>/dev/null; then
-        echo "[playwright] No '${directory}' directory under $(pwd)." >&2
-        echo "[playwright] Set PW_TEST_DIR in web_environment or .ddev/.env.web to point at your Playwright tests." >&2
+        echo "[playwright] No '${directory}' directory under $(pwd). Create it with:" >&2
+        echo "[playwright]   ddev exec 'mkdir -p ${directory} && cd ${directory} && npm init -y && npm pkg set type=module && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'" >&2
+        echo "[playwright] Tests elsewhere? Set PW_TEST_DIR in web_environment or .ddev/.env.web." >&2
         return 1
     fi
 }

@@ -29,9 +29,11 @@ test helpers.
 - The Composer extension, installed in the project
 - A host name that runs in the Testing context. The add-on does not set this up; see
   the [extension README](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit#testing-host).
-- Playwright with browsers, in the container where `ddev playwright` runs. Install
-  them with the `lullabot/ddev-playwright` add-on, your own container, or
-  `npx playwright install` in the web container.
+- Playwright with browsers, in the container where `ddev playwright` runs — see
+  [browsers](#browsers). Do not use another Playwright add-on for this; see
+  [other Playwright add-ons](#other-playwright-add-ons).
+- A directory for your tests. The add-on does not create one — see
+  [where your tests live](#where-your-tests-live).
 
 The add-on does not change your web server configuration. Apache and nginx pass the
 test ID header to PHP by themselves.
@@ -54,13 +56,48 @@ database itself before every test run.
 
 ### Where your tests live
 
-The commands run in `tests/playwright`. If yours are somewhere else, say so in
-`.ddev/config.yaml` and `ddev restart`:
+The commands run in `tests/playwright`. The add-on does not create it — it is your
+directory, with your own `package.json`:
+
+```bash
+ddev exec 'mkdir -p tests/playwright && cd tests/playwright && npm init -y && npm pkg set type=module && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'
+```
+
+Tests somewhere else? Say so in `.ddev/config.yaml` and `ddev restart`:
 
 ```yaml
 web_environment:
     - PW_TEST_DIR=e2e
 ```
+
+### Browsers
+
+The add-on ships none. Install them where the tests run:
+
+```bash
+ddev exec 'cd tests/playwright && npx playwright install --with-deps chromium'
+```
+
+They land in the container's home directory, which DDEV drops on a rebuild. Keep them
+under the project instead, `ddev restart`, and gitignore `.cache/`:
+
+```yaml
+web_environment:
+    - PLAYWRIGHT_BROWSERS_PATH=/var/www/html/.cache/ms-playwright
+```
+
+### Other Playwright add-ons
+
+Do not install one beside this. `lullabot/ddev-playwright` ships the same file,
+`commands/web/playwright`, so the second install replaces the first `ddev playwright`.
+If theirs wins, a run no longer rebuilds the database template first and looks in
+`test/playwright` rather than `PW_TEST_DIR`.
+
+> [!NOTE]
+> What it offers beyond this add-on is browser installation and a KasmVNC desktop for
+> watching runs. You need neither: browsers are two lines above, and `ddev
+> playwright-ui` serves Playwright's own UI mode on the exposed port 3000, which you
+> open in your **host** browser — same picking, watching and stepping, no VNC.
 
 ### Browsers in a container of their own
 
