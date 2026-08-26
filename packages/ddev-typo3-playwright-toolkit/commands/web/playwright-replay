@@ -17,6 +17,8 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "to a per-test database. Use 'ddev playwright test' for those."
     echo ""
     echo "The run ends by printing a link that logs you into that database's backend."
+    echo "What you get there is sample pages nobody had to build by hand: one example"
+    echo "of every content element your builders know how to make."
     echo ""
     echo "Options this command handles itself:"
     echo "  --build             Build frontend assets first (npm run build)"

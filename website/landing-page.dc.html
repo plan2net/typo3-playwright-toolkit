@@ -46,6 +46,10 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 /* The second content value gives the diamond empty alternative text, so a screen
    reader reads the links without "black diamond" between them. */
 .nav-list li + li:not(:last-child)::before { content:"◆"; content:"◆" / ""; color:var(--dim); font-size:8px; margin-right:14px; }
+/* Panels left, prose right. Only the painting order changes: the heading stays
+   first in the markup, where a screen reader and the outline want it. */
+.flip { grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); }
+.flip > :first-child { order:2; }
 .compare { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:32px; align-items:stretch; }
 .annotated { position:relative; display:flex; flex-direction:column; }
 .annotated-panel { flex:1; }
@@ -59,7 +63,10 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 }
 /* Both stack earlier than the card grids: the terminal and the code sample are the
    first things two columns stop fitting. */
-@media (max-width:1279px) { .split, .split-start { grid-template-columns:minmax(0,1fr); gap:32px; } }
+@media (max-width:1279px) {
+  .split, .split-start { grid-template-columns:minmax(0,1fr); gap:32px; }
+  .flip > :first-child { order:0; }
+}
 @media (max-width:620px) {
   .grid-4 { grid-template-columns:minmax(0,1fr); }
   .pad { padding-left:20px !important; padding-right:20px !important; }
@@ -271,11 +278,12 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
 </section>
 
 <section id="failure" data-screen-label="When it fails" style="border-top:1px solid var(--line);">
-  <div class="split-start pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
+  <div class="split-start flip pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
     <div>
       <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 20px;">When a test fails, walk into the scene</h2>
       <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 20px;">A screenshot tells you something broke. It never tells you what the database looked like when it did.</p>
       <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">So a failed file keeps its database instead of dropping it, and <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">ddev playwright-inspect</span> prints a signed link for each one. Open it and you are inside the TYPO3 backend of that exact run — already logged in, page tree intact, content exactly as the test left it, the frontend one click away. The scenario name and its test ID sit beside the site name, so two open tabs are never confused.</p>
+      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">For the whole suite rather than one failure, <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">ddev playwright-replay</span> runs every scenario into a single database, each in its own sysfolder, and prints one link into it. Sample pages nobody had to build by hand.</p>
       <ul class="bare" style="display:flex; flex-direction:column; gap:10px;">
         <sc-for list="{{ failNotes }}" as="f" hint-placeholder-count="3">
           <li style="display:flex; align-items:flex-start; gap:12px; font-size:14.5px; color:var(--dim);">

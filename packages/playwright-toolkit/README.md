@@ -228,17 +228,30 @@ tests/checkout.spec.ts → dbABCD1234EFGH5678
 Open it and you are in the TYPO3 backend of that test's database, logged in, with
 the frontend reachable from there. You need no browser extension and no header.
 
-The backend shows the test ID next to the site name in the top left corner, so two
-open tabs are never confused:
+The backend shows the scenario and its test ID next to the site name in the top left
+corner, so two open tabs are never confused:
 
 ```
-PlaywrightDemo [EF70E3DDD33D3571]
+PlaywrightDemo [checkout · EF70E3DDD33D3571]
 ```
 
-Nothing to configure; it appears whenever a request carries a test ID.
+The scenario is the spec file's name, without its directory or `.spec.ts` suffix.
+Nothing to configure; the marker appears whenever a request carries a test ID.
 
 The link is signed with the API secret and lives **15 minutes**. It sets two
 session cookies, so closing the browser ends the visit.
+
+### One database holding every scenario
+
+`ddev playwright-replay` runs every scenario's setup into a single database instead
+of one per test file, so everything the suite knows how to build ends up in one
+place. It calls `typo3 playwright:replay-prepare` first, which rebuilds that database
+from the template.
+
+The database is the plain `db` on the `db-test` container, reached through the fixed
+test ID `REPLAY0000000000`. Each scenario writes into a sysfolder named after its
+file, and the run prints a backend link when it finishes. Sample pages nobody had to
+build by hand.
 
 ## Troubleshooting
 

@@ -247,3 +247,23 @@ match neither test.
 
 Here the content belongs to the test that needs it. A new test is a new file, and
 nobody else's lines move.
+
+## Browsing everything the suite builds
+
+A run puts its content in one throwaway database per test file, then drops them all
+when it passes. To see the lot in one place, replay it:
+
+```bash
+ddev playwright-replay                   # every scenario
+ddev playwright-replay --grep accordion  # a subset
+```
+
+Every scenario's setup runs into a single database on the `db-test` container, each
+one into a sysfolder named after its file. The tests are skipped: their assertions
+and screenshot baselines belong to a per-test database. When the run ends it prints a
+link that logs you into that backend.
+
+What comes out is a set of sample pages nobody had to build by hand: one example of
+every content element your builders know how to make, ready to click through or
+export. The database is rebuilt from the template each time, so nothing piles up, and
+the database you develop against is never touched.
