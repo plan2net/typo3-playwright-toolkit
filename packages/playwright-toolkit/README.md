@@ -2,7 +2,7 @@
   <img src="Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
 </p>
 <h1 align="center">plan2net/playwright-toolkit</h1>
-<p align="center"><em>One test database per test, and a ready-made backend session, for TYPO3.</em></p>
+<p align="center"><em>One test database per test file, and a ready-made backend session, for TYPO3.</em></p>
 <br>
 
 [![Packagist](https://img.shields.io/packagist/v/plan2net/playwright-toolkit)](https://packagist.org/packages/plan2net/playwright-toolkit)
@@ -10,7 +10,7 @@
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
 [![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
 
-A TYPO3 extension. It creates one test database per test and provides a ready-made
+A TYPO3 extension. It creates one test database per test file and provides a ready-made
 backend session, so tests never fill in the login form.
 
 Developed in the

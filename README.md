@@ -2,7 +2,7 @@
   <img src="packages/playwright-toolkit/Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
 </p>
 <h1 align="center">typo3-playwright-toolkit</h1>
-<p align="center"><em>Playwright end-to-end tests for TYPO3, with one test database per test.</em></p>
+<p align="center"><em>Playwright end-to-end tests for TYPO3, with one test database per test file.</em></p>
 <p align="center"><a href="https://plan2net.github.io/typo3-playwright-toolkit/"><strong>plan2net.github.io/typo3-playwright-toolkit</strong></a></p>
 <br>
 
