@@ -107,7 +107,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
       </button>
     </sc-if>
     </div>
-    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">Every spec file gets its own database, cloned from a prepared template in milliseconds. Files run at the same time without sharing data, so they cannot break each other — and content is created through the real TYPO3 backend, not from SQL fixtures.</p>
+    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">Every spec file gets its own database, cloned from a prepared template in milliseconds. Files run at the same time without sharing data, so they cannot break each other. Content comes from the real TYPO3 backend rather than from SQL fixtures.</p>
     <div style="display:flex; gap:14px; flex-wrap:wrap;">
       <a href="#packages" style="background:var(--org); color:var(--ink); font-weight:700; padding:13px 26px; border-radius:6px; font-size:15px;" style-hover="background:var(--org-lg); color:#fff;">Get started</a>
       <a href="#example" style="border:1.5px solid var(--line); color:var(--ink); padding:13px 26px; border-radius:6px; font-size:15px; font-weight:600;" style-hover="border-color:var(--org); color:var(--org-d);">See a test</a>
@@ -145,7 +145,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 <section id="why" data-screen-label="Value" style="background:var(--soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
   <div class="pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
     <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px;">Why this toolkit</h2>
-    <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">The value is in what your tests exercise — and what they can't do to each other.</p>
+    <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">What your tests exercise, and what they cannot do to each other.</p>
     <ul class="grid-4 bare">
       <sc-for list="{{ values }}" as="v" hint-placeholder-count="4">
         <li style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:26px 24px; display:flex; flex-direction:column; gap:12px;">
@@ -161,7 +161,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 <section id="teamwork" data-screen-label="Merge conflicts" style="background:#454C57;">
   <div class="pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
     <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px; color:#fff;">Two people, two files</h2>
-    <p style="font-size:16px; line-height:1.7; color:#E6EBF2; margin:0 0 40px; max-width:64ch;">Git has no trouble with two people working in separate files. It has no answer for two people picking the same uid — which is exactly what a shared fixture file asks them to do.</p>
+    <p style="font-size:16px; line-height:1.7; color:#E6EBF2; margin:0 0 40px; max-width:64ch;">Git has no trouble with two people working in separate files. It has no answer for two people picking the same uid, which is what a shared fixture file asks them to do.</p>
 
     <div class="compare">
       <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 14px 34px rgba(26,30,36,0.22); display:flex; flex-direction:column;">
@@ -201,7 +201,7 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
       </div>
     </div>
 
-    <p style="font-size:15.5px; line-height:1.7; color:#E6EBF2; margin:32px 0 0; max-width:70ch;">The fixture manifest stays at what genuinely every test needs — a site root, a TypoScript template — instead of growing with the suite until every test depends on all of it.</p>
+    <p style="font-size:15.5px; line-height:1.7; color:#E6EBF2; margin:32px 0 0; max-width:70ch;">Your fixture manifest stays at what every test genuinely needs, a site root and a TypoScript template. It stops growing with the suite, and no test ends up depending on all of it.</p>
   </div>
 </section>
 
@@ -355,7 +355,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
     </dl>
     <div style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:30px 32px; display:flex; flex-direction:column; gap:14px;">
       <h3 style="font-weight:800; font-size:19px; margin:0;">There is a whole TYPO3 project in the repository, and CI reinstalls it on every push</h3>
-      <p style="margin:0; font-size:15px; line-height:1.7; color:var(--dim); max-width:88ch;">Site configuration, seed fixture, web-server binding, Playwright config — a real consumer, not a snippet. Every push, CI installs all three packages into it on TYPO3 13.4 and 14.3, builds a page through the backend and checks the frontend renders it. Which means the setup instructions cannot quietly go stale: they are executed.</p>
+      <p style="margin:0; font-size:15px; line-height:1.7; color:var(--dim); max-width:88ch;">Site configuration, seed fixture, web-server binding, Playwright config: a working project rather than a snippet. On every push CI installs all three packages into it on TYPO3 13.4 and 14.3, builds a page through the backend and checks the frontend renders it. The setup instructions cannot go stale, because CI executes them.</p>
       <a href="https://github.com/plan2net/typo3-playwright-toolkit/tree/main/tests/e2e/consumer" style="font-size:15px; font-weight:700;">Read the fixture ↗</a>
     </div>
   </div>
@@ -365,7 +365,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
   <div style="max-width:760px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:24px; text-align:center;">
     <div>
       <h2 class="h2" style="font-weight:800; font-size:30px; margin:0 0 12px; line-height:1.25;">The next upgrade tells you what broke</h2>
-      <p style="color:var(--dim); font-size:17px; line-height:1.7; margin:0 auto; max-width:62ch;">Your content is built through the backend's own save route, so a TYPO3 release that renames a field fails a test instead of passing quietly. And when one does fail, its database is still standing — one signed link and you are inside that backend, on that content, looking at what the test saw.</p>
+      <p style="color:var(--dim); font-size:17px; line-height:1.7; margin:0 auto; max-width:62ch;">Your content is built through the backend's own save route, so a TYPO3 release that renames a field fails a test instead of slipping past. And when one fails, its database is still there — one signed link and you are inside that backend, on that content, looking at what the test saw.</p>
     </div>
 
     <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
@@ -461,9 +461,9 @@ class Component extends DCLogic {
       paused: !this.state.rotating,
       toggleRotation: () => this.setState(s => ({ rotating: !s.rotating })),
       values: [
-        { d: 'M3 8h14m0 0-3-3m3 3-3 3M21 16H7m0 0 3-3m-3 3 3 3', title: 'Real end-to-end', lead: 'Rename a field in TCA and the suite fails.', body: 'Pages and content elements are posted to /typo3/record/edit, the route the backend itself uses on save — so a test breaks instead of passing against a shape the product no longer has.' },
-        { d: 'M12 3c-4.4 0-8 1.3-8 3s3.6 3 8 3 8-1.3 8-3-3.6-3-8-3Zm-8 3v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', title: 'A database per test file', lead: 'Run order stops mattering.', body: 'The template is built once per run and cloned in 27 ms, so every spec file can afford its own database — and nothing is shared to get the order wrong.' },
-        { d: 'M12 3 4 6v5c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-3Zm-3.5 8.5 2.5 2.5 4.5-4.5', title: 'Cleans up after itself', lead: 'Two runs can happen at once.', body: 'Teardown drops only the databases this run recorded. A run that leaks one fails in CI rather than filling a disk quietly.' },
+        { d: 'M3 8h14m0 0-3-3m3 3-3 3M21 16H7m0 0 3-3m-3 3 3 3', title: 'Real end-to-end', lead: 'Rename a field in TCA and the suite fails.', body: 'Pages and content elements are posted to /typo3/record/edit, the route the backend itself uses on save. A test breaks rather than passing against a shape the product no longer has.' },
+        { d: 'M12 3c-4.4 0-8 1.3-8 3s3.6 3 8 3 8-1.3 8-3-3.6-3-8-3Zm-8 3v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', title: 'A database per test file', lead: 'Run order stops mattering.', body: 'The template is built once per run and cloned in 27 ms, so every spec file can afford its own database. Nothing is shared, so nothing can be shared in the wrong order.' },
+        { d: 'M12 3 4 6v5c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-3Zm-3.5 8.5 2.5 2.5 4.5-4.5', title: 'Cleans up after itself', lead: 'Two runs can happen at once.', body: 'Teardown drops only the databases this run recorded. A run that leaks one fails in CI, so a full disk is never the first you hear of it.' },
         { d: 'm12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5m-18 4 9 5 9-5', title: 'TYPO3 11.5 – 14.3', lead: 'One codebase across four releases, on PHP 8.1 and up.', body: 'Everything version-dependent lives in one directory, so dropping a version is a deletion rather than an audit.' },
       ],
       packages: [
@@ -494,10 +494,10 @@ class Component extends DCLogic {
         { t: 'A browser cannot send the test-ID header, which is the whole reason the link exists.' },
       ],
       stats: [
-        { label: 'Per test file', value: '27 ms', note: 'What a private database costs, cloned from a seeded template on PostgreSQL 15+. Isolation stops being a trade-off.' },
+        { label: 'Per test file', value: '27 ms', note: 'What a private database costs, cloned from a seeded template on PostgreSQL 15+. You stop trading isolation for speed.' },
         { label: 'Content builders included', value: '22', note: 'Every content type a stock TYPO3 registers, typed. You write builders for your own elements only.' },
         { label: 'Values you must configure', value: '2', note: 'The testing URL and your project root. Everything else has a default you can leave alone.' },
-        { label: 'Login steps in your tests', value: '0', note: 'The backend session is seeded into the template database. No login form to drive, no auth fixture, no stored session to refresh.' },
+        { label: 'Login steps in your tests', value: '0', note: 'The backend session is seeded into the template database, so your tests never touch the login form and there is no stored session to keep fresh.' },
       ],
     };
   }
