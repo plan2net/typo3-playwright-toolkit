@@ -1,7 +1,8 @@
 import { getToolkitConfig } from '../config.js'
 import { toolkitHeaders } from '../contract.js'
 
-export const RECORD_EDIT_PATH = '/typo3/record/edit'
+/** Relative to the backend entry point, which a project may have moved. */
+export const RECORD_EDIT_ROUTE = '/record/edit'
 
 /** Shaped like a DataHandler datamap: table → identifier → fields. */
 export type RecordDataMap = Record<string, Record<string, Record<string, unknown>>>
@@ -21,6 +22,7 @@ export interface FormPoster {
 
 export interface EditContext {
     baseUrl: string
+    backendPath: string
     testId: string
     routeToken: string
 }
@@ -54,7 +56,7 @@ export async function saveRecord(
 
     const action = record.identifier.startsWith('NEW') ? 'new' : 'edit'
     const url =
-        `${context.baseUrl}${RECORD_EDIT_PATH}` +
+        `${context.baseUrl}${context.backendPath}${RECORD_EDIT_ROUTE}` +
         `?edit%5B${record.table}%5D%5B${record.target}%5D=${action}` +
         `&token=${encodeURIComponent(context.routeToken)}`
 

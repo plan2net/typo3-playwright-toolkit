@@ -36,6 +36,22 @@ describe('resolveRequestContext', () => {
         expect(resolved.baseUrl).toBe('https://example-testing.test')
     })
 
+    // The session endpoint reports it; a builder used outside a pair has none.
+    it('assumes the stock backend path when none is given', () => {
+        const resolved = resolveRequestContext(pageAt('https://site.test'), { testId: 'ABCD1234EFGH5678' })
+
+        expect(resolved.backendPath).toBe('/typo3')
+    })
+
+    it('prefers an explicit backend path', () => {
+        const resolved = resolveRequestContext(pageAt('https://site.test'), {
+            testId: 'ABCD1234EFGH5678',
+            backendPath: '/admin',
+        })
+
+        expect(resolved.backendPath).toBe('/admin')
+    })
+
     it('prefers an explicit base url', () => {
         const resolved = resolveRequestContext(pageAt('https://site.test/typo3'), {
             testId: 'ABCD1234EFGH5678',

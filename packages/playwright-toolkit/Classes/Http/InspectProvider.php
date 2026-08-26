@@ -82,7 +82,7 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
 
     public static function backendRedirect(string $testId, string $cookieValue): ResponseInterface
     {
-        return new RedirectResponse('/typo3/', 302, [
+        return new RedirectResponse(BackendSettings::entryPoint() . '/', 302, [
             'Set-Cookie' => [
                 self::cookieHeader(TestContext::TEST_ID_COOKIE, $testId),
                 self::cookieHeader(BackendSettings::cookieName(), $cookieValue),

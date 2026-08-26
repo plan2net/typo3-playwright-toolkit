@@ -89,6 +89,7 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
                 'sessionId' => $userSession->getIdentifier(),
                 'cookieName' => BackendSettings::cookieName(),
                 'cookieValue' => $cookieValue,
+                'backendPath' => BackendSettings::entryPoint(),
                 'userId' => $userSession->getUserId(),
                 'testId' => $testId,
                 'tokens' => $this->routeTokens($request, $cookieValue),

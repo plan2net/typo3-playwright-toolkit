@@ -126,6 +126,18 @@ final class BackendSessionProviderTest extends FunctionalTestCase
         self::assertSame('be_project_user', $payload['cookieName'] ?? null);
     }
 
+    /** The builders post to record/edit under this path, and a project may move it. */
+    #[Test]
+    public function namesTheBackendEntryPoint(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['BE']['entryPoint'] = '/admin';
+        $this->seedSessionAndBackendUser();
+
+        $payload = $this->createSession();
+
+        self::assertSame('/admin', $payload['backendPath'] ?? null);
+    }
+
     // What the other three endpoints answer, so a wrong verb on a toolkit path is
     // not reported as a missing route.
     #[Test]

@@ -1,8 +1,13 @@
 import { getToolkitConfig } from '../config.js'
 import { ContextWithTestId, PageWithTestId } from '../types/playwright-extensions.js'
 
+/** TYPO3's own default for `BE/entryPoint`, which 11.5 and 12.4 have no setting for. */
+export const DEFAULT_BACKEND_PATH = '/typo3'
+
 export interface RequestContext {
     baseUrl: string
+    /** Where the backend routes answer, from `BE/entryPoint`; the session endpoint reports it. */
+    backendPath: string
     testId: string
     /** For `record_edit`; the session endpoint hands it out. */
     routeToken: string
@@ -47,6 +52,7 @@ export function resolveRequestContext(
         // Never derived from page.url(): the request carries the API secret, and a
         // page that navigated off-site must not decide where the builder posts it.
         baseUrl: explicit.baseUrl ?? getToolkitConfig().testingURL,
+        backendPath: explicit.backendPath ?? DEFAULT_BACKEND_PATH,
         testId: requireTestId(page, explicit.testId),
         routeToken: explicit.routeToken ?? '',
     }

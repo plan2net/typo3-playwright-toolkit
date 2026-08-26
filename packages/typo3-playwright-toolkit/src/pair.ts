@@ -4,6 +4,7 @@ import { getToolkitConfig, type ToolkitConfig } from './config.js'
 import { ensureState } from './state/ensure-state.js'
 import { applyPairOutcome, recordPairVerifyFailure } from './state/pair-outcome.js'
 import { sanitizePairKey } from './state/run-namespace.js'
+import { DEFAULT_BACKEND_PATH } from './builders/request-context.js'
 import { ContentBuilder } from './builders/content-builder.js'
 import { PageBuilder } from './builders/page-builder.js'
 import { ContextWithTestId, PageWithTestId } from './types/playwright-extensions.js'
@@ -45,7 +46,7 @@ export async function openAuthenticatedPage(
     config: ToolkitConfig,
     testId: string,
     name = '',
-): Promise<{ page: Page; routeToken: string; close: () => Promise<void> }> {
+): Promise<{ page: Page; routeToken: string; backendPath: string; close: () => Promise<void> }> {
     const headers = toolkitHeaders(config, testId)
     const context = await browser.newContext({ ignoreHTTPSErrors: true })
 
@@ -68,6 +69,7 @@ export async function openAuthenticatedPage(
         const session = (await response.json()) as {
             cookieName: string
             cookieValue: string
+            backendPath?: string
             tokens?: Record<string, string>
         }
         await context.addCookies([
@@ -84,6 +86,7 @@ export async function openAuthenticatedPage(
         return {
             page,
             routeToken: session.tokens?.record_edit ?? '',
+            backendPath: session.backendPath ?? DEFAULT_BACKEND_PATH,
             close: () => context.close(),
         }
     } catch (error) {
@@ -117,6 +120,7 @@ export function definePair<S = Record<string, never>>(setup?: (tools: SetupTools
                     const builderContext = {
                         testId,
                         baseUrl: config.testingURL,
+                        backendPath: session.backendPath,
                         routeToken: session.routeToken,
                     }
                     try {

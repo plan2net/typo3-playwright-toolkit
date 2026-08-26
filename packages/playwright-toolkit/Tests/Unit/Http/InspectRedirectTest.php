@@ -33,6 +33,27 @@ final class InspectRedirectTest extends TestCase
         parent::tearDown();
     }
 
+    #[Test]
+    public function opensTheStockBackendPath(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['BE']['entryPoint'] = '';
+
+        $response = InspectProvider::backendRedirect(self::TEST_ID, 'the-jwt');
+
+        self::assertSame(302, $response->getStatusCode());
+        self::assertSame('/typo3/', $response->getHeaderLine('location'));
+    }
+
+    #[Test]
+    public function opensTheConfiguredBackendPath(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['BE']['entryPoint'] = '/admin';
+
+        $response = InspectProvider::backendRedirect(self::TEST_ID, 'the-jwt');
+
+        self::assertSame('/admin/', $response->getHeaderLine('location'));
+    }
+
     /** A cookie under the wrong name lands on the login form instead of the backend. */
     #[Test]
     public function sendsTheSessionUnderTheConfiguredCookieName(): void

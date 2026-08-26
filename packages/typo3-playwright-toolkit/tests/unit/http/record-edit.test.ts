@@ -53,6 +53,7 @@ function fakePoster(
 
 const context = {
     baseUrl: 'https://example-testing.test',
+    backendPath: '/typo3',
     testId: TEST_ID,
     routeToken: 'the-route-token',
 }
@@ -75,6 +76,27 @@ describe('saveRecord', () => {
         expect(posted).toHaveLength(1)
         expect(posted[0].url).toBe(
             'https://example-testing.test/typo3/record/edit' +
+                '?edit%5Bpages%5D%5B1%5D=new&token=the-route-token',
+        )
+    })
+
+    // BE/entryPoint moves every backend route, record/edit included.
+    it('posts under the backend path the session endpoint named', async () => {
+        const { poster, posted } = fakePoster()
+
+        await saveRecord(
+            poster,
+            { ...context, backendPath: '/admin' },
+            {
+                table: 'pages',
+                identifier: 'NEWpage',
+                target: 1,
+                data: { pages: { NEWpage: { title: 'A page' } } },
+            },
+        )
+
+        expect(posted[0].url).toBe(
+            'https://example-testing.test/admin/record/edit' +
                 '?edit%5Bpages%5D%5B1%5D=new&token=the-route-token',
         )
     })

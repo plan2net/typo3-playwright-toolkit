@@ -68,7 +68,7 @@ The link is valid for 900 seconds. The secret is never in the URL.
 exactly that token for those inputs.
 
 The endpoint checks the signature, sets two cookies (the test ID and the backend
-session) and redirects to `/typo3/`. Both cookies are `HttpOnly`, `Secure` and
+session) and redirects to the backend. Both cookies are `HttpOnly`, `Secure` and
 `SameSite=Lax`, and both end when the browser closes.
 
 **Read the header first and the cookie only if there is no header.** Otherwise a
@@ -80,18 +80,26 @@ secret and a browser never sends it.
 ## Writing records
 
 There is no toolkit endpoint for creating content. The builders post to
-`/typo3/record/edit`, the same route the TYPO3 backend form uses. Keep it that way:
+`record/edit`, the same route the TYPO3 backend form uses. Keep it that way:
 if TYPO3 changes that route or its fields, the tests must fail rather than pass on
 an endpoint of our own.
 
 `POST /typo3/test-api/session` returns the session cookie and the tokens:
 
 ```json
-{ "cookieName": "be_typo_user", "cookieValue": "<cookie>", "tokens": { "record_edit": "…" } }
+{
+    "cookieName": "be_typo_user",
+    "cookieValue": "<cookie>",
+    "backendPath": "/typo3",
+    "tokens": { "record_edit": "…" }
+}
 ```
 
-**The cookie name is reported, never assumed.** `BE/cookieName` is a project's to
-change, so the extension reads it and the toolkit sets whatever it is told.
+**The names are reported, never assumed.** `BE/cookieName` and `BE/entryPoint` are
+both a project's to change, so the extension reads them and the toolkit uses what
+it is told — `cookieName` for the cookie it sets, `backendPath` for the route it
+posts to. `BE/entryPoint` exists only on TYPO3 13.4 and 14.3; on 11.5 and 12.4 the
+answer is always `/typo3`.
 
 The request may send a readable name for the test:
 
