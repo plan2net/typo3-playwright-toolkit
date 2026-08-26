@@ -1,6 +1,6 @@
 {
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1280, "h": 4300, "title": "Landing page", "print": "flow" }
+    { "file": "landing-page.dc.html", "x": 0, "y": 0, "w": 1280, "h": 4300, "title": "Landing page", "print": "flow" }
   ],
   "annotations": [
     {
@@ -25,5 +25,5 @@
       "text": "Every identifier is real\n\nDatabase names are deriveTestId(salt, scenarioKey, attempt) run for real, prefixed db.\nThe backend marker and the inspect listing show the scenario name — the spec file name\nwithout its directory or suffix — which is what the toolkit now writes."
     }
   ],
-  "launch": { "view": "focused", "file": "Main.dc.html" }
+  "launch": { "view": "focused", "file": "landing-page.dc.html" }
 }

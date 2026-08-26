@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'design/**'
+      - 'website/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: '22'
 
-      - run: node design/build-docs.mjs
+      - run: node website/build-site.mjs
 
       - uses: actions/upload-pages-artifact@v4
         with:

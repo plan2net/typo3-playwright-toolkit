@@ -13,7 +13,8 @@
 [![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
 
 Tests run at the same time without sharing data, so they cannot break each other.
-Content is created through the real TYPO3 backend, not from SQL fixtures.
+Content is created through the real TYPO3 backend, not from SQL fixtures — so a new
+test is a new file, and two people writing tests never meet in the same one.
 
 Three packages. You need all three:
 
@@ -235,3 +236,13 @@ ddev playwright test                # all tests
 ddev playwright test my-feature     # one file
 ddev playwright-ui                  # Playwright UI mode
 ```
+
+### Two people, two files
+
+A suite on SQL fixtures keeps its content in one file the whole team edits. Two
+people adding tests pick uids by hand in the same `pages.sql`, and git cannot merge
+that — the numbers mean something, so both halves of a conflict can look right and
+match neither test.
+
+Here the content belongs to the test that needs it. A new test is a new file, and
+nobody else's lines move.

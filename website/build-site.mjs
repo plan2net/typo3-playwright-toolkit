@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Builds site/ — what GitHub Pages serves — from Main.dc.html. */
+/** Builds site/ — what GitHub Pages serves — from landing-page.dc.html. */
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -13,7 +13,7 @@ const TITLE = 'TYPO3 Playwright Toolkit'
 const DESCRIPTION =
     'End-to-end tests for TYPO3 with a throwaway database per test file, content built through the real backend, and a signed link into every failure.'
 
-const source = fs.readFileSync(path.join(here, 'Main.dc.html'), 'utf-8')
+const source = fs.readFileSync(path.join(here, 'landing-page.dc.html'), 'utf-8')
 
 function between(text, open, close) {
     const start = text.indexOf(open)
@@ -133,6 +133,9 @@ body = body.replace(/data-copy(?=[\s>])/g, () => `data-copy="${escapeAttribute(c
 
 body = body.replace(/onClick="\{\{ toggleRotation \}\}"/g, '')
 
+// A code block that scrolls has to be reachable by keyboard.
+body = body.replace(/<pre /g, '<pre tabindex="0" ')
+
 const hoverRules = []
 body = body.replace(/\s*style-hover="([^"]*)"/g, (whole, declarations) => {
     const name = `hv-${hoverRules.length}`
@@ -201,6 +204,46 @@ if (toggle) {
     })
     stillMedia.addEventListener('change', applyMotionPreference)
     applyMotionPreference()
+}
+
+// The run prints itself once, when it comes into view, and then stays. Hidden with
+// visibility so the terminal never changes height while the lines arrive.
+const runSteps = [...document.querySelectorAll('[data-run-line]'), ...document.querySelectorAll('[data-run-summary]')]
+
+if (runSteps.length > 0 && !stillMedia.matches) {
+    const pending = []
+    const reveal = (step) => {
+        step.style.visibility = 'visible'
+    }
+
+    runSteps.forEach((step) => {
+        step.style.visibility = 'hidden'
+    })
+
+    const play = () => {
+        runSteps.forEach((step, index) => {
+            pending.push(setTimeout(() => reveal(step), index * 420))
+        })
+    }
+
+    const watcher = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+            if (entry.isIntersecting) {
+                watcher.disconnect()
+                play()
+            }
+        }
+    }, { threshold: 0.35 })
+    watcher.observe(runSteps[0].closest('div'))
+
+    // Turned on part-way through: stop and show the finished run.
+    stillMedia.addEventListener('change', () => {
+        if (stillMedia.matches) {
+            watcher.disconnect()
+            pending.forEach(clearTimeout)
+            runSteps.forEach(reveal)
+        }
+    })
 }
 
 document.querySelectorAll('[data-copy]').forEach((button) => {
