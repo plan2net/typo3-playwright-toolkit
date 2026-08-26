@@ -6,7 +6,7 @@ namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database;
 
 use Plan2net\PlaywrightToolkit\Database\Driver\MysqlTestDatabaseDriver;
 
-final class DatabaseInitializerMysqlProvisionTest extends DatabaseInitializerServerProvisionTest
+final class DatabaseInitializerMysqlProvisionTest extends DatabaseInitializerServerProvisionTestCase
 {
     /**
      * @var string

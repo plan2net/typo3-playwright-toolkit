@@ -20,7 +20,7 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
  * pointed the Default connection at the per-test database, and nothing has created
  * it yet. Sqlite cannot show this — it creates a missing file on connect.
  */
-abstract class DatabaseInitializerServerProvisionTest extends FunctionalTestCase
+abstract class DatabaseInitializerServerProvisionTestCase extends FunctionalTestCase
 {
     /**
      * @var string

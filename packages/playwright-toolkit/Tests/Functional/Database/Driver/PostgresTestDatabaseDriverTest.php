@@ -9,7 +9,7 @@ use Plan2net\PlaywrightToolkit\Database\Driver\PostgresTestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\Driver\TemplateSeed;
 use PHPUnit\Framework\Attributes\Test;
 
-final class PostgresTestDatabaseDriverTest extends ServerTestDatabaseDriverTest
+final class PostgresTestDatabaseDriverTest extends ServerTestDatabaseDriverTestCase
 {
     // Its own template, so this suite cannot disturb a real run on the same server.
     /**

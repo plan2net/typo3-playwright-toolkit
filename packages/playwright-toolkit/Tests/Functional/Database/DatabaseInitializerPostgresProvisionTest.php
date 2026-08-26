@@ -14,7 +14,7 @@ use PHPUnit\Framework\Attributes\Test;
  * other session holds the template open — so this suite, not the mysql one, is
  * what pins that provisioning leaves no connection behind.
  */
-final class DatabaseInitializerPostgresProvisionTest extends DatabaseInitializerServerProvisionTest
+final class DatabaseInitializerPostgresProvisionTest extends DatabaseInitializerServerProvisionTestCase
 {
     /**
      * @var string

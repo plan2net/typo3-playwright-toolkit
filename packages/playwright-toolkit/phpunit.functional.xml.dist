@@ -8,8 +8,6 @@
     <testsuites>
         <testsuite name="functional">
             <directory>Tests/Functional</directory>
-            <exclude>Tests/Functional/Database/Driver/ServerTestDatabaseDriverTest.php</exclude>
-            <exclude>Tests/Functional/Database/DatabaseInitializerServerProvisionTest.php</exclude>
         </testsuite>
     </testsuites>
     <source>

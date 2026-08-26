@@ -9,7 +9,7 @@ use Plan2net\PlaywrightToolkit\Database\Driver\MysqlTestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\Driver\TemplateSeed;
 use PHPUnit\Framework\Attributes\Test;
 
-final class MysqlTestDatabaseDriverTest extends ServerTestDatabaseDriverTest
+final class MysqlTestDatabaseDriverTest extends ServerTestDatabaseDriverTestCase
 {
     // Its own template, so this suite cannot disturb a real run on the same server.
     /**

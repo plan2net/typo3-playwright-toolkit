@@ -14,7 +14,7 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
  * how the template is cloned, what survives the copy — belongs in the concrete
  * suites, not behind a hook here.
  */
-abstract class ServerTestDatabaseDriverTest extends FunctionalTestCase
+abstract class ServerTestDatabaseDriverTestCase extends FunctionalTestCase
 {
     /**
      * @var string

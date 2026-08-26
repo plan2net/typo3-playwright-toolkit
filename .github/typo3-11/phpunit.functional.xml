@@ -15,8 +15,6 @@
     <testsuites>
         <testsuite name="functional">
             <directory>public/typo3conf/ext/playwright_toolkit/Tests/Functional</directory>
-            <exclude>public/typo3conf/ext/playwright_toolkit/Tests/Functional/Database/Driver/ServerTestDatabaseDriverTest.php</exclude>
-            <exclude>public/typo3conf/ext/playwright_toolkit/Tests/Functional/Database/DatabaseInitializerServerProvisionTest.php</exclude>
         </testsuite>
     </testsuites>
     <php>
