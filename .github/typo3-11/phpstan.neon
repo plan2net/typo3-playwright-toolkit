@@ -1,4 +1,5 @@
-# Static analysis for the TYPO3 11 lane only. Delete with typo3-11.yml.
+# Static analysis for the TYPO3 11 row of typo3-versions only. Delete with 11.5
+# support; nothing else references it.
 #
 # Not phpstan.neon.dist: neither entry below is an error on 12-14, so putting
 # them there would be reported as unmatched and fail the main lane instead.

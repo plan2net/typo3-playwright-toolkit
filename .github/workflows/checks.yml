@@ -179,12 +179,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # 11.5 needs a config of its own: two findings that are errors only there.
+          - typo3: '11.5'
+            php: '8.1'
+            phpstan-config: .github/typo3-11/phpstan.neon
           - typo3: '12.4'
             php: '8.1'
+            phpstan-config: ''
           - typo3: '13.4'
             php: '8.2'
+            phpstan-config: ''
           - typo3: '14.3'
             php: '8.2'
+            phpstan-config: ''
     steps:
       - uses: actions/checkout@v7
 
@@ -204,6 +211,8 @@ jobs:
           # Supported releases of an older core carry advisories that ELTS covers;
           # they must not stop us from checking the API against them.
           composer config policy.advisories.block false
+          composer config minimum-stability dev
+          composer config prefer-stable true
           composer require --no-interaction --no-scripts --no-audit \
             plan2net/playwright-toolkit:@dev \
             "typo3/cms-core:^${{ matrix.typo3 }}" \
@@ -211,10 +220,15 @@ jobs:
             phpstan/phpstan:^2.1
 
       - name: Analyse against the real ${{ matrix.typo3 }} API
+        env:
+          PHPSTAN_CONFIG: ${{ matrix.phpstan-config }}
         run: |
           cd /tmp/matrix
+          config=()
+          [ -n "${PHPSTAN_CONFIG}" ] && config=(-c "$GITHUB_WORKSPACE/${PHPSTAN_CONFIG}")
           php -d memory_limit=1G vendor/bin/phpstan analyse \
             "$GITHUB_WORKSPACE/packages/playwright-toolkit/Classes" \
+            "${config[@]}" \
             --level=5 --autoload-file=vendor/autoload.php \
             --no-progress --error-format=table
 
@@ -255,3 +269,79 @@ jobs:
       - name: Check the shared library and commands
         working-directory: packages/ddev-typo3-playwright-toolkit
         run: shellcheck -S warning playwright-lib.sh commands/web/*
+
+  # The drivers skip themselves when no server answers, so without this job the
+  # postgres and mysql ones are only ever verified by hand. --fail-on-skipped is
+  # the whole point. Sqlite needs no job of its own: the version matrix above runs
+  # the functional suite on it for every supported core.
+  drivers:
+    name: test-database drivers (postgres + mysql)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/playwright-toolkit
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: db
+          POSTGRES_PASSWORD: db
+          POSTGRES_DB: db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: db
+          MARIADB_USER: db
+          MARIADB_PASSWORD: db
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_sqlite, pdo_pgsql, pdo_mysql, intl
+          coverage: none
+
+      - run: composer update --no-interaction --no-progress
+
+      # The same grant the add-on ships as init SQL. Applying it here means CI runs
+      # as the unprivileged `db` user a consumer has, not as root — MARIADB_USER is
+      # granted its own database only, and the driver creates and drops many.
+      # Installed rather than assumed: the runner image ships whichever client it
+      # ships, under whichever name, and that is not something to depend on.
+      - name: Install a MariaDB client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq mariadb-client
+
+      - name: Grant the test user what provisioning needs
+        run: |
+          mariadb -h 127.0.0.1 -P 3306 -uroot -proot \
+            < ../ddev-typo3-playwright-toolkit/mysql/db-test-init.sql
+
+      # --fail-on-skipped is the point of this job: these tests skip themselves
+      # when no server answers, so without it a broken service would look green.
+      - name: Driver suites against real servers
+        env:
+          typo3DatabaseDriver: pdo_sqlite
+          PW_TEST_POSTGRES_HOST: 127.0.0.1
+          PW_TEST_POSTGRES_USER: db
+          PW_TEST_POSTGRES_PASSWORD: db
+          PW_TEST_MYSQL_HOST: 127.0.0.1
+          PW_TEST_MYSQL_USER: db
+          PW_TEST_MYSQL_PASSWORD: db
+        run: >-
+          vendor/bin/phpunit -c phpunit.functional.xml.dist
+          --filter '(Postgres|Mysql)TestDatabaseDriverTest|TemplatePreparerMysqlTest|DatabaseInitializer(Postgres|Mysql)ProvisionTest'
+          --fail-on-skipped
