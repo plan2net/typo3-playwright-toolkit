@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
-import { saveRecord, type FormPoster } from '#src/http/record-edit.js'
+import { recordSaver, saveRecord, type FormPoster } from '#src/http/record-edit.js'
 
 const TEST_ID = 'ABCD1234EFGH5678'
 
@@ -220,5 +220,40 @@ describe('saveRecord', () => {
                 },
             ),
         ).rejects.toThrow(/route token/i)
+    })
+})
+
+// A consumer with its own table needs the same route the builders use; a scenario
+// setup has the token but no way to spend it.
+describe('recordSaver', () => {
+    it('writes an arbitrary table through the edit route', async () => {
+        const { poster, posted } = fakePoster({
+            status: 302,
+            location: '/typo3/record/edit?edit%5Btx_vendor_domain_model_thing%5D%5B42%5D=edit&token=abc',
+        })
+
+        const uid = await recordSaver(poster, context)({
+            table: 'tx_vendor_domain_model_thing',
+            identifier: '1',
+            target: 1,
+            data: { tx_vendor_domain_model_thing: { 1: { title: 'A thing' } } },
+        })
+
+        expect(uid).toBe(42)
+        expect(posted[0].url).toContain('edit%5Btx_vendor_domain_model_thing%5D%5B1%5D=edit')
+        expect(posted[0].multipart['data[tx_vendor_domain_model_thing][1][title]']).toBe('A thing')
+    })
+
+    it('refuses without a route token, rather than posting into a login redirect', async () => {
+        const { poster } = fakePoster()
+
+        await expect(
+            recordSaver(poster, { ...context, routeToken: '' })({
+                table: 'tx_vendor_domain_model_thing',
+                identifier: '1',
+                target: 1,
+                data: {},
+            }),
+        ).rejects.toThrow(/route token/)
     })
 })

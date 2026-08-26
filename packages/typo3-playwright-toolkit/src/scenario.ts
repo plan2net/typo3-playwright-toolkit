@@ -4,7 +4,13 @@ import { getToolkitConfig, type ToolkitConfig } from './config.js'
 import { ensureState } from './state/ensure-state.js'
 import { applyScenarioOutcome, recordTestFailure } from './state/scenario-outcome.js'
 import { sanitizeScenarioKey } from './state/run-namespace.js'
-import { DEFAULT_BACKEND_PATH, type ReplayFolder, type RequestContext } from './builders/request-context.js'
+import {
+    DEFAULT_BACKEND_PATH,
+    resolveRequestContext,
+    type ReplayFolder,
+    type RequestContext,
+} from './builders/request-context.js'
+import { recordSaver, type RecordToSave } from './http/record-edit.js'
 import { ContentBuilder } from './builders/content-builder.js'
 import { PageBuilder } from './builders/page-builder.js'
 import { ContextWithTestId, PageWithTestId } from './types/playwright-extensions.js'
@@ -25,6 +31,8 @@ export interface SetupTools {
     page: Page
     request: APIRequestContext
     builders: ScenarioBuilders
+    /** For a table no builder covers; returns the uid TYPO3 assigned. */
+    saveRecord(record: RecordToSave): Promise<number>
 }
 
 export interface ScenarioFixtures<S> {
@@ -190,6 +198,10 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
                                 page: () => new PageBuilder(session.page, builderContext),
                                 content: () => new ContentBuilder(session.page, builderContext),
                             },
+                            saveRecord: recordSaver(
+                                session.page.request,
+                                resolveRequestContext(session.page, builderContext),
+                            ),
                         })
                     } finally {
                         await session.close()

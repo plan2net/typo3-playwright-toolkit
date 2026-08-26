@@ -27,6 +27,14 @@ export interface EditContext {
     routeToken: string
 }
 
+/** Binds a poster and context so a scenario setup can write its own tables. */
+export function recordSaver(
+    poster: FormPoster,
+    context: EditContext,
+): (record: RecordToSave) => Promise<number> {
+    return (record) => saveRecord(poster, context, record)
+}
+
 export interface RecordToSave {
     table: string
     /** A `NEW` prefix creates; anything else is a uid the form opens for editing. */

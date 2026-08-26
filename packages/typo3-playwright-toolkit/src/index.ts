@@ -35,7 +35,7 @@ export {
     type ContentTypeMap,
     type CoreContentTypeMap,
 } from './builders/core-content.js'
-export type { RecordDataMap } from './http/record-edit.js'
+export type { RecordDataMap, RecordToSave } from './http/record-edit.js'
 export { newRecordIdentifier } from './builders/identifier.js'
 
 export { takeScreenshot, waitForAnimations } from './checks/screenshot.js'
