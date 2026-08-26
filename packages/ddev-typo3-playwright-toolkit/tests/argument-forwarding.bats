@@ -144,6 +144,21 @@ setup() {
     done
 }
 
+# The same bug one layer up, and the only part of it a hermetic test can reach.
+# Without this annotation DDEV joins the arguments into a shell string and
+# re-evaluates them before the command runs, so every argument test above passes
+# while `ddev playwright test --grep "two words"` still searches for two patterns
+# and `--grep 'a; echo x'` still runs the echo.
+@test "every command takes its arguments raw from ddev" {
+    for command in "${ADDON_DIR}"/commands/web/*; do
+        run grep -qE '^## ExecRaw: true$' "${command}"
+        [ "$status" -eq 0 ] || {
+            echo "${command} is missing '## ExecRaw: true'"
+            false
+        }
+    done
+}
+
 # A flattened string is the other half of the same bug: it loses boundaries even
 # without eval.
 @test "no command flattens arguments into a string" {

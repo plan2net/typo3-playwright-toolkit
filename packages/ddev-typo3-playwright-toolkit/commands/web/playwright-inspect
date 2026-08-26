@@ -4,6 +4,7 @@
 ## Description: Print links that open a kept test database in the backend
 ## Usage: playwright-inspect [test-file-pattern]
 ## Example: "ddev playwright-inspect" or "ddev playwright-inspect accordion"
+## ExecRaw: true
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "Usage: ddev playwright-inspect [test-file-pattern]"

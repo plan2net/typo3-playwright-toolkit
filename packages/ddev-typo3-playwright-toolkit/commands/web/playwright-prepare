@@ -3,6 +3,7 @@
 
 ## Description: Build the Playwright test database template
 ## Usage: playwright-prepare
+## ExecRaw: true
 
 set -e
 

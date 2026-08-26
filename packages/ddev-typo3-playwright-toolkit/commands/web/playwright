@@ -4,6 +4,7 @@
 ## Description: Run Playwright against fresh per-test databases
 ## Usage: playwright [subcommand] [options]
 ## Example: "ddev playwright test" or "ddev playwright test accordion --build"
+## ExecRaw: true
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "Usage: ddev playwright [subcommand] [options]"

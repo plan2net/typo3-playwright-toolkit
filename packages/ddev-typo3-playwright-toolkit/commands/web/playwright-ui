@@ -4,6 +4,7 @@
 ## Description: Open Playwright's UI mode in the browser
 ## Usage: playwright-ui [test-file-pattern] [options]
 ## Example: "ddev playwright-ui" or "ddev playwright-ui accordion"
+## ExecRaw: true
 
 set -e
 
