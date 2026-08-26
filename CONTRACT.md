@@ -90,6 +90,9 @@ an endpoint of our own.
 { "cookieName": "be_typo_user", "cookieValue": "<cookie>", "tokens": { "record_edit": "…" } }
 ```
 
+**The cookie name is reported, never assumed.** `BE/cookieName` is a project's to
+change, so the extension reads it and the toolkit sets whatever it is told.
+
 The request may send a readable name for the test:
 
 ```json

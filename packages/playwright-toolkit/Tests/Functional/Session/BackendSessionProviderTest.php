@@ -111,6 +111,21 @@ final class BackendSessionProviderTest extends FunctionalTestCase
         self::assertTrue($formProtection->validateToken($token, 'route', 'record_edit'));
     }
 
+    /**
+     * The toolkit sets the cookie the response names, so a project that renamed
+     * it would otherwise be handed one the backend never reads.
+     */
+    #[Test]
+    public function namesTheConfiguredBackendCookie(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['BE']['cookieName'] = 'be_project_user';
+        $this->seedSessionAndBackendUser();
+
+        $payload = $this->createSession();
+
+        self::assertSame('be_project_user', $payload['cookieName'] ?? null);
+    }
+
     // What the other three endpoints answer, so a wrong verb on a toolkit path is
     // not reported as a missing route.
     #[Test]
@@ -171,6 +186,24 @@ final class BackendSessionProviderTest extends FunctionalTestCase
                 Environment::isWindows() ? 'WINDOWS' : 'UNIX',
             );
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function createSession(): array
+    {
+        $request = (new ServerRequest('https://example.test/test-api/session', 'POST'))
+            ->withHeader(TestApiSecret::HEADER, $this->authenticate())
+            ->withHeader(TestContext::TEST_ID_HEADER, 'ABCD1234EFGH5678');
+
+        $response = $this->get(BackendSessionProvider::class)->process($request, $this->passThroughHandler());
+
+        $payload = json_decode((string) $response->getBody(), true);
+        self::assertIsArray($payload);
+        self::assertTrue($payload['success'] ?? false, (string) $response->getBody());
+
+        return $payload;
     }
 
     private function seedSessionAndBackendUser(): void

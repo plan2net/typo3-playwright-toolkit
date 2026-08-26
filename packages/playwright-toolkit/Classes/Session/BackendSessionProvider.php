@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Session;
 
 use Plan2net\PlaywrightToolkit\Compatibility\SessionCookieValue;
+use Plan2net\PlaywrightToolkit\Configuration\BackendSettings;
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 use Plan2net\PlaywrightToolkit\Database\DatabaseName;
@@ -33,11 +34,6 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
      * @var string
      */
     private const CREATE_SESSION_PATH = '/test-api/session';
-
-    /**
-     * @var string
-     */
-    private const COOKIE_NAME = 'be_typo_user';
 
     // The backend routes the builders post to; RouteDispatcher refuses each
     // without a token.
@@ -91,7 +87,7 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
                 'success' => true,
                 'message' => 'Backend session retrieved from fixture',
                 'sessionId' => $userSession->getIdentifier(),
-                'cookieName' => self::COOKIE_NAME,
+                'cookieName' => BackendSettings::cookieName(),
                 'cookieValue' => $cookieValue,
                 'userId' => $userSession->getUserId(),
                 'testId' => $testId,
@@ -124,7 +120,7 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
     private function routeTokens(ServerRequestInterface $request, string $cookieValue): array
     {
         $authenticated = $request->withCookieParams(
-            [...$request->getCookieParams(), self::COOKIE_NAME => $cookieValue]
+            [...$request->getCookieParams(), BackendSettings::cookieName() => $cookieValue]
         );
 
         $backendUser = GeneralUtility::makeInstance(BackendUserAuthentication::class);

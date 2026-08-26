@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Http;
 
 use Plan2net\PlaywrightToolkit\Compatibility\SessionCookieValue;
+use Plan2net\PlaywrightToolkit\Configuration\BackendSettings;
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use Plan2net\PlaywrightToolkit\Database\BorrowedConnection;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
@@ -28,11 +29,6 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
      * @var string
      */
     private const INSPECT_PATH = '/test-api/inspect';
-
-    /**
-     * @var string
-     */
-    private const BACKEND_COOKIE = 'be_typo_user';
 
     public function __construct(
         private readonly ToolkitConfigurationFactory $configurationFactory,
@@ -84,6 +80,16 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
         return implode('; ', [$name . '=' . rawurlencode($value), 'Path=/', 'HttpOnly', 'Secure', 'SameSite=Lax']);
     }
 
+    public static function backendRedirect(string $testId, string $cookieValue): ResponseInterface
+    {
+        return new RedirectResponse('/typo3/', 302, [
+            'Set-Cookie' => [
+                self::cookieHeader(TestContext::TEST_ID_COOKIE, $testId),
+                self::cookieHeader(BackendSettings::cookieName(), $cookieValue),
+            ],
+        ]);
+    }
+
     private function openBackend(string $testId): ResponseInterface
     {
         $cookieValue = $this->sessionCookieFor($testId);
@@ -91,12 +97,7 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
             return TestApi::error('No seeded session in that test database', 404);
         }
 
-        return new RedirectResponse('/typo3/', 302, [
-            'Set-Cookie' => [
-                self::cookieHeader(TestContext::TEST_ID_COOKIE, $testId),
-                self::cookieHeader(self::BACKEND_COOKIE, $cookieValue),
-            ],
-        ]);
+        return self::backendRedirect($testId, $cookieValue);
     }
 
     // The session row lives in the test database, and this request has no cookie yet.
