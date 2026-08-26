@@ -22,7 +22,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # One top-level directory, verified against DDEV itself: a tarball whose
       # files sit at the root makes DDEV treat the alphabetically first entry as
@@ -87,7 +87,7 @@ jobs:
     name: npm package
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:

@@ -24,7 +24,7 @@ jobs:
     name: extension (typo3 11.5 ELTS)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # 8.1 is the package's declared floor, and the only lane that runs its
       # tests there: php-floor parses the shipped files but executes nothing.
