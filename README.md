@@ -186,6 +186,16 @@ files, are in the
 Everything else has a default value — the
 **[npm README](packages/typo3-playwright-toolkit#configure)** lists all of them.
 
+### A working example
+
+Every file above exists in **[`tests/e2e/consumer/`](tests/e2e/consumer)**, a small
+TYPO3 project you can copy from.
+
+It cannot go out of date: CI installs all three packages into it on every push to
+`main`, on TYPO3 13.4 and 14.3, and runs a test that builds a page in the backend
+and checks the frontend shows it. That is the `e2e` badge at the top. Run it
+yourself with `tests/e2e/run.sh`.
+
 ## Writing a test
 
 One file is one pair: a setup function that creates content through the real

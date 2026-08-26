@@ -77,6 +77,14 @@ fastcgi_param TYPO3_CONTEXT $typo3_context;
 Important: a `.ddev/nginx/*.conf` file does not work here. DDEV includes those after
 the PHP location block, and nginx then ignores the value.
 
+A complete file is checked in at
+[`tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf`](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf)
+— copy from there.
+
+One catch: do not write DDEV's generated-file marker anywhere in that file, not even
+in a comment. DDEV looks for the string anywhere in the file and starts overwriting
+your config again.
+
 ### Database selection
 
 Point TYPO3 at the test database of the current request in
