@@ -37,8 +37,17 @@ interface ResolvedScenario<S> {
     testId: string
 }
 
-export function testName(key: string, attempt: number): string {
-    return attempt > 1 ? `${key} #${attempt}` : key
+/**
+ * What the backend shows beside the site name, so whoever opens an inspect link
+ * can tell which scenario they are looking at. The scenario key cannot do that
+ * job: it is a sanitised path with a hash on the end.
+ */
+export function scenarioName(file: string, attempt: number): string {
+    const fileName = file.split('/').pop() ?? file
+    const stripped = fileName.replace(/\.(spec|test)\.[cm]?[jt]sx?$/i, '')
+    const name = '' === stripped ? fileName : stripped
+
+    return attempt > 1 ? `${name} #${attempt}` : name
 }
 
 export async function openAuthenticatedPage(
@@ -116,7 +125,12 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
                         return {} as S
                     }
 
-                    const session = await openAuthenticatedPage(browser, config, testId, testName(key, attempt))
+                    const session = await openAuthenticatedPage(
+                        browser,
+                        config,
+                        testId,
+                        scenarioName(testInfo.file, attempt),
+                    )
                     const builderContext = {
                         testId,
                         baseUrl: config.testingURL,

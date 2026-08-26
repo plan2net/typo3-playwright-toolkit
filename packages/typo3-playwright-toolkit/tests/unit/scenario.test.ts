@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
-import { openAuthenticatedPage, testName } from '#src/scenario.js'
+import { openAuthenticatedPage, scenarioName } from '#src/scenario.js'
 
 function config(): ToolkitConfig {
     return {
@@ -121,12 +121,29 @@ describe('openAuthenticatedPage', () => {
     })
 })
 
-describe('testName', () => {
-    it('is the scenario key on the first attempt', () => {
-        expect(testName('accordion-simple', 1)).toBe('accordion-simple')
+// This lands in the backend's title bar next to the site name, so a person has to
+// recognise which of eight open tabs they are looking at. The scenario key cannot
+// do that job: it is a sanitised path with a hash on the end.
+describe('scenarioName', () => {
+    it('is the file name without its directory or suffix', () => {
+        expect(scenarioName('/srv/project/tests/news-archive-filter.spec.ts', 1)).toBe(
+            'news-archive-filter',
+        )
     })
 
-    it('says which retry it is on a later one', () => {
-        expect(testName('accordion-simple', 2)).toBe('accordion-simple #2')
+    it('drops the test suffix too', () => {
+        expect(scenarioName('tests/news.test.ts', 1)).toBe('news')
+    })
+
+    it('leaves everything else alone', () => {
+        expect(scenarioName('tests/my_page.editorial.spec.ts', 1)).toBe('my_page.editorial')
+    })
+
+    it('says which retry it is on a later attempt', () => {
+        expect(scenarioName('tests/checkout.spec.ts', 2)).toBe('checkout #2')
+    })
+
+    it('keeps the file name when there is nothing else left', () => {
+        expect(scenarioName('tests/.spec.ts', 1)).toBe('.spec.ts')
     })
 })
