@@ -16,7 +16,7 @@ the package a change belongs to.
   service and the `playwright`, `playwright-prepare` and `playwright-ui`
   commands. It touches no webserver configuration.
 - **playwright-toolkit** — TYPO3 extension (`playwright_toolkit`) for
-  TYPO3 11.5 (ELTS), 12.4, 13.4 and 14.3 on PHP 8.1 and up: a throwaway database per test
+  TYPO3 11.5 and 12.4 (both ELTS), 13.4 and 14.3 on PHP 8.1 and up: a throwaway database per test
   cloned from a fingerprinted template, a pre-seeded backend session and a real
   `record_edit` route token, plus health, records, inspect and cleanup endpoints.
   Every endpoint is gated on the Testing context and then on `TestApiSecret`.

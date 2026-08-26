@@ -27,8 +27,9 @@ service.
 - PHP 8.1 or newer
 - PostgreSQL, MySQL, MariaDB or SQLite
 
-TYPO3 11.5 is ELTS. CI verifies against the last public release, 11.5.41; ELTS
-releases are behind credentials and cannot be tested here.
+TYPO3 11.5 and 12.4 are both ELTS. CI verifies each against its last public
+release — 11.5.41 and 12.4.45 — because ELTS releases sit behind credentials and
+cannot be tested here.
 
 ## Install
 
