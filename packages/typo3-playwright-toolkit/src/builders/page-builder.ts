@@ -76,6 +76,7 @@ export class PageBuilder {
 
     async create(): Promise<{ id: string; slug: string }> {
         const context = resolveRequestContext(this.page, this.requestContext)
+        this.claimSlug(context)
         const identifier = newRecordIdentifier()
         const parentId = replayParentId(context, String(Number(this.fields.pid)))
 
@@ -109,6 +110,27 @@ export class PageBuilder {
         })
 
         return { id: pageId, slug: (this.fields.slug as string) || '' }
+    }
+
+    /**
+     * TYPO3 deduplicates a colliding slug on save, but create() reports the slug it
+     * asked for — so the second page's tests would quietly read the first page.
+     */
+    private claimSlug(context: RequestContext): void {
+        const slug = this.fields.slug
+        if ('string' !== typeof slug || '' === slug || !context.usedSlugs) {
+            return
+        }
+
+        if (context.usedSlugs.has(slug)) {
+            throw new Error(
+                `[typo3-playwright-toolkit] This scenario already created a page with the slug "${slug}". ` +
+                    'TYPO3 would store the second one under a different path, and every test reading it ' +
+                    'would land on the first page. Give them distinct slugs.',
+            )
+        }
+
+        context.usedSlugs.add(slug)
     }
 
     /**

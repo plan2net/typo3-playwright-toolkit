@@ -426,3 +426,48 @@ describe('the body an image element posts', () => {
         expect(withFixtureIdentifiers(posted[0], posted[0].dataMap)).toEqual(fixture)
     })
 })
+
+// TYPO3 deduplicates a colliding slug on save, but create() reports the slug it
+// asked for — so the second page's tests would quietly read the first page.
+describe('duplicate slugs within one scenario', () => {
+    it('refuses a slug another page already claimed', async () => {
+        const context = { routeToken: ROUTE_TOKEN, usedSlugs: new Set<string>() }
+        const first = fakePage(10)
+        const second = fakePage(11)
+
+        await new PageBuilder(first.page, context).withTitle('One').withSlug('/same').create()
+
+        await expect(
+            new PageBuilder(second.page, context).withTitle('Two').withSlug('/same').create(),
+        ).rejects.toThrow(/slug/)
+    })
+
+    it('allows the same slug in another scenario', async () => {
+        const first = fakePage(10)
+        const second = fakePage(11)
+
+        await new PageBuilder(first.page, { routeToken: ROUTE_TOKEN, usedSlugs: new Set() })
+            .withTitle('One')
+            .withSlug('/same')
+            .create()
+
+        await expect(
+            new PageBuilder(second.page, { routeToken: ROUTE_TOKEN, usedSlugs: new Set() })
+                .withTitle('Two')
+                .withSlug('/same')
+                .create(),
+        ).resolves.toMatchObject({ id: '11' })
+    })
+
+    // update() re-saves an existing page with its own slug.
+    it('does not trip when a page is updated', async () => {
+        const context = { routeToken: ROUTE_TOKEN, usedSlugs: new Set<string>() }
+        const { page } = fakePage(10)
+
+        await new PageBuilder(page, context).withTitle('One').withSlug('/same').create()
+
+        await expect(
+            new PageBuilder(page, context).withTitle('Renamed').withSlug('/same').update('10'),
+        ).resolves.toMatchObject({ id: '10' })
+    })
+})

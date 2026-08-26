@@ -18,6 +18,8 @@ export interface RequestContext {
     /** For `record_edit`; the session endpoint hands it out. */
     routeToken: string
     replayFolder?: ReplayFolder
+    /** Slugs already created in this scenario; TYPO3 would deduplicate a repeat. */
+    usedSlugs?: Set<string>
 }
 
 /** A fixture page as parent means the record moves into the folder; one the scenario made keeps it. */
@@ -64,6 +66,7 @@ export function resolveRequestContext(
 ): RequestContext {
     return {
         replayFolder: explicit.replayFolder,
+        usedSlugs: explicit.usedSlugs,
         // Never derived from page.url(): the request carries the API secret, and a
         // page that navigated off-site must not decide where the builder posts it.
         baseUrl: explicit.baseUrl ?? getToolkitConfig().testingURL,

@@ -90,6 +90,7 @@ export async function buildScenarioContext(
         baseUrl: config.testingURL,
         backendPath: session.backendPath,
         routeToken: session.routeToken,
+        usedSlugs: new Set(),
     }
 
     if (!config.replay) {
