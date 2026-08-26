@@ -195,6 +195,11 @@ does not work, because these are DDEV web commands.
 | `PW_RUN_ID` | generated | Names the run, so cleanup can tell runs apart |
 | `PW_UI_PORT` | `3000` | Port for UI mode |
 | `PW_SKIP_PREPARE` | unset | Same as `--skip-prepare`; use the flag instead |
+| `PW_TEST_CONNECT_WS_ENDPOINT` | unset | Browser server to drive instead of the local browsers — see [Browsers in a container of their own](#browsers-in-a-container-of-their-own) |
+| `PW_TEST_CONNECT_EXPOSE_NETWORK` | unset | Lets that browser reach your site through the web container; `*` covers everything |
+
+The last two are Playwright's own, read by the test run rather than by this add-on,
+so they work the same way outside DDEV.
 
 ## Troubleshooting
 
