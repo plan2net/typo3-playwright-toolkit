@@ -255,7 +255,9 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
     </div>
     <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.14);">
       <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">tests/news.spec.ts</div>
-      <pre style="margin:0; padding:20px 22px; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.8; color:#C9D2DE; overflow-x:auto;"><span style="color:#FFB151;">import</span> { defineScenario, expect } <span style="color:#FFB151;">from</span> <span style="color:#8FD48A;">'@plan2net/typo3-playwright-toolkit'&#10;&#10;</span><span style="color:#7FB8E8;">export const</span> test = defineScenario(<span style="color:#FFB151;">async</span> ({ builders }) =&gt; {
+      <pre style="margin:0; padding:20px 22px; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.8; color:#C9D2DE; overflow-x:auto;"><span style="color:#FFB151;">import</span> {
+    defineScenario, expect, expectScreenshot,
+} <span style="color:#FFB151;">from</span> <span style="color:#8FD48A;">'@plan2net/typo3-playwright-toolkit'&#10;&#10;</span><span style="color:#7FB8E8;">export const</span> test = defineScenario(<span style="color:#FFB151;">async</span> ({ builders }) =&gt; {
     <span style="color:#7FB8E8;">const</span> page = <span style="color:#FFB151;">await</span> builders.page()
         .withTitle(<span style="color:#8FD48A;">'Newsroom'</span>).withSlug(<span style="color:#8FD48A;">'/newsroom'</span>).create()
 
@@ -271,6 +273,8 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
 
     <span style="color:#FFB151;">await</span> expect(page.getByRole(<span style="color:#8FD48A;">'heading'</span>, { name: <span style="color:#8FD48A;">'Latest'</span> }))
         .toBeVisible()
+
+    <span style="color:#949DAC;">// Fonts, images and animations have settled.&#10;</span>    <span style="color:#FFB151;">await</span> expectScreenshot(page, <span style="color:#8FD48A;">'newsroom'</span>)
 })</pre>
       <div style="padding:12px 18px; border-top:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">Content is posted to <span style="color:#C9D2DE;">/typo3/record/edit</span> — the route the backend itself uses on save, request token included.</div>
     </div>

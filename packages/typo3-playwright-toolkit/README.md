@@ -220,21 +220,21 @@ prepareContext: async (context) => {
 
 ### Screenshots
 
-`takeScreenshot` waits for fonts, images and animations, hides the selectors from
+`expectScreenshot` waits for fonts, images and animations, hides the selectors from
 `hideBeforeScreenshot`, and then compares against the stored image.
 
 ```ts
-import { takeScreenshot } from '@plan2net/typo3-playwright-toolkit'
+import { expectScreenshot } from '@plan2net/typo3-playwright-toolkit'
 
-await takeScreenshot(page, 'my-page')                             // the whole page
-await takeScreenshot(page, 'accordion', { include: '.accordion' }) // one element
+await expectScreenshot(page, 'my-page')                             // the whole page
+await expectScreenshot(page, 'accordion', { include: '.accordion' }) // one element
 ```
 
 The name carries no file extension; Playwright adds `.png` and the platform suffix
 itself. The first run writes the missing image and fails, as Playwright always does.
 Every other option is passed on to `toHaveScreenshot`.
 
-`takeScreenshot` waits for animations itself. When you interact and then assert
+`expectScreenshot` waits for animations itself. When you interact and then assert
 without a screenshot — an accessibility scan after opening an accordion, say — wait
 first:
 

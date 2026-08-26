@@ -18,7 +18,7 @@ export function buildHideStyles(selectors: string[]): string {
 }
 
 /**
- * takeScreenshot already waits; call this when you interact and then assert
+ * expectScreenshot already waits; call this when you interact and then assert
  * without one, such as an accessibility scan after opening an accordion.
  */
 export async function waitForAnimations(page: Page, selector?: string, timeout = 5000): Promise<void> {
@@ -136,7 +136,7 @@ export function hiddenSelectors(configured: string[] | undefined, perCall: strin
     return perCall ?? configured ?? []
 }
 
-export async function takeScreenshot(
+export async function expectScreenshot(
     target: Page | Locator,
     name: string,
     options: ScreenshotOptions = {},

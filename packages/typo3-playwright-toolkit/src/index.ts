@@ -38,7 +38,7 @@ export {
 export type { RecordDataMap, RecordToSave } from './http/record-edit.js'
 export { newRecordIdentifier } from './builders/identifier.js'
 
-export { takeScreenshot, waitForAnimations } from './checks/screenshot.js'
+export { expectScreenshot, waitForAnimations } from './checks/screenshot.js'
 export {
     runAccessibilityScan,
     scanAccessibility,

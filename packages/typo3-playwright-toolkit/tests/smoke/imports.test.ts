@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
     PageBuilder,
     ContentBuilder,
-    takeScreenshot,
+    expectScreenshot,
     defineToolkitConfig,
     TEST_ID_HEADER,
     TEST_ID_PATTERN,
@@ -32,7 +32,7 @@ describe('public API smoke', () => {
         expect(PageBuilder).toBeTypeOf('function')
         expect(ContentBuilder).toBeTypeOf('function')
         expect(createContent).toBeTypeOf('function')
-        expect(takeScreenshot).toBeTypeOf('function')
+        expect(expectScreenshot).toBeTypeOf('function')
         expect(defineScenario).toBeTypeOf('function')
         expect(defineToolkitConfig).toBeTypeOf('function')
         expect(TEST_ID_HEADER).toBe('X-Playwright-Test-Id')
