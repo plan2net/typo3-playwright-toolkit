@@ -12,11 +12,6 @@ final class InspectToken
      */
     public const PURPOSE = 'inspect';
 
-    /**
-     * @var int
-     */
-    public const LIFETIME_SECONDS = 300;
-
     public static function mint(string $secret, string $testId, int $expiresAt): string
     {
         return $expiresAt . '.' . self::signature($secret, $testId, $expiresAt);
@@ -39,6 +34,24 @@ final class InspectToken
         }
 
         return hash_equals(self::signature($secret, $testId, $expiresAt), $parts[1]);
+    }
+
+    /** True only for a token this secret really signed, whose expiry has passed. */
+    public static function lapsed(string $secret, string $testId, string $token, int $now): bool
+    {
+        if ('' === $secret) {
+            return false;
+        }
+
+        $parts = explode('.', $token, 2);
+        if (2 !== \count($parts) || '' === $parts[1] || 1 !== preg_match('/^\d+$/', $parts[0])) {
+            return false;
+        }
+
+        $expiresAt = (int) $parts[0];
+
+        return $expiresAt < $now
+            && hash_equals(self::signature($secret, $testId, $expiresAt), $parts[1]);
     }
 
     private static function signature(string $secret, string $testId, int $expiresAt): string

@@ -65,7 +65,11 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
         }
 
         if (!$this->secret->matchesInspectToken($testId, $token)) {
-            $this->logger?->warning('Refused an inspect link with a bad or expired token.');
+            if ($this->secret->inspectTokenLapsed($testId, $token)) {
+                return TestApi::error('This inspect link expired. Run playwright-inspect again.', 401);
+            }
+
+            $this->logger?->warning('Refused an inspect link with a bad token.');
 
             return TestApi::error('Unauthorized', 401);
         }

@@ -54,7 +54,6 @@ final class InspectLinkAuthenticationTest extends FunctionalTestCase
             'no token at all' => [self::TEST_ID, ''],
             'a token that is not a token' => [self::TEST_ID, 'let-me-in'],
             'a signature for another test id' => [self::TEST_ID, '__OTHER__'],
-            'an expired token' => [self::TEST_ID, '__EXPIRED__'],
             'a token signed with another secret' => [self::TEST_ID, '__FOREIGN__'],
             'a test id that is not contract shaped' => ['../../etc/passwd', '__VALID__'],
         ];
@@ -68,6 +67,26 @@ final class InspectLinkAuthenticationTest extends FunctionalTestCase
 
         self::assertSame(401, $response->getStatusCode());
         self::assertSame([], $response->getHeader('Set-Cookie'));
+    }
+
+    // The expiry is plain text in the link, so naming it gives nothing away.
+    #[Test]
+    public function tellsTheHolderOfAnExpiredLinkToMintAnother(): void
+    {
+        $response = $this->call(self::TEST_ID, InspectToken::mint($this->secret, self::TEST_ID, time() - 1));
+
+        self::assertSame(401, $response->getStatusCode());
+        self::assertSame([], $response->getHeader('Set-Cookie'));
+        self::assertStringContainsString('expired', (string) $response->getBody());
+        self::assertStringContainsString('playwright-inspect', (string) $response->getBody());
+    }
+
+    #[Test]
+    public function saysNothingAboutExpiryWhenTheSignatureIsWrong(): void
+    {
+        $response = $this->call(self::TEST_ID, InspectToken::mint('not-the-secret', self::TEST_ID, time() - 1));
+
+        self::assertStringNotContainsString('expired', (string) $response->getBody());
     }
 
     #[Test]

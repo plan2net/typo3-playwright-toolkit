@@ -88,6 +88,11 @@ final class TestApiSecret
         return InspectToken::verify((string) $this->resolve(), $testId, $token, time());
     }
 
+    public function inspectTokenLapsed(string $testId, string $token): bool
+    {
+        return InspectToken::lapsed((string) $this->resolve(), $testId, $token, time());
+    }
+
     public function file(): string
     {
         return $this->secretFile;
