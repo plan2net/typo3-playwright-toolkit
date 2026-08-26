@@ -1,4 +1,9 @@
-# typo3-playwright-toolkit
+<p align="center">
+  <img src="packages/playwright-toolkit/Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
+</p>
+<h1 align="center">typo3-playwright-toolkit</h1>
+<p align="center"><em>Playwright end-to-end tests for TYPO3, with one test database per test.</em></p>
+<br>
 
 [![checks](https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/checks.yml/badge.svg)](https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/checks.yml)
 [![e2e](https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/e2e.yml/badge.svg)](https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/e2e.yml)
@@ -6,7 +11,6 @@
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
 [![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
 
-Playwright end-to-end tests for TYPO3, with **one test database per test**.
 Tests run at the same time without sharing data, so they cannot break each other.
 Content is created through the real TYPO3 backend, not from SQL fixtures.
 

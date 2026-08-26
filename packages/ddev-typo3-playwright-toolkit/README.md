@@ -1,4 +1,9 @@
-# ddev-typo3-playwright-toolkit
+<p align="center">
+  <img src="../playwright-toolkit/Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
+</p>
+<h1 align="center">ddev-typo3-playwright-toolkit</h1>
+<p align="center"><em>The test-database service and the ddev playwright commands.</em></p>
+<br>
 
 [![e2e](https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/e2e.yml/badge.svg)](https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/e2e.yml)
 [![DDEV](https://img.shields.io/badge/DDEV-1.25%2B-02c7e6)](https://ddev.com)

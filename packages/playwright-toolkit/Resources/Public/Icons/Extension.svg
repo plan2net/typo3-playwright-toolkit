@@ -1,5 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Playwright API">
-  <rect width="64" height="64" rx="8" fill="#1f2937"/>
-  <circle cx="32" cy="32" r="16" fill="none" stroke="#34d399" stroke-width="4"/>
-  <path d="M27 24l12 8-12 8z" fill="#34d399"/>
-</svg>
+<svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg"><path d="m11 103.3v4.5l64.1 35.8 63.6-35.7v-4.6l-63.6 35.8z"/><path d="m23.3 89.7 51.7 29.5 51.6-29.4-51.4-27.7z" fill="#c6c6c6"/><path d="m11 66.8v9.6l64 36.5 63.7-36.5v-9.6l-63.7-34.3z"/><path d="m11.1 41.3v9.6l63.9 36.7 63.7-36.6v-9.7l-63.7-34.8z" fill="#ff8212"/><path d="m11.1 41.3v9.6l63.9 36.7v-9.5z" fill="#bf6714"/><path d="m75.1 28.2c-7.8.1-15.2 1.8-19.6 5.8-3 2.8-4.5 6.5-3.8 10 1.9 8.3 11.8 13 23.8 13s21.8-4.8 22.5-13.4c.3-5.4-4.2-13.3-19-15.1z" fill="none" stroke="#fff" stroke-miterlimit="9.9998" stroke-width="3"/><path d="m74.4 29.8c-4.6 0-11.6 1.2-15.4 3.8s-5.6 5.4-5.6 9.1c0 6.7 9.3 12.8 21.6 12.8s21.5-4.7 21.5-13.2c-.2-5-7.2-12.5-22.1-12.5z" fill="#ff8212"/><path d="m67.9 35v14.6l19.8-7.7" fill="#fff"/></svg>

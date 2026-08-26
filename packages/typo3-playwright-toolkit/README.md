@@ -1,4 +1,9 @@
-# @plan2net/typo3-playwright-toolkit
+<p align="center">
+  <img src="../playwright-toolkit/Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
+</p>
+<h1 align="center">@plan2net/typo3-playwright-toolkit</h1>
+<p align="center"><em>Playwright fixtures and content builders for TYPO3, one test database per test.</em></p>
+<br>
 
 [![npm](https://img.shields.io/npm/v/@plan2net/typo3-playwright-toolkit)](https://www.npmjs.com/package/@plan2net/typo3-playwright-toolkit)
 [![Node](https://img.shields.io/badge/Node-22.12%2B-5fa04e)](https://nodejs.org)

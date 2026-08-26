@@ -1,4 +1,9 @@
-# plan2net/playwright-toolkit
+<p align="center">
+  <img src="Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
+</p>
+<h1 align="center">plan2net/playwright-toolkit</h1>
+<p align="center"><em>One test database per test, and a ready-made backend session, for TYPO3.</em></p>
+<br>
 
 [![Packagist](https://img.shields.io/packagist/v/plan2net/playwright-toolkit)](https://packagist.org/packages/plan2net/playwright-toolkit)
 [![TYPO3](https://img.shields.io/badge/TYPO3-11.5%20%7C%2012.4%20%7C%2013.4%20%7C%2014.3-orange)](https://get.typo3.org)
