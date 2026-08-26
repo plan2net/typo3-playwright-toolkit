@@ -25,6 +25,9 @@ final class InspectRedirectTest extends TestCase
     {
         parent::setUp();
         $this->backendConfiguration = $GLOBALS['TYPO3_CONF_VARS']['BE'] ?? [];
+        // A booted TYPO3 always has this; 11.5 reads it without a null coalesce,
+        // so leaving it unset warns there and nowhere else.
+        $GLOBALS['TYPO3_CONF_VARS']['BE']['cookieName'] = 'be_typo_user';
     }
 
     protected function tearDown(): void
