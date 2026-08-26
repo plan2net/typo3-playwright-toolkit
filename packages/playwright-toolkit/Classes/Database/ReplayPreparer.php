@@ -32,11 +32,10 @@ final class ReplayPreparer
             ));
         }
 
-        $database = (string) ($connection['dbname'] ?? '');
         $configuration = $this->configurationFactory->create();
 
-        // Shared, the same way cloning a test database takes it: a concurrent
-        // playwright:prepare must not replace the template midway through.
+        // Shared, like every clone: a concurrent playwright:prepare must not
+        // replace the template midway through.
         $handle = $this->lockFiles->open($this->lockFiles->templateLock());
 
         try {
@@ -45,12 +44,13 @@ final class ReplayPreparer
             }
 
             $this->readiness->assertPrepared($driver, $configuration);
-            $driver->replaceBaseDatabase($database);
+            // Cleanup refuses this name, so a clean start has to come from here.
+            $driver->materialise(DatabaseName::REPLAY_TEST_ID);
         } finally {
             flock($handle, LOCK_UN);
             fclose($handle);
         }
 
-        return $database;
+        return DatabaseName::forTestId(DatabaseName::REPLAY_TEST_ID);
     }
 }

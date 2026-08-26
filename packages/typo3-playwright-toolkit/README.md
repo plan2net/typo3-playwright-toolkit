@@ -377,15 +377,15 @@ one rather than rebuilding anything.
 
 ### Replay mode
 
-`PW_REPLAY=1` runs every scenario's setup against the site's own database rather
-than a per-test one, so all the content the suite builds ends up in one place you
-can browse and export. `ddev playwright-replay` sets it, rebuilds that database from
-the template first, and prints a backend link when the run ends.
+`PW_REPLAY=1` runs every scenario's setup into one shared database rather than a
+per-test one, so all the content the suite builds ends up in a single place you can
+browse and export. `ddev playwright-replay` sets it, rebuilds that database from the
+template first, and prints a backend link when the run ends.
 
-What changes while it is set: no test ID goes on the wire, each scenario's content
-goes into a sysfolder named after it under the fixture root, slugs keep no test-ID
-suffix, setups run once with no retry, the tests themselves are skipped, and teardown
-drops nothing.
+What changes while it is set: every scenario uses the one fixed test ID
+`REPLAY0000000000`, its content goes into a sysfolder named after it under the
+fixture root, slugs keep no test-ID suffix, setups run once with no retry, the tests
+themselves are skipped, and teardown drops nothing.
 
 ## Troubleshooting
 

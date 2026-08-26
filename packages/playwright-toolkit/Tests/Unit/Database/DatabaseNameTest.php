@@ -19,6 +19,41 @@ final class DatabaseNameTest extends TestCase
     }
 
     #[Test]
+    public function mapsTheReplayTestIdToTheBaseDatabase(): void
+    {
+        self::assertSame('db', DatabaseName::forTestId(DatabaseName::REPLAY_TEST_ID));
+    }
+
+    #[Test]
+    public function theReplayTestIdIsContractShaped(): void
+    {
+        self::assertMatchesRegularExpression(TestContext::TEST_ID_PATTERN, DatabaseName::REPLAY_TEST_ID);
+    }
+
+    #[Test]
+    public function provisioningAcceptsTheReplayDatabase(): void
+    {
+        DatabaseName::assertProvisionable(DatabaseName::forTestId(DatabaseName::REPLAY_TEST_ID));
+
+        self::assertSame('db', DatabaseName::forTestIdChecked(DatabaseName::REPLAY_TEST_ID));
+    }
+
+    // Only the CLI may rebuild it; nothing that reaches the wire drops a bare "db".
+    #[Test]
+    public function theReplayDatabaseIsNeverDroppable(): void
+    {
+        self::assertFalse(DatabaseName::isDroppable(DatabaseName::forTestId(DatabaseName::REPLAY_TEST_ID)));
+    }
+
+    #[Test]
+    public function anEmptyTestIdStillReachesNoDatabase(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        DatabaseName::forTestIdChecked('');
+    }
+
+    #[Test]
     public function readsTheTestIdBackOut(): void
     {
         self::assertSame('ABCD1234EFGH5678', DatabaseName::testIdOf('dbABCD1234EFGH5678'));

@@ -14,7 +14,6 @@ final class ReplayPreparerTest extends FunctionalTestCase
         'plan2net/playwright-toolkit',
     ];
 
-    // Replay rebuilds a database on the db-test service; a sqlite file is not one.
     #[Test]
     public function refusesToReplayOnSqlite(): void
     {

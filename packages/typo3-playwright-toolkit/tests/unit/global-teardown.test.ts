@@ -11,6 +11,7 @@ import {
     resolvePreservePlan,
 } from '#src/global-teardown.js'
 import type { ToolkitConfig } from '#src/config.js'
+import { REPLAY_TEST_ID } from '#src/contract.js'
 import type { CleanupClient, CleanupOutcome, CleanupResult, SweepReport } from '#src/http/cleanup-client.js'
 import { readAttempts, registerAttempt } from '#src/state/attempt-registry.js'
 import { recordScenarioFailure } from '#src/state/scenario-state.js'
@@ -105,7 +106,7 @@ describe('runTeardown', () => {
                 secret: 'shh',
             })
 
-            expect(summary.replayUrl).toContain('/typo3/test-api/inspect?replay=1&t=')
+            expect(summary.replayUrl).toContain(`/typo3/test-api/inspect?id=${REPLAY_TEST_ID}&t=`)
         })
 
         it('reports no leak, so a replay never fails the run', async () => {

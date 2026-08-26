@@ -172,9 +172,9 @@ their assertions and screenshot baselines belong to a per-test database.
 The run ends by printing a link that logs you into that database's backend. The
 database is rebuilt from the template on every replay, so nothing accumulates.
 
-That database is the one the testing site uses when no test is running, and the
-`db-test` service exists for exactly this. It is never the database you develop
-against — that one lives in DDEV's own `db` service and is not touched.
+It is the plain `db` on the `db-test` container, which exists for exactly this and
+holds nothing else. The database you develop against lives in DDEV's own `db`
+service and is never touched.
 
 UI mode runs in the web container, so the browsers must be installed there:
 

@@ -4,6 +4,7 @@ import { saveRecord, type RecordDataMap } from '../http/record-edit.js'
 import { replayParentId, requireTestId, resolveRequestContext, type RequestContext } from './request-context.js'
 import { coerceFields } from './fields.js'
 import { newRecordIdentifier } from './identifier.js'
+import { getToolkitConfig } from '../config.js'
 
 interface Fields {
     [key: string]: string | number | boolean | undefined | CropConfig
@@ -44,14 +45,17 @@ export class PageBuilder {
         return this
     }
 
-    /** The test ID is appended so two runs never claim the same URL; replay has none. */
+    /** The test ID is appended so two runs never claim the same URL. */
     withSlug(slug: string): this {
         const testId = requireTestId(this.page, this.requestContext?.testId)
 
         let normalizedSlug = slug.startsWith('/') ? slug : `/${slug}`
         normalizedSlug = normalizedSlug.endsWith('/') ? normalizedSlug.slice(0, -1) : normalizedSlug
 
-        this.fields.slug = testId ? `${normalizedSlug}-${testId.toLowerCase()}` : normalizedSlug
+        // One database, so nothing to keep apart, and the slugs stay exportable.
+        this.fields.slug = getToolkitConfig().replay
+            ? normalizedSlug
+            : `${normalizedSlug}-${testId.toLowerCase()}`
         return this
     }
 

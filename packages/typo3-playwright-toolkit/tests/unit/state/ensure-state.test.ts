@@ -5,7 +5,7 @@ import * as path from 'path'
 import type { ToolkitConfig } from '#src/config.js'
 import { configForRun } from '../../helpers.js'
 import { deriveTestId, ensureState } from '#src/state/ensure-state.js'
-import { TEST_ID_PATTERN } from '#src/contract.js'
+import { REPLAY_TEST_ID, TEST_ID_PATTERN } from '#src/contract.js'
 import { readAttempts } from '#src/state/attempt-registry.js'
 import { commitScenarioState, readScenarioState, readScenarioFailure, recordScenarioFailure } from '#src/state/scenario-state.js'
 import { ensureRunNamespace, runPaths, runSalt } from '#src/state/run-namespace.js'
@@ -238,6 +238,27 @@ describe('ensureState — retries', () => {
         expect(outcome.status).toBe('ready')
         expect(seen).toHaveLength(2)
         expect(seen[0]).not.toBe(seen[1])
+    })
+
+    // Every scenario of a replay run shares one database, so they share its id.
+    it('uses the fixed replay test id for every scenario', async () => {
+        const seen: string[] = []
+        const replay = { ...config, replay: true }
+
+        for (const key of ['one', 'two']) {
+            await ensureState(replay, {
+                key,
+                triggerId: 't1',
+                setup: async ({ testId }) => {
+                    seen.push(testId)
+
+                    return {}
+                },
+                ...noWait,
+            })
+        }
+
+        expect(seen).toEqual([REPLAY_TEST_ID, REPLAY_TEST_ID])
     })
 
     // A retry would mint a second folder beside the first attempt's half-built one.

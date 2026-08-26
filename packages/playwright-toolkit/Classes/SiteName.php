@@ -14,7 +14,12 @@ final class SiteName
     /**
      * @var string
      */
-    private const MARKER_PATTERN = '/ \[(?:[^\]]* · )?[A-Z0-9]{16}\]$/u';
+    private const MARKER_PATTERN = '/ \[(?:(?:[^\]]* · )?[A-Z0-9]{16}|replay)\]$/u';
+
+    /**
+     * @var string
+     */
+    private const REPLAY_MARKER = 'replay';
 
     /**
      * @var string
@@ -45,6 +50,11 @@ final class SiteName
         $plain = (string) preg_replace(self::MARKER_PATTERN, '', $siteName);
         if ('' === $testId) {
             return $plain;
+        }
+
+        // It holds every scenario, so naming one of them says nothing.
+        if (DatabaseName::REPLAY_TEST_ID === $testId) {
+            return $plain . ' [' . self::REPLAY_MARKER . ']';
         }
 
         $marker = '' === $name ? $testId : $name . self::NAME_SEPARATOR . $testId;

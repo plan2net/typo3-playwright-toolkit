@@ -1,7 +1,0 @@
-{
-    "_comment": "The subject is the literal 'replay' where a test ID goes, so a replay link needs no test database.",
-    "secret": "contract-fixture-secret",
-    "subject": "replay",
-    "expiresAt": 1800000000,
-    "token": "1800000000.57ea3ccdca2f29006cbaf14c8f9e25d3a8c847421e4c4d7a39f745d74c3fa19e"
-}

@@ -10,6 +10,13 @@ use Plan2net\PlaywrightToolkit\TestContext;
 final class DatabaseName
 {
     /**
+     * A real test ID on the wire — that is what points the connection at the test
+     * service — but it maps to the bare base database below.
+     *
+     * @var string
+     */
+    public const REPLAY_TEST_ID = 'REPLAY0000000000';
+    /**
      * Must stay in step with TestContext::TEST_ID_PATTERN and DATABASE_PREFIX.
      *
      * @var string
@@ -25,12 +32,19 @@ final class DatabaseName
 
     public static function forTestId(string $testId): string
     {
-        return TestContext::DATABASE_PREFIX . $testId;
+        return self::REPLAY_TEST_ID === $testId
+            ? TestContext::DATABASE_PREFIX
+            : TestContext::DATABASE_PREFIX . $testId;
     }
 
     public static function forTestIdChecked(string $testId): string
     {
         $databaseName = self::forTestId($testId);
+
+        // Only this ID reaches the bare name; an empty or malformed one still throws.
+        if (self::REPLAY_TEST_ID === $testId) {
+            return $databaseName;
+        }
 
         if (!self::isDroppable($databaseName)) {
             throw new \InvalidArgumentException(

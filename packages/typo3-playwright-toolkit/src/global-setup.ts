@@ -1,6 +1,6 @@
 import { getToolkitConfig, type ToolkitConfig } from './config.js'
 import { prepareRun } from './state/run-namespace.js'
-import { TEST_ID_HEADER, generateTestId } from './contract.js'
+import { REPLAY_TEST_ID, TEST_ID_HEADER, generateTestId } from './contract.js'
 import { SECRET_HEADER, resolveApiSecret } from './http/api-secret.js'
 import { registerSetupAttempt } from './state/attempt-registry.js'
 
@@ -140,13 +140,9 @@ async function globalSetup(): Promise<void> {
     // behind a database teardown can no longer reach.
     await verifyApiVersion(config)
 
-    // Minting an ID here would create a database replay's teardown never drops.
-    if (config.replay) {
-        return
-    }
-
+    // Replay checks its own database; a throwaway one its teardown never drops.
     await runHealthCheck(config.testingURL, {
-        testId: preflightTestId(config),
+        testId: config.replay ? REPLAY_TEST_ID : preflightTestId(config),
         secret: resolveApiSecret(config),
     })
 }

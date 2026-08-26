@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit;
 
+use Plan2net\PlaywrightToolkit\Database\DatabaseName;
 use Plan2net\PlaywrightToolkit\SiteName;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -62,6 +63,31 @@ final class SiteNameTest extends TestCase
     public function fallsBackToTheIdAloneWhenNoNameWasStored(): void
     {
         self::assertSame('Acme [ABCD1234EFGH5678]', SiteName::marked('Acme', 'ABCD1234EFGH5678', ''));
+    }
+
+    #[Test]
+    public function marksAReplayDatabaseByName(): void
+    {
+        self::assertSame(
+            'Acme [replay]',
+            SiteName::marked('Acme', DatabaseName::REPLAY_TEST_ID, 'whichever-ran-last')
+        );
+    }
+
+    #[Test]
+    public function doesNotStackTheReplayMarker(): void
+    {
+        $once = SiteName::marked('Acme', DatabaseName::REPLAY_TEST_ID);
+
+        self::assertSame($once, SiteName::marked($once, DatabaseName::REPLAY_TEST_ID));
+    }
+
+    #[Test]
+    public function replacesAReplayMarkerWithATestOne(): void
+    {
+        $replay = SiteName::marked('Acme', DatabaseName::REPLAY_TEST_ID);
+
+        self::assertSame('Acme [ABCD1234EFGH5678]', SiteName::marked($replay, 'ABCD1234EFGH5678'));
     }
 
     #[Test]

@@ -107,28 +107,3 @@ describe('requireTestId', () => {
         expect(() => requireTestId(pageAt('https://site.test/typo3'))).toThrow(/test ID/)
     })
 })
-
-describe('replay mode', () => {
-    beforeEach(() => {
-        setToolkitConfig({
-            testingURL: 'https://example-testing.test',
-            replay: true,
-            paths: {
-                consumerRoot: '/srv/project',
-                stateDir: '/srv/project/.test-state',
-                sessionDir: '/srv/project/var/session',
-            },
-        })
-    })
-
-    it('requireTestId answers empty instead of throwing', () => {
-        expect(requireTestId(pageAt('https://site.test/typo3'))).toBe('')
-    })
-
-    it('resolveRequestContext resolves without a test id', () => {
-        const resolved = resolveRequestContext(pageAt('https://site.test/typo3'))
-
-        expect(resolved.testId).toBe('')
-        expect(resolved.baseUrl).toBe('https://example-testing.test')
-    })
-})

@@ -2,12 +2,7 @@ import { describe, expect, it } from 'vitest'
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
-import {
-    mintInspectToken,
-    replayInspectUrl,
-    INSPECT_TOKEN_LIFETIME_MS,
-    REPLAY_SUBJECT,
-} from '#src/inspect/token.js'
+import { mintInspectToken, INSPECT_TOKEN_LIFETIME_MS } from '#src/inspect/token.js'
 
 const fixture = JSON.parse(
     fs.readFileSync(
@@ -39,40 +34,5 @@ describe('mintInspectToken', () => {
 
     it('outlives reading the list and picking a database from it', () => {
         expect(INSPECT_TOKEN_LIFETIME_MS).toBe(900_000)
-    })
-})
-
-describe('replayInspectUrl', () => {
-    it('asks for the replayed database instead of a test one', () => {
-        const url = new URL(replayInspectUrl('https://example-testing.test', 'shh', 1_700_000_000_000))
-
-        expect(url.pathname).toBe('/typo3/test-api/inspect')
-        expect(url.searchParams.get('replay')).toBe('1')
-        expect(url.searchParams.get('id')).toBeNull()
-    })
-
-    it('signs the replay subject the extension verifies', () => {
-        const url = new URL(replayInspectUrl('https://example-testing.test', 'shh', 1_700_000_000_000))
-        const expiresAt = Math.floor((1_700_000_000_000 + INSPECT_TOKEN_LIFETIME_MS) / 1000)
-
-        expect(url.searchParams.get('t')).toBe(mintInspectToken('shh', REPLAY_SUBJECT, expiresAt))
-    })
-
-    // The extension verifies this token; both sides are pinned to the fixture.
-    it('mints exactly the token the contract fixture records', () => {
-        const replayFixture = JSON.parse(
-            fs.readFileSync(
-                path.resolve(
-                    path.dirname(fileURLToPath(import.meta.url)),
-                    '../../../../../contract/inspect-replay-token.json',
-                ),
-                'utf-8',
-            ),
-        ) as { secret: string; subject: string; expiresAt: number; token: string }
-
-        expect(REPLAY_SUBJECT).toBe(replayFixture.subject)
-        expect(mintInspectToken(replayFixture.secret, REPLAY_SUBJECT, replayFixture.expiresAt)).toBe(
-            replayFixture.token,
-        )
     })
 })

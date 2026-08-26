@@ -65,26 +65,18 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
             return $refusal;
         }
 
-        $payload = json_decode((string) $request->getBody(), true);
-        $payload = is_array($payload) ? $payload : [];
-
         $testId = $request->getHeaderLine(TestContext::TEST_ID_HEADER);
-        // Replay sends no test ID, so it has to say so: a lost header still gets 401.
-        $replay = '' === $testId && true === ($payload['replay'] ?? null);
-
-        if ('' === $testId && !$replay) {
+        if ('' === $testId) {
             return TestApi::error('Missing ' . TestContext::TEST_ID_HEADER . ' header', 401);
         }
 
         // The same rule the database layer applies, so a header it would reject
         // cannot mint a backend session here. Never echo the value back.
-        if (!$replay && 1 !== preg_match(TestContext::TEST_ID_PATTERN, $testId)) {
+        if (1 !== preg_match(TestContext::TEST_ID_PATTERN, $testId)) {
             return TestApi::error('Malformed ' . TestContext::TEST_ID_HEADER . ' header', 401);
         }
 
-        if (!$replay) {
-            $this->rememberTestName($payload, $testId);
-        }
+        $this->rememberTestName($request, $testId);
 
         try {
             $preseededSessionId = $this->configurationFactory->create()->preseededSessionId;
@@ -110,14 +102,16 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
         }
     }
 
-    /**
-     * Stored, not sent per request: an inspect session has cookies and no headers.
-     *
-     * @param array<string, mixed> $payload
-     */
-    private function rememberTestName(array $payload, string $testId): void
+    /** Stored, not sent per request: an inspect session has cookies and no headers. */
+    private function rememberTestName(ServerRequestInterface $request, string $testId): void
     {
-        if (!is_string($payload['name'] ?? null)) {
+        // Every scenario of a replay run would overwrite the one before it.
+        if (DatabaseName::REPLAY_TEST_ID === $testId) {
+            return;
+        }
+
+        $payload = json_decode((string) $request->getBody(), true);
+        if (!is_array($payload) || !is_string($payload['name'] ?? null)) {
             return;
         }
 

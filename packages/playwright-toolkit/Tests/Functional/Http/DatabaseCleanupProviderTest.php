@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Http;
 
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
+use Plan2net\PlaywrightToolkit\Database\DatabaseName;
 use Plan2net\PlaywrightToolkit\Http\DatabaseCleanupProvider;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -172,6 +173,18 @@ final class DatabaseCleanupProviderTest extends FunctionalTestCase
             $body['results']
         );
         self::assertFileExists($this->databaseFile('BBBB2222BBBB2222'), 'dropped a database we never claimed');
+    }
+
+    // A whole replay run's content lives there.
+    #[Test]
+    public function refusesToDropTheReplayDatabase(): void
+    {
+        $body = $this->json($this->post([DatabaseName::REPLAY_TEST_ID]));
+
+        self::assertSame(
+            [['testId' => DatabaseName::REPLAY_TEST_ID, 'outcome' => 'refused']],
+            $body['results']
+        );
     }
 
     #[Test]

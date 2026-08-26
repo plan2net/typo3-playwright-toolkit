@@ -5,6 +5,9 @@ import { SECRET_HEADER, resolveApiSecret } from './http/api-secret.js'
 export const TEST_ID_HEADER = 'X-Playwright-Test-Id'
 export const TEST_ID_PATTERN = /^[A-Z0-9]{16}$/
 
+/** Replay's own test ID; the extension maps it to the throwaway base database. */
+export const REPLAY_TEST_ID = 'REPLAY0000000000'
+
 const TEST_ID_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 const TEST_ID_LENGTH = 16
 
@@ -26,5 +29,5 @@ export function toolkitHeaders(config: ToolkitConfig, testId: string): Record<st
 
 /** What routing and the request client add. No secret: that stays explicit. */
 export function browserHeaders(testId: string): Record<string, string> {
-    return '' === testId ? {} : { [TEST_ID_HEADER]: testId }
+    return { [TEST_ID_HEADER]: testId }
 }

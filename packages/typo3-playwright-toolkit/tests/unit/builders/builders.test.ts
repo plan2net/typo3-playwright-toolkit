@@ -63,7 +63,7 @@ function toDataMap(fields: Record<string, string>): RecordDataMap {
  * and `request.post()`. Answers the way the backend does — a redirect naming the
  * saved uid, or a rendered page when it refused the save.
  */
-function fakePage(uid: number, refusalBody?: string, testId: string | undefined = TEST_ID) {
+function fakePage(uid: number, refusalBody?: string, testId: string = TEST_ID) {
     const posted: Posted[] = []
 
     const page = {
@@ -223,7 +223,7 @@ describe('PageBuilder', () => {
 
     it('keeps the slug unsuffixed in replay mode', async () => {
         setToolkitConfig({ ...config(), replay: true })
-        const { posted, page } = fakePage(1, undefined, '')
+        const { posted, page } = fakePage(1)
 
         await pageBuilder(page).withTitle('A page').withSlug('/my-page').create()
 
@@ -241,7 +241,7 @@ describe('replay folder redirect', () => {
     })
 
     it('moves a page anchored at a fixture page into the folder', async () => {
-        const { posted, page } = fakePage(1, undefined, '')
+        const { posted, page } = fakePage(1)
 
         await new PageBuilder(page, anchored()).withTitle('A page').atParentId(1).create()
 
@@ -249,7 +249,7 @@ describe('replay folder redirect', () => {
     })
 
     it('keeps a page anchored at one the scenario created', async () => {
-        const { posted, page } = fakePage(1, undefined, '')
+        const { posted, page } = fakePage(1)
         const context = anchored()
         context.replayFolder.ownPages.add('42')
 
@@ -259,7 +259,7 @@ describe('replay folder redirect', () => {
     })
 
     it('records the pages it creates so their children stay put', async () => {
-        const { page } = fakePage(77, undefined, '')
+        const { page } = fakePage(77)
         const context = anchored()
 
         await new PageBuilder(page, context).withTitle('A page').create()
@@ -269,7 +269,7 @@ describe('replay folder redirect', () => {
 
     // uids are per table, so a tt_content 42 must not make a fixture page 42 look owned.
     it('does not record content elements as pages', async () => {
-        const { page } = fakePage(42, undefined, '')
+        const { page } = fakePage(42)
         const context = anchored()
 
         await new ContentBuilder(page, context).onPage('900').ofType('header').create()
@@ -278,7 +278,7 @@ describe('replay folder redirect', () => {
     })
 
     it('does not record an updated page', async () => {
-        const { page } = fakePage(5, undefined, '')
+        const { page } = fakePage(5)
         const context = anchored()
 
         await new PageBuilder(page, context).withTitle('Renamed').update('5')
@@ -287,7 +287,7 @@ describe('replay folder redirect', () => {
     })
 
     it('moves a content element anchored at a fixture page into the folder', async () => {
-        const { posted, page } = fakePage(3, undefined, '')
+        const { posted, page } = fakePage(3)
 
         await new ContentBuilder(page, anchored()).onPage('1').ofType('header').create()
 

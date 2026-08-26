@@ -5,7 +5,7 @@ import * as path from 'path'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
 import globalSetup, { preflightTestId, runHealthCheck, verifyApiVersion } from '#src/global-setup.js'
 import { configForRun } from '../helpers.js'
-import { TEST_ID_HEADER, TEST_ID_PATTERN } from '#src/contract.js'
+import { REPLAY_TEST_ID, TEST_ID_HEADER, TEST_ID_PATTERN } from '#src/contract.js'
 import { readAttempts } from '#src/state/attempt-registry.js'
 import { ensureRunNamespace } from '#src/state/run-namespace.js'
 
@@ -142,21 +142,21 @@ describe('globalSetup', () => {
     })
 })
 
-// The health check needs a test ID, and minting one would leave a database behind.
+// A random preflight id would leave a database replay's teardown never drops.
 describe('globalSetup in replay mode', () => {
-    it('probes the version but runs no preflight', async () => {
+    it('preflights the replay database and registers no attempt of its own', async () => {
         const seen: Record<string, string>[] = []
         vi.stubGlobal('fetch', async (_url: string, init?: { headers?: Record<string, string> }) => {
             seen.push(init?.headers ?? {})
             return new Response(JSON.stringify({ ok: true, api: 1, checks: {} }), { status: 200 })
         })
-        setToolkitConfig({ ...config, replay: true })
+        const replay = { ...config, replay: true }
+        setToolkitConfig(replay)
 
         await globalSetup()
 
-        expect(seen).toHaveLength(1)
-        expect(seen[0][TEST_ID_HEADER]).toBeUndefined()
-        expect(readAttempts({ ...config, replay: true })).toEqual([])
+        expect(seen[1][TEST_ID_HEADER]).toBe(REPLAY_TEST_ID)
+        expect(readAttempts(replay)).toEqual([])
     })
 })
 

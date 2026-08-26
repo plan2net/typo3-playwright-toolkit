@@ -17,6 +17,7 @@ import {
     stillOwns,
 } from './setup-lock.js'
 import { claimNextAttempt, highestClaimedAttempt } from './attempt-claim.js'
+import { REPLAY_TEST_ID } from '../contract.js'
 
 export const SETUP_DEFAULTS = {
     attemptTimeoutMs: 90_000,
@@ -203,7 +204,7 @@ export async function ensureState<S>(
             throw giveUp(config, key, triggerId, failures, reason, now() - startedAt)
         }
 
-        const testId = deriveTestId(runSalt(config), key, attempt)
+        const testId = config.replay ? REPLAY_TEST_ID : deriveTestId(runSalt(config), key, attempt)
         registerAttempt(config, { key, name, attempt, testId, nonce })
 
         const heartbeat = setInterval(() => heartbeatSetupLock(paths.locksDir, key, nonce), 1_000)

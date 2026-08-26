@@ -61,6 +61,9 @@ export async function createScenarioFolder(
     const folder = await new PageBuilder(page, builderContext)
         .withTitle(name)
         .withField('doktype', SYSFOLDER_DOKTYPE)
+        // Or TYPO3 derives one from the title and the scenario's own page,
+        // wanting "/news" too, has to take "/news-1".
+        .withField('slug', `/replay-${name}`)
         .atParentId(FIXTURE_ROOT_ID)
         .create()
 
@@ -108,7 +111,7 @@ export async function openAuthenticatedPage(
 
         const response = await page.request.post(`${config.testingURL}/typo3/test-api/session`, {
             headers,
-            data: config.replay ? { name, replay: true } : { name },
+            data: { name },
         })
         if (!response.ok()) {
             throw new Error(`[setup] Session creation failed (${response.status()}): ${await response.text()}`)

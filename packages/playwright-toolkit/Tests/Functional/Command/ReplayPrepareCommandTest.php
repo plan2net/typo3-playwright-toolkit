@@ -19,7 +19,6 @@ final class ReplayPrepareCommandTest extends FunctionalTestCase
         'plan2net/playwright-toolkit',
     ];
 
-    // It drops the site's own database, so every other context must refuse it.
     #[Test]
     #[DataProvider('contextsThatMustNeverReplay')]
     public function refusesToReplaceAnythingOutsideATestingContext(string $context): void

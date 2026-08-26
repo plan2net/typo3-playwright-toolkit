@@ -5,7 +5,8 @@ import { httpCleanup, type CleanupClient } from './http/cleanup-client.js'
 import { readAttemptsFrom, readRegisteredTestIds } from './state/attempt-registry.js'
 import { listRunIds, runLastActiveMs, runPaths, runsRoot } from './state/run-namespace.js'
 import { assertDeletableDirectory, safeJoin } from './state/safe-paths.js'
-import { inspectUrl, replayInspectUrl } from './inspect/token.js'
+import { inspectUrl } from './inspect/token.js'
+import { REPLAY_TEST_ID } from './contract.js'
 import { recordReplayTarget } from './inspect/replay-target.js'
 import { resolveApiSecret } from './http/api-secret.js'
 
@@ -225,7 +226,8 @@ export async function runTeardown(config: ToolkitConfig, options: TeardownOption
             dropped: 0,
             leaked: [],
             preserved: [],
-            replayUrl: '' === secret ? undefined : replayInspectUrl(config.testingURL, secret, Date.now()),
+            replayUrl:
+                '' === secret ? undefined : inspectUrl(config.testingURL, secret, REPLAY_TEST_ID, Date.now()),
         }
     }
 

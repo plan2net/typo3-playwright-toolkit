@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
 import { buildScenarioContext, createScenarioFolder, openAuthenticatedPage, scenarioName } from '#src/scenario.js'
 import type { RecordDataMap } from '#src/http/record-edit.js'
+import { REPLAY_TEST_ID } from '#src/contract.js'
 
 function config(): ToolkitConfig {
     return {
@@ -128,23 +129,12 @@ describe('openAuthenticatedPage', () => {
 })
 
 describe('openAuthenticatedPage in replay mode', () => {
-    const replayConfig = (): ToolkitConfig => ({ ...config(), replay: true })
-
-    it('asks for a replay session and sends no test-ID header', async () => {
+    it('sends the replay test id like any other', async () => {
         const { browser, state } = fakeBrowser('never')
 
-        await openAuthenticatedPage(browser as never, replayConfig(), '')
+        await openAuthenticatedPage(browser as never, { ...config(), replay: true }, REPLAY_TEST_ID)
 
-        expect(state.postedData).toMatchObject({ replay: true })
-        expect(state.postedHeaders).not.toHaveProperty('X-Playwright-Test-Id')
-        expect(state.postedHeaders).toHaveProperty('X-Playwright-Toolkit-Secret')
-    })
-
-    it('says nothing about replay on a normal run', async () => {
-        const { browser, state } = fakeBrowser('never')
-
-        await openAuthenticatedPage(browser as never, config(), 'ABCD1234EFGH5678')
-
+        expect(state.postedHeaders).toHaveProperty('X-Playwright-Test-Id', REPLAY_TEST_ID)
         expect(state.postedData).not.toHaveProperty('replay')
     })
 })
@@ -155,7 +145,8 @@ describe('createScenarioFolder', () => {
 
         const page = {
             url: () => 'https://example-testing.test/typo3',
-            context: () => ({}),
+            context: () => ({ testId: REPLAY_TEST_ID }),
+            testId: REPLAY_TEST_ID,
             request: {
                 post: async (_url: string, options: { multipart: Record<string, string> }) => {
                     posted.push({ fields: options.multipart })
@@ -200,6 +191,16 @@ describe('createScenarioFolder', () => {
         expect(record).toMatchObject({ doktype: '254', title: 'news', pid: '1' })
     })
 
+    // Without its own slug TYPO3 derives one from the title, and the scenario's
+    // page then has to take "/news-1" because its folder took "/news".
+    it('takes a namespaced slug so it cannot claim a page slug', async () => {
+        const { posted, page } = folderPage(900)
+
+        await createScenarioFolder(page as never, { routeToken: 'tok' }, 'news')
+
+        expect(Object.values(dataMap(posted[0].fields).pages)[0].slug).toBe('/replay-news')
+    })
+
     it('answers the folder uid with nothing claimed yet', async () => {
         const { page } = folderPage(900)
 
@@ -216,7 +217,7 @@ describe('createScenarioFolder', () => {
         it('carries the folder in replay mode', async () => {
             const { page } = folderPage(900)
 
-            const context = await buildScenarioContext(page as never, replayConfig(), session, '', 'news')
+            const context = await buildScenarioContext(page as never, replayConfig(), session, REPLAY_TEST_ID, 'news')
 
             expect(context.replayFolder?.id).toBe('900')
         })
@@ -225,7 +226,7 @@ describe('createScenarioFolder', () => {
         it('creates the folder without an anchor of its own', async () => {
             const { posted, page } = folderPage(900)
 
-            await buildScenarioContext(page as never, replayConfig(), session, '', 'news')
+            await buildScenarioContext(page as never, replayConfig(), session, REPLAY_TEST_ID, 'news')
 
             expect(Object.values(dataMap(posted[0].fields).pages)[0]).toMatchObject({ pid: '1' })
         })

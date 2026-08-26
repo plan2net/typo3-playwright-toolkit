@@ -9,7 +9,6 @@ use Plan2net\PlaywrightToolkit\Configuration\BackendSettings;
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use Plan2net\PlaywrightToolkit\Database\BorrowedConnection;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
-use Plan2net\PlaywrightToolkit\Security\InspectToken;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\TestContext;
 use Psr\Http\Message\ResponseInterface;
@@ -57,10 +56,6 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
         $testId = trim((string) ($parameters['id'] ?? ''));
         $token = trim((string) ($parameters['t'] ?? ''));
 
-        if ('1' === ($parameters['replay'] ?? null)) {
-            return $this->openReplayBackend($token);
-        }
-
         if (1 !== preg_match(TestContext::TEST_ID_PATTERN, $testId)) {
             return TestApi::error('Unauthorized', 401);
         }
@@ -93,44 +88,6 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
                 self::cookieHeader(BackendSettings::cookieName(), $cookieValue),
             ],
         ]);
-    }
-
-    private function openReplayBackend(string $token): ResponseInterface
-    {
-        if (!$this->secret->matchesInspectToken(InspectToken::REPLAY_SUBJECT, $token)) {
-            if ($this->secret->inspectTokenLapsed(InspectToken::REPLAY_SUBJECT, $token)) {
-                return TestApi::error('This inspect link expired. Run ddev playwright-replay again.', 401);
-            }
-
-            $this->logger?->warning('Refused a replay inspect link with a bad token.');
-
-            return TestApi::error('Unauthorized', 401);
-        }
-
-        // No overrides: with no test ID this request is already on that database.
-        try {
-            $cookieValue = SessionCookieValue::of(
-                UserSessionManager::create('BE')
-                    ->createSessionFromStorage($this->configurationFactory->create()->preseededSessionId)
-            );
-        } catch (\Throwable $e) {
-            $this->logger?->warning('Could not open the seeded session.', ['exception' => $e]);
-
-            return TestApi::error('No seeded session in the replayed database', 404);
-        }
-
-        return new RedirectResponse(BackendSettings::entryPoint() . '/', 302, [
-            'Set-Cookie' => [
-                // One left by an earlier inspect link would redirect to its database.
-                self::expiredCookieHeader(TestContext::TEST_ID_COOKIE),
-                self::cookieHeader(BackendSettings::cookieName(), $cookieValue),
-            ],
-        ]);
-    }
-
-    private static function expiredCookieHeader(string $name): string
-    {
-        return implode('; ', [$name . '=', 'Path=/', 'Max-Age=0', 'HttpOnly', 'Secure', 'SameSite=Lax']);
     }
 
     private function openBackend(string $testId): ResponseInterface

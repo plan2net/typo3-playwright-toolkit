@@ -37,7 +37,8 @@ can send a junk header, and the toolkit did not send it.
 `CREATE DATABASE` and `DROP DATABASE`. `DatabaseName::assertProvisionable()` is the
 gate and must stay in front of both.
 
-**Never assume the `db` database has test data.** Only a per-test database has it.
+**Never assume the `db` database has test data.** Only a per-test database has it —
+and the replay run below, which is the one exception and says so.
 
 ## The project's own file
 
@@ -92,36 +93,30 @@ cookie left in a browser changes what a test run does.
 A cookie can select a database but never create one, because creating one needs the
 secret and a browser never sends it.
 
-## Replay: no test ID at all
+## Replay: one test ID, one database
 
-`ddev playwright-replay` runs every scenario's setup against the site's *own*
-database, so all the content it builds ends up in one place a person can browse. A
-replay request therefore sends **no** `X-Playwright-Test-Id` at all — an empty header
-would still read as one, so `toolkitHeaders()` omits it — and nothing is provisioned:
-`TestContext::testId()` answers `''`, the Default connection is left alone, and
-`DatabaseInitializer` returns early.
+`ddev playwright-replay` runs every scenario's *setup* into a single database, so all
+the content the suite builds can be browsed and exported in one place. It carries an
+ordinary test ID on the wire — the fixed `REPLAY0000000000` (`DatabaseName::REPLAY_TEST_ID`,
+`REPLAY_TEST_ID` in `src/contract.ts`) — so every step above works unchanged: the
+connection is redirected to the test service, the session endpoint answers, and the
+inspect link is an ordinary `?id=…` one.
 
-Two endpoints need to know anyway:
+**That one ID maps to the bare database name `db`, not `dbREPLAY0000000000`.** It is
+the throwaway database on the db-test container, and it is the only test ID that
+reaches a bare name — `forTestIdChecked()` allows it by name, so an empty or
+malformed ID still throws.
 
-- **The session endpoint** refuses a missing test ID, because a run that lost its
-  header must not silently get a session. Replay says so instead: `POST
-  /typo3/test-api/session` with `{"replay": true}` in the body. The secret is still
-  required, and the response's `testId` is `""`.
-- **The inspect link** has no test ID to name, so it carries `replay=1` and signs the
-  literal subject `replay` where a test ID would go — sixteen upper-case characters
-  can never collide with it:
+The guards then split, deliberately:
 
-```
-?replay=1&t=<expiresAt>.<hmac>
+- `assertProvisionable('db')` passes, so `DatabaseInitializer` provisions it on the
+  first secret-carrying request of a run and `isAlreadySeeded()` reuses it for the
+  rest, which is how the content accumulates.
+- `isDroppable('db')` **fails**, so nothing reachable from the wire can drop it —
+  neither cleanup route, nor the sweep. `typo3 playwright:replay-prepare` is the only
+  thing that rebuilds it, and it is CLI-only and Testing-context-only.
 
-hmac = HMAC-SHA256(secret, "inspect:replay:" + expiresAt), as hex
-```
-
-`contract/inspect-replay-token.json` pins that token on both sides.
-
-This link **expires** the `playwright_test_id` cookie instead of setting it: one left
-by an earlier inspect link would send the redirected request to that test database
-rather than the replayed one.
+Nothing else on the wire changes shape, so there is no replay fixture to pin.
 
 ## Writing records
 

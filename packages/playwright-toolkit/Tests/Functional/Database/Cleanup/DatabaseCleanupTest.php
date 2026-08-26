@@ -7,6 +7,7 @@ namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database\Cleanup;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\CleanupOutcome;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\DatabaseCleanup;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
+use Plan2net\PlaywrightToolkit\Database\DatabaseName;
 use Plan2net\PlaywrightToolkit\Database\Driver\SqliteTestDatabaseDriver;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -121,6 +122,8 @@ final class DatabaseCleanupTest extends FunctionalTestCase
             ['../../etc/passwd'],
             ['ABCD1234EFGH-678'],
             ['playwright_db_template'],
+            // Provisioning reaches the bare "db" by this name; dropping never may.
+            [DatabaseName::REPLAY_TEST_ID],
         ];
     }
 

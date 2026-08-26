@@ -20,6 +20,13 @@ export interface RequestContext {
     replayFolder?: ReplayFolder
 }
 
+/** A fixture page as parent means the record moves into the folder; one the scenario made keeps it. */
+export function replayParentId(context: RequestContext, parentId: string): string {
+    const folder = context.replayFolder
+
+    return folder && !folder.ownPages.has(parentId) ? folder.id : parentId
+}
+
 export interface RequestContextSource {
     url(): string
     context(): unknown
@@ -41,11 +48,6 @@ export function ambientTestId(page: RequestContextSource): string | undefined {
 export function requireTestId(page: RequestContextSource, explicit?: string): string {
     const testId = explicit || ambientTestId(page) || ''
 
-    // Replay runs against the base database on purpose.
-    if (!testId && getToolkitConfig().replay) {
-        return ''
-    }
-
     if (!testId) {
         throw new Error(
             '[typo3-playwright-toolkit] No test ID for this request. Pass one in, or use a page from the ' +
@@ -54,13 +56,6 @@ export function requireTestId(page: RequestContextSource, explicit?: string): st
     }
 
     return testId
-}
-
-/** A fixture page as parent means the record moves into the folder; one the scenario made keeps it. */
-export function replayParentId(context: RequestContext, parentId: string): string {
-    const folder = context.replayFolder
-
-    return folder && !folder.ownPages.has(parentId) ? folder.id : parentId
 }
 
 export function resolveRequestContext(

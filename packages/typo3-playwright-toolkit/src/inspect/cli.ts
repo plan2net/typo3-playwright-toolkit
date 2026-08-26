@@ -2,8 +2,9 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { findStateDir, inspectLinks } from './links.js'
-import { INSPECT_TOKEN_LIFETIME_MS } from './token.js'
-import { replayLink } from './replay-target.js'
+import { INSPECT_TOKEN_LIFETIME_MS, inspectUrl } from './token.js'
+import { replayTestingUrl } from './replay-target.js'
+import { REPLAY_TEST_ID } from '../contract.js'
 
 function readSecret(stateDir: string): string {
     const fromEnvironment = process.env.PLAYWRIGHT_TOOLKIT_SECRET?.trim()
@@ -29,17 +30,16 @@ if ('' === secret) {
     process.exit(1)
 }
 
-// The link a replay run printed expires; this mints another without rebuilding
-// the database.
+// The link a replay run printed expires, and its run state is gone by then.
 if (process.argv.includes('--replay')) {
-    const link = replayLink(stateDir, secret)
-    if (undefined === link) {
+    const testingURL = replayTestingUrl(stateDir)
+    if (undefined === testingURL) {
         console.error('No replay recorded. Run "ddev playwright-replay" first.')
         process.exit(1)
     }
 
     console.log(`Logs you into the replayed database, for ${INSPECT_TOKEN_LIFETIME_MS / 60_000} minutes.\n`)
-    console.log(`  ${link}\n`)
+    console.log(`  ${inspectUrl(testingURL, secret, REPLAY_TEST_ID, Date.now())}\n`)
     process.exit(0)
 }
 
