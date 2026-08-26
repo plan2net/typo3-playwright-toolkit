@@ -50,13 +50,59 @@ jobs:
       - name: Security advisories
         run: npm audit --omit=dev --audit-level=high
 
+  extension-qa:
+    name: extension (qa)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/playwright-toolkit
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_sqlite, intl
+          coverage: none
+
+      - run: composer update --no-interaction --no-progress
+
+      - run: composer qa
+
+      # --abandoned=ignore because TYPO3 13 still requires doctrine/annotations,
+      # which is abandoned but not vulnerable; without it this is red forever and
+      # a real advisory would be indistinguishable from that noise.
+      - name: Security advisories
+        run: composer audit --locked --abandoned=ignore
+
+  # Both suites against every supported core on every PHP that core allows. This
+  # is the only lane that executes the package's code against another TYPO3:
+  # typo3-versions analyses it, which cannot see a behavioural change like TYPO3
+  # 14 swapping the session-id hash out from under the seeded row.
+  #
+  # Each core needs its own test toolchain — testing-framework 7 for 11.5, 8 for
+  # 12.4, 9 for 13.4 and 14.3 — so the constraints are pinned per row rather than
+  # taken from composer.json.
   extension:
-    name: extension (php ${{ matrix.php }})
+    name: extension (typo3 ${{ matrix.typo3 }}, php ${{ matrix.php }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.3', '8.4']
+        include:
+          # 11.5 allows 7.4-8.2; 8.1 is the package's own floor.
+          - { typo3: '11.5', php: '8.1', framework: '^7.1', phpunit: '^10.1' }
+          - { typo3: '11.5', php: '8.2', framework: '^7.1', phpunit: '^10.1' }
+          - { typo3: '12.4', php: '8.1', framework: '^8.3', phpunit: '^10.1' }
+          - { typo3: '12.4', php: '8.2', framework: '^8.3', phpunit: '^11.0' }
+          - { typo3: '12.4', php: '8.3', framework: '^8.3', phpunit: '^11.0' }
+          - { typo3: '12.4', php: '8.4', framework: '^8.3', phpunit: '^11.0' }
+          - { typo3: '13.4', php: '8.2', framework: '^9.0', phpunit: '^11.2' }
+          - { typo3: '13.4', php: '8.3', framework: '^9.0', phpunit: '^12.1' }
+          - { typo3: '13.4', php: '8.4', framework: '^9.0', phpunit: '^12.1' }
+          - { typo3: '14.3', php: '8.2', framework: '^9.0', phpunit: '^11.2' }
+          - { typo3: '14.3', php: '8.3', framework: '^9.0', phpunit: '^12.1' }
+          - { typo3: '14.3', php: '8.4', framework: '^9.0', phpunit: '^12.1' }
     defaults:
       run:
         working-directory: packages/playwright-toolkit
@@ -69,19 +115,37 @@ jobs:
           extensions: pdo, pdo_sqlite, intl
           coverage: none
 
-      - run: composer update --no-interaction --no-progress
+      - name: Pin the toolchain for TYPO3 ${{ matrix.typo3 }}
+        run: |
+          # The QA tools are not run here and would block the older cores:
+          # phpstan-typo3 requires cms-core ^13.4.3 and is uninstallable beside 11.5.
+          composer remove --dev --no-update --no-interaction \
+            phpstan/phpstan phpstan/extension-installer saschaegerer/phpstan-typo3 \
+            friendsofphp/php-cs-fixer rector/rector
+          composer require --dev --no-update --no-interaction \
+            "typo3/testing-framework:${{ matrix.framework }}" \
+            "phpunit/phpunit:${{ matrix.phpunit }}"
+          composer require --no-update --no-interaction \
+            "typo3/cms-core:^${{ matrix.typo3 }}" "typo3/cms-backend:^${{ matrix.typo3 }}"
+          # Supported older cores carry advisories that consumers cover with ELTS.
+          composer config policy.advisories.block false
+          composer update --no-interaction --no-progress
 
-      - run: composer qa
+      # No -c: the checked-in configs declare a PHPUnit 12 schema, and the older
+      # rows run PHPUnit 10. Everything those configs set is passed here instead.
+      - name: Unit tests
+        run: >-
+          php -d memory_limit=-1 vendor/bin/phpunit
+          --bootstrap vendor/autoload.php
+          --fail-on-warning --do-not-cache-result Tests/Unit
 
-      - run: composer test
-
-      - run: composer test:functional
-
-      # --abandoned=ignore because TYPO3 13 still requires doctrine/annotations,
-      # which is abandoned but not vulnerable; without it this is red forever and
-      # a real advisory would be indistinguishable from that noise.
-      - name: Security advisories
-        run: composer audit --locked --abandoned=ignore
+      - name: Functional tests
+        env:
+          typo3DatabaseDriver: pdo_sqlite
+        run: >-
+          php -d memory_limit=-1 vendor/bin/phpunit
+          --bootstrap vendor/typo3/testing-framework/Resources/Core/Build/FunctionalTestsBootstrap.php
+          --fail-on-warning --do-not-cache-result Tests/Functional
 
   # The package ships against PHP 8.1 while its own toolchain needs 8.3 (phpunit
   # 12), so the floor cannot be proven by running the suite. It is proven twice

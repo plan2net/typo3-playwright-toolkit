@@ -7,6 +7,7 @@ namespace Plan2net\PlaywrightToolkit\Tests\Functional\DataHandling;
 use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Tests\ContractFixture;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
@@ -25,7 +26,11 @@ final class ContentDatamapTest extends FunctionalTestCase
         parent::setUp();
 
         $this->importCSVDataSet(__DIR__ . '/Fixtures/ContentDatamap.csv');
-        $this->setUpBackendUser(1);
+        $backendUser = $this->setUpBackendUser(1);
+        // DataHandler reaches for it through BackendUtility, and only the newer
+        // testing-framework sets it up alongside the backend user.
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)
+            ->createFromUserPreferences($backendUser);
     }
 
     #[Test]
