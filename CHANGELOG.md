@@ -10,6 +10,23 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-26
+
+### Breaking
+
+- **@plan2net/typo3-playwright-toolkit** — `takeScreenshot` is now
+  `expectScreenshot`. It asserts against a stored baseline and fails the test on a
+  mismatch, which the old name hid: `takeScreenshot` reads like Playwright's own
+  `page.screenshot()`, which captures an image and asserts nothing. The package is
+  alpha, so the old name is gone rather than deprecated. Rename the import and the
+  calls; nothing else about it changed.
+
+### Documentation
+
+- The example on the landing page ends with a screenshot assertion, so the sample
+  shows the visual check the waiting logic exists for rather than only a text
+  assertion.
+
 ## [0.2.0] - 2026-08-26
 
 ### Added
@@ -73,6 +90,7 @@ the package a change belongs to.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.2.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.3.0...main
+[0.3.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/plan2net/typo3-playwright-toolkit/releases/tag/v0.1.0
