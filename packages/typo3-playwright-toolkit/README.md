@@ -302,31 +302,38 @@ report as a JSON file when the test fails.
 
 ### Configuration options
 
+Required:
+
+| Name | Purpose |
+|---|---|
+| `paths.consumerRoot` | Absolute path to your TYPO3 project root |
+| `testingURL` | Host name that runs in the Testing context |
+
+Everything else:
+
 | Name | Default | Purpose |
 |---|---|---|
-| `testingURL` | required | Host name that runs in the Testing context |
-| `paths.consumerRoot` | required | Absolute path to your TYPO3 project root |
-| `paths.stateDir` | `<consumerRoot>/.test-state` | Folder for setup state |
-| `paths.sessionDir` | `<consumerRoot>/var/session` | TYPO3 session folder, cleaned after a run |
-| `contentTypes` | `{}` | Your own content builders, one per CType |
-| `screenshot.threshold` | `0.2` | How different one pixel may be, from 0 to 1 |
-| `screenshot.maxDiffPixelRatio` | `0.005` | How many pixels may differ, as a share of the image |
-| `hideBeforeScreenshot` | `[]` | CSS selectors hidden before every screenshot |
-| `prepareContext` | none | Runs on every context a test uses, for your own routes and stubs |
+| `accessibility.auto` | `false` | Scan after every test that opened a page, instead of calling `runAccessibilityScan` yourself |
+| `accessibility.disabledRules` | `[]` | axe rules turned off for the whole project |
 | `accessibility.projects` | all projects | Projects that run axe checks |
 | `accessibility.tags` | `DEFAULT_SCAN_TAGS` | Which axe rule sets to run |
-| `accessibility.disabledRules` | `[]` | axe rules turned off for the whole project |
-| `accessibility.auto` | `false` | Scan after every test that opened a page, instead of calling `runAccessibilityScan` yourself |
-| `csp.mode` | `any` | Which policy header a page must send: `any`, `report-only` or `enforced` |
+| `cleanup.failOnLeak` | true in CI | Fail the run if a test database could not be deleted |
+| `cleanup.orphanAgeMs` | 24 hours | How old a leftover database must be before cleanup deletes it |
+| `cleanup.preserveOnFailure` | `failed` | Which test databases to keep after a failure: `failed`, `all` or `none` |
+| `contentTypes` | `{}` | Your own content builders, one per CType |
 | `csp.expectedOrigin` | origin of `testingURL` | Whose violations count |
+| `csp.mode` | `any` | Which policy header a page must send: `any`, `report-only` or `enforced` |
+| `hideBeforeScreenshot` | `[]` | CSS selectors hidden before every screenshot |
+| `paths.sessionDir` | `<consumerRoot>/var/session` | TYPO3 session folder, cleaned after a run |
+| `paths.stateDir` | `<consumerRoot>/.test-state` | Folder for setup state |
+| `prepareContext` | none | Runs on every context a test uses, for your own routes and stubs |
+| `screenshot.maxDiffPixelRatio` | `0.005` | How many pixels may differ, as a share of the image |
+| `screenshot.threshold` | `0.2` | How different one pixel may be, from 0 to 1 |
 | `setup.attemptTimeoutMs` | `90000` | How long one setup attempt may take |
-| `setup.waitTimeoutMs` | `300000` | How long a test waits for its pair in total, lock included |
 | `setup.attempts` | `2` | Attempts per setup, so `2` means one retry |
 | `setup.lockStaleMs` | `15000` | Silence after which another worker may take over the setup |
 | `setup.pollMs` | `100` | Gap between polls while waiting for a pair |
-| `cleanup.preserveOnFailure` | `failed` | Which test databases to keep after a failure: `failed`, `all` or `none` |
-| `cleanup.failOnLeak` | true in CI | Fail the run if a test database could not be deleted |
-| `cleanup.orphanAgeMs` | 24 hours | How old a leftover database must be before cleanup deletes it |
+| `setup.waitTimeoutMs` | `300000` | How long a test waits for its pair in total, lock included |
 
 `defineBasePlaywrightConfig` sets Playwright's `baseURL` to `testingURL` and adds
 this package's setup and cleanup functions. Values in its second argument win, and
