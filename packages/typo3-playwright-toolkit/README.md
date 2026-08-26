@@ -121,6 +121,27 @@ reason instead of failing because content is missing.
 The setup runs once per file, even when the file runs in several browser projects.
 The other projects use the state and the test database that the first one created.
 
+```mermaid
+flowchart TD
+    F["one test file"]
+    S["setup — runs once<br>builds content through the backend"]
+    D["state + its own test database"]
+    X["tests skip, with the reason"]
+    P1["chromium-desktop"]
+    P2["firefox"]
+    P3["webkit"]
+
+    F --> S
+    S -->|built| D
+    S -->|failed| X
+    D --> P1 & P2 & P3
+
+    classDef ok fill:#2ea04326,stroke:#2ea043b3
+    classDef bad fill:#f8514926,stroke:#f85149b3
+    class D ok
+    class X bad
+```
+
 Besides `builders`, the setup receives `testId` (the database this attempt runs
 against), `attempt` (`1` on the first try), `signal` (aborted when the attempt times
 out, so pass it to your own long requests), and a `page` and `request` that already
