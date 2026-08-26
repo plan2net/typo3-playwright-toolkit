@@ -19,6 +19,7 @@ use TYPO3\CMS\Core\FormProtection\BackendFormProtection;
 use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Http\JsonResponse;
+use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
@@ -98,9 +99,12 @@ final class BackendSessionProviderTest extends FunctionalTestCase
         self::assertIsString($token);
 
         $backendUser = GeneralUtility::makeInstance(BackendUserAuthentication::class);
-        $backendUser->start($request->withCookieParams(
-            [...$request->getCookieParams(), 'be_typo_user' => $payload['cookieValue']]
-        ));
+        // TYPO3 14 reads the client address off normalizedParams while starting.
+        $backendUser->start(
+            $request
+                ->withCookieParams([...$request->getCookieParams(), 'be_typo_user' => $payload['cookieValue']])
+                ->withAttribute('normalizedParams', NormalizedParams::createFromRequest($request))
+        );
         $GLOBALS['BE_USER'] = $backendUser;
 
         $formProtection = GeneralUtility::makeInstance(

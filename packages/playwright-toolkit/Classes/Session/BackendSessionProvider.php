@@ -22,6 +22,7 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\FormProtection\BackendFormProtection;
 use TYPO3\CMS\Core\Http\JsonResponse;
+use TYPO3\CMS\Core\Http\NormalizedParams;
 use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Session\UserSessionManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -120,9 +121,12 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
      */
     private function routeTokens(ServerRequestInterface $request, string $cookieValue): array
     {
-        $authenticated = $request->withCookieParams(
-            [...$request->getCookieParams(), BackendSettings::cookieName() => $cookieValue]
-        );
+        $authenticated = $request
+            ->withCookieParams([...$request->getCookieParams(), BackendSettings::cookieName() => $cookieValue])
+            ->withAttribute(
+                'normalizedParams',
+                $request->getAttribute('normalizedParams') ?? NormalizedParams::createFromRequest($request)
+            );
 
         $backendUser = GeneralUtility::makeInstance(BackendUserAuthentication::class);
         $backendUser->start($authenticated);
