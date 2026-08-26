@@ -1,0 +1,14 @@
+rootPageId: 1
+# Not the testing hostname: the site has to resolve on the ordinary one too, which
+# is what the off-origin test navigates to.
+base: '/'
+websiteTitle: 'Playwright toolkit e2e'
+dependencies:
+  - typo3/fluid-styled-content
+languages:
+  - languageId: 0
+    title: English
+    navigationTitle: English
+    base: '/'
+    locale: en_US.UTF-8
+    flag: gb

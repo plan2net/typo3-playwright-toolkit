@@ -57,9 +57,57 @@ jobs:
         working-directory: packages/typo3-playwright-toolkit
         run: npm run test:pack
 
-# Not yet covered here, and worth naming rather than implying otherwise: a full
-# TYPO3 install driven by definePair against a real backend. That was proven by
-# hand against an existing project; reproducing it in CI needs a TYPO3 project
-# fixture to install the extension into, which does not exist in this repository
-# yet. Until it does, the chain is verified in two halves — the transport above,
-# and the extension's own suites in checks.yml and engines.yml.
+  consumer-chain:
+    name: consumer chain (typo3 ${{ matrix.typo3 }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        typo3: ['13.4', '14.3']
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: packages/typo3-playwright-toolkit/package-lock.json
+
+      - uses: ddev/github-action-setup-ddev@v1
+        with:
+          autostart: false
+
+      # Composer and the browsers are installed inside the web container, so the
+      # runner's usual cache paths are never written. Both are redirected into the
+      # project directory (see .ddev/config.yaml) and cached from there.
+      - name: Cache composer downloads
+        uses: actions/cache@v4
+        with:
+          path: tests/e2e/consumer/.cache/composer
+          key: e2e-composer-${{ matrix.typo3 }}-${{ hashFiles('tests/e2e/consumer/composer.json') }}
+          restore-keys: e2e-composer-${{ matrix.typo3 }}-
+
+      # Keyed on the lock file, which is where run.sh reads the exact version from.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: tests/e2e/consumer/.cache/ms-playwright
+          key: e2e-browsers-${{ hashFiles('packages/typo3-playwright-toolkit/package-lock.json') }}
+
+      - name: Install all three packages and drive definePair
+        env:
+          PW_E2E_TYPO3: ${{ matrix.typo3 }}
+        run: tests/e2e/run.sh
+
+      - name: Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-report-typo3-${{ matrix.typo3 }}
+          path: |
+            tests/e2e/consumer/tests/playwright/test-results/
+            tests/e2e/consumer/tests/playwright/playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
+

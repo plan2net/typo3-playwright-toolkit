@@ -1,0 +1,26 @@
+# Only two DDEV files are the fixture's own; everything else under .ddev is
+# written by `ddev add-on get` and would go stale in the repository.
+/.ddev/*
+!/.ddev/config.yaml
+!/.ddev/nginx_full/
+/.ddev/nginx_full/*
+!/.ddev/nginx_full/nginx-site.conf
+
+# Staged by run.sh: the packed npm tarball and a copy of the extension, both of
+# which must live inside the DDEV mount to be installable.
+/.artifacts/
+
+# Redirected here from the container so the CI runner can cache them.
+/.cache/
+
+# Written by `typo3 setup`; everything the fixture owns is in additional.php.
+/config/system/settings.php
+
+/public/
+/vendor/
+/var/
+/.test-state/
+/tests/playwright/node_modules/
+/tests/playwright/package-lock.json
+/tests/playwright/test-results/
+/tests/playwright/playwright-report/

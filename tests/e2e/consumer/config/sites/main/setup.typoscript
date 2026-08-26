@@ -1,0 +1,4 @@
+# Fluid Styled Content defines no PAGE object, so without this the frontend
+# renders nothing. SiteConfiguration reads this file for the site beside it.
+page = PAGE
+page.10 < styles.content.get

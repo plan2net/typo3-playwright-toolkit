@@ -1,0 +1,37 @@
+{
+    "name": "plan2net/playwright-toolkit-e2e-consumer",
+    "description": "Fixture TYPO3 project the consumer end-to-end job installs all three packages into.",
+    "type": "project",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "typo3/cms-backend": "^13.4 || ^14.3",
+        "typo3/cms-core": "^13.4 || ^14.3",
+        "typo3/cms-fluid-styled-content": "^13.4 || ^14.3",
+        "typo3/cms-frontend": "^13.4 || ^14.3",
+        "typo3/cms-install": "^13.4 || ^14.3"
+    },
+    "require-dev": {
+        "plan2net/playwright-toolkit": "@dev"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./.artifacts/playwright-toolkit",
+            "options": {
+                "symlink": false
+            }
+        }
+    ],
+    "config": {
+        "allow-plugins": {
+            "typo3/class-alias-loader": true,
+            "typo3/cms-composer-installers": true
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "typo3/cms": {
+            "web-dir": "public"
+        }
+    }
+}

@@ -1,0 +1,19 @@
+name: t3pw-e2e
+type: typo3
+docroot: public
+php_version: '8.3'
+nodejs_version: '22'
+webserver_type: nginx-fpm
+database:
+  type: postgres
+  version: '16'
+# The Testing context is bound to this hostname in .ddev/nginx_full/nginx-site.conf.
+additional_hostnames:
+  - t3pw-e2e-testing
+# TYPO3 settings are the fixture's own; DDEV must not rewrite them.
+disable_settings_management: true
+web_environment:
+  # Both caches are written inside the container, so they are redirected into the
+  # project directory, which is the only path the runner can cache afterwards.
+  - COMPOSER_CACHE_DIR=/var/www/html/.cache/composer
+  - PLAYWRIGHT_BROWSERS_PATH=/var/www/html/.cache/ms-playwright
