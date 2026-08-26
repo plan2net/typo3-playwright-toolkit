@@ -24,6 +24,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Composer takes the version from the tag, but classic-mode installs read
+      # ext_emconf.php, so that one repeated number must not drift.
+      - name: Assert ext_emconf.php matches the tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          declared=$(php -r '$EM_CONF=[]; require "packages/playwright-toolkit/ext_emconf.php"; echo $EM_CONF["playwright_toolkit"]["version"];')
+          tagged="${GITHUB_REF_NAME#v}"
+          if [ "${declared}" != "${tagged}" ]; then
+            echo "ext_emconf.php says ${declared}, tag says ${tagged}"
+            exit 1
+          fi
+
       # One top-level directory, verified against DDEV itself: a tarball whose
       # files sit at the root makes DDEV treat the alphabetically first entry as
       # the add-on directory and fail looking for install.yaml inside it.
