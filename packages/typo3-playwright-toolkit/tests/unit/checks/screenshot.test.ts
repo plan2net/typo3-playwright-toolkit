@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildHideStyles, resolveScreenshotTarget } from '#src/checks/screenshot.js'
+import { buildHideStyles, resolveScreenshotTarget, hiddenSelectors } from '#src/checks/screenshot.js'
 
 describe('resolveScreenshotTarget', () => {
     const marker = { name: 'the element' }
@@ -42,5 +42,24 @@ describe('buildHideStyles', () => {
     it('joins multiple selectors into one rule group', () => {
         const css = buildHideStyles(['.a', '.b'])
         expect(css).toContain('.a, .b')
+    })
+})
+
+describe('hiddenSelectors', () => {
+    it('uses the configured list when the call says nothing', () => {
+        expect(hiddenSelectors(['.header'], undefined)).toEqual(['.header'])
+    })
+
+    // A shot *of* the element the config hides needs a way out.
+    it('lets a call hide nothing', () => {
+        expect(hiddenSelectors(['.header'], [])).toEqual([])
+    })
+
+    it('lets a call name its own selectors', () => {
+        expect(hiddenSelectors(['.header'], ['.banner'])).toEqual(['.banner'])
+    })
+
+    it('is empty when neither names anything', () => {
+        expect(hiddenSelectors(undefined, undefined)).toEqual([])
     })
 })

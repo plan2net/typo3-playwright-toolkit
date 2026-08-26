@@ -128,6 +128,12 @@ export function resolveScreenshotTarget(
 export interface ScreenshotOptions extends PageAssertionsToHaveScreenshotOptions {
     /** Shoot only this element. */
     include?: string
+    /** Replaces `hideBeforeScreenshot` for this shot; `[]` hides nothing. */
+    hide?: string[]
+}
+
+export function hiddenSelectors(configured: string[] | undefined, perCall: string[] | undefined): string[] {
+    return perCall ?? configured ?? []
 }
 
 export async function takeScreenshot(
@@ -136,13 +142,13 @@ export async function takeScreenshot(
     options: ScreenshotOptions = {},
 ): Promise<void> {
     const config = getToolkitConfig()
-    const { include, ...screenshotOptions } = options
+    const { include, hide, ...screenshotOptions } = options
     const { shot, wholePage } = resolveScreenshotTarget(target, include)
     const page = 'page' in target ? target.page() : target
 
     await page.addStyleTag({ content: FREEZE_STYLES })
 
-    const hideStyles = buildHideStyles(config.hideBeforeScreenshot ?? [])
+    const hideStyles = buildHideStyles(hiddenSelectors(config.hideBeforeScreenshot, hide))
     if (hideStyles) {
         await page.addStyleTag({ content: hideStyles })
     }
