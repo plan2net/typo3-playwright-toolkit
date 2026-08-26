@@ -89,7 +89,28 @@ final class DatabaseInitializerPostgresProvisionTest extends DatabaseInitializer
         return self::environment(self::PASSWORD_VARIABLE, 'db');
     }
 
+    /**
+     * A backend lingers in pg_stat_activity for a moment after its client
+     * disconnects, so a count taken the instant provisioning returns can still see
+     * one winding down. A leaked session never goes away, which is the difference
+     * this has to detect — hence a deadline rather than a single read.
+     */
     private function sessionsOnTheTemplate(): int
+    {
+        $deadline = microtime(true) + 5.0;
+
+        do {
+            $sessions = $this->countTemplateSessions();
+            if (0 === $sessions) {
+                return 0;
+            }
+            usleep(50000);
+        } while (microtime(true) < $deadline);
+
+        return $sessions;
+    }
+
+    private function countTemplateSessions(): int
     {
         $connection = new \PDO(
             sprintf('pgsql:host=%s;port=5432;dbname=postgres', static::host()),
