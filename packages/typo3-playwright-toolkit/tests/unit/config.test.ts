@@ -59,6 +59,45 @@ describe('defineToolkitConfig path validation', () => {
     })
 })
 
+describe('defineToolkitConfig testing url', () => {
+    // Every request is built by concatenation, so a trailing slash would send
+    // POSTs to //typo3/test-api/… which the extension matches nothing against.
+    it.each([
+        ['a trailing slash', 'https://example-testing.test/'],
+        ['several trailing slashes', 'https://example-testing.test///'],
+        ['a default port', 'https://example-testing.test:443'],
+    ])('normalises %s to the bare origin', (_case, testingURL) => {
+        const resolved = defineToolkitConfig({ ...baseConfig(), testingURL })
+
+        expect(resolved.testingURL).toBe('https://example-testing.test')
+    })
+
+    it('keeps a port that is not the default one', () => {
+        const resolved = defineToolkitConfig({ ...baseConfig(), testingURL: 'https://example-testing.test:8443/' })
+
+        expect(resolved.testingURL).toBe('https://example-testing.test:8443')
+    })
+
+    it.each([
+        ['no scheme', 'example-testing.test'],
+        ['a scheme that carries no requests', 'file:///srv/project'],
+        ['embedded credentials', 'https://user:pass@example-testing.test'],
+        ['a query string', 'https://example-testing.test/?debug=1'],
+        ['a fragment', 'https://example-testing.test/#top'],
+        ['nothing at all', ''],
+    ])('refuses %s', (_case, testingURL) => {
+        expect(() => defineToolkitConfig({ ...baseConfig(), testingURL })).toThrow(/testingURL/)
+    })
+
+    // The test API answers on /typo3/test-api/… at the root, so a subdirectory
+    // install cannot work and silently dropping the path would hide that.
+    it('refuses a path, rather than dropping it', () => {
+        expect(() =>
+            defineToolkitConfig({ ...baseConfig(), testingURL: 'https://example-testing.test/subdir' }),
+        ).toThrow(/testingURL/)
+    })
+})
+
 describe('defineToolkitConfig', () => {
     it('resolves onto its own object and leaves the caller\'s untouched', () => {
         delete process.env.PW_RUN_ID

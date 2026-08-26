@@ -307,7 +307,7 @@ Required:
 | Name | Purpose |
 |---|---|
 | `paths.consumerRoot` | Absolute path to your TYPO3 project root |
-| `testingURL` | Host name that runs in the Testing context |
+| `testingURL` | Bare origin that runs in the Testing context |
 
 Everything else:
 

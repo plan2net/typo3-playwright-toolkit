@@ -74,7 +74,8 @@ export interface ToolkitConfig {
     /**
      * The only URL the toolkit uses: the origin that serves the Testing context.
      * Relative navigation, the test API and the builders all resolve against it,
-     * because the per-test database exists nowhere else.
+     * because the per-test database exists nowhere else. A bare origin — no path,
+     * query, fragment or credentials; `defineToolkitConfig` refuses anything else.
      */
     testingURL: string
     /** Screenshot tolerances merged into the base Playwright config + Screenshot helper. */
@@ -128,10 +129,41 @@ function resolvePaths(paths: ToolkitConfigInput['paths']): ToolkitPaths {
     return resolved
 }
 
+function resolveTestingURL(testingURL: string): string {
+    const refuse = (reason: string): never => {
+        throw new Error(`[typo3-playwright-toolkit] testingURL ${reason}, got "${testingURL}".`)
+    }
+
+    let url: URL
+    try {
+        url = new URL(testingURL)
+    } catch {
+        return refuse('must be an absolute URL, such as https://example-testing.ddev.site')
+    }
+
+    if ('https:' !== url.protocol && 'http:' !== url.protocol) {
+        return refuse('must be http or https')
+    }
+    if (url.username || url.password) {
+        return refuse('must carry no credentials')
+    }
+    if (url.search || url.hash) {
+        return refuse('must carry no query string or fragment')
+    }
+    // The test API answers at /typo3/test-api/…, so a subdirectory install cannot
+    // work and dropping the path silently would hide that.
+    if (!/^\/+$/.test(url.pathname)) {
+        return refuse('must be a bare origin, with no path')
+    }
+
+    return url.origin
+}
+
 export function defineToolkitConfig(config: ToolkitConfigInput): ToolkitConfig {
     // Resolved here: this runs in the main process before workers are forked.
     const resolved: ToolkitConfig = {
         ...config,
+        testingURL: resolveTestingURL(config.testingURL),
         paths: resolvePaths(config.paths),
         runId: resolveRunId(config.runId),
     }
