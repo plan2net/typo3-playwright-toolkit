@@ -8,9 +8,12 @@ on:
 permissions:
   contents: read
 
+# No cancel-in-progress, unlike checks: this runs on main only, where every commit
+# is a point in history someone may come back to. Cancelling would leave commits
+# that were never verified end to end, and paint the badge "failing" whenever two
+# pushes land inside one run.
 concurrency:
   group: e2e-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   header-chain:
