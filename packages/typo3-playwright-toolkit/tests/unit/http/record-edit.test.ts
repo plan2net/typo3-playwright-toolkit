@@ -223,8 +223,6 @@ describe('saveRecord', () => {
     })
 })
 
-// A consumer with its own table needs the same route the builders use; a scenario
-// setup has the token but no way to spend it.
 describe('recordSaver', () => {
     it('writes an arbitrary table through the edit route', async () => {
         const { poster, posted } = fakePoster({

@@ -27,7 +27,7 @@ export interface EditContext {
     routeToken: string
 }
 
-/** Binds a poster and context so a scenario setup can write its own tables. */
+/** saveRecord with the poster and context already bound. */
 export function recordSaver(
     poster: FormPoster,
     context: EditContext,

@@ -427,8 +427,6 @@ describe('the body an image element posts', () => {
     })
 })
 
-// TYPO3 deduplicates a colliding slug on save, but create() reports the slug it
-// asked for — so the second page's tests would quietly read the first page.
 describe('duplicate slugs within one scenario', () => {
     it('refuses a slug another page already claimed', async () => {
         const context = { routeToken: ROUTE_TOKEN, usedSlugs: new Set<string>() }

@@ -18,7 +18,7 @@ export interface RequestContext {
     /** For `record_edit`; the session endpoint hands it out. */
     routeToken: string
     replayFolder?: ReplayFolder
-    /** Slugs already created in this scenario; TYPO3 would deduplicate a repeat. */
+    /** Slugs this scenario already created. */
     usedSlugs?: Set<string>
 }
 

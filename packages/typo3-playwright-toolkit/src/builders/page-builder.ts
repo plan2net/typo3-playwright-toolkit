@@ -112,10 +112,7 @@ export class PageBuilder {
         return { id: pageId, slug: (this.fields.slug as string) || '' }
     }
 
-    /**
-     * TYPO3 deduplicates a colliding slug on save, but create() reports the slug it
-     * asked for — so the second page's tests would quietly read the first page.
-     */
+    // TYPO3 would store the repeat elsewhere while create() still reports this slug.
     private claimSlug(context: RequestContext): void {
         const slug = this.fields.slug
         if ('string' !== typeof slug || '' === slug || !context.usedSlugs) {
