@@ -72,10 +72,10 @@
         "prepack": "npm run build"
     },
     "peerDependencies": {
-        "@playwright/test": "^1.56.0"
+        "@playwright/test": "^1.62.1"
     },
     "devDependencies": {
-        "@playwright/test": "^1.56.0",
+        "@playwright/test": "^1.62.1",
         "@types/node": "^24.10.1",
         "eslint": "^9.39.5",
         "typescript": "^5.9.0",
