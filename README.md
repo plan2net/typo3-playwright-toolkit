@@ -158,6 +158,11 @@ Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
 Keep the context check. It is what stops a request carrying a test-ID header from
 redirecting the database connection on your ordinary hostname.
 
+> [!NOTE]
+> That path is where TYPO3 12.4, 13.4 and 14.3 look under Composer. TYPO3 11.5 loads
+> `typo3conf/AdditionalConfiguration.php` instead, and classic-mode 12.4 and 13.4 load
+> `typo3conf/system/additional.php`. Only the file name changes.
+
 And `tests/playwright/playwright.config.ts`:
 
 ```ts

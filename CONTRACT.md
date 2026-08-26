@@ -47,8 +47,10 @@ gate and must stay in front of both.
 Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
 ```
 
-TYPO3 auto-loads `config/system/additional.php` and no context-suffixed variant, so
-the project requires the file from there, behind the context check:
+TYPO3 auto-loads one additional-configuration file and no context-suffixed variant, so
+the project requires the file from there, behind the context check. Under Composer on
+12.4, 13.4 and 14.3 that file is `config/system/additional.php`; the extension README
+lists the two older layouts.
 
 ```php
 if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {

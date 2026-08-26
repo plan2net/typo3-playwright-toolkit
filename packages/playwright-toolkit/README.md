@@ -105,6 +105,17 @@ ordinary database. Keep the context check too: `applyDatabaseConnectionOverrides
 acts on the test ID alone, so outside the Testing context it would let a request
 carrying that header redirect the connection on your ordinary hostname.
 
+> [!NOTE]
+> `config/system/additional.php` is the Composer-mode path, which is where TYPO3 12.4,
+> 13.4 and 14.3 look. Two older layouts differ, and only the file name changes — the
+> contents above are the same:
+>
+> - **TYPO3 11.5** loads `typo3conf/AdditionalConfiguration.php`, in Composer mode too.
+> - **Classic (non-Composer) 12.4 and 13.4** load `typo3conf/system/additional.php`.
+>
+> `ConfigurationManager::getAdditionalConfigurationFileLocation()` is the authority if
+> you need to check for a version not listed here.
+
 It reads your `Default` connection and writes the per-test one back. If a request
 carries no test ID, nothing changes and nothing is created: the site uses its normal
 database.
