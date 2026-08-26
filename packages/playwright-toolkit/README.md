@@ -202,9 +202,8 @@ PlaywrightDemo [EF70E3DDD33D3571]
 
 Nothing to configure; it appears whenever a request carries a test ID.
 
-The link is signed with the API secret and lives **five minutes**. It sets two
-session cookies, so closing the browser ends the visit. Anyone who opens it gets a
-backend session, so treat it like a password: do not paste it into a chat.
+The link is signed with the API secret and lives **15 minutes**. It sets two
+session cookies, so closing the browser ends the visit.
 
 ## Troubleshooting
 

@@ -364,8 +364,7 @@ npx typo3-playwright-inspect accordion  # only matching test files
 
 It reads the API secret from `var/playwright/api-secret` or from
 `PLAYWRIGHT_TOOLKIT_SECRET`. On DDEV, `ddev playwright-inspect` wraps it. The links
-log in as the pre-seeded backend user and live five minutes, so treat one like a
-password.
+log in as the pre-seeded backend user and live 15 minutes.
 
 ## Troubleshooting
 
@@ -391,8 +390,8 @@ turn this off.
 
 **You want to look at what a failing test built.** Open the link the run printed
 under "Kept for debugging". It logs you into that test's backend, and the frontend
-is reachable from there. The link is signed with the API secret and lives five
-minutes, so treat it like a password.
+is reachable from there. The link is signed with the API secret and lives 15
+minutes.
 
 ## Related packages
 

@@ -63,7 +63,7 @@ extension answers it at `GET /typo3/test-api/inspect`:
 hmac = HMAC-SHA256(secret, "inspect:" + testId + ":" + expiresAt), as hex
 ```
 
-The link is valid for 300 seconds. The secret is never in the URL.
+The link is valid for 900 seconds. The secret is never in the URL.
 `contract/inspect-token.json` holds one example token. Both packages must produce
 exactly that token for those inputs.
 

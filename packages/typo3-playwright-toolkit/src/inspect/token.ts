@@ -2,8 +2,8 @@ import { createHmac } from 'node:crypto'
 
 const PURPOSE = 'inspect'
 
-/** Long enough to click a link in the terminal, short enough that a pasted one dies. */
-export const INSPECT_TOKEN_LIFETIME_MS = 300_000
+/** Long enough to pick a link from the list, short enough that a pasted one dies. */
+export const INSPECT_TOKEN_LIFETIME_MS = 900_000
 
 export function mintInspectToken(secret: string, testId: string, expiresAt: number): string {
     const signature = createHmac('sha256', secret).update(`${PURPOSE}:${testId}:${expiresAt}`).digest('hex')

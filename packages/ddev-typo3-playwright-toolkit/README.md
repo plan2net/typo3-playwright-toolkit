@@ -149,8 +149,7 @@ ddev playwright-inspect accordion  # one test file
 ```
 
 Opening a link logs you into the TYPO3 backend of that database, and the frontend is
-reachable from there. Links are signed and expire after five minutes; anyone who
-opens one gets a backend session, so do not paste them into a chat.
+reachable from there. Links are signed and expire after 15 minutes.
 
 UI mode runs in the web container, so the browsers must be installed there:
 

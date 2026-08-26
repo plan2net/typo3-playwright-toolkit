@@ -32,7 +32,7 @@ describe('mintInspectToken', () => {
         expect(one).not.toBe(two)
     })
 
-    it('gives the link long enough to click but not to share', () => {
-        expect(INSPECT_TOKEN_LIFETIME_MS).toBe(300_000)
+    it('outlives reading the list and picking a database from it', () => {
+        expect(INSPECT_TOKEN_LIFETIME_MS).toBe(900_000)
     })
 })
