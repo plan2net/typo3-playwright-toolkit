@@ -43,6 +43,13 @@ jobs:
       # here rather than at a consumer.
       - run: npm run test:pack
 
+      # --omit=dev, because the tarball ships dist/ and one runtime dependency:
+      # everything else is vitest's and eslint's tree, which no consumer installs.
+      # Auditing it would turn an advisory in a bundler into a red build on every
+      # unrelated push. Dependabot watches the dev tree instead.
+      - name: Security advisories
+        run: npm audit --omit=dev --audit-level=high
+
   extension:
     name: extension (php ${{ matrix.php }})
     runs-on: ubuntu-latest

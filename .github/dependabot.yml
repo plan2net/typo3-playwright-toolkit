@@ -1,0 +1,24 @@
+version: 2
+
+# The npm job audits --omit=dev, so the dev tree is watched here rather than
+# gated there: an advisory in vitest's bundler opens a pull request instead of
+# stopping every unrelated push.
+#
+# No composer entry. The extension ships no lock file, so Dependabot could only
+# edit composer.json — and the one constraint worth watching is the deliberate
+# "^11.5 || ^12.4 || ^13.4 || ^14.3". Its dev tools stay current anyway, because
+# the workflow resolves them with `composer update` on every run.
+updates:
+  - package-ecosystem: npm
+    directory: /packages/typo3-playwright-toolkit
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: development
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
