@@ -20,7 +20,9 @@
 html { scroll-behavior:smooth; }
 body { margin:0; background:#fff; color:#1A1E24; font-family:'Open Sans',sans-serif; -webkit-font-smoothing:antialiased; }
 a { color:var(--ink); text-decoration:none; }
-a:hover { color:var(--org-lg); }
+a:hover { color:var(--org-d); }
+.offscreen { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+section, header { scroll-margin-top:104px; }
 /* A link inside a paragraph must not rely on colour alone to be recognisable. */
 footer a, p a { text-decoration:underline; text-underline-offset:2px; }
 a:focus-visible, button:focus-visible, pre:focus-visible { outline:2px solid var(--org); outline-offset:3px; border-radius:4px; }
@@ -67,13 +69,24 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
   .split, .split-start { grid-template-columns:minmax(0,1fr); gap:32px; }
   .flip > :first-child { order:0; }
 }
+/* One row that scrolls sideways, rather than a sticky bar 164px tall. */
+@media (max-width:900px) {
+  nav { flex-wrap:nowrap !important; gap:14px !important; }
+  nav > div:first-child { flex-shrink:0; }
+  nav > div:first-child div { white-space:nowrap; }
+  .nav-list { flex-wrap:nowrap; overflow-x:auto; gap:12px; }
+  .nav-list li { flex-shrink:0; }
+}
 @media (max-width:620px) {
   .grid-4 { grid-template-columns:minmax(0,1fr); }
   .pad { padding-left:20px !important; padding-right:20px !important; }
   .h1 { font-size:32px !important; }
   .h2 { font-size:23px !important; }
 }
-@media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  * { animation:none !important; transition:none !important; }
+  html { scroll-behavior:auto; }
+}
 </style>
 </helmet>
 
@@ -157,7 +170,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
       <sc-for list="{{ values }}" as="v" hint-placeholder-count="4">
         <li style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:26px 24px; display:flex; flex-direction:column; gap:12px;">
           <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#1A1E24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:block;" aria-hidden="true"><path d="{{ v.d }}"></path></svg>
-          <div style="font-weight:800; font-size:16px;">{{ v.title }}</div>
+          <h3 style="font-weight:800; font-size:16px; margin:0;">{{ v.title }}</h3>
           <div style="font-size:14px; line-height:1.65; color:var(--dim);"><strong style="color:var(--ink); font-weight:700;">{{ v.lead }}</strong> {{ v.body }}</div>
         </li>
       </sc-for>
@@ -221,11 +234,12 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
         <div style="padding:22px 24px 0; display:flex; align-items:center; gap:10px;">
           <span style="font-size:12.5px; font-weight:800; letter-spacing:0.08em; color:var(--org-d); background:#FFF3E4; padding:4px 10px; border-radius:4px;">{{ p.kind }}</span>
         </div>
-        <div style="padding:16px 24px 0; font-weight:800; font-size:16px; line-height:1.4; word-break:break-word; font-family:'Source Code Pro',monospace;">{{ p.name }}</div>
-        <div style="padding:10px 24px 22px; font-size:14px; line-height:1.65; color:var(--dim); flex:1;">{{ p.gives }}</div>
+        <h3 style="padding:16px 24px 0; margin:0; font-weight:800; font-size:16px; line-height:1.4; word-break:break-word; font-family:'Source Code Pro',monospace;"><code>{{ p.name }}</code></h3>
+        <p style="padding:10px 24px 22px; margin:0; font-size:14px; line-height:1.65; color:var(--dim); flex:1;">{{ p.gives }}</p>
         <div style="background:var(--term); padding:14px 18px; display:flex; gap:12px; align-items:flex-start;">
           <div style="font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.65; color:#E6EBF2; white-space:pre-wrap; overflow-wrap:anywhere; flex:1;"><span style="color:#949DAC;">$ </span>{{ p.cmd }}</div>
-          <button type="button" onClick="{{ p.onCopy }}" title="Copy command" aria-label="Copy command" style="flex-shrink:0; background:none; border:1px solid #3C434F; border-radius:5px; color:#AEB7C4; padding:5px; cursor:pointer; display:grid; place-items:center; width:28px; height:28px;" style-hover="border-color:var(--org); color:var(--org);">
+          <span data-copy-status role="status" class="offscreen"></span>
+          <button type="button" onClick="{{ p.onCopy }}" title="Copy the {{ p.name }} command" aria-label="Copy the {{ p.name }} command" style="flex-shrink:0; background:none; border:1px solid #3C434F; border-radius:5px; color:#AEB7C4; padding:5px; cursor:pointer; display:grid; place-items:center; width:28px; height:28px;" style-hover="border-color:var(--org); color:var(--org);">
             <sc-if value="{{ p.isCopied }}" hint-placeholder-val="{{ false }}">
               <svg viewBox="0 0 16 16" width="15" height="15" fill="#2FBF71" style="display:block;" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg>
             </sc-if>

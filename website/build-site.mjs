@@ -137,18 +137,24 @@ body = body.replace(/onClick="\{\{ toggleRotation \}\}"/g, '')
 // A code block that scrolls has to be reachable by keyboard.
 body = body.replace(/<pre /g, '<pre tabindex="0" ')
 
+// Both states become classes: an inline style would outrank the :hover rule.
 const hoverRules = []
-body = body.replace(/\s*style-hover="([^"]*)"/g, (whole, declarations) => {
+body = body.replace(/<(\w+)((?:[^>"]|"[^"]*")*?\sstyle-hover="[^"]*"(?:[^>"]|"[^"]*")*)>/g, (whole, tag, attributes) => {
+    const hover = /\sstyle-hover="([^"]*)"/.exec(attributes)?.[1] ?? ''
+    const base = /\sstyle="([^"]*)"/.exec(attributes)?.[1] ?? ''
     const name = `hv-${hoverRules.length}`
-    hoverRules.push(`.${name}:hover { ${declarations} }`)
 
-    return ` data-hv="${name}"`
+    if (base) {
+        hoverRules.push(`.${name}{${base}}`)
+    }
+    hoverRules.push(`.${name}:hover{${hover}}`)
+
+    const rest = attributes.replace(/\sstyle-hover="[^"]*"/, '').replace(/\sstyle="[^"]*"/, '')
+
+    return rest.includes('class="')
+        ? `<${tag}${rest.replace('class="', `class="${name} `)}>`
+        : `<${tag}${rest} class="${name}">`
 })
-body = body.replace(/<(\w+)([^>]*?)data-hv="([\w-]+)"/g, (whole, tag, rest, name) =>
-    rest.includes('class="')
-        ? `<${tag}${rest.replace('class="', `class="${name} `)}`
-        : `<${tag}${rest} class="${name}"`,
-)
 
 const RUNTIME = `
 const stillMedia = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -207,8 +213,7 @@ if (toggle) {
     applyMotionPreference()
 }
 
-// The run prints itself once, when it comes into view, and then stays. Hidden with
-// visibility so the terminal never changes height while the lines arrive.
+// Prints once, on first view. visibility, so the terminal never changes height.
 const runSteps = [...document.querySelectorAll('[data-run-line]'), ...document.querySelectorAll('[data-run-summary]')]
 
 if (runSteps.length > 0 && !stillMedia.matches) {
@@ -247,13 +252,29 @@ if (runSteps.length > 0 && !stillMedia.matches) {
     })
 }
 
+function announce(button, message) {
+    const status = button.closest('li')?.querySelector('[data-copy-status]')
+    if (status) {
+        status.textContent = message
+    }
+}
+
 document.querySelectorAll('[data-copy]').forEach((button) => {
-    button.addEventListener('click', () => {
-        // Not awaited: a clipboard prompt would otherwise hold up the feedback.
-        navigator.clipboard?.writeText(button.dataset.copy).catch(() => {})
+    button.addEventListener('click', async () => {
+        // Awaited: the tick has to mean the clipboard actually took it.
+        try {
+            await navigator.clipboard.writeText(button.dataset.copy)
+        } catch {
+            announce(button, 'Copying failed. Select the command and copy it yourself.')
+            return
+        }
+        announce(button, 'Command copied')
         setBranch(button, 'done')
         clearTimeout(button.resetTimer)
-        button.resetTimer = setTimeout(() => setBranch(button, 'idle'), 1600)
+        button.resetTimer = setTimeout(() => {
+            setBranch(button, 'idle')
+            announce(button, '')
+        }, 1600)
     })
 })
 document.querySelectorAll('[data-copy] [data-copy-state]').forEach((part) => {
@@ -279,10 +300,7 @@ function squeezeJs(source) {
         .join('\n')
 }
 
-/**
- * Newlines become a single space rather than nothing: between two inline elements
- * that space separates words, and dropping it runs them together.
- */
+// Newlines become a space, not nothing: between inline elements it separates words.
 function squeezeHtml(markup) {
     const kept = []
     return markup
@@ -300,8 +318,7 @@ const version = JSON.parse(
     fs.readFileSync(path.join(repoRoot, 'packages/typo3-playwright-toolkit/package.json'), 'utf-8'),
 ).version
 
-// An answer engine reads this before it reads the prose, so the facts a person
-// would ask for — what it is, what it costs, what it runs on — belong here.
+// What an answer engine reads instead of the prose.
 const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
@@ -359,7 +376,7 @@ if (leftovers) {
     process.exit(1)
 }
 
-// llmstxt.org: the summary an answer engine reads instead of scraping the page.
+// llmstxt.org
 const llmsTxt = `# ${TITLE}
 
 > ${DESCRIPTION}
