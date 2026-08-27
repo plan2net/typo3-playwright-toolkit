@@ -46,6 +46,8 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 .bare { list-style:none; margin:0; padding:0; }
 .nav-list { display:flex; align-items:center; gap:14px; flex-wrap:wrap; list-style:none; margin:0; padding:0; font-size:14px; font-weight:600; }
 .nav-list li { display:inline-flex; align-items:center; }
+/* The call to action sits apart from the section links. */
+.nav-list li:last-child { margin-left:14px; }
 /* The second content value gives the diamond empty alternative text, so a screen
    reader reads the links without "black diamond" between them. */
 .nav-list li + li:not(:last-child)::before { content:"◆"; content:"◆" / ""; color:var(--dim); font-size:8px; margin-right:14px; }
