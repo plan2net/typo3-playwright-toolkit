@@ -276,6 +276,7 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
       <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">tests/news.spec.ts</div>
       <pre style="margin:0; padding:20px 22px; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.8; color:#C9D2DE; overflow-x:auto;"><span style="color:#FFB151;">import</span> {
     defineScenario, expect, expectScreenshot,
+    runAccessibilityScan,
 } <span style="color:#FFB151;">from</span> <span style="color:#8FD48A;">'@plan2net/typo3-playwright-toolkit'&#10;&#10;</span><span style="color:#7FB8E8;">export const</span> test = defineScenario(<span style="color:#FFB151;">async</span> ({ builders }) =&gt; {
     <span style="color:#7FB8E8;">const</span> page = <span style="color:#FFB151;">await</span> builders.page()
         .withTitle(<span style="color:#8FD48A;">'Newsroom'</span>).withSlug(<span style="color:#8FD48A;">'/newsroom'</span>).create()
@@ -294,6 +295,8 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
         .toBeVisible()
 
     <span style="color:#949DAC;">// Fonts, images and animations have settled.&#10;</span>    <span style="color:#FFB151;">await</span> expectScreenshot(page, <span style="color:#8FD48A;">'newsroom'</span>)
+
+    <span style="color:#949DAC;">// axe, on the page as the test left it.&#10;</span>    <span style="color:#FFB151;">await</span> runAccessibilityScan(page)
 })</pre>
       <div style="padding:12px 18px; border-top:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">Content is posted to <span style="color:#C9D2DE;">/typo3/record/edit</span> — the route the backend itself uses on save, request token included.</div>
     </div>
@@ -497,7 +500,7 @@ class Component extends DCLogic {
         { d: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z', title: 'Its own files too', lead: 'Two tests never overwrite one image.', body: 'Each test database also gets its own folder for processed images. Without it, two tests regenerate the same file, and one can read it while the other is still writing.' },
         { d: 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 10a8 8 0 0 1 16 0', title: 'A real backend session', lead: 'No login form, no disabled checks.', body: 'Tests start with a pre-seeded session and a genuine request token, so saving a record goes through the real backend route with its CSRF checks intact.' },
         { d: 'M12 3 4 6v5c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-3Zm-3.5 8.5 2.5 2.5 4.5-4.5', title: 'Cleans up after itself', lead: 'Two runs can happen at once.', body: 'Teardown drops only the databases this run recorded, and the image folder that went with each one. A run that leaks one fails in CI, so a full disk is never the first you hear of it.' },
-        { d: 'm12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5m-18 4 9 5 9-5', title: 'TYPO3 11.5 – 14.3', lead: 'One codebase across four releases, on PHP 8.1 and up.', body: 'Everything version-dependent lives in one directory, so dropping a version is a deletion rather than an audit.' },
+        { d: 'm12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5m-18 4 9 5 9-5', title: 'TYPO3 11.5 – 14.3', lead: 'Works on the version you run.', body: 'TYPO3 11.5, 12.4, 13.4 and 14.3, PHP 8.1 or newer. Moving between them does not change your tests.' },
       ],
       packages: [
         { kind: 'DDEV ADD-ON', name: 'ddev-typo3-playwright-toolkit', cmd: 'ddev add-on get https://github.com/plan2net/typo3-playwright-toolkit/releases/latest/download/ddev-typo3-playwright-toolkit.tar.gz', gives: 'The db-test database service and the ddev playwright, playwright-prepare, playwright-ui and playwright-inspect commands.' },
