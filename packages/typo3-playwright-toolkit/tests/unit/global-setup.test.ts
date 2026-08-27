@@ -87,6 +87,24 @@ describe('verifyApiVersion', () => {
         await expect(verifyApiVersion(config, { fetchImpl: notFound })).rejects.toThrow(/status 404/)
     })
 
+    // A PHP fatal answers 200 with an error page, so only the body names the cause.
+    it('quotes the body it could not parse', async () => {
+        const fatal = (async () =>
+            new Response('<br /><b>Fatal error</b>: Uncaught InvalidArgumentException: no driver', {
+                status: 200,
+            })) as unknown as typeof fetch
+
+        await expect(verifyApiVersion(config, { fetchImpl: fatal })).rejects.toThrow(
+            /Uncaught InvalidArgumentException: no driver/,
+        )
+    })
+
+    it('says so when the body is empty', async () => {
+        const empty = (async () => new Response('', { status: 200 })) as unknown as typeof fetch
+
+        await expect(verifyApiVersion(config, { fetchImpl: empty })).rejects.toThrow(/\(empty body\)/)
+    })
+
     it('says which url it could not reach', async () => {
         const unreachable = (async () => {
             throw new Error('ECONNREFUSED')

@@ -138,6 +138,31 @@ $configurationSettings = array_merge(
 );
 ```
 
+> [!NOTE]
+> If that array also carries your **database credentials** — common when they come
+> from environment variables rather than `settings.php` — then `$GLOBALS` does not
+> name a driver yet at this point, and the call throws
+> `The Default database connection names no driver`. Fold the pending values in
+> first:
+>
+> ```php
+> $defaultConnection = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [];
+>
+> foreach ($configurationSettings as $path => $value) {
+>     if (str_starts_with($path, 'DB/Connections/Default/')) {
+>         $defaultConnection[substr($path, strlen('DB/Connections/Default/'))] = $value;
+>     }
+> }
+>
+> $configurationSettings = array_merge(
+>     $configurationSettings,
+>     TestContext::databaseConnectionOverrides($defaultConnection)
+> );
+> ```
+>
+> `applyDatabaseConnectionOverrides($defaultConnection)` takes the same argument, for
+> projects that write to `$GLOBALS` directly.
+
 Important: the returned keys are paths like `DB/Connections/Default/dbname`, not
 array keys. If your project writes them with `ArrayUtility::setValueByPath` (or the
 same helper it already uses for the other settings), they land correctly. A plain

@@ -41,14 +41,22 @@ async function readHealth(
         throw new Error(unreachable(error instanceof Error ? error.message : String(error)))
     }
 
+    const text = await response.text()
     try {
-        return { status: response.status, ok: response.ok, body: (await response.json()) as HealthResponse['body'] }
+        return { status: response.status, ok: response.ok, body: JSON.parse(text) as HealthResponse['body'] }
     } catch {
         throw new Error(
             `Preflight failed: ${healthUrl} returned non-JSON (status ${response.status}). ` +
-                'Check that the Playwright test API extension is loaded in the Testing context.',
+                'Either the Playwright test API extension is not loaded in the Testing context, ' +
+                `or the site failed before it answered:\n${excerpt(text)}`,
         )
     }
+}
+
+function excerpt(body: string): string {
+    const collapsed = body.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+
+    return collapsed.length > 500 ? `${collapsed.slice(0, 500)}…` : collapsed || '(empty body)'
 }
 
 /**

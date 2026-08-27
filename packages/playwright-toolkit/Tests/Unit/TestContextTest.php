@@ -97,6 +97,19 @@ final class TestContextTest extends TestCase
     }
 
     #[Test]
+    public function appliesAConnectionPassedInWhenGlobalsDoesNotCarryItYet(): void
+    {
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = 'ABCD1234EFGH5678';
+        $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] = [];
+
+        TestContext::applyDatabaseConnectionOverrides(['driver' => 'pdo_pgsql']);
+
+        $connection = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
+        self::assertSame('dbABCD1234EFGH5678', $connection['dbname']);
+        self::assertSame('db-test', $connection['host']);
+    }
+
+    #[Test]
     public function applyingWithoutATestIdLeavesTheProjectDatabaseAlone(): void
     {
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);

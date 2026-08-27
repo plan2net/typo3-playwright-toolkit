@@ -21,12 +21,15 @@ final class TestContext
      */
     public const API_VERSION = 1;
 
-    public static function applyDatabaseConnectionOverrides(): void
+    /**
+     * @param array<string, mixed>|null $defaultConnection pass it when $GLOBALS does not carry it yet
+     */
+    public static function applyDatabaseConnectionOverrides(?array $defaultConnection = null): void
     {
-        /** @var array<string, mixed> $defaultConnection */
-        $defaultConnection = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [];
+        /** @var array<string, mixed> $connection */
+        $connection = $defaultConnection ?? $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [];
 
-        foreach (self::databaseConnectionOverrides($defaultConnection) as $path => $value) {
+        foreach (self::databaseConnectionOverrides($connection) as $path => $value) {
             $GLOBALS['TYPO3_CONF_VARS'] = ArrayUtility::setValueByPath($GLOBALS['TYPO3_CONF_VARS'], $path, $value);
         }
     }

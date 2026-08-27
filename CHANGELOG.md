@@ -10,6 +10,18 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — when the preflight gets an answer it
+  cannot parse, it now prints that answer. It used to say the extension was not
+  loaded, which is often wrong: a PHP error in your own configuration also lands
+  here, and its message tells you what broke.
+- **plan2net/playwright-toolkit** — `applyDatabaseConnectionOverrides()` now accepts
+  the Default connection as an argument. It only read `$GLOBALS` before, which is
+  still empty if your database settings come from environment variables, so
+  provisioning failed with `The Default database connection names no driver`. The
+  README shows what to pass.
+
 ## [0.3.0] - 2026-08-26
 
 ### Breaking
