@@ -14,8 +14,8 @@ fi
 
 . /mnt/ddev_config/playwright-lib.sh
 
-# The ungated helper: a hand run prepares whatever PW_SKIP_PREPARE tells the
-# test commands; --force rebuilds a template that is still current.
+# Runs even when PW_SKIP_PREPARE is set: calling this command by hand means you
+# want it to run. --force rebuilds a template that is still up to date.
 playwright_run_prepare "" "$@" || {
     echo "[playwright] Could not build the test database template." >&2
     exit 1

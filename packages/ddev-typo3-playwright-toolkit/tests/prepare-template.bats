@@ -104,6 +104,49 @@ STUB
     [ "$output" -eq 0 ]
 }
 
+@test "refuses to prepare when the db-test service is configured but not active yet" {
+    export PW_ADDON_CONFIG_DIR="${BATS_TEST_TMPDIR}/ddev-config"
+    mkdir -p "${PW_ADDON_CONFIG_DIR}"
+    touch "${PW_ADDON_CONFIG_DIR}/docker-compose.db-test.yaml"
+    unset PLAYWRIGHT_DB_TEST_HOST
+
+    run playwright_run_prepare "${HTML}"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *'ddev restart'* ]]
+    [ ! -f "${CALLS}" ]
+}
+
+@test "prepares once the db-test service is active in the web container" {
+    export PW_ADDON_CONFIG_DIR="${BATS_TEST_TMPDIR}/ddev-config"
+    mkdir -p "${PW_ADDON_CONFIG_DIR}"
+    touch "${PW_ADDON_CONFIG_DIR}/docker-compose.db-test.yaml"
+    export PLAYWRIGHT_DB_TEST_HOST=db-test
+
+    run playwright_run_prepare "${HTML}"
+    [ "$status" -eq 0 ]
+}
+
+@test "prepares on a project without the db-test service" {
+    export PW_ADDON_CONFIG_DIR="${BATS_TEST_TMPDIR}/ddev-config"
+    mkdir -p "${PW_ADDON_CONFIG_DIR}"
+    unset PLAYWRIGHT_DB_TEST_HOST
+
+    run playwright_run_prepare "${HTML}"
+    [ "$status" -eq 0 ]
+}
+
+@test "the replay preparation is guarded the same way" {
+    export PW_ADDON_CONFIG_DIR="${BATS_TEST_TMPDIR}/ddev-config"
+    mkdir -p "${PW_ADDON_CONFIG_DIR}"
+    touch "${PW_ADDON_CONFIG_DIR}/docker-compose.db-test.yaml"
+    unset PLAYWRIGHT_DB_TEST_HOST
+
+    run playwright_replay_prepare "${HTML}"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *'ddev restart'* ]]
+    [ ! -f "${CALLS}" ]
+}
+
 @test "the ungated helper forwards extra arguments to the prepare call" {
     run playwright_run_prepare "${HTML}" --force
     [ "$status" -eq 0 ]

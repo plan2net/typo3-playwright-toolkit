@@ -66,7 +66,22 @@ playwright_build_assets() {
     (cd "${build_root}" && npm run build) || return 1
 }
 
+# The db-test compose file only takes effect after `ddev restart`. Before that,
+# "db-test" does not resolve — or worse, resolves to ANOTHER project's service on
+# the shared ddev network, and prepare would write into that project's template.
+playwright_require_db_test() {
+    config_dir="${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}"
+
+    if [ -f "${config_dir}/docker-compose.db-test.yaml" ] && [ -z "${PLAYWRIGHT_DB_TEST_HOST:-}" ]; then
+        echo "[playwright] The db-test service is configured but not active in this web container." >&2
+        echo "[playwright] Run 'ddev restart' once to enable the add-on, then try again." >&2
+        return 1
+    fi
+}
+
 playwright_run_prepare() {
+    playwright_require_db_test || return 1
+
     # $1 optional project root (empty for the default); the rest reaches playwright:prepare.
     prepare_root="${1:-/var/www/html}"
     [ $# -gt 0 ] && shift
@@ -79,6 +94,8 @@ playwright_run_prepare() {
 }
 
 playwright_replay_prepare() {
+    playwright_require_db_test || return 1
+
     # $1 optional project root, so this is testable outside the web container.
     replay_root="${1:-/var/www/html}"
 
