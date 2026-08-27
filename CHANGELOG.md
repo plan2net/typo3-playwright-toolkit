@@ -12,6 +12,11 @@ the package a change belongs to.
 
 ### Fixed
 
+- **plan2net/playwright-toolkit** — each test database now gets its own folder for
+  processed images, `fileadmin/_processed_<test id>`. The records naming those images
+  live in the database, so every test used to regenerate the same shared files and
+  could overwrite one while another test was reading it. That showed up as a test
+  seeing the wrong crop of the right image, and only under load.
 - **@plan2net/typo3-playwright-toolkit** — when the preflight gets an answer it
   cannot parse, it now prints that answer. It used to say the extension was not
   loaded, which is often wrong: a PHP error in your own configuration also lands

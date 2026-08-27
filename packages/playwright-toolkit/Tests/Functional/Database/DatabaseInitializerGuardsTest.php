@@ -8,6 +8,7 @@ use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use Plan2net\PlaywrightToolkit\Database\BorrowedConnection;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 use Plan2net\PlaywrightToolkit\Database\DatabaseInitializer;
+use Plan2net\PlaywrightToolkit\Database\ProcessedFileIsolation;
 use Plan2net\PlaywrightToolkit\Database\SeedSources;
 use Plan2net\PlaywrightToolkit\Database\TemplateReadiness;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
@@ -186,7 +187,8 @@ final class DatabaseInitializerGuardsTest extends FunctionalTestCase
             new TemplateReadiness(
                 $this->get(SeedSources::class),
                 new BorrowedConnection($this->get(ConnectionPool::class))
-            )
+            ),
+            $this->get(ProcessedFileIsolation::class)
         );
     }
 }

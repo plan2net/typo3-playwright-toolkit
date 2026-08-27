@@ -25,6 +25,7 @@ final class DatabaseInitializer implements LoggerAwareInterface
         private readonly LockFiles $lockFiles,
         private readonly TestApiSecret $secret,
         private readonly TemplateReadiness $readiness,
+        private readonly ProcessedFileIsolation $processedFiles,
     ) {
     }
 
@@ -117,6 +118,7 @@ final class DatabaseInitializer implements LoggerAwareInterface
                 }
 
                 $driver->materialise($testId);
+                $this->processedFiles->apply($driver->connectionOverrides($testId), $testId);
             } finally {
                 flock($createHandle, LOCK_UN);
                 fclose($createHandle);

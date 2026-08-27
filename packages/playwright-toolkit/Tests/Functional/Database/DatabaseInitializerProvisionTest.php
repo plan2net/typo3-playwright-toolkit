@@ -68,6 +68,20 @@ final class DatabaseInitializerProvisionTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function givesTheTestDatabaseItsOwnProcessedFileFolder(): void
+    {
+        $this->prepareTemplate();
+        $this->seedFileStorageInTemplate();
+
+        $this->initializer()->provision($this->driver(), self::TEST_ID);
+
+        self::assertSame(
+            '_processed_' . self::TEST_ID,
+            $this->testDatabase()->query('SELECT processingfolder FROM sys_file_storage WHERE uid = 1')->fetchColumn()
+        );
+    }
+
+    #[Test]
     public function writesTheClaimCleanupLooksFor(): void
     {
         $this->prepareTemplate();
@@ -199,6 +213,15 @@ final class DatabaseInitializerProvisionTest extends FunctionalTestCase
     private function databaseDirectory(): string
     {
         return Environment::getVarPath() . '/test-databases';
+    }
+
+    private function seedFileStorageInTemplate(): void
+    {
+        $template = new \PDO('sqlite:' . $this->databaseDirectory() . '/playwright_db_template.sqlite');
+        $template->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $template->exec(
+            "INSERT INTO sys_file_storage (uid, pid, name, driver, processingfolder) VALUES (1, 0, 'fileadmin', 'Local', '')"
+        );
     }
 
     private function testDatabase(): \PDO
