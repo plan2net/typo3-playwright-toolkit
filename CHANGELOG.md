@@ -10,6 +10,8 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-27
+
 ### Fixed
 
 - **plan2net/playwright-toolkit** — each test database now gets its own folder for
@@ -112,7 +114,8 @@ the package a change belongs to.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.3.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.0...main
+[0.4.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/plan2net/typo3-playwright-toolkit/releases/tag/v0.1.0
