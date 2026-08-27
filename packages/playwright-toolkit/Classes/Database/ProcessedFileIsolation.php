@@ -88,5 +88,4 @@ final class ProcessedFileIsolation
 
         return $roots;
     }
-
 }

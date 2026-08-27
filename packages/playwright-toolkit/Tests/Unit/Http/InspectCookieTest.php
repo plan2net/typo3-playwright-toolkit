@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit\Http;
 
-use Plan2net\PlaywrightToolkit\Http\InspectProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Http\InspectProvider;
 
 final class InspectCookieTest extends TestCase
 {

@@ -7,7 +7,7 @@ namespace Plan2net\PlaywrightToolkit\Database\Driver;
 final class PostgresTestDatabaseDriver extends ServerTestDatabaseDriver
 {
     /**
-     * @var \Plan2net\PlaywrightToolkit\Database\Driver\Engine
+     * @var Engine
      */
     private const ENGINE = Engine::Postgres;
 
@@ -78,7 +78,7 @@ final class PostgresTestDatabaseDriver extends ServerTestDatabaseDriver
         $admin->exec(self::cloneStatement(
             $database,
             $this->templateDatabase,
-            (string)$admin->getAttribute(\PDO::ATTR_SERVER_VERSION)
+            (string) $admin->getAttribute(\PDO::ATTR_SERVER_VERSION)
         ));
     }
 
@@ -151,6 +151,6 @@ final class PostgresTestDatabaseDriver extends ServerTestDatabaseDriver
 
     private static function supportsCloneStrategy(string $serverVersion): bool
     {
-        return 1 === preg_match('/^(\d+)/', $serverVersion, $major) && (int)$major[1] >= 15;
+        return 1 === preg_match('/^(\d+)/', $serverVersion, $major) && (int) $major[1] >= 15;
     }
 }

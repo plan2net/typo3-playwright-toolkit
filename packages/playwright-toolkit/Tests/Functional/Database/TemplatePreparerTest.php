@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database;
 
+use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Database\Driver\SqliteTestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\SeededSession;
 use Plan2net\PlaywrightToolkit\Database\TemplatePreparer;
-use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 

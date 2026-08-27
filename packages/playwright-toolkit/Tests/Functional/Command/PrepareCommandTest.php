@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Command;
 
-use Plan2net\PlaywrightToolkit\Command\PrepareCommand;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Plan2net\PlaywrightToolkit\Command\PrepareCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use TYPO3\CMS\Core\Core\ApplicationContext;

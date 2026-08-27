@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit\Compatibility;
 
-use Plan2net\PlaywrightToolkit\Compatibility\SessionCookieValue;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Compatibility\SessionCookieValue;
 use TYPO3\CMS\Core\Session\UserSession;
 
 /**

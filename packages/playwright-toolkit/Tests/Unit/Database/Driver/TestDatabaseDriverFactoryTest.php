@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit\Database\Driver;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
 use Plan2net\PlaywrightToolkit\Database\Driver\Engine;
 use Plan2net\PlaywrightToolkit\Database\Driver\MysqlTestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\Driver\PostgresTestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\Driver\SqliteTestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Core\ApplicationContext;
 use TYPO3\CMS\Core\Core\Environment;
 
@@ -31,6 +31,7 @@ final class TestDatabaseDriverFactoryTest extends TestCase
             'UNIX',
         );
     }
+
     #[Test]
     public function buildsAPostgresDriverFromThePostgresConnection(): void
     {

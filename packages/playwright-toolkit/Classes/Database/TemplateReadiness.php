@@ -39,7 +39,7 @@ final class TemplateReadiness
 
     private function expectedFingerprint(
         TestDatabaseDriver $driver,
-        ToolkitConfiguration $configuration
+        ToolkitConfiguration $configuration,
     ): string {
         return $this->borrowedConnection->use(
             $driver->schemaConnectionOverrides(),

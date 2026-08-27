@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database;
 
-use Plan2net\PlaywrightToolkit\Database\ReplayPreparer;
 use PHPUnit\Framework\Attributes\Test;
+use Plan2net\PlaywrightToolkit\Database\ReplayPreparer;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class ReplayPreparerTest extends FunctionalTestCase

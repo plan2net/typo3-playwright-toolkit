@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit\Configuration;
 
-use Plan2net\PlaywrightToolkit\Configuration\BackendSettings;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Configuration\BackendSettings;
 
 final class BackendSettingsTest extends TestCase
 {

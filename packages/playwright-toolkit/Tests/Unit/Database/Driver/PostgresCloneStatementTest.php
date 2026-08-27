@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit\Database\Driver;
 
-use Plan2net\PlaywrightToolkit\Database\Driver\PostgresTestDatabaseDriver;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Database\Driver\PostgresTestDatabaseDriver;
 
 final class PostgresCloneStatementTest extends TestCase
 {

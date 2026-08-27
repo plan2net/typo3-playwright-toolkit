@@ -36,7 +36,7 @@ final class TestApi
     public static function refuse(
         ServerRequestInterface $request,
         TestApiSecret $secret,
-        string $method
+        string $method,
     ): ?ResponseInterface {
         if (!$secret->matches($request->getHeaderLine(TestApiSecret::HEADER))) {
             return TestApiSecret::unauthorizedResponse();

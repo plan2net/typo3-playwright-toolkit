@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit\Database;
 
-use Plan2net\PlaywrightToolkit\Database\SeedFingerprint;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Database\SeedFingerprint;
 
 final class SeedFingerprintTest extends TestCase
 {

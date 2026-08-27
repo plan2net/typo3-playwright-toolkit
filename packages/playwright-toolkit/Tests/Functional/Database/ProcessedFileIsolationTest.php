@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database;
 
-use Plan2net\PlaywrightToolkit\Database\DatabaseName;
-use Plan2net\PlaywrightToolkit\Database\ProcessedFileIsolation;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Plan2net\PlaywrightToolkit\Database\DatabaseName;
+use Plan2net\PlaywrightToolkit\Database\ProcessedFileIsolation;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;

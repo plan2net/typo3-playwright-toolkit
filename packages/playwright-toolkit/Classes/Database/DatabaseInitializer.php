@@ -153,7 +153,7 @@ final class DatabaseInitializer implements LoggerAwareInterface
         TestDatabaseDriver $driver,
         string $testId,
         ToolkitConfiguration $configuration,
-        string $seedMarker
+        string $seedMarker,
     ): bool {
         return file_exists($seedMarker)
             && $driver->hasSeededSession(
@@ -162,5 +162,4 @@ final class DatabaseInitializer implements LoggerAwareInterface
                 $configuration->sessionUserId
             );
     }
-
 }

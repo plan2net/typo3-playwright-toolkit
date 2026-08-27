@@ -123,5 +123,4 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
             }
         );
     }
-
 }

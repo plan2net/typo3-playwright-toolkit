@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests;
 
-use RuntimeException;
-
 /**
  * The fixtures sit at the monorepo root, beside the npm package that asserts the
  * same bytes. The split repository carries a copy at its own root, so both
@@ -24,7 +22,7 @@ final class ContractFixture
             }
         }
 
-        throw new RuntimeException(sprintf('No contract fixture "%s" beside or above %s', $name, $package));
+        throw new \RuntimeException(sprintf('No contract fixture "%s" beside or above %s', $name, $package));
     }
 
     /**

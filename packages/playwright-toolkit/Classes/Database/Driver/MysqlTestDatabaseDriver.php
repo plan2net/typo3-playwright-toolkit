@@ -11,7 +11,7 @@ use Plan2net\PlaywrightToolkit\Database\SeededSession;
 final class MysqlTestDatabaseDriver extends ServerTestDatabaseDriver
 {
     /**
-     * @var \Plan2net\PlaywrightToolkit\Database\Driver\Engine
+     * @var Engine
      */
     private const ENGINE = Engine::Mysql;
 

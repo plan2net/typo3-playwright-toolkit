@@ -10,13 +10,14 @@ return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
     ->setFinder($finder)
     ->setRules([
-        '@PSR12' => true,
-        // The codebase writes fn(), and PSR-12 has no opinion on arrow functions.
+        '@Symfony' => true,
+        'concat_space' => ['spacing' => 'one'],
+        // A guard throw carries a sprintf message too long for one line.
+        'single_line_throw' => false,
+        // Symfony omits curly_brace_block, which leaves a blank line before a closing brace.
+        'no_extra_blank_lines' => ['tokens' => ['curly_brace_block', 'extra']],
         'function_declaration' => ['closure_fn_spacing' => 'none'],
         'declare_strict_types' => true,
-        'no_unused_imports' => true,
-        'single_quote' => true,
-        'array_syntax' => ['syntax' => 'short'],
         // A class reads top-down: what it is, what it needs, then what it does,
         // widest visibility first. sort_algorithm "none" keeps the order within
         // each group, so a helper stays where its caller put it.

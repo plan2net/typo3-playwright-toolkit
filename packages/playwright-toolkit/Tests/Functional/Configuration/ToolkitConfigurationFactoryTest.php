@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Configuration;
 
-use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use PHPUnit\Framework\Attributes\Test;
+use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 

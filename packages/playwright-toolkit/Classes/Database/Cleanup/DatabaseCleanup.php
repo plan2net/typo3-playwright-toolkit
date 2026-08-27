@@ -52,15 +52,15 @@ final class DatabaseCleanup implements LoggerAwareInterface
      * @param list<string> $keepTestIds test IDs belonging to live runs
      *
      * @return array{outcomes: array<string, CleanupOutcome>, kept: int, cutoffMs: int}
-     *         outcomes keyed by test ID, kept counts the claims deliberately left
-     *         alone, cutoffMs is the age actually applied after clamping
+     *                                                                                  outcomes keyed by test ID, kept counts the claims deliberately left
+     *                                                                                  alone, cutoffMs is the age actually applied after clamping
      */
     public function sweep(
         TestDatabaseDriver $driver,
         array $keepTestIds,
         int $requestedAgeMs,
         int $floorMs,
-        ?int $nowMs = null
+        ?int $nowMs = null,
     ): array {
         $cutoffMs = max($requestedAgeMs, $floorMs);
         $nowMs ??= (int) (microtime(true) * 1000);
@@ -110,14 +110,14 @@ final class DatabaseCleanup implements LoggerAwareInterface
 
     /**
      * @param int|null $minimumAgeMs when set, the claim is re-checked under the
-     *                              lock and left alone if it is younger
+     *                               lock and left alone if it is younger
      *
      * @return CleanupOutcome|null null means "deliberately left alone"
      */
     private function dropWithinLock(
         TestDatabaseDriver $driver,
         string $testId,
-        ?int $minimumAgeMs = null
+        ?int $minimumAgeMs = null,
     ): ?CleanupOutcome {
         $databaseName = DatabaseName::forTestId($testId);
 
@@ -163,7 +163,7 @@ final class DatabaseCleanup implements LoggerAwareInterface
         TestDatabaseDriver $driver,
         string $testId,
         string $databaseName,
-        ?int $minimumAgeMs
+        ?int $minimumAgeMs,
     ): ?CleanupOutcome {
         $claim = $this->lockFiles->claim($databaseName);
 

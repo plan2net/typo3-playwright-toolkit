@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit\Security;
 
-use Plan2net\PlaywrightToolkit\Security\InspectToken;
-use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Security\InspectToken;
+use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 
 final class TestApiSecretTest extends TestCase
 {

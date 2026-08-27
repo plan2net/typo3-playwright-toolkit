@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database;
 
-use Plan2net\PlaywrightToolkit\Database\SeededSession;
 use PHPUnit\Framework\Attributes\Test;
+use Plan2net\PlaywrightToolkit\Database\SeededSession;
 use TYPO3\CMS\Core\Session\Backend\DatabaseSessionBackend;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;

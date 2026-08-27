@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit;
 
-use Plan2net\PlaywrightToolkit\Database\DatabaseName;
-use Plan2net\PlaywrightToolkit\SiteName;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Database\DatabaseName;
+use Plan2net\PlaywrightToolkit\SiteName;
 
 final class SiteNameTest extends TestCase
 {

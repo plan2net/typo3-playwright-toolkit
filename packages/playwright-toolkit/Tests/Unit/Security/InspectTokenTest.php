@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit\Security;
 
-use Plan2net\PlaywrightToolkit\Security\InspectToken;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Security\InspectToken;
 use Plan2net\PlaywrightToolkit\Tests\ContractFixture;
 
 final class InspectTokenTest extends TestCase

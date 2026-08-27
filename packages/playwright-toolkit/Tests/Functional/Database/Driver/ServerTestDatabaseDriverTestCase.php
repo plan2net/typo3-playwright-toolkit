@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database\Driver;
 
+use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Database\Driver\ServerTestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\Driver\TemplateSeed;
-use PHPUnit\Framework\Attributes\Test;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 /**

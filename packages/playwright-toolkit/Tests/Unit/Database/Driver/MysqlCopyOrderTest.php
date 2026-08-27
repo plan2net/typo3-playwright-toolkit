@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit\Database\Driver;
 
-use Plan2net\PlaywrightToolkit\Database\Driver\MysqlTestDatabaseDriver;
-use Plan2net\PlaywrightToolkit\Database\SeededSession;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Database\Driver\MysqlTestDatabaseDriver;
+use Plan2net\PlaywrightToolkit\Database\SeededSession;
 
 /**
  * MySQL clones table by table, and readiness is judged by the seeded session row.

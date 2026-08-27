@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database;
 
+use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 use Plan2net\PlaywrightToolkit\Database\DatabaseInitializer;
 use Plan2net\PlaywrightToolkit\Database\Driver\ServerTestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseService;
 use Plan2net\PlaywrightToolkit\Database\TemplatePreparer;
-use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\ArrayUtility;

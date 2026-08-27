@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database\Driver;
 
+use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Database\Driver\Engine;
 use Plan2net\PlaywrightToolkit\Database\Driver\SqliteTestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\Driver\TemplateSeed;
-use PHPUnit\Framework\Attributes\Test;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class SqliteTestDatabaseDriverTest extends FunctionalTestCase

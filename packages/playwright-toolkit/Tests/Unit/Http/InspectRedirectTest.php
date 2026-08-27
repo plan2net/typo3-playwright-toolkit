@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit\Http;
 
-use Plan2net\PlaywrightToolkit\Http\InspectProvider;
-use Plan2net\PlaywrightToolkit\TestContext;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Http\InspectProvider;
+use Plan2net\PlaywrightToolkit\TestContext;
 
 final class InspectRedirectTest extends TestCase
 {

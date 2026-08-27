@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database\Cleanup;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\CleanupOutcome;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\DatabaseCleanup;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 use Plan2net\PlaywrightToolkit\Database\DatabaseName;
 use Plan2net\PlaywrightToolkit\Database\Driver\SqliteTestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\ProcessedFileIsolation;
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Test;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
@@ -299,7 +299,7 @@ final class DatabaseCleanupTest extends FunctionalTestCase
     #[Test]
     public function logsEveryDropRefusalAndReclamation(): void
     {
-        $logger = new class () extends \Psr\Log\AbstractLogger {
+        $logger = new class extends \Psr\Log\AbstractLogger {
             /** @var list<string> */
             public array $lines = [];
 
@@ -307,9 +307,8 @@ final class DatabaseCleanupTest extends FunctionalTestCase
              * Untyped $message on purpose: psr/log 1, which TYPO3 11 pins, declares
              * it untyped, and narrowing it here is a fatal.
              *
-             * @param mixed             $level
              * @param string|\Stringable $message
-             * @param array<mixed>      $context
+             * @param array<mixed>       $context
              */
             public function log($level, $message, array $context = []): void
             {

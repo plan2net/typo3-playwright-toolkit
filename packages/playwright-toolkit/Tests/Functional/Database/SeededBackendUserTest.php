@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database;
 
-use Plan2net\PlaywrightToolkit\Database\SeededBackendUser;
 use PHPUnit\Framework\Attributes\Test;
+use Plan2net\PlaywrightToolkit\Database\SeededBackendUser;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\InvalidPasswordHashException;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -23,7 +23,7 @@ final class SeededBackendUserTest extends FunctionalTestCase
         $this->expectException(InvalidPasswordHashException::class);
 
         GeneralUtility::makeInstance(PasswordHashFactory::class)
-            ->get((string)SeededBackendUser::row(1)['password'], 'BE');
+            ->get((string) SeededBackendUser::row(1)['password'], 'BE');
     }
 
     #[Test]

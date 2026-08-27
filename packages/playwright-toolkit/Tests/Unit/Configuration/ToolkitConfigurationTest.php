@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Unit\Configuration;
 
-use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfiguration;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfiguration;
 
 final class ToolkitConfigurationTest extends TestCase
 {
