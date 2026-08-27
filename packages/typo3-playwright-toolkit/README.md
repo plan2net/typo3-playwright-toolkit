@@ -343,7 +343,12 @@ Everything else:
 
 `defineBasePlaywrightConfig` sets Playwright's `baseURL` to `testingURL` and adds
 this package's setup and cleanup functions. Values in its second argument win, and
-`use` and `expect` are merged instead of replaced.
+`use` and `expect` are merged instead of replaced. Four keys cannot be overridden
+and are refused with an error: `globalSetup` and `globalTeardown` carry the
+preflight and the database cleanup, `use.baseURL` must stay the testing origin, and
+`use.serviceWorkers` stays `block` because a service worker serves past the routing
+that carries the test ID. Add your own setup as a Playwright project dependency
+instead.
 
 ### Content types
 

@@ -14,7 +14,7 @@ export {
     type ToolkitScreenshotConfig,
     type ContentTypeConstructor,
 } from './config.js'
-export { defineBasePlaywrightConfig } from './playwright/base-config.js'
+export { defineBasePlaywrightConfig, type BasePlaywrightOverrides } from './playwright/base-config.js'
 
 export { ContentBuilder } from './builders/content-builder.js'
 export { PageBuilder } from './builders/page-builder.js'
