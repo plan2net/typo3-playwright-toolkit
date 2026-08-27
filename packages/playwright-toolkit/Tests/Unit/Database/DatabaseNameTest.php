@@ -59,6 +59,14 @@ final class DatabaseNameTest extends TestCase
         self::assertSame('ABCD1234EFGH5678', DatabaseName::testIdOf('dbABCD1234EFGH5678'));
     }
 
+    // PHP's $ matches before a final newline, so the pattern needs \z to hold.
+    #[Test]
+    public function refusesANameCarryingATrailingNewline(): void
+    {
+        self::assertFalse(DatabaseName::isDroppable("dbABCD1234EFGH5678\n"));
+        self::assertFalse(DatabaseName::isProvisionable("dbABCD1234EFGH5678\n"));
+    }
+
     #[Test]
     public function acceptsAContractShapedName(): void
     {

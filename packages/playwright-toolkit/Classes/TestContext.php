@@ -14,7 +14,7 @@ final class TestContext
     /** Only an inspect link sets this; a test run sends the header. */
     public const TEST_ID_COOKIE = 'playwright_test_id';
     public const DATABASE_PREFIX = 'db';
-    public const TEST_ID_PATTERN = '/^[A-Z0-9]{16}$/';
+    public const TEST_ID_PATTERN = '/^[A-Z0-9]{16}\z/';
 
     /**
      * Raise this whenever an endpoint the toolkit depends on changes shape.

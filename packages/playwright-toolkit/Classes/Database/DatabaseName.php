@@ -21,14 +21,14 @@ final class DatabaseName
      *
      * @var string
      */
-    private const DROPPABLE = '/^db[A-Z0-9]{16}$/';
+    private const DROPPABLE = '/^db[A-Z0-9]{16}\z/';
 
     /**
      * An empty test ID legitimately selects the base database.
      *
      * @var string
      */
-    private const PROVISIONABLE = '/^db([A-Z0-9]{16})?$/';
+    private const PROVISIONABLE = '/^db([A-Z0-9]{16})?\z/';
 
     public static function forTestId(string $testId): string
     {
