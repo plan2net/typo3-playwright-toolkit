@@ -9,9 +9,10 @@ const repoRoot = path.join(here, '..')
 const outDir = path.join(repoRoot, 'site')
 
 const SITE_URL = 'https://plan2net.github.io/typo3-playwright-toolkit/'
+const REPO_URL = 'https://github.com/plan2net/typo3-playwright-toolkit'
 const TITLE = 'TYPO3 Playwright Toolkit'
 const DESCRIPTION =
-    'End-to-end tests for TYPO3 with a throwaway database per test file, content built through the real backend, and a signed link into every failure.'
+    'End-to-end tests for TYPO3 CMS with a throwaway database per test file, content built through the real backend, and a signed link into every failure.'
 
 const source = fs.readFileSync(path.join(here, 'landing-page.dc.html'), 'utf-8')
 
@@ -295,18 +296,58 @@ function squeezeHtml(markup) {
         .trim()
 }
 
-const head = squeezeHtml(`<meta charset="utf-8">
-<title>${TITLE} — end-to-end tests for TYPO3</title>
+const version = JSON.parse(
+    fs.readFileSync(path.join(repoRoot, 'packages/typo3-playwright-toolkit/package.json'), 'utf-8'),
+).version
+
+// An answer engine reads this before it reads the prose, so the facts a person
+// would ask for — what it is, what it costs, what it runs on — belong here.
+const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: TITLE,
+    alternateName: 'plan2net/playwright-toolkit',
+    description: DESCRIPTION,
+    applicationCategory: 'DeveloperApplication',
+    applicationSubCategory: 'Testing framework',
+    operatingSystem: 'Linux, macOS, Windows',
+    url: SITE_URL,
+    softwareVersion: version,
+    codeRepository: REPO_URL,
+    license: 'https://spdx.org/licenses/GPL-2.0-or-later.html',
+    programmingLanguage: ['TypeScript', 'PHP'],
+    softwareRequirements: 'TYPO3 CMS 11.5, 12.4, 13.4 or 14.3; PHP 8.1 or newer; DDEV',
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+    author: { '@type': 'Organization', name: 'plan2net', url: 'https://www.plan2.net/' },
+    keywords: 'TYPO3, Playwright, end-to-end testing, DDEV, test database, visual regression',
+}
+
+const head =
+    squeezeHtml(`<meta charset="utf-8">
+<title>${TITLE} — end-to-end tests for TYPO3 CMS</title>
 <meta name="description" content="${escapeAttribute(DESCRIPTION)}">
 <link rel="canonical" href="${SITE_URL}">
 <link rel="icon" href="logo.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FF8700">
+<meta name="author" content="plan2net">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="${TITLE}">
+<meta property="og:locale" content="en">
 <meta property="og:url" content="${SITE_URL}">
 <meta property="og:title" content="${TITLE}">
 <meta property="og:description" content="${escapeAttribute(DESCRIPTION)}">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="${SITE_URL}og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${escapeAttribute(TITLE)}: end-to-end tests for TYPO3 CMS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${TITLE}">
+<meta name="twitter:description" content="${escapeAttribute(DESCRIPTION)}">
+<meta name="twitter:image" content="${SITE_URL}og-image.png">
 ${helmet}
-<style>[hidden]{display:none !important}${squeezeCss(hoverRules.join(''))}</style>`)
+<style>[hidden]{display:none !important}${squeezeCss(hoverRules.join(''))}</style>`) +
+    `<script type="application/ld+json">${JSON.stringify(structuredData)}</script>`
 
 const page = `<!DOCTYPE html><html lang="en"><head>${head}</head><body>${squeezeHtml(
     body,
@@ -318,8 +359,56 @@ if (leftovers) {
     process.exit(1)
 }
 
+// llmstxt.org: the summary an answer engine reads instead of scraping the page.
+const llmsTxt = `# ${TITLE}
+
+> ${DESCRIPTION}
+
+Three packages that only work together: a DDEV add-on (the db-test database service
+and the ddev playwright commands), a TYPO3 extension (\`plan2net/playwright-toolkit\`,
+which clones the databases and hands out a backend session), and an npm package
+(\`@plan2net/typo3-playwright-toolkit\`, the Playwright fixtures and content builders).
+
+Version ${version}. GPL-2.0-or-later. TYPO3 CMS 11.5, 12.4, 13.4 and 14.3 on PHP 8.1
+to 8.4, with drivers for MariaDB, MySQL, PostgreSQL and SQLite.
+
+What is unusual about it: every spec file runs against its own database, cloned from a
+prepared template in about 27 ms, so files cannot break each other. Content is created
+through TYPO3's own backend save route rather than from SQL fixtures, which means a
+renamed field fails a test instead of passing against a shape the product no longer
+has, and two people adding tests never edit the same fixture file. A failed test keeps
+its database, and \`ddev playwright-inspect\` prints a signed link that logs you into
+the TYPO3 backend of that exact run.
+
+## Documentation
+
+- [README](${REPO_URL}#readme): install, setup and how to write a test
+- [Wire contract](${REPO_URL}/blob/main/CONTRACT.md): the test-ID header chain the packages agree on
+- [DDEV add-on](${REPO_URL}/tree/main/packages/ddev-typo3-playwright-toolkit): commands, flags, database service
+- [TYPO3 extension](${REPO_URL}/tree/main/packages/playwright-toolkit): endpoints, settings, testing host
+- [npm package](${REPO_URL}/tree/main/packages/typo3-playwright-toolkit): defineScenario, builders, screenshots, axe
+- [Example project](${REPO_URL}/tree/main/tests/e2e/consumer): a working TYPO3 project CI reinstalls on every push
+- [Changelog](${REPO_URL}/blob/main/CHANGELOG.md)
+`
+
+const robotsTxt = `User-agent: *
+Allow: /
+
+Sitemap: ${SITE_URL}sitemap.xml
+`
+
+const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>${SITE_URL}</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+</urlset>
+`
+
 fs.mkdirSync(outDir, { recursive: true })
 fs.writeFileSync(path.join(outDir, 'index.html'), page)
+fs.writeFileSync(path.join(outDir, 'llms.txt'), llmsTxt)
+fs.writeFileSync(path.join(outDir, 'robots.txt'), robotsTxt)
+fs.writeFileSync(path.join(outDir, 'sitemap.xml'), sitemapXml)
 fs.copyFileSync(path.join(here, 'logo.svg'), path.join(outDir, 'logo.svg'))
+fs.copyFileSync(path.join(here, 'og-image.png'), path.join(outDir, 'og-image.png'))
 
-console.log(`site/index.html — ${Math.round(page.length / 1024)} KB`)
+console.log(`site/index.html — ${Math.round(page.length / 1024)} KB, plus llms.txt, robots.txt, sitemap.xml`)
