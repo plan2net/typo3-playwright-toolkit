@@ -66,8 +66,8 @@ SetEnvIf Host "." TYPO3_CONTEXT=Development/Docker
 SetEnvIf Host "-testing\.ddev\.site$" TYPO3_CONTEXT=Testing
 ```
 
-For nginx-fpm, run `ddev config --nginx-full` and edit
-`.ddev/nginx_full/nginx-site.conf`:
+For nginx-fpm, edit `.ddev/nginx_full/nginx-site.conf`. Delete the `#ddev-generated`
+line at the top first, or DDEV overwrites your changes on the next start:
 
 ```nginx
 map $http_host $typo3_context {
@@ -86,9 +86,8 @@ A complete file is checked in at
 [`tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf`](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf)
 — copy from there.
 
-One catch: do not write DDEV's generated-file marker anywhere in that file, not even
-in a comment. DDEV looks for the string anywhere in the file and starts overwriting
-your config again.
+Do not write that marker anywhere else in the file, not even in a comment: DDEV
+searches the whole file for it. Then run `ddev restart`.
 
 ### Database selection
 
@@ -108,6 +107,14 @@ Without those lines the overrides never run and every test uses your ordinary
 database. Keep the context check: `applyDatabaseConnectionOverrides()` acts on the
 test ID alone, so outside the Testing context a request carrying that header would
 switch the connection on your ordinary hostname too.
+
+> [!IMPORTANT]
+> Under DDEV this file already exists and carries `#ddev-generated`. Delete that line
+> first, as with the nginx file, or the next `ddev restart` writes the file again
+> without your call — and your tests then pass against your ordinary database.
+>
+> Put the call at the end of the file. It reads the `Default` connection, which DDEV
+> sets in the block above it.
 
 If your project already keeps a separate file per context, put the call in the
 Testing one and require that from `additional.php` behind the same check.
@@ -217,11 +224,18 @@ and could overwrite one while another test is reading it — which shows up as a
 seeing the wrong crop of the right image. The folders are throwaway; delete them
 whenever you like.
 
-To check that a project is set up correctly, run this in the web container:
+To check that a project is set up correctly, ask the health endpoint:
 
 ```bash
-BASE_URL=https://example-testing.ddev.site Tests/Smoke/health-and-session.sh
+ddev exec 'curl -sS -H "X-Playwright-Toolkit-Secret: $(cat var/playwright/api-secret)" \
+    -H "X-Playwright-Test-Id: HEALTHCHECK00001" \
+    https://example-testing.ddev.site/typo3/test-api/health'
 ```
+
+It answers `{"ok":true,…}` and names the test database it just created from your
+template. Send the test ID: without it the request uses the project's own database,
+and the check fails with a 503 saying so. A 404 means the request never reached the
+Testing context, a 401 means the secret does not match.
 
 ## Reference
 
@@ -291,7 +305,8 @@ build by hand.
 the testing host name, not the normal one, and check your web server configuration.
 
 **Tests write to your normal database.** Your project merges the override paths as
-array keys. See the note under Database selection.
+array keys, or DDEV rewrote the file because its `#ddev-generated` marker is still
+there. See Database selection.
 
 **The run stops with "run ddev playwright-prepare".** The template database is
 missing or was built with different settings. Run `ddev playwright-prepare` again.
