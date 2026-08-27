@@ -137,7 +137,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
       </button>
     </sc-if>
     </div>
-    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">Every spec file gets its own database, cloned from a prepared template in milliseconds. Files run at the same time without sharing data, so they cannot break each other. Content comes from the real TYPO3 backend rather than from SQL fixtures. For TYPO3 projects that run on DDEV.</p>
+    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">Every spec file gets its own database, cloned from a prepared template in milliseconds. Files run at the same time without sharing data, so one test can never break another. And the content comes from the real TYPO3 backend, not from SQL fixtures, so your tests see pages the way an editor would build them. For TYPO3 projects that run on DDEV.</p>
     <div style="display:flex; gap:14px; flex-wrap:wrap;">
       <a href="#packages" style="background:var(--org); color:var(--ink); font-weight:700; padding:13px 26px; border-radius:6px; font-size:15px;" style-hover="background:var(--org-lg); color:#fff;">Get started</a>
       <a href="#example" style="border:1.5px solid var(--line); color:var(--ink); padding:13px 26px; border-radius:6px; font-size:15px; font-weight:600;" style-hover="border-color:var(--org); color:var(--org-d);">See a test</a>
@@ -175,7 +175,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 <section id="why" data-screen-label="Value" style="background:var(--soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
   <div class="pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
     <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px;">Why this toolkit</h2>
-    <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">What your tests exercise, and what they cannot do to each other.</p>
+    <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">Your tests check the real thing, and they cannot break each other.</p>
     <ul class="grid-cards bare">
       <sc-for list="{{ values }}" as="v" hint-placeholder-count="6">
         <li style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:26px 24px; display:flex; flex-direction:column; gap:12px;">
@@ -231,7 +231,7 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
       </div>
     </div>
 
-    <p style="font-size:15.5px; line-height:1.7; color:#E6EBF2; margin:32px 0 0; max-width:70ch;">Your fixture manifest stays at what every test genuinely needs, a site root and a TypoScript template. It stops growing with the suite, and no test ends up depending on all of it.</p>
+    <p style="font-size:15.5px; line-height:1.7; color:#E6EBF2; margin:32px 0 0; max-width:70ch;">Your fixture manifest stays at what every test genuinely needs: a site root and a TypoScript template. It stops growing with the suite, and the merge conflicts over IDs stop with it.</p>
   </div>
 </section>
 
@@ -316,8 +316,8 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
   <div class="split-start flip pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
     <div>
       <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 20px;">When a test fails, open its backend</h2>
-      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 20px;">A screenshot tells you something broke. It never tells you what the database looked like when it did.</p>
-      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">So a failed file keeps its database instead of dropping it, and <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">ddev playwright-inspect</span> prints a signed link for each one. Open it and you are inside the TYPO3 backend of that exact run — already logged in, page tree intact, content exactly as the test left it, the frontend one click away. The scenario name and its test ID sit beside the site name, so two open tabs are never confused.</p>
+      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 20px;">A screenshot tells you that something broke, but not what the database looked like at that moment.</p>
+      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">That is why a failed file keeps its database instead of dropping it, and <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">ddev playwright-inspect</span> prints a signed link for each one. Open it and you are inside the TYPO3 backend of that exact run — already logged in, page tree intact, content exactly as the test left it, the frontend one click away. The scenario name and its test ID sit beside the site name, so two open tabs are never confused.</p>
       <ul class="bare" style="display:flex; flex-direction:column; gap:10px;">
         <sc-for list="{{ failNotes }}" as="f" hint-placeholder-count="3">
           <li style="display:flex; align-items:flex-start; gap:12px; font-size:14.5px; color:var(--dim);">
@@ -543,11 +543,11 @@ class Component extends DCLogic {
       paused: !this.state.rotating,
       toggleRotation: () => this.setState(s => ({ rotating: !s.rotating })),
       values: [
-        { d: 'M3 8h14m0 0-3-3m3 3-3 3M21 16H7m0 0 3-3m-3 3 3 3', title: 'Real end-to-end', lead: 'Rename a field in TCA and the suite fails.', body: 'Pages and content elements are posted to /typo3/record/edit, the route the backend itself uses on save. A test breaks rather than passing against a shape the product no longer has.' },
-        { d: 'M12 3c-4.4 0-8 1.3-8 3s3.6 3 8 3 8-1.3 8-3-3.6-3-8-3Zm-8 3v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', title: 'A database per test file', lead: 'Run order stops mattering.', body: 'The template is built once per run and cloned in 27 ms, so every spec file can afford its own database. Nothing is shared, so nothing can be shared in the wrong order.' },
+        { d: 'M3 8h14m0 0-3-3m3 3-3 3M21 16H7m0 0 3-3m-3 3 3 3', title: 'Real end-to-end', lead: 'Rename a field in TCA and the suite fails.', body: 'Pages and content elements are posted to /typo3/record/edit, the route the backend itself uses on save. When your data model changes, a test fails instead of passing against data that no longer matches it.' },
+        { d: 'M12 3c-4.4 0-8 1.3-8 3s3.6 3 8 3 8-1.3 8-3-3.6-3-8-3Zm-8 3v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', title: 'A database per test file', lead: 'Run order stops mattering.', body: 'The template is built once per run and cloned in 27 ms, so every spec file can afford its own database. With nothing shared, a test can never fail because another one ran first.' },
         { d: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z', title: 'Its own files too', lead: 'Two tests never overwrite one image.', body: 'Each test has its own folder for processed images and its own temporary files. Both are deleted with its database.' },
         { d: 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 10a8 8 0 0 1 16 0', title: 'A real backend session', lead: 'No login form, no disabled checks.', body: 'Tests start with a pre-seeded session and a genuine request token, so saving a record goes through the real backend route with its CSRF checks intact.' },
-        { d: 'M12 3 4 6v5c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-3Zm-3.5 8.5 2.5 2.5 4.5-4.5', title: 'Cleans up after itself', lead: 'Two runs can happen at once.', body: 'Teardown drops only the databases this run recorded, and the image folder that went with each one. A run that leaks one fails in CI, so a full disk is never the first you hear of it.' },
+        { d: 'M12 3 4 6v5c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-3Zm-3.5 8.5 2.5 2.5 4.5-4.5', title: 'Cleans up after itself', lead: 'Two runs can happen at once.', body: 'Teardown drops only the databases this run recorded, and the image folder that went with each one. A run that leaves a database behind fails in CI, so you find out right away, not when the disk is full.' },
         { d: 'm12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5m-18 4 9 5 9-5', title: 'TYPO3 11.5 – 14.3', lead: 'Works on the version you run.', body: 'TYPO3 11.5, 12.4, 13.4 and 14.3, PHP 8.1 or newer. Moving between them does not change your tests.' },
       ],
       packages: [

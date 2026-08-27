@@ -12,7 +12,7 @@ const SITE_URL = 'https://plan2net.github.io/typo3-playwright-toolkit/'
 const REPO_URL = 'https://github.com/plan2net/typo3-playwright-toolkit'
 const TITLE = 'TYPO3 Playwright Toolkit'
 const DESCRIPTION =
-    'End-to-end tests for TYPO3 CMS with a throwaway database per test file, content built through the real backend, and a signed link into every failure.'
+    'End-to-end tests for TYPO3 CMS: every test file gets its own throwaway database, content is built through the real backend, and every failure keeps a signed link into its backend.'
 
 const source = fs.readFileSync(path.join(here, 'landing-page.dc.html'), 'utf-8')
 
@@ -392,8 +392,8 @@ to 8.4, with drivers for MariaDB, MySQL, PostgreSQL and SQLite.
 What is unusual about it: every spec file runs against its own database, cloned from a
 prepared template in about 27 ms, so files cannot break each other. Content is created
 through TYPO3's own backend save route rather than from SQL fixtures, which means a
-renamed field fails a test instead of passing against a shape the product no longer
-has, and two people adding tests never edit the same fixture file. A failed test keeps
+renamed field fails a test instead of passing against data that no longer matches the
+data model, and two people adding tests never edit the same fixture file. A failed test keeps
 its database, and \`ddev playwright-inspect\` prints a signed link that logs you into
 the TYPO3 backend of that exact run.
 
