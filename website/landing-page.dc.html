@@ -323,13 +323,13 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
       <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.14);">
         <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">ddev playwright-inspect</div>
         <div style="padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.9; overflow-x:auto;">
-          <div style="color:#F0696D;">  ✘  1 tests/checkout.spec.ts:12:1 › cart keeps its line items (2.4s)</div>
+          <div style="color:#F0696D;">  ✘  1 tests/courses.spec.ts:12:1 › a course page lists its lecture dates (2.4s)</div>
           <div style="color:#949DAC; margin-bottom:10px;">[teardown] Kept 1 DB for a failed scenario.</div>
           <div style="color:#AEB7C4;"><span style="color:#949DAC;">$</span> ddev playwright-inspect</div>
           <div style="color:#949DAC; margin-bottom:8px;">Links log you into the backend and expire in 15 minutes.</div>
-          <div style="color:#E6EBF2;">checkout</div>
+          <div style="color:#E6EBF2;">courses</div>
           <div style="color:#FFB151;">&nbsp;&nbsp;db09D933A1066CD448</div>
-          <div style="color:#7FB8E8; overflow-wrap:anywhere; white-space:normal;">&nbsp;&nbsp;https://acme-testing.ddev.site/typo3/test-api/inspect?id=09D933A1066CD448&amp;t=…</div>
+          <div style="color:#7FB8E8; overflow-wrap:anywhere; white-space:normal;">&nbsp;&nbsp;https://university-testing.ddev.site/typo3/test-api/inspect?id=09D933A1066CD448&amp;t=…</div>
         </div>
       </div>
       <figure style="margin:0; border:1px solid var(--line); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.10);">
@@ -338,14 +338,14 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
           <span aria-hidden="true" style="width:9px; height:9px; border-radius:50%; background:#D6DAE0; display:block;"></span>
           <span aria-hidden="true" style="width:9px; height:9px; border-radius:50%; background:#D6DAE0; display:block;"></span>
           <span aria-hidden="true" style="width:9px; height:9px; border-radius:50%; background:#D6DAE0; display:block;"></span>
-          <span style="font-family:'Source Code Pro',monospace; font-size:12.5px; color:var(--dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">acme-testing.ddev.site/typo3/</span>
+          <span style="font-family:'Source Code Pro',monospace; font-size:12.5px; color:var(--dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">university-testing.ddev.site/typo3/</span>
         </div>
 
         <!-- TYPO3 topbar: SYS/sitename lives here, and SiteName appends the marker -->
         <div style="display:flex; align-items:center; gap:10px; padding:0 12px; height:42px; background:#1D2129;">
           <span aria-hidden="true" style="width:20px; height:20px; border-radius:4px; background:var(--org); flex-shrink:0;"></span>
-          <span style="font-weight:700; font-size:13px; color:#fff; white-space:nowrap; flex-shrink:0;">Acme Relaunch</span>
-          <span style="font-family:'Source Code Pro',monospace; font-size:12.5px; color:var(--org); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">[checkout · 09D933A1066CD448]</span>
+          <span style="font-weight:700; font-size:13px; color:#fff; white-space:nowrap; flex-shrink:0;">University Relaunch</span>
+          <span style="font-family:'Source Code Pro',monospace; font-size:12.5px; color:var(--org); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">[courses · 09D933A1066CD448]</span>
           <span style="margin-left:auto; flex-shrink:0;" aria-hidden="true">
             <span style="width:18px; height:18px; border-radius:50%; background:#3C434F; display:block;"></span>
           </span>
@@ -519,10 +519,10 @@ class Component extends DCLogic {
         { n: '4', code: 'page.goto() lands in that same database' },
       ],
       tree: [
-        { label: 'Acme Relaunch', indent: '10px', bg: 'transparent', border: 'transparent', color: '#1A1E24', weight: '700', stroke: '#FF8700' },
+        { label: 'University Relaunch', indent: '10px', bg: 'transparent', border: 'transparent', color: '#1A1E24', weight: '700', stroke: '#FF8700' },
         { label: 'Home', indent: '24px', bg: 'transparent', border: 'transparent', color: '#5B6570', weight: '400', stroke: '#9AA3AE' },
-        { label: 'Checkout', indent: '24px', bg: '#FFF3E4', border: '#FF8700', color: '#1A1E24', weight: '700', stroke: '#E67A00' },
-        { label: 'Cart', indent: '38px', bg: 'transparent', border: 'transparent', color: '#5B6570', weight: '400', stroke: '#9AA3AE' },
+        { label: 'Courses', indent: '24px', bg: '#FFF3E4', border: '#FF8700', color: '#1A1E24', weight: '700', stroke: '#E67A00' },
+        { label: 'Data Structures', indent: '38px', bg: 'transparent', border: 'transparent', color: '#5B6570', weight: '400', stroke: '#9AA3AE' },
       ],
       failNotes: [
         { t: 'Only the failed file keeps its database. Everything that passed is dropped, so the disk does not fill up with successes.' },
