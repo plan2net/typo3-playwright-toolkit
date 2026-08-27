@@ -9,8 +9,11 @@ use Plan2net\PlaywrightToolkit\Database\Cleanup\DatabaseCleanup;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 use Plan2net\PlaywrightToolkit\Database\DatabaseName;
 use Plan2net\PlaywrightToolkit\Database\Driver\SqliteTestDatabaseDriver;
+use Plan2net\PlaywrightToolkit\Database\ProcessedFileIsolation;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class DatabaseCleanupTest extends FunctionalTestCase
@@ -51,6 +54,11 @@ final class DatabaseCleanupTest extends FunctionalTestCase
         }
         @rmdir($this->root);
 
+        foreach (glob($this->processedFolder() . '/*') ?: [] as $file) {
+            unlink($file);
+        }
+        @rmdir($this->processedFolder());
+
         parent::tearDown();
     }
 
@@ -63,6 +71,30 @@ final class DatabaseCleanupTest extends FunctionalTestCase
         self::assertSame(CleanupOutcome::Dropped, $this->cleanup()->drop($this->driver(), self::TEST_ID));
         self::assertFileDoesNotExist($this->databaseFile());
         self::assertFileDoesNotExist($this->lockFiles->claim(self::DATABASE));
+    }
+
+    #[Test]
+    public function removesTheProcessedImageFolderOfTheDroppedDatabase(): void
+    {
+        $this->claim();
+        $this->createDatabaseFile();
+        $folder = $this->processedFolder();
+        mkdir($folder, 0777, true);
+        touch($folder . '/csm_image_0123456789.jpg');
+
+        self::assertSame(CleanupOutcome::Dropped, $this->cleanup()->drop($this->driver(), self::TEST_ID));
+        self::assertDirectoryDoesNotExist($folder);
+    }
+
+    // Preserved on failure, and for replay, so the images have to stay readable.
+    #[Test]
+    public function keepsTheProcessedImageFolderWhenTheDatabaseSurvives(): void
+    {
+        $folder = $this->processedFolder();
+        mkdir($folder, 0777, true);
+
+        self::assertSame(CleanupOutcome::Absent, $this->cleanup()->drop($this->driver(), self::TEST_ID));
+        self::assertDirectoryExists($folder);
     }
 
     // A lost response must not turn a completed drop into an error on retry.
@@ -373,7 +405,22 @@ final class DatabaseCleanupTest extends FunctionalTestCase
 
     private function cleanup(int $lockTimeoutMs = 2000): DatabaseCleanup
     {
-        return new DatabaseCleanup($this->lockFiles, $lockTimeoutMs);
+        return new DatabaseCleanup(
+            $this->lockFiles,
+            $lockTimeoutMs,
+            $this->get(ProcessedFileIsolation::class)
+        );
+    }
+
+    // Read from the storage record rather than assuming fileadmin: a project can
+    // point its storage anywhere, and a literal here would quietly assert nothing.
+    private function processedFolder(): string
+    {
+        $configuration = $this->get(StorageRepository::class)->getDefaultStorage()?->getConfiguration() ?? [];
+        $basePath = trim((string) ($configuration['basePath'] ?? ''), '/');
+
+        return rtrim(Environment::getPublicPath(), '/') . '/' . $basePath . '/'
+            . ProcessedFileIsolation::folderFor(self::TEST_ID);
     }
 
     private function driver(): SqliteTestDatabaseDriver

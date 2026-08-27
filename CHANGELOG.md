@@ -16,7 +16,9 @@ the package a change belongs to.
   processed images, `fileadmin/_processed_<test id>`. The records naming those images
   live in the database, so every test used to regenerate the same shared files and
   could overwrite one while another test was reading it. That showed up as a test
-  seeing the wrong crop of the right image, and only under load.
+  seeing the wrong crop of the right image, and only under load. The folder goes when
+  its database is dropped, so a database kept after a failure — and the replay one —
+  keeps its images.
 - **plan2net/playwright-toolkit** — the name check that guards `DROP DATABASE` no
   longer accepts a trailing newline. PHP's `$` matches before one, so a test ID sent
   with `\n` appended passed a pattern meant to allow only sixteen characters.

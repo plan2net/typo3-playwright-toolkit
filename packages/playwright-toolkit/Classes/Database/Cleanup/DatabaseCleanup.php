@@ -6,6 +6,7 @@ namespace Plan2net\PlaywrightToolkit\Database\Cleanup;
 
 use Plan2net\PlaywrightToolkit\Database\DatabaseName;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriver;
+use Plan2net\PlaywrightToolkit\Database\ProcessedFileIsolation;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 
@@ -20,6 +21,7 @@ final class DatabaseCleanup implements LoggerAwareInterface
     public function __construct(
         private readonly LockFiles $lockFiles,
         private readonly int $lockTimeoutMs = 5000,
+        private readonly ?ProcessedFileIsolation $processedFiles = null,
     ) {
     }
 
@@ -227,6 +229,8 @@ final class DatabaseCleanup implements LoggerAwareInterface
 
             return CleanupOutcome::Failed;
         }
+
+        $this->processedFiles?->remove($testId);
 
         $this->logger?->notice('Dropped a test database', ['database' => $databaseName]);
 
