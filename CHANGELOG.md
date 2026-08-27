@@ -10,6 +10,21 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-08-27
+
+### Fixed
+
+- **plan2net/playwright-toolkit** — two tests converting the same image no longer
+  collide. TYPO3 writes a conversion to `typo3temp/assets/images/` and renames it
+  from there into the processing folder, and it names that scratch file after the
+  image and the conversion, not after the test. The second test found the first
+  one's file, skipped its own conversion because the file was already there, and
+  then found it renamed away; TYPO3 marked the task unprocessed and served the
+  **original** image for the rest of that test database's life, which is a subtly
+  wrong screenshot rather than a failed test. Those names now carry the test ID and
+  are removed with the test's other files. The per-test processing folder added in
+  0.4.0 could not prevent this: the collision happens before that folder is reached.
+
 ## [0.4.0] - 2026-08-27
 
 ### Fixed
@@ -114,7 +129,8 @@ the package a change belongs to.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.1...main
+[0.4.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.1.0...v0.2.0
