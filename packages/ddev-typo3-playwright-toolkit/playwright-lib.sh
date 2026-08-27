@@ -67,14 +67,15 @@ playwright_build_assets() {
 }
 
 playwright_run_prepare() {
-    # $1 optional project root, so this is testable outside the web container.
+    # $1 optional project root (empty for the default); the rest reaches playwright:prepare.
     prepare_root="${1:-/var/www/html}"
+    [ $# -gt 0 ] && shift
 
     echo "[playwright] Flushing Testing-context TYPO3 caches…"
     (cd "${prepare_root}" && TYPO3_CONTEXT=Testing ./vendor/bin/typo3 cache:flush) || return 1
 
     echo "[playwright] Preparing the test database template…"
-    (cd "${prepare_root}" && TYPO3_CONTEXT=Testing ./vendor/bin/typo3 playwright:prepare) || return 1
+    (cd "${prepare_root}" && TYPO3_CONTEXT=Testing ./vendor/bin/typo3 playwright:prepare "$@") || return 1
 }
 
 playwright_replay_prepare() {

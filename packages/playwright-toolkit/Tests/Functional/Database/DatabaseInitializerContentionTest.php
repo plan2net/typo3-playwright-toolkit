@@ -73,7 +73,7 @@ final class DatabaseInitializerContentionTest extends FunctionalTestCase
     #[Test]
     public function aCloneStartingDuringPreparationWaitsAndSeesTheFinishedTemplate(): void
     {
-        $fingerprint = $this->get(TemplatePreparer::class)->prepare();
+        $fingerprint = $this->get(TemplatePreparer::class)->prepare()['fingerprint'];
         $holder = $this->startLockHolder($fingerprint);
 
         $this->waitForTheHolderToOwnTheLock();

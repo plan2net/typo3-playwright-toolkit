@@ -113,7 +113,7 @@ final class TemplatePreparerTest extends FunctionalTestCase
     #[Test]
     public function aFinishedTemplateCarriesTheFingerprintThatWasReturned(): void
     {
-        $fingerprint = $this->get(TemplatePreparer::class)->prepare();
+        $fingerprint = $this->get(TemplatePreparer::class)->prepare()['fingerprint'];
 
         self::assertSame($fingerprint, $this->driver()->templateFingerprint());
     }
@@ -149,9 +149,55 @@ final class TemplatePreparerTest extends FunctionalTestCase
     {
         $preparer = $this->get(TemplatePreparer::class);
         $preparer->prepare();
-        $preparer->prepare();
+        // Forced: an unforced second call would skip and pin nothing.
+        $preparer->prepare(force: true);
 
         $count = $this->template()->query('SELECT count(*) FROM be_sessions')->fetchColumn();
+
+        self::assertSame('1', (string) $count);
+    }
+
+    #[Test]
+    public function aChangedFixtureRebuildsTheTemplate(): void
+    {
+        $preparer = $this->get(TemplatePreparer::class);
+        $preparer->prepare();
+
+        file_put_contents(
+            Environment::getProjectPath() . '/playwright-fixtures/pages.sql',
+            "INSERT INTO pages (uid, pid, title) VALUES (99, 0, 'Changed fixture root');"
+        );
+        $preparer->prepare();
+
+        $title = $this->template()->query('SELECT title FROM pages WHERE uid = 99')->fetchColumn();
+
+        self::assertSame('Changed fixture root', $title);
+    }
+
+    #[Test]
+    public function forceRebuildsATemplateWhoseFingerprintIsCurrent(): void
+    {
+        $preparer = $this->get(TemplatePreparer::class);
+        $preparer->prepare();
+        $this->template()->exec("INSERT INTO pages (uid, pid, title) VALUES (100, 0, 'manual corruption')");
+
+        $preparer->prepare(force: true);
+
+        $count = $this->template()->query('SELECT count(*) FROM pages WHERE uid = 100')->fetchColumn();
+
+        self::assertSame('0', (string) $count);
+    }
+
+    #[Test]
+    public function aSecondPrepareWithUnchangedSourcesLeavesTheTemplateUntouched(): void
+    {
+        $preparer = $this->get(TemplatePreparer::class);
+        $preparer->prepare();
+        $this->template()->exec("INSERT INTO pages (uid, pid, title) VALUES (100, 0, 'left by the first build')");
+
+        $preparer->prepare();
+
+        $count = $this->template()->query('SELECT count(*) FROM pages WHERE uid = 100')->fetchColumn();
 
         self::assertSame('1', (string) $count);
     }
@@ -161,7 +207,7 @@ final class TemplatePreparerTest extends FunctionalTestCase
     {
         $preparer = $this->get(TemplatePreparer::class);
 
-        self::assertSame($preparer->prepare(), $preparer->prepare());
+        self::assertSame($preparer->prepare()['fingerprint'], $preparer->prepare()['fingerprint']);
     }
 
     private function breakTheFixtures(): void

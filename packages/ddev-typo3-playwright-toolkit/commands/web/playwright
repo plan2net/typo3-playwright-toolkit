@@ -10,7 +10,8 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "Usage: ddev playwright [subcommand] [options]"
     echo ""
     echo "Everything is forwarded to 'npx playwright', so any subcommand and flag"
-    echo "works. Before 'test' the test database template is rebuilt, so a TCA or"
+    echo "works. Before 'test' the test database template is checked and rebuilt"
+    echo "when your schema, fixtures or session seed changed, so a TCA or"
     echo "ext_tables.sql change never runs against a stale schema."
     echo ""
     echo "Options this command handles itself:"
@@ -43,7 +44,7 @@ if [ "${PW_BUILD}" = "1" ]; then
 fi
 
 # Only `test` prepares: subcommands like show-report and codegen do not need a
-# database, and rebuilding the template for them would cost 30-60s for nothing.
+# database, and even the up-to-date check would boot TYPO3 for nothing.
 if [ "${PW_ARGS[0]:-}" != "test" ]; then
     exec npx playwright "${PW_ARGS[@]}"
 fi

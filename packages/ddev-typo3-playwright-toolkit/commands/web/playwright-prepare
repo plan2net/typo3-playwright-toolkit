@@ -2,7 +2,7 @@
 #ddev-generated
 
 ## Description: Build the Playwright test database template
-## Usage: playwright-prepare
+## Usage: playwright-prepare [--force]
 ## ExecRaw: true
 
 set -e
@@ -14,9 +14,9 @@ fi
 
 . /mnt/ddev_config/playwright-lib.sh
 
-# The ungated helper: someone running this by hand wants the template rebuilt,
-# whatever PW_SKIP_PREPARE tells the test commands.
-playwright_run_prepare || {
+# The ungated helper: a hand run prepares whatever PW_SKIP_PREPARE tells the
+# test commands; --force rebuilds a template that is still current.
+playwright_run_prepare "" "$@" || {
     echo "[playwright] Could not build the test database template." >&2
     exit 1
 }

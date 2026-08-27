@@ -7,6 +7,14 @@ namespace Plan2net\PlaywrightToolkit\Database;
 final class SeedFingerprint
 {
     /**
+     * Bump when this package changes what it seeds into a template. The hashed
+     * sources below do not move with it, so an upgrade would reuse the old one.
+     *
+     * @var int
+     */
+    public const SEED_FORMAT = 1;
+
+    /**
      * @param array<string, string> $fixtures filename => contents, in seed order
      */
     public static function compute(
@@ -15,7 +23,7 @@ final class SeedFingerprint
         string $hashedSessionId,
         int $sessionUserId,
     ): string {
-        $parts = [$schemaSql];
+        $parts = ['seed-format=' . self::SEED_FORMAT, $schemaSql];
         foreach ($fixtures as $name => $contents) {
             $parts[] = $name;
             $parts[] = $contents;

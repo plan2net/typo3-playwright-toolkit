@@ -147,7 +147,7 @@ final class TemplatePreparerMysqlTest extends FunctionalTestCase
     #[Test]
     public function theMysqlTemplateEndsUpFingerprinted(): void
     {
-        $fingerprint = $this->get(TemplatePreparer::class)->prepare();
+        $fingerprint = $this->get(TemplatePreparer::class)->prepare()['fingerprint'];
 
         self::assertSame($fingerprint, MysqlTestDatabaseDriver::onTestService()->templateFingerprint());
     }

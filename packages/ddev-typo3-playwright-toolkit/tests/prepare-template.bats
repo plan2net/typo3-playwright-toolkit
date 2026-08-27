@@ -104,6 +104,18 @@ STUB
     [ "$output" -eq 0 ]
 }
 
+@test "the ungated helper forwards extra arguments to the prepare call" {
+    run playwright_run_prepare "${HTML}" --force
+    [ "$status" -eq 0 ]
+
+    run tail -1 "${CALLS}"
+    [ "$output" = 'Testing playwright:prepare --force' ]
+}
+
+@test "the standalone prepare command forwards its arguments" {
+    grep -q 'playwright_run_prepare "" "$@"' "${ADDON_DIR}/commands/web/playwright-prepare"
+}
+
 @test "the ungated helper prepares even when PW_SKIP_PREPARE is set" {
     PW_SKIP_PREPARE=1
     export PW_SKIP_PREPARE

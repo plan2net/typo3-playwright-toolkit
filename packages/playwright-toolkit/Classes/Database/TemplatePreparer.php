@@ -21,7 +21,10 @@ final class TemplatePreparer
     ) {
     }
 
-    public function prepare(): string
+    /**
+     * @return array{fingerprint: string, built: bool}
+     */
+    public function prepare(bool $force = false): array
     {
         $configuration = $this->configurationFactory->create();
         $driver = TestDatabaseDriverFactory::fromConnection(
@@ -37,6 +40,11 @@ final class TemplatePreparer
                 throw new \RuntimeException('Could not acquire the template build lock');
             }
 
+            // Written last, so a build that died partway through reads as null and rebuilds.
+            if (!$force && $driver->templateFingerprint() === $snapshot->fingerprint) {
+                return ['fingerprint' => $snapshot->fingerprint, 'built' => false];
+            }
+
             $driver->createEmptyTemplate();
             $this->buildSchema($driver, $snapshot->schemaStatements);
             $driver->seedTemplate($snapshot->templateSeed());
@@ -46,7 +54,7 @@ final class TemplatePreparer
             fclose($handle);
         }
 
-        return $snapshot->fingerprint;
+        return ['fingerprint' => $snapshot->fingerprint, 'built' => true];
     }
 
     /**

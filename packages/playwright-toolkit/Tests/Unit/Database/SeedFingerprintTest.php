@@ -77,6 +77,17 @@ final class SeedFingerprintTest extends TestCase
     }
 
     #[Test]
+    public function theSeedFormatIsPartOfTheFingerprint(): void
+    {
+        $withoutFormat = hash('sha256', implode("\0", ['schema', 'a.sql', 'A', 'a-session-hash', '1']));
+
+        self::assertNotSame(
+            $withoutFormat,
+            SeedFingerprint::compute('schema', ['a.sql' => 'A'], 'a-session-hash', 1),
+        );
+    }
+
+    #[Test]
     public function aChangedSessionUserProducesADifferentFingerprint(): void
     {
         self::assertNotSame(

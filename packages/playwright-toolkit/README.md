@@ -212,7 +212,9 @@ ddev playwright-prepare
 ```
 
 This loads the schema through TYPO3's schema migrator, applies your fixtures, writes
-the prepared backend session, and stores the API secret in
+the prepared backend session, and stores a fingerprint of all three. A later run
+whose fingerprint still matches skips the rebuild and answers in a moment;
+`--force` rebuilds anyway. It also stores the API secret in
 `var/playwright/api-secret`. Every test database is a copy of this template.
 
 `ddev playwright` runs this step for you, so you rarely call it directly.

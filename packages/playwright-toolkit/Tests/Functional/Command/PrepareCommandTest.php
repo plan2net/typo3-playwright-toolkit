@@ -83,6 +83,32 @@ final class PrepareCommandTest extends FunctionalTestCase
         self::assertFileExists(Environment::getVarPath() . '/test-databases/playwright_db_template.sqlite');
     }
 
+    #[Test]
+    public function aSecondRunReportsTheTemplateAsAlreadyCurrentInsteadOfRebuilding(): void
+    {
+        $tester = new CommandTester($this->get(PrepareCommand::class));
+        $tester->execute([]);
+
+        $exitCode = $tester->execute([]);
+
+        self::assertSame(Command::SUCCESS, $exitCode);
+        self::assertStringContainsString('already current', $tester->getDisplay());
+        self::assertStringContainsString('--force', $tester->getDisplay());
+    }
+
+    #[Test]
+    public function forceRebuildsATemplateThatIsAlreadyCurrent(): void
+    {
+        $tester = new CommandTester($this->get(PrepareCommand::class));
+        $tester->execute([]);
+
+        $exitCode = $tester->execute(['--force' => true]);
+
+        self::assertSame(Command::SUCCESS, $exitCode);
+        self::assertStringContainsString('fingerprint', $tester->getDisplay());
+        self::assertStringNotContainsString('already current', $tester->getDisplay());
+    }
+
     private function reinitializeWith(ApplicationContext $context): void
     {
         Environment::initialize(

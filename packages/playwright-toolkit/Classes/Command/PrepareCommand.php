@@ -8,6 +8,7 @@ use Plan2net\PlaywrightToolkit\Database\TemplatePreparer;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use TYPO3\CMS\Core\Core\Environment;
@@ -26,6 +27,12 @@ final class PrepareCommand extends Command
     {
         $this->setDescription(
             'Builds the Playwright test database template that every per-test database is cloned from.'
+        );
+        $this->addOption(
+            'force',
+            null,
+            InputOption::VALUE_NONE,
+            'Rebuild even when the stored fingerprint matches the current schema, fixtures and session seed.'
         );
     }
 
@@ -47,8 +54,10 @@ final class PrepareCommand extends Command
         // the one command that always runs before a test run.
         $this->secret->ensureExists();
 
-        $fingerprint = $this->preparer->prepare();
-        $io->success('Test database template prepared. Seed fingerprint: ' . $fingerprint);
+        $result = $this->preparer->prepare((bool) $input->getOption('force'));
+        $io->success($result['built']
+            ? 'Test database template prepared. Seed fingerprint: ' . $result['fingerprint']
+            : 'Test database template already current, nothing rebuilt. Pass --force to rebuild anyway.');
 
         return Command::SUCCESS;
     }
