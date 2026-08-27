@@ -21,7 +21,9 @@ playwright_enter_test_dir() {
     # fails inside Playwright instead, which is a worse place to find out.
     if ! cd "${directory}" 2>/dev/null; then
         echo "[playwright] No '${directory}' directory under $(pwd). Create it with:" >&2
-        echo "[playwright]   ddev exec 'mkdir -p ${directory} && cd ${directory} && npm init -y && npm pkg set type=module && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'" >&2
+        echo "[playwright]   mkdir -p ${directory} && cd ${directory}" >&2
+        echo "[playwright]   ddev npm init -y && ddev npm pkg set type=module" >&2
+        echo "[playwright]   ddev npm i -D @plan2net/typo3-playwright-toolkit @playwright/test" >&2
         echo "[playwright] Tests elsewhere? Set PW_TEST_DIR in web_environment or .ddev/.env.web." >&2
         return 1
     fi

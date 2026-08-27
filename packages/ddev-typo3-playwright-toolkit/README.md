@@ -62,8 +62,13 @@ The commands run in `tests/playwright`. The add-on does not create it — it is 
 directory, with your own `package.json`:
 
 ```bash
-ddev exec 'mkdir -p tests/playwright && cd tests/playwright && npm init -y && npm pkg set type=module && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'
+mkdir -p tests/playwright && cd tests/playwright
+ddev npm init -y && ddev npm pkg set type=module
+ddev npm i -D @plan2net/typo3-playwright-toolkit @playwright/test
 ```
+
+`ddev npm` runs in the container directory matching the one you are standing in, so
+there is no `cd` inside the container to get right.
 
 Tests somewhere else? Say so in `.ddev/config.yaml` and `ddev restart`:
 
@@ -77,7 +82,7 @@ web_environment:
 The add-on ships none. Install them where the tests run:
 
 ```bash
-ddev exec 'cd tests/playwright && npx playwright install --with-deps chromium'
+cd tests/playwright && ddev npx playwright install --with-deps chromium
 ```
 
 They land in the container's home directory, which DDEV drops on a rebuild. Keep them
@@ -268,7 +273,8 @@ so they work the same way outside DDEV.
 ## Troubleshooting
 
 **Playwright reports a missing browser.** The browsers are not installed in the
-container that runs the command. Run `ddev exec 'npx playwright install --with-deps'`.
+container that runs the command. Run `ddev npx playwright install --with-deps` from your
+Playwright directory.
 
 **The first test fails with `ERROR 1044 Access denied`.** The MySQL or MariaDB user
 cannot create databases. Reinstall the add-on, which grants the missing rights.

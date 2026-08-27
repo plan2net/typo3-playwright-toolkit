@@ -96,8 +96,12 @@ ddev exec vendor/bin/typo3 setup --no-interaction --force \
 ddev exec vendor/bin/typo3 cache:flush
 
 say 'installing the Playwright side'
-ddev exec "cd tests/playwright && npm install --no-audit --no-fund --save-dev /var/www/html/.artifacts/${TARBALL} @playwright/test@${PLAYWRIGHT_VERSION}"
-ddev exec 'cd tests/playwright && npx playwright install --with-deps chromium'
+(
+    cd tests/playwright
+    ddev npm install --no-audit --no-fund --save-dev \
+        "/var/www/html/.artifacts/${TARBALL}" "@playwright/test@${PLAYWRIGHT_VERSION}"
+    ddev npx playwright install --with-deps chromium
+)
 
 say 'running the suite'
 ddev playwright test --reporter=list

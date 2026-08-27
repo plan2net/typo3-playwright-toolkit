@@ -116,11 +116,13 @@ ddev restart
 ddev composer require --dev plan2net/playwright-toolkit
 
 # 3. A directory for the Playwright tests, and the npm package inside it.
-#    One command on purpose: the directory has to exist before npm runs there.
-ddev exec 'mkdir -p tests/playwright && cd tests/playwright && npm init -y && npm pkg set type=module && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'
+#    `ddev npm` runs in the container directory matching the one you are in.
+mkdir -p tests/playwright && cd tests/playwright
+ddev npm init -y && ddev npm pkg set type=module
+ddev npm i -D @plan2net/typo3-playwright-toolkit @playwright/test
 
 # 4. The browsers, in the container that runs the tests
-ddev exec 'cd tests/playwright && npx playwright install --with-deps chromium'
+ddev npx playwright install --with-deps chromium
 ```
 
 Step 4 puts the browsers in the web container, where `ddev playwright` runs them. They
