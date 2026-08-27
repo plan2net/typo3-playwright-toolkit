@@ -10,6 +10,22 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Changed
+
+- **plan2net/playwright-toolkit** — `playwright:prepare` skips the rebuild when the
+  stored template fingerprint matches the current schema, fixtures and session seed,
+  so an unchanged template no longer costs 30–60s on every `ddev playwright test`.
+  The skip uses the same fingerprint `DatabaseInitializer` gates every run on, so it
+  is exactly as safe as the runtime check. `--force` rebuilds anyway, and
+  `ddev playwright-prepare` forwards it.
+- **@plan2net/typo3-playwright-toolkit** — `defineBasePlaywrightConfig` refuses
+  overrides of `globalSetup`, `globalTeardown`, `use.baseURL` and
+  `use.serviceWorkers` instead of silently accepting them: the hooks carry the
+  preflight, run bookkeeping and database cleanup (including leak detection), and
+  the other two are the header-routing invariants. The new
+  `BasePlaywrightOverrides` type excludes them, and a runtime check catches plain-JS
+  consumers with an actionable error.
+
 ## [0.4.2] - 2026-08-27
 
 ### Fixed

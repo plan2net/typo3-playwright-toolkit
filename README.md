@@ -50,14 +50,17 @@ flowchart LR
 Nothing sits in between: no web server configuration, no environment variable. This
 chain is the whole idea, and `CONTRACT.md` describes it in detail.
 
-The template database is built once per test run from your schema and your fixture
-files. Copying it takes milliseconds, so each test can have its own database. At the
+The template database is built from your schema and your fixture files, and rebuilt
+only when those change — an unchanged template is reused, so a run costs no build
+time. Copying it takes milliseconds, so each test can have its own database. At the
 end, only the databases this run created are deleted, so two test runs can happen at
 the same time.
 
 ### A full test run
 
-Each package does one job, and they talk to each other only over HTTP:
+Each package does one job. At test time they talk to each other only over HTTP; the
+bootstrap coordinates differently — the add-on calls the extension's CLI command, and
+the npm package reads the API secret file the extension wrote:
 
 ```mermaid
 sequenceDiagram
