@@ -252,6 +252,9 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
           </li>
         </sc-for>
       </ol>
+
+      <h3 style="font-weight:800; font-size:17px; margin:32px 0 8px;">Why not click through the backend?</h3>
+      <p style="font-size:15.5px; line-height:1.7; color:var(--dim); margin:0;">Playwright could open the TYPO3 backend and fill in the forms the way an editor does. That is slow, several seconds per record, and fragile: the markup changes between TYPO3 versions and FormEngine builds the fields from your TCA, so a selector that works today can stop working after an update. You gain little for it. The builders post the same fields and the same request token to the route the form itself uses.</p>
     </div>
     <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.14);">
       <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">tests/news.spec.ts</div>

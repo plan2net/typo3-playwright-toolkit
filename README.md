@@ -251,6 +251,23 @@ match neither test.
 Here the content belongs to the test that needs it. A new test is a new file, and
 nobody else's lines move.
 
+### Why not click through the backend?
+
+Playwright could open the TYPO3 backend and fill in the forms the way an editor does.
+The builders post to the backend's own save route instead.
+
+Filling a form takes several seconds per record. A setup that builds ten of them adds
+minutes to every run.
+
+The forms are also fragile. Their markup changes between TYPO3 versions, and
+FormEngine builds the fields from your TCA, so a selector that works today can stop
+working after an update. The test then fails for a reason that has nothing to do with
+your site.
+
+And you gain little for the trouble. `/typo3/record/edit` is the route the backend's
+own form posts to. The builders send the same fields and the same request token, so
+TYPO3 does the same work.
+
 ## Browsing everything the suite builds
 
 A run puts its content in one throwaway database per test file, then drops them all
