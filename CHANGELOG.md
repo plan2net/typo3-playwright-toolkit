@@ -10,6 +10,17 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-08-27
+
+### Fixed
+
+- **plan2net/playwright-toolkit** — the scratch name for an image conversion is now
+  unique per conversion. 0.4.1 made it unique per test, which still let two parallel
+  requests of the same test collide: one renames the file away while the other is
+  reading it, and TYPO3 then serves the **original** image for the rest of that test
+  database's life, which is a subtly wrong screenshot rather than a failed test.
+  A browser opens parallel requests for a page's images, so this is the common case.
+
 ## [0.4.1] - 2026-08-27
 
 ### Fixed
@@ -129,7 +140,8 @@ the package a change belongs to.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.1...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.2...main
+[0.4.2]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.2.0...v0.3.0
