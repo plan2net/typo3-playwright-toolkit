@@ -43,7 +43,7 @@ export default tseslint.config(
     },
     {
         // Build configuration, outside the package's own tsconfig.
-        files: ['eslint.config.js', 'vitest.config.ts'],
+        files: ['eslint.config.js', 'vitest.config.ts', 'vitest.pack.config.ts'],
         extends: [tseslint.configs.disableTypeChecked],
     },
     {

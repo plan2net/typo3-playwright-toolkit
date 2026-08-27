@@ -64,7 +64,7 @@
         "build": "tsc -p tsconfig.build.json",
         "test": "vitest run",
         "test:watch": "vitest",
-        "test:pack": "vitest run --config /dev/null tests/smoke/node-modules-resolution.test.ts",
+        "test:pack": "vitest run --config vitest.pack.config.ts",
         "typecheck": "tsc -p tsconfig.json --noEmit",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
