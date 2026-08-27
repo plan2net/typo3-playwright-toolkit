@@ -1,7 +1,7 @@
 {
     "name": "plan2net/playwright-toolkit",
     "type": "typo3-cms-extension",
-    "description": "Playwright testing toolkit for TYPO3: a throwaway database per test, pre-seeded backend sessions, health and cleanup endpoints.",
+    "description": "Playwright testing toolkit for TYPO3 CMS: a throwaway database per test file, pre-seeded backend sessions, health and cleanup endpoints.",
     "license": "GPL-2.0-or-later",
     "require": {
         "php": "^8.1",

@@ -2,7 +2,7 @@
 
 $EM_CONF['playwright_toolkit'] = [
     'title' => 'Playwright Toolkit',
-    'description' => 'Playwright testing toolkit for TYPO3: a throwaway database per test file, pre-seeded backend sessions, health and cleanup endpoints.',
+    'description' => 'Playwright testing toolkit for TYPO3 CMS: a throwaway database per test file, pre-seeded backend sessions, health and cleanup endpoints.',
     'category' => 'misc',
     'author' => 'Wolfgang Klinger',
     'author_email' => 'wk@plan2.net',
