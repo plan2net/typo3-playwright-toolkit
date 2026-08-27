@@ -30,7 +30,19 @@ final class TestScopedGraphicalFunctionsTest extends FunctionalTestCase
 
         $graphicalFunctions = GeneralUtility::makeInstance(GraphicalFunctions::class);
 
-        self::assertSame('ABCD1234EFGH5678-', $graphicalFunctions->filenamePrefix);
+        self::assertStringStartsWith('ABCD1234EFGH5678-', $graphicalFunctions->filenamePrefix);
+    }
+
+    // A browser fetching a page's images runs these in parallel within one test.
+    #[Test]
+    public function twoConversionsInOneTestNeverShareAScratchName(): void
+    {
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = 'ABCD1234EFGH5678';
+
+        self::assertNotSame(
+            GeneralUtility::makeInstance(GraphicalFunctions::class)->filenamePrefix,
+            GeneralUtility::makeInstance(GraphicalFunctions::class)->filenamePrefix
+        );
     }
 
     #[Test]
@@ -42,6 +54,7 @@ final class TestScopedGraphicalFunctionsTest extends FunctionalTestCase
             $prefixes[] = GeneralUtility::makeInstance(GraphicalFunctions::class)->filenamePrefix;
         }
 
+        self::assertStringStartsWith('ZYXW9876VUTS5432-', $prefixes[1]);
         self::assertNotSame($prefixes[0], $prefixes[1]);
     }
 

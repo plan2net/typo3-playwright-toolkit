@@ -8,8 +8,8 @@ use Plan2net\PlaywrightToolkit\TestContext;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Imaging\GraphicalFunctions;
 
-// Concurrent conversions of the same image would otherwise share one scratch path
-// in typo3temp/assets/images, leaving the loser serving the unprocessed original.
+// Unique per conversion, not per test: two conversions of the same image otherwise
+// share one scratch path, and whichever finishes second serves the original image.
 final class TestScopedGraphicalFunctions
 {
     public function create(): GraphicalFunctions
@@ -23,7 +23,8 @@ final class TestScopedGraphicalFunctions
 
         $testId = TestContext::testId();
         if ('' !== $testId) {
-            $graphicalFunctions->filenamePrefix = $testId . '-';
+            // The test ID stays in front so cleanup can still collect these.
+            $graphicalFunctions->filenamePrefix = $testId . '-' . bin2hex(random_bytes(6)) . '-';
         }
 
         return $graphicalFunctions;
