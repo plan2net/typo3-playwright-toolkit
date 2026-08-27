@@ -81,6 +81,7 @@ sequenceDiagram
         PW->>PW: create a test ID and write it down first
         PW->>EXT: POST /typo3/test-api/session
         EXT->>DB: copy the template → dbABCD…
+        EXT->>EXT: point it at its own<br>_processed_ABCD… image folder
         EXT-->>PW: backend cookie + record_edit request token
         PW->>EXT: POST /typo3/record/edit — the fields FormEngine uses
         EXT-->>PW: 302 Location that contains the new uid
@@ -91,6 +92,7 @@ sequenceDiagram
         PW->>EXT: page.goto(…) — same test ID, so the same database
         PW->>EXT: POST /typo3/test-api/databases/drop
         EXT->>DB: DROP DATABASE dbABCD…
+        EXT->>EXT: remove _processed_ABCD…
     end
 ```
 
