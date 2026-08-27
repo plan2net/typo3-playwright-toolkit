@@ -46,11 +46,13 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 .bare { list-style:none; margin:0; padding:0; }
 .nav-list { display:flex; align-items:center; gap:14px; flex-wrap:wrap; list-style:none; margin:0; padding:0; font-size:14px; font-weight:600; }
 .nav-list li { display:inline-flex; align-items:center; }
-/* The call to action sits apart from the section links. */
-.nav-list li:last-child { margin-left:14px; }
+/* The links keep to the right beside the call to action rather than being spread
+   from it, and nav's 24px gap plus this 4px is the 28px they had as one list. */
+.nav-list { margin-left:auto; }
+.nav-cta { flex-shrink:0; margin-left:4px; }
 /* The second content value gives the diamond empty alternative text, so a screen
    reader reads the links without "black diamond" between them. */
-.nav-list li + li:not(:last-child)::before { content:"◆"; content:"◆" / ""; color:var(--dim); font-size:8px; margin-right:14px; }
+.nav-list li + li::before { content:"◆"; content:"◆" / ""; color:var(--dim); font-size:8px; margin-right:14px; }
 /* Panels left, prose right. Only the painting order changes: the heading stays
    first in the markup, where a screen reader and the outline want it. */
 .flip { grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); }
@@ -72,17 +74,22 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
   .split, .split-start { grid-template-columns:minmax(0,1fr); gap:32px; }
   .flip > :first-child { order:0; }
 }
-/* One row that scrolls sideways, rather than a sticky bar 164px tall. */
+/* Brand and call to action keep the first row; the links take the next one and
+   wrap within it, rather than being cropped off the side. */
 @media (max-width:900px) {
-  nav { flex-wrap:nowrap !important; gap:14px !important; }
-  nav > div:first-child { flex-shrink:0; }
-  nav > div:first-child div { white-space:nowrap; }
-  .nav-list { flex-wrap:nowrap; overflow-x:auto; gap:12px; }
-  .nav-list li { flex-shrink:0; }
+  nav { gap:14px !important; }
+  /* Flex wraps before it shrinks, so the brand needs a small basis to stay on the
+     call to action's row; it then grows back and the title breaks if it must. */
+  nav > div:first-child { flex:1 1 120px; min-width:0; }
+  nav > div:first-child div { min-width:0; }
+  .nav-list { order:3; width:100%; margin-left:0; gap:12px; }
+  .nav-cta { margin-left:auto; }
 }
 @media (max-width:620px) {
   .grid-4, .grid-cards { grid-template-columns:minmax(0,1fr); }
   .pad { padding-left:20px !important; padding-right:20px !important; }
+  /* The nav takes two rows here, so the headline does not need 88px above it. */
+  header.pad { padding-top:48px !important; }
   .h1 { font-size:32px !important; }
   .h2 { font-size:23px !important; }
 }
@@ -107,9 +114,8 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
     <li><a href="#example" style="color:var(--dim);" style-hover="color:var(--ink);">Example</a></li>
     <li><a href="#failure" style="color:var(--dim);" style-hover="color:var(--ink);">When it fails</a></li>
     <li><a href="#replay" style="color:var(--dim);" style-hover="color:var(--ink);">Sample content</a></li>
-    <li><a href="#proof" style="color:var(--dim);" style-hover="color:var(--ink);">Proof</a></li>
-    <li><a href="https://github.com/plan2net/typo3-playwright-toolkit" style="color:var(--ink); background:var(--org); padding:9px 18px; border-radius:6px; font-weight:700; font-size:13.5px;" style-hover="background:var(--org-lg); color:#fff;">GitHub ↗</a></li>
   </ul>
+  <a class="nav-cta" href="https://github.com/plan2net/typo3-playwright-toolkit" style="color:var(--ink); background:var(--org); padding:9px 18px; border-radius:6px; font-weight:700; font-size:13.5px;" style-hover="background:var(--org-lg); color:#fff;">GitHub ↗</a>
 </nav>
 
 <main id="main">
