@@ -10,8 +10,9 @@
 [![databases](https://img.shields.io/badge/databases-PostgreSQL%20%7C%20MySQL%20%7C%20MariaDB-336791)](#requirements)
 [![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
 
-A DDEV add-on. It installs the database service that holds the test databases, and
-the `ddev playwright` commands that run your tests.
+A [DDEV](https://ddev.com) add-on. It installs the database service that holds the
+test databases, and the `ddev playwright` commands that run your
+[Playwright](https://playwright.dev) tests.
 
 It needs the [Composer extension](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit), which creates the test
 databases, and the [npm package](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit), which contains the
@@ -24,8 +25,9 @@ test helpers.
 ## Requirements
 
 - DDEV 1.25.0 or newer
-- A PostgreSQL, MySQL or MariaDB project. Install picks the matching `db-test`
-  service. An SQLite project needs no service at all.
+- A [PostgreSQL](https://www.postgresql.org), [MySQL](https://www.mysql.com) or
+  [MariaDB](https://mariadb.org) project. Install picks the matching `db-test`
+  service. An [SQLite](https://sqlite.org) project needs no service at all.
 - The Composer extension, installed in the project
 - A host name that runs in the Testing context. The add-on does not set this up; see
   the [extension README](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit#testing-host).

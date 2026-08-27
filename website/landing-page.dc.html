@@ -393,7 +393,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
 
 <footer data-screen-label="Footer" style="border-top:1px solid var(--line);">
   <div class="pad" style="max-width:1200px; margin:0 auto; padding:28px 40px; display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; font-size:13.5px; color:var(--dim);">
-    <div>Built by <a href="https://www.plan2.net/">plan2net</a> · Vienna, Austria</div>
+    <div>Built by <a href="https://www.plan2.net/">plan2net</a> · Vienna, Austria<br>Built on <a href="https://playwright.dev">Playwright</a>, <a href="https://ddev.com">DDEV</a> and <a href="https://typo3.org">TYPO3</a></div>
     <div style="display:flex; gap:24px;">
       <a href="https://github.com/plan2net/typo3-playwright-toolkit">GitHub</a>
       <a href="https://packagist.org/packages/plan2net/playwright-toolkit" style="color:var(--dim);" style-hover="color:var(--ink);">Packagist</a>
@@ -481,7 +481,7 @@ class Component extends DCLogic {
       packages: [
         { kind: 'DDEV ADD-ON', name: 'ddev-typo3-playwright-toolkit', cmd: 'ddev add-on get https://github.com/plan2net/typo3-playwright-toolkit/releases/latest/download/ddev-typo3-playwright-toolkit.tar.gz', gives: 'The db-test database service and the ddev playwright, playwright-prepare, playwright-ui and playwright-inspect commands.' },
         { kind: 'COMPOSER', name: 'plan2net/playwright-toolkit', cmd: 'ddev composer require --dev plan2net/playwright-toolkit', gives: 'Clones the databases, hands out a ready-made backend session and a real record_edit token, and drops the databases again.' },
-        { kind: 'NPM', name: '@plan2net/typo3-playwright-toolkit', cmd: "ddev exec 'cd tests/playwright && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'", gives: 'defineScenario, the page and content builders for every core CType, screenshots, axe, and the setup and teardown that provision and drop the databases.' },
+        { kind: 'NPM', name: '@plan2net/typo3-playwright-toolkit', cmd: "ddev exec 'cd tests/playwright && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'", gives: 'defineScenario, the page and content builders for every core CType, screenshots, axe accessibility scans, and the setup and teardown that provision and drop the databases.' },
       ].map((p, i) => ({
         ...p,
         isCopied: this.state.copied === i,

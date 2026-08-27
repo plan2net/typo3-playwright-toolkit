@@ -16,13 +16,16 @@ Tests run at the same time without sharing data, so they cannot break each other
 Content is created through the real TYPO3 backend, not from SQL fixtures — so a new
 test is a new file, and two people writing tests never meet in the same one.
 
+It drives [Playwright](https://playwright.dev) against a [TYPO3](https://typo3.org)
+project running under [DDEV](https://ddev.com).
+
 Three packages. You need all three:
 
 | Package | Install with | What it gives you |
 |---|---|---|
-| [DDEV add-on](packages/ddev-typo3-playwright-toolkit) | `ddev add-on get …` | the `db-test` database service and the `ddev playwright*` commands |
-| [`plan2net/playwright-toolkit`](packages/playwright-toolkit) | Composer | the test databases, the backend session, and the test API |
-| [`@plan2net/typo3-playwright-toolkit`](packages/typo3-playwright-toolkit) | npm | Playwright fixtures, content builders, cleanup, screenshots, axe |
+| [DDEV add-on](packages/ddev-typo3-playwright-toolkit) | [`ddev add-on get …`](https://ddev.readthedocs.io/en/stable/users/extend/additional-services/) | the `db-test` database service and the `ddev playwright*` commands |
+| [`plan2net/playwright-toolkit`](packages/playwright-toolkit) | [Composer](https://getcomposer.org) | the test databases, the backend session, and the test API |
+| [`@plan2net/typo3-playwright-toolkit`](packages/typo3-playwright-toolkit) | [npm](https://www.npmjs.com/package/@plan2net/typo3-playwright-toolkit) | Playwright fixtures, content builders, cleanup, screenshots, [axe](https://github.com/dequelabs/axe-core) |
 
 ## How it works
 

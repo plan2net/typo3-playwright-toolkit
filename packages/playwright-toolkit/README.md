@@ -10,7 +10,7 @@
 [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
 [![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
 
-A TYPO3 extension. It creates one test database per test file and provides a ready-made
+A [TYPO3](https://typo3.org) extension. It creates one test database per test file and provides a ready-made
 backend session, so tests never fill in the login form.
 
 Developed in the

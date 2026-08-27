@@ -10,8 +10,9 @@
 [![Playwright](https://img.shields.io/badge/Playwright-1.56%2B-2ead33)](https://playwright.dev)
 [![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
 
-An npm package. It provides the Playwright fixtures, the content builders that
-create TYPO3 records, and the accessibility and CSP checks.
+An npm package. It provides the [Playwright](https://playwright.dev) fixtures, the
+content builders that create [TYPO3](https://typo3.org) records, and the
+accessibility ([axe](https://github.com/dequelabs/axe-core)) and CSP checks.
 
 It needs the [Composer extension](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit), which creates the test
 databases, and the [DDEV add-on](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/ddev-typo3-playwright-toolkit), which provides
