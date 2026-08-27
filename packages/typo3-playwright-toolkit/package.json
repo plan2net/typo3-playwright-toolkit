@@ -80,7 +80,7 @@
         "eslint": "^10.9.0",
         "typescript": "^5.9.0",
         "typescript-eslint": "^8.67.0",
-        "vitest": "^3.2.0"
+        "vitest": "^4.1.11"
     },
     "dependencies": {
         "axe-core": "^4.13.0"
