@@ -217,12 +217,11 @@ the prepared backend session, and stores the API secret in
 
 `ddev playwright` runs this step for you, so you rarely call it directly.
 
-Each test database also gets its own folder for processed images,
-`fileadmin/_processed_<test id>`. The records naming those images live in the
-database, so without a folder of its own every test would regenerate the same files
-and could overwrite one while another test is reading it — which shows up as a test
-seeing the wrong crop of the right image. The folders are throwaway; delete them
-whenever you like.
+Images are kept apart per test as well. Each test database gets its own folder for
+processed images, `fileadmin/_processed_<test id>`, and its own scratch names in
+`typo3temp/assets/images/`, where TYPO3 converts an image before moving it into that
+folder. Both carry the test ID, so two tests never write the same file, and both go
+when the test database does.
 
 To check that a project is set up correctly, ask the health endpoint:
 

@@ -54,6 +54,20 @@ final class ProcessedFileIsolation
             // folder cannot empty what it points at.
             GeneralUtility::rmdir($root . '/' . self::folderFor($testId), true);
         }
+
+        $this->removeScratchFiles($testId);
+    }
+
+    // A failed conversion leaves its scratch file behind; a successful one is renamed away.
+    private function removeScratchFiles(string $testId): void
+    {
+        $scratch = rtrim(Environment::getPublicPath(), '/') . '/typo3temp/assets/images/';
+
+        foreach ((array) glob($scratch . $testId . '-*') as $file) {
+            if (is_string($file) && is_file($file)) {
+                unlink($file);
+            }
+        }
     }
 
     /**
