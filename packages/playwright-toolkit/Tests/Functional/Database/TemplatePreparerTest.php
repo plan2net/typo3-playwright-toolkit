@@ -149,7 +149,7 @@ final class TemplatePreparerTest extends FunctionalTestCase
     {
         $preparer = $this->get(TemplatePreparer::class);
         $preparer->prepare();
-        // Forced: an unforced second call would skip and pin nothing.
+        // Forced: without it the second call would skip and the test would prove nothing.
         $preparer->prepare(force: true);
 
         $count = $this->template()->query('SELECT count(*) FROM be_sessions')->fetchColumn();

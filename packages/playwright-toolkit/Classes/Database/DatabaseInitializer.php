@@ -11,26 +11,47 @@ use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\TestContext;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Environment;
-use TYPO3\CMS\Core\Core\Event\BootCompletedEvent;
 
-final class DatabaseInitializer implements LoggerAwareInterface
+/**
+ * Runs before TYPO3 boots, from the same call that redirects the connection, so
+ * no query during boot can hit a missing database. There is no container yet, so
+ * the dependencies are created by hand. The check that needs TCA lives in
+ * TemplateDriftGuard.
+ */
+final class DatabaseInitializer
 {
-    use LoggerAwareTrait;
+    private static bool $clonedThisRequest = false;
 
     public function __construct(
         private readonly ToolkitConfigurationFactory $configurationFactory,
         private readonly LockFiles $lockFiles,
         private readonly TestApiSecret $secret,
-        private readonly TemplateReadiness $readiness,
-        private readonly ProcessedFileIsolation $processedFiles,
     ) {
     }
 
-    /** @psalm-suppress UnusedParam */
-    public function __invoke(BootCompletedEvent $event): void
+    public static function fromGlobals(): self
+    {
+        return new self(
+            new ToolkitConfigurationFactory(new ExtensionConfiguration()),
+            LockFiles::inVarPath(),
+            TestApiSecret::inVarPath(),
+        );
+    }
+
+    public static function clonedThisRequest(): bool
+    {
+        return self::$clonedThisRequest;
+    }
+
+    /** @internal only functional tests share a process */
+    public static function forgetClone(): void
+    {
+        self::$clonedThisRequest = false;
+    }
+
+    public function provisionCurrentRequest(): void
     {
         if (!Environment::getContext()->isTesting()) {
             return;
@@ -40,8 +61,6 @@ final class DatabaseInitializer implements LoggerAwareInterface
         // would drop and rebuild whatever database the Default connection points at.
         $testId = TestContext::testId();
         if ('' === $testId) {
-            $this->logMalformedTestId();
-
             return;
         }
 
@@ -100,7 +119,7 @@ final class DatabaseInitializer implements LoggerAwareInterface
                     return;
                 }
 
-                $this->readiness->assertPrepared($driver, $configuration);
+                TemplateReadiness::assertFinalised($driver);
 
                 // Claim the name before the database exists. A crash inside
                 // materialise() would otherwise leave a database no claim names,
@@ -118,7 +137,8 @@ final class DatabaseInitializer implements LoggerAwareInterface
                 }
 
                 $driver->materialise($testId);
-                $this->processedFiles->apply($driver->connectionOverrides($testId), $testId);
+                $driver->isolateProcessedFiles($testId);
+                self::$clonedThisRequest = true;
             } finally {
                 flock($createHandle, LOCK_UN);
                 fclose($createHandle);
@@ -127,19 +147,6 @@ final class DatabaseInitializer implements LoggerAwareInterface
             flock($templateHandle, LOCK_UN);
             fclose($templateHandle);
         }
-    }
-
-    private function logMalformedTestId(): void
-    {
-        $malformed = TestContext::malformedTestId();
-        if (null === $malformed) {
-            return;
-        }
-
-        $this->logger?->warning(
-            'Ignoring a malformed {header} header; this request uses the project database.',
-            ['header' => TestContext::TEST_ID_HEADER, 'value' => $malformed]
-        );
     }
 
     /**

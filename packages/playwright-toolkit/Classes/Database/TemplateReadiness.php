@@ -15,7 +15,8 @@ final class TemplateReadiness
     ) {
     }
 
-    public function assertPrepared(TestDatabaseDriver $driver, ToolkitConfiguration $configuration): void
+    /** Needs no container, so it can run before boot; the check below needs TCA. */
+    public static function assertFinalised(TestDatabaseDriver $driver): string
     {
         // The fingerprint is written last, so an absent one also covers a
         // preparation that died partway through. Checked first because working out
@@ -30,7 +31,12 @@ final class TemplateReadiness
             ));
         }
 
-        if ($stored !== $this->expectedFingerprint($driver, $configuration)) {
+        return $stored;
+    }
+
+    public function assertPrepared(TestDatabaseDriver $driver, ToolkitConfiguration $configuration): void
+    {
+        if (self::assertFinalised($driver) !== $this->expectedFingerprint($driver, $configuration)) {
             throw new \RuntimeException(
                 'The Playwright test database template is out of date. Run "ddev playwright-prepare" to build it.'
             );

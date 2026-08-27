@@ -10,7 +10,30 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **DDEV add-on** — `ddev playwright-prepare` (and every command that reaches the
+  test database) now refuses with "run `ddev restart`" when the db-test service is
+  configured but not yet active in the web container — running prepare between
+  `ddev add-on get` and the enabling `ddev restart` used to fail with a bare
+  connection error, or worse: on a host with several toolkit projects, `db-test`
+  resolves to *another* project's service on the shared ddev network and prepare
+  silently wrote into that project's template.
+
 ### Changed
+
+- **plan2net/playwright-toolkit** — the per-test database is now created *before*
+  TYPO3 boots, in the same call that redirects the Default connection
+  (`TestContext::applyDatabaseConnectionOverrides()`), instead of in a
+  `BootCompletedEvent` listener. Any extension that queries the database from its
+  own `BootCompletedEvent` listener used to hit a database that did not exist yet
+  whenever its listener happened to run before the toolkit's; listener order
+  between unrelated extensions is undefined, so this worked in one project and
+  500ed in another. The one check
+  that needs a booted TYPO3, comparing the template fingerprint against the
+  current TCA, stays at `BootCompletedEvent` in the new `TemplateDriftGuard` and
+  runs only for the request that cloned. The processed-folder isolation moved
+  into the drivers (`isolateProcessedFiles`).
 
 - **plan2net/playwright-toolkit** — `playwright:prepare` skips the rebuild when the
   stored template fingerprint matches the current schema, fixtures and session seed,

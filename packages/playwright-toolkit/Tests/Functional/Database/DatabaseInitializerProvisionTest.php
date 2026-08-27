@@ -179,17 +179,6 @@ final class DatabaseInitializerProvisionTest extends FunctionalTestCase
         $this->initializer()->provision($this->driver(), self::TEST_ID);
     }
 
-    #[Test]
-    public function demandsPreparationWhenTheTemplateSeedDrifted(): void
-    {
-        $this->prepareTemplate();
-        $this->driver()->finaliseTemplate('a-fingerprint-from-another-life');
-
-        $this->expectExceptionMessageMatches('/playwright-prepare/');
-
-        $this->initializer()->provision($this->driver(), self::TEST_ID);
-    }
-
     private function claimFile(): string
     {
         return LockFiles::inVarPath()->claim('db' . self::TEST_ID);

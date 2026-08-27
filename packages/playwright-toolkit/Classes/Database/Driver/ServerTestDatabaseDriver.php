@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Database\Driver;
 
 use Plan2net\PlaywrightToolkit\Database\DatabaseName;
+use Plan2net\PlaywrightToolkit\Database\ProcessedFileIsolation;
 use Plan2net\PlaywrightToolkit\Database\SeededBackendUser;
 use Plan2net\PlaywrightToolkit\Database\SeededSession;
 
@@ -121,6 +122,14 @@ abstract class ServerTestDatabaseDriver implements TestDatabaseDriver
 
         $this->dropDatabase($this->admin(), $database);
         $this->cloneTemplateInto($database);
+    }
+
+    #[\Override]
+    public function isolateProcessedFiles(string $testId): void
+    {
+        $statement = $this->connect($this->databaseFor($testId))
+            ->prepare("UPDATE sys_file_storage SET processingfolder = :folder WHERE driver = 'Local'");
+        $statement->execute(['folder' => ProcessedFileIsolation::folderFor($testId)]);
     }
 
     #[\Override]

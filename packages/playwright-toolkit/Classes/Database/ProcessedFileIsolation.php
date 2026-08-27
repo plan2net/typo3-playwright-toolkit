@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Database;
 
 use TYPO3\CMS\Core\Core\Environment;
-use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class ProcessedFileIsolation
 {
     public function __construct(
-        private readonly BorrowedConnection $borrowedConnection,
-        private readonly ConnectionPool $connectionPool,
         private readonly StorageRepository $storageRepository,
     ) {
     }
@@ -21,20 +18,6 @@ final class ProcessedFileIsolation
     public static function folderFor(string $testId): string
     {
         return '_processed_' . $testId;
-    }
-
-    /**
-     * @param array<string, mixed> $connectionOverrides addressing the test database
-     */
-    public function apply(array $connectionOverrides, string $testId): void
-    {
-        $this->borrowedConnection->use($connectionOverrides, function () use ($testId): void {
-            $this->connectionPool->getConnectionForTable('sys_file_storage')->update(
-                'sys_file_storage',
-                ['processingfolder' => self::folderFor($testId)],
-                ['driver' => 'Local']
-            );
-        });
     }
 
     public function remove(string $testId): void

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit;
 
+use Plan2net\PlaywrightToolkit\Database\DatabaseInitializer;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 
@@ -29,8 +30,15 @@ final class TestContext
         /** @var array<string, mixed> $connection */
         $connection = $defaultConnection ?? $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [];
 
-        foreach (self::databaseConnectionOverrides($connection) as $path => $value) {
+        $overrides = self::databaseConnectionOverrides($connection);
+        foreach ($overrides as $path => $value) {
             $GLOBALS['TYPO3_CONF_VARS'] = ArrayUtility::setValueByPath($GLOBALS['TYPO3_CONF_VARS'], $path, $value);
+        }
+
+        // Create the database right after redirecting to it, so no query during
+        // boot can hit a missing database.
+        if ([] !== $overrides) {
+            DatabaseInitializer::fromGlobals()->provisionCurrentRequest();
         }
     }
 

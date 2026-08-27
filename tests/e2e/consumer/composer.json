@@ -11,12 +11,20 @@
         "typo3/cms-install": "^13.4 || ^14.3"
     },
     "require-dev": {
+        "plan2net/boot-probe": "@dev",
         "plan2net/playwright-toolkit": "@dev"
     },
     "repositories": [
         {
             "type": "path",
             "url": "./.artifacts/playwright-toolkit",
+            "options": {
+                "symlink": false
+            }
+        },
+        {
+            "type": "path",
+            "url": "./packages/boot-probe",
             "options": {
                 "symlink": false
             }

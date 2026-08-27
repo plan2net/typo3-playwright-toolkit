@@ -1,0 +1,13 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Plan2net\BootProbe\BootQuery:
+    public: true
+    tags:
+      - name: event.listener
+        identifier: 'plan2net/boot-probe/boot-query'
+        event: TYPO3\CMS\Core\Core\Event\BootCompletedEvent
+        before: 'plan2net/playwright-toolkit/template-drift-guard'

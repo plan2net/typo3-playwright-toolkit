@@ -32,9 +32,12 @@ services:
 
   Plan2net\PlaywrightToolkit\Database\DatabaseInitializer:
     public: true
+
+  Plan2net\PlaywrightToolkit\Database\TemplateDriftGuard:
+    public: true
     tags:
       - name: event.listener
-        identifier: 'plan2net/playwright-toolkit/database-create'
+        identifier: 'plan2net/playwright-toolkit/template-drift-guard'
         event: TYPO3\CMS\Core\Core\Event\BootCompletedEvent
 
   Plan2net\PlaywrightToolkit\SiteName:

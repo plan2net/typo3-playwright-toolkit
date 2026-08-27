@@ -40,7 +40,8 @@ final class TemplatePreparer
                 throw new \RuntimeException('Could not acquire the template build lock');
             }
 
-            // Written last, so a build that died partway through reads as null and rebuilds.
+            // The fingerprint is written last, so a build that died in the middle
+            // reads as null here and is rebuilt.
             if (!$force && $driver->templateFingerprint() === $snapshot->fingerprint) {
                 return ['fingerprint' => $snapshot->fingerprint, 'built' => false];
             }

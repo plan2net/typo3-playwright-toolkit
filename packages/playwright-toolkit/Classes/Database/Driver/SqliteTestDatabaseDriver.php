@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Database\Driver;
 
 use Plan2net\PlaywrightToolkit\Database\DatabaseName;
+use Plan2net\PlaywrightToolkit\Database\ProcessedFileIsolation;
 use Plan2net\PlaywrightToolkit\Database\SeededBackendUser;
 use Plan2net\PlaywrightToolkit\Database\SeededSession;
 use TYPO3\CMS\Core\Core\Environment;
@@ -164,6 +165,14 @@ final class SqliteTestDatabaseDriver implements TestDatabaseDriver
         if (!@copy($this->templateFile(), $this->fileFor($testId))) {
             throw new \RuntimeException(sprintf('Could not copy the template to "%s".', $this->fileFor($testId)));
         }
+    }
+
+    #[\Override]
+    public function isolateProcessedFiles(string $testId): void
+    {
+        $statement = $this->connect($this->fileFor($testId))
+            ->prepare("UPDATE sys_file_storage SET processingfolder = :folder WHERE driver = 'Local'");
+        $statement->execute(['folder' => ProcessedFileIsolation::folderFor($testId)]);
     }
 
     #[\Override]

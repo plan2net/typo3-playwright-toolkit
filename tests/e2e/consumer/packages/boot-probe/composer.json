@@ -1,0 +1,19 @@
+{
+    "name": "plan2net/boot-probe",
+    "description": "Queries the database while TYPO3 is still booting — the per-test database must already exist by then.",
+    "type": "typo3-cms-extension",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "typo3/cms-core": "^13.4 || ^14.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Plan2net\\BootProbe\\": "Classes/"
+        }
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "boot_probe"
+        }
+    }
+}

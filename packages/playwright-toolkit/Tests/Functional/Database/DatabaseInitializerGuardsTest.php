@@ -7,19 +7,13 @@ namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
-use Plan2net\PlaywrightToolkit\Database\BorrowedConnection;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 use Plan2net\PlaywrightToolkit\Database\DatabaseInitializer;
-use Plan2net\PlaywrightToolkit\Database\ProcessedFileIsolation;
-use Plan2net\PlaywrightToolkit\Database\SeedSources;
-use Plan2net\PlaywrightToolkit\Database\TemplateReadiness;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\TestContext;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\ApplicationContext;
 use TYPO3\CMS\Core\Core\Environment;
-use TYPO3\CMS\Core\Core\Event\BootCompletedEvent;
-use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class DatabaseInitializerGuardsTest extends FunctionalTestCase
@@ -51,7 +45,7 @@ final class DatabaseInitializerGuardsTest extends FunctionalTestCase
     {
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
 
-        $this->guardedInitializer()->__invoke(new BootCompletedEvent(true));
+        $this->guardedInitializer()->provisionCurrentRequest();
 
         self::assertDirectoryDoesNotExist(Environment::getVarPath() . '/test-locks');
     }
@@ -63,13 +57,13 @@ final class DatabaseInitializerGuardsTest extends FunctionalTestCase
     {
         $_SERVER[TestContext::TEST_ID_SERVER_KEY] = 'ABCD1234EFGH5678';
 
-        $this->guardedInitializer()->__invoke(new BootCompletedEvent(true));
+        $this->guardedInitializer()->provisionCurrentRequest();
 
         self::assertDirectoryDoesNotExist(Environment::getVarPath() . '/test-locks');
     }
 
     /**
-     * This listener creates and drops databases, so the context gate is the most
+     * This entry point creates and drops databases, so the context gate is the most
      * important line in the class. Development must fail it as firmly as
      * Production — isTesting() matches a root context of Testing only.
      */
@@ -80,7 +74,7 @@ final class DatabaseInitializerGuardsTest extends FunctionalTestCase
         $_SERVER[TestContext::TEST_ID_SERVER_KEY] = 'ABCD1234EFGH5678';
 
         $this->inContext($context, function (): void {
-            $this->guardedInitializer()->__invoke(new BootCompletedEvent(true));
+            $this->guardedInitializer()->provisionCurrentRequest();
         });
 
         self::assertDirectoryDoesNotExist(Environment::getVarPath() . '/test-locks');
@@ -98,7 +92,7 @@ final class DatabaseInitializerGuardsTest extends FunctionalTestCase
         unset($_SERVER[TestApiSecret::SERVER_KEY]);
 
         $this->asWebRequest(function (): void {
-            $this->guardedInitializer()->__invoke(new BootCompletedEvent(true));
+            $this->guardedInitializer()->provisionCurrentRequest();
         });
 
         self::assertDirectoryDoesNotExist(Environment::getVarPath() . '/test-locks');
@@ -112,7 +106,7 @@ final class DatabaseInitializerGuardsTest extends FunctionalTestCase
         $_SERVER[TestApiSecret::SERVER_KEY] = 'not-the-secret';
 
         $this->asWebRequest(function (): void {
-            $this->guardedInitializer()->__invoke(new BootCompletedEvent(true));
+            $this->guardedInitializer()->provisionCurrentRequest();
         });
 
         self::assertDirectoryDoesNotExist(Environment::getVarPath() . '/test-locks');
@@ -184,11 +178,6 @@ final class DatabaseInitializerGuardsTest extends FunctionalTestCase
             new ToolkitConfigurationFactory($extensionConfiguration),
             LockFiles::inVarPath(),
             $this->get(TestApiSecret::class),
-            new TemplateReadiness(
-                $this->get(SeedSources::class),
-                new BorrowedConnection($this->get(ConnectionPool::class))
-            ),
-            $this->get(ProcessedFileIsolation::class)
         );
     }
 }
