@@ -104,6 +104,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
     <li><a href="#packages" style="color:var(--dim);" style-hover="color:var(--ink);">Packages</a></li>
     <li><a href="#example" style="color:var(--dim);" style-hover="color:var(--ink);">Example</a></li>
     <li><a href="#failure" style="color:var(--dim);" style-hover="color:var(--ink);">When it fails</a></li>
+    <li><a href="#replay" style="color:var(--dim);" style-hover="color:var(--ink);">Sample content</a></li>
     <li><a href="#proof" style="color:var(--dim);" style-hover="color:var(--ink);">Proof</a></li>
     <li><a href="https://github.com/plan2net/typo3-playwright-toolkit" style="color:var(--ink); background:var(--org); padding:9px 18px; border-radius:6px; font-weight:700; font-size:13.5px;" style-hover="background:var(--org-lg); color:#fff;">GitHub ↗</a></li>
   </ul>
@@ -309,7 +310,6 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
       <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 20px;">When a test fails, open its backend</h2>
       <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 20px;">A screenshot tells you something broke. It never tells you what the database looked like when it did.</p>
       <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">So a failed file keeps its database instead of dropping it, and <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">ddev playwright-inspect</span> prints a signed link for each one. Open it and you are inside the TYPO3 backend of that exact run — already logged in, page tree intact, content exactly as the test left it, the frontend one click away. The scenario name and its test ID sit beside the site name, so two open tabs are never confused.</p>
-      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">For the whole suite rather than one failure, <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">ddev playwright-replay</span> runs every scenario into a single database, each in its own sysfolder, and prints one link into it. Sample pages nobody had to build by hand.</p>
       <ul class="bare" style="display:flex; flex-direction:column; gap:10px;">
         <sc-for list="{{ failNotes }}" as="f" hint-placeholder-count="3">
           <li style="display:flex; align-items:flex-start; gap:12px; font-size:14.5px; color:var(--dim);">
@@ -368,6 +368,46 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
               </div>
             </sc-for>
           </div>
+        </div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="replay" data-screen-label="Sample content" style="border-top:1px solid var(--line);">
+  <div class="split-start pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
+    <div>
+      <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 20px;">Your suite already built a demo site</h2>
+      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 20px;">Every scenario builds content. <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">ddev playwright-replay</span> runs all of them into one database instead of one per test file, each scenario in its own sysfolder, and prints a single link into that backend.</p>
+      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">So the pages your tests need are also pages people can look at. Show a client every content element, or check a template change against all of them at once. Nobody had to build any of it by hand.</p>
+      <ul class="bare" style="display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ replayNotes }}" as="r" hint-placeholder-count="3">
+          <li style="display:flex; align-items:flex-start; gap:12px; font-size:14.5px; color:var(--dim);">
+            <span aria-hidden="true" style="color:var(--org-lg); font-weight:800; line-height:1.6;">›</span>
+            <span>{{ r.t }}</span>
+          </li>
+        </sc-for>
+      </ul>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:18px;">
+      <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.14);">
+        <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">ddev playwright-replay</div>
+        <div style="padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.9; overflow-x:auto;">
+          <div style="color:#AEB7C4;"><span style="color:#949DAC;">$</span> ddev playwright-replay</div>
+          <div style="color:#949DAC;">[replay] Everything was replayed into the testing site's own database.</div>
+          <div style="color:#949DAC; margin-bottom:8px;">[replay] This link logs you into its backend for the next 15 minutes:</div>
+          <div style="color:#7FB8E8; overflow-wrap:anywhere; white-space:normal;">&nbsp;&nbsp;https://university-testing.ddev.site/typo3/test-api/inspect?id=REPLAY0000000000&amp;t=…</div>
+        </div>
+      </div>
+      <figure style="margin:0; border:1px solid var(--line); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.10);">
+        <figcaption style="padding:11px 16px; background:var(--soft); border-bottom:1px solid var(--line); font-size:13px; color:var(--dim);">One sysfolder per scenario, named after its file</figcaption>
+        <div style="background:#fff; padding:10px 0 12px;">
+          <sc-for list="{{ replayTree }}" as="t" hint-placeholder-count="6">
+            <div style="display:flex; align-items:center; gap:7px; padding:5px 12px 5px {{ t.indent }}; background:{{ t.bg }}; border-left:2px solid {{ t.border }};">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="{{ t.stroke }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;" aria-hidden="true"><path d="{{ t.icon }}"></path></svg>
+              <span style="font-size:12.5px; color:{{ t.color }}; font-weight:{{ t.weight }}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.label }}</span>
+            </div>
+          </sc-for>
         </div>
       </figure>
     </div>
@@ -528,6 +568,19 @@ class Component extends DCLogic {
         { t: 'Only the failed file keeps its database. Everything that passed is dropped, so the disk does not fill up with successes.' },
         { t: 'The link is signed with the API secret and dies after fifteen minutes. The secret is never in the URL.' },
         { t: 'A browser cannot send the test-ID header, which is the whole reason the link exists.' },
+      ],
+      replayTree: [
+        { label: 'University Relaunch', indent: '10px', bg: 'transparent', border: 'transparent', color: '#1A1E24', weight: '700', stroke: '#FF8700', icon: 'M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7Zm0 0 4 4h-4Z' },
+        { label: 'Home', indent: '24px', bg: 'transparent', border: 'transparent', color: '#5B6570', weight: '400', stroke: '#9AA3AE', icon: 'M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7Zm0 0 4 4h-4Z' },
+        { label: 'courses', indent: '24px', bg: '#FFF3E4', border: '#FF8700', color: '#1A1E24', weight: '700', stroke: '#E67A00', icon: 'M3 7a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z' },
+        { label: 'Data Structures', indent: '38px', bg: 'transparent', border: 'transparent', color: '#5B6570', weight: '400', stroke: '#9AA3AE', icon: 'M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7Zm0 0 4 4h-4Z' },
+        { label: 'news', indent: '24px', bg: '#FFF3E4', border: '#FF8700', color: '#1A1E24', weight: '700', stroke: '#E67A00', icon: 'M3 7a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z' },
+        { label: 'staff', indent: '24px', bg: '#FFF3E4', border: '#FF8700', color: '#1A1E24', weight: '700', stroke: '#E67A00', icon: 'M3 7a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z' },
+      ],
+      replayNotes: [
+        { t: 'It rebuilds the database from the template first, so nothing from the last run survives.' },
+        { t: 'Only the setups run. Playwright skips the tests themselves, so a failing assertion does not stop the site from filling up.' },
+        { t: 'The link is signed and expires after fifteen minutes, like the ones for a failed test.' },
       ],
       stats: [
         { label: 'Per test file', value: '~27 ms', note: 'What a private database costs, measured cloning a seeded TYPO3 13 template on PostgreSQL 15. You stop trading isolation for speed.' },
