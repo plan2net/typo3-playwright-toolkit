@@ -288,13 +288,16 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
       <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">tests/news.spec.ts</div>
       <pre style="margin:0; padding:20px 22px; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.8; color:#C9D2DE; overflow-x:auto;"><span style="color:#FFB151;">import</span> {
     defineScenario, expect, expectScreenshot,
-    runAccessibilityScan,
+    imageCrop, runAccessibilityScan,
 } <span style="color:#FFB151;">from</span> <span style="color:#8FD48A;">'@plan2net/typo3-playwright-toolkit'&#10;&#10;</span><span style="color:#7FB8E8;">export const</span> test = defineScenario(<span style="color:#FFB151;">async</span> ({ builders }) =&gt; {
     <span style="color:#7FB8E8;">const</span> page = <span style="color:#FFB151;">await</span> builders.page()
         .withTitle(<span style="color:#8FD48A;">'Newsroom'</span>).withSlug(<span style="color:#8FD48A;">'/newsroom'</span>).create()
 
     <span style="color:#949DAC;">// Every TYPO3 core CType already has a builder.&#10;</span>    <span style="color:#FFB151;">await</span> builders.content().onPage(page.id).ofType(<span style="color:#8FD48A;">'textmedia'</span>)
         .configure((element) =&gt; element.withHeader(<span style="color:#8FD48A;">'Latest'</span>))
+        <span style="color:#949DAC;">// The sys_file_reference rows are written for you.&#10;</span>        .withFileReferences(<span style="color:#8FD48A;">'assets'</span>, [1, 2], {
+            crop: imageCrop({ ratio: <span style="color:#8FD48A;">'16:9'</span> }),
+        })
         .create()
 
     <span style="color:#FFB151;">return</span> { slug: page.slug }
@@ -556,7 +559,7 @@ class Component extends DCLogic {
       packages: [
         { kind: 'DDEV ADD-ON', name: 'ddev-typo3-playwright-toolkit', cmd: 'ddev add-on get https://github.com/plan2net/typo3-playwright-toolkit/releases/latest/download/ddev-typo3-playwright-toolkit.tar.gz', gives: 'The db-test database service and the ddev playwright, playwright-prepare, playwright-ui and playwright-inspect commands.' },
         { kind: 'COMPOSER', name: 'plan2net/playwright-toolkit', cmd: 'ddev composer require --dev plan2net/playwright-toolkit', gives: 'Clones the databases, hands out a ready-made backend session and a real record_edit token, and drops the databases again.' },
-        { kind: 'NPM', name: '@plan2net/typo3-playwright-toolkit', cmd: "ddev exec 'cd tests/playwright && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'", gives: 'defineScenario, the page and content builders for every core CType, screenshots, axe accessibility scans, and the setup and teardown that provision and drop the databases.' },
+        { kind: 'NPM', name: '@plan2net/typo3-playwright-toolkit', cmd: "ddev exec 'cd tests/playwright && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'", gives: 'defineScenario, the page and content builders for every core CType, setters that attach files and child records at any depth, screenshots, axe accessibility scans, and the setup and teardown that provision and drop the databases.' },
       ].map((p, i) => ({
         ...p,
         isCopied: this.state.copied === i,
