@@ -102,10 +102,7 @@ function formFields(data: RecordDataMap): Record<string, string> {
     for (const [table, rows] of Object.entries(data)) {
         for (const [identifier, row] of Object.entries(rows)) {
             for (const [column, value] of Object.entries(row)) {
-                if (undefined === value || null === value) {
-                    continue
-                }
-                fields[`data[${table}][${identifier}][${column}]`] = formValue(value)
+                addField(fields, `data[${table}][${identifier}][${column}]`, value)
             }
         }
     }
@@ -116,6 +113,21 @@ function formFields(data: RecordDataMap): Record<string, string> {
     fields._savedok = '1'
 
     return fields
+}
+
+function addField(fields: Record<string, string>, name: string, value: unknown): void {
+    if (undefined === value || null === value) {
+        return
+    }
+    if ('object' === typeof value && !Array.isArray(value)) {
+        for (const [key, nested] of Object.entries(value)) {
+            addField(fields, `${name}[${key}]`, nested)
+        }
+
+        return
+    }
+
+    fields[name] = formValue(value)
 }
 
 function formValue(value: unknown): string {

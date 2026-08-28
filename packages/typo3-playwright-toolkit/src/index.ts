@@ -37,6 +37,7 @@ export {
 } from './builders/core-content.js'
 export type { RecordDataMap, RecordToSave } from './http/record-edit.js'
 export { newRecordIdentifier } from './builders/identifier.js'
+export { flexForm } from './builders/fields.js'
 
 export { expectScreenshot, waitForAnimations } from './checks/screenshot.js'
 export {
@@ -49,6 +50,6 @@ export { CspVerifier, type CspMode, type CspViolation } from './checks/csp.js'
 
 export { TEST_ID_HEADER, TEST_ID_PATTERN } from './contract.js'
 export { RUN_ID_ENV, RUN_ID_PATTERN } from './state/run-id.js'
-export type { CropConfig } from './types/common.js'
+export type { CropConfig, NestedFields } from './types/common.js'
 export type { ContentFields, ContentBuilderInterface } from './types/content-builder.js'
 export type { PageWithTestId, ContextWithTestId } from './types/playwright-extensions.js'

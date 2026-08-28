@@ -10,7 +10,24 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **@plan2net/typo3-playwright-toolkit** — flexform columns can be written:
+  `withField('pi_flexform', flexForm({ 'settings.limit': 10 }))`. The form posts one
+  input per value, not one for the column, so such a value used to end up in the
+  column as JSON. Plain values go to the sheet a structure with a single one calls
+  `sDEF`; name a sheet per group where it has several. The input name is the same in
+  11.5, 12.4, 13.4 and 14.3. `contract/content-flexform-datamap.json` holds the body
+  both packages check, and the extension feeds it to a real DataHandler: a name the
+  structure does not know is stored unchanged instead of refused, so the fixture
+  sends padded values and only a trimmed result proves the name was found.
+
 ### Changed
+
+- **@plan2net/typo3-playwright-toolkit** — a nested value passed to `withField` is
+  now posted as one field per value instead of as JSON. `CropConfig` left the field
+  types with it: a crop belongs to `sys_file_reference`, not to a column of `pages`
+  or `tt_content`, and the builder that writes one serialises it itself.
 
 - **plan2net/playwright-toolkit** — locking now uses `symfony/lock` instead of
   `flock()` calls spread over five places. `LockFiles` offers `shared()`,

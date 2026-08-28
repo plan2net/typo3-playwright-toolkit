@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import * as fs from 'fs'
 import * as path from 'path'
+import * as rootEntry from '#src/index.js'
 import * as playwrightEntry from '#src/playwright/index.js'
 import { defineBasePlaywrightConfig, defineToolkitConfig } from '#src/playwright/index.js'
 import { GenericTextContent } from '../fixtures/generic-content.js'
@@ -43,6 +44,19 @@ describe('the documented configuration example', () => {
 
         expect(config.use?.baseURL).toBe('https://example-testing.test')
         expect(config.testDir).toBe('./tests')
+    })
+
+    it('imports only names the package entry actually exports', () => {
+        const pattern = /import \{([^}]+)\} from '@plan2net\/typo3-playwright-toolkit'/g
+        const matches = [...README.matchAll(pattern)]
+
+        expect(matches.length).toBeGreaterThan(0)
+
+        for (const match of matches) {
+            for (const name of match[1].split(',').map((entry) => entry.trim()).filter(Boolean)) {
+                expect(Object.keys(rootEntry)).toContain(name)
+            }
+        }
     })
 
     it('imports only names the /playwright entry actually exports', () => {

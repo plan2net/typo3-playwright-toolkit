@@ -94,7 +94,7 @@ TYPO3 backend, and the tests that read it.
 
 ```ts
 // tests/my-feature.spec.ts
-import { defineScenario, expect } from '@plan2net/typo3-playwright-toolkit'
+import { defineScenario, expect, flexForm } from '@plan2net/typo3-playwright-toolkit'
 
 const test = defineScenario(async ({ builders }) => {
     const { id, slug } = await builders
@@ -108,6 +108,16 @@ const test = defineScenario(async ({ builders }) => {
         .onPage(id)
         .ofType('textmedia')
         .configure((element) => element.withHeader('Hello').withBodyText('<p>Copy.</p>'))
+        .create()
+
+    await builders
+        .content()
+        .onPage(id)
+        // your own CType, registered as shown under "Your own content types"
+        .ofType('article')
+        .configure((element) =>
+            element.withField('pi_flexform', flexForm({ 'settings.limit': 3 })),
+        )
         .create()
 
     return { slug }
@@ -361,6 +371,16 @@ All builders share `withHeader`, `withSubheader`, `withHeaderLayout`,
 other TCA column. Types with images add `withFile` and `withFiles`, which write the
 `sys_file_reference` rows for you, plus `withColumns`, `withOrientation` and
 `withImageSize`.
+
+A flexform column takes `flexForm()`, because the form posts one field per value
+rather than one for the column:
+
+```ts
+element.withField('pi_flexform', flexForm({ 'settings.limit': 10 }))
+```
+
+Plain values land on the single sheet a structure without named ones has. Where it
+has several, name one per group: `flexForm({ sDEF: {…}, sFilter: {…} })`.
 
 ### The inspect command
 

@@ -7,6 +7,7 @@ namespace Plan2net\PlaywrightToolkit\Tests\Functional\DataHandling;
 use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Tests\ContractFixture;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
@@ -136,6 +137,74 @@ final class ContentDatamapTest extends FunctionalTestCase
         ], 'NEWpage');
 
         self::assertSame([$pageUid], $this->referenceParents());
+    }
+
+    // A name the structure does not know is stored unchanged instead of refused,
+    // so only the trimmed value proves it was found.
+    #[Test]
+    public function theBodyAFlexformElementPostsIsReadAgainstTheDataStructure(): void
+    {
+        $this->declareFlexFormStructure();
+        $posted = ContractFixture::read('content-flexform-datamap');
+
+        parse_str(http_build_query($posted), $body);
+
+        /** @var array<string, array<string, array<string, mixed>>> $datamap */
+        $datamap = $body['data'];
+        $contentUid = $this->processDatamap($datamap);
+
+        self::assertSame('10', $this->storedFlexFormValue($contentUid, 'sDEF', 'settings.limit'));
+        self::assertSame(
+            '1,2',
+            $this->storedFlexFormValue($contentUid, 'sFilter', 'settings.categories')
+        );
+    }
+
+    private function declareFlexFormStructure(): void
+    {
+        $structure = '<T3DataStructure><sheets><sDEF><ROOT><type>array</type><el>'
+            . '<settings.limit><label>Limit</label><config><type>input</type><eval>trim</eval></config></settings.limit>'
+            . '</el></ROOT></sDEF>'
+            . '<sFilter><ROOT><type>array</type><el>'
+            . '<settings.categories><label>Categories</label><config><type>input</type><eval>trim</eval></config></settings.categories>'
+            . '</el></ROOT></sFilter>'
+            . '</sheets></T3DataStructure>';
+
+        $isVersion14 = (new Typo3Version())->getMajorVersion() >= 14;
+
+        $GLOBALS['TCA']['tt_content']['columns']['pi_flexform']['config'] = [
+            'type' => 'flex',
+            // 14 reads the structure from a string, older versions from a 'default' key.
+            'ds' => $isVersion14 ? $structure : ['default' => $structure],
+        ];
+
+        if ($isVersion14) {
+            // 14 reads it from the compiled schema, which was built before this.
+            $schemaFactory = 'TYPO3\\CMS\\Core\\Schema\\TcaSchemaFactory';
+            $factory = GeneralUtility::makeInstance($schemaFactory);
+            if (method_exists($factory, 'rebuild')) {
+                $factory->rebuild($GLOBALS['TCA']);
+            }
+        }
+    }
+
+    private function storedFlexFormValue(int $contentUid, string $sheet, string $field): ?string
+    {
+        $queryBuilder = $this->getConnectionPool()->getQueryBuilderForTable('tt_content');
+        $queryBuilder->getRestrictions()->removeAll();
+
+        $stored = $queryBuilder
+            ->select('pi_flexform')
+            ->from('tt_content')
+            ->where($queryBuilder->expr()->eq('uid', $contentUid))
+            ->executeQuery()
+            ->fetchOne();
+
+        $parsed = GeneralUtility::xml2array((string) $stored);
+
+        return is_array($parsed)
+            ? ($parsed['data'][$sheet]['lDEF'][$field]['vDEF'] ?? null)
+            : null;
     }
 
     /**

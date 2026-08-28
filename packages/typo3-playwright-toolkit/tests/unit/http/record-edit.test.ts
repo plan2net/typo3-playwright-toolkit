@@ -138,6 +138,38 @@ describe('saveRecord', () => {
         })
     })
 
+    // The key below is what a flexform field posts, in every supported version.
+    it('sends a nested value as one key per leaf', async () => {
+        const { poster, posted } = fakePoster({
+            status: 302,
+            location: '/typo3/record/edit?edit%5Btt_content%5D%5B9%5D=edit',
+        })
+
+        await saveRecord(poster, context, {
+            table: 'tt_content',
+            identifier: 'NEWcontent',
+            target: 1,
+            data: {
+                tt_content: {
+                    NEWcontent: {
+                        CType: 'list',
+                        pi_flexform: {
+                            data: { sDEF: { lDEF: { 'settings.limit': { vDEF: 10 } } } },
+                        },
+                    },
+                },
+            },
+        })
+
+        expect(posted[0].multipart).toEqual({
+            'data[tt_content][NEWcontent][CType]': 'list',
+            'data[tt_content][NEWcontent][pi_flexform][data][sDEF][lDEF][settings.limit][vDEF]':
+                '10',
+            doSave: '1',
+            _savedok: '1',
+        })
+    })
+
     it('carries the test id so the write lands in this test database', async () => {
         const { poster, posted } = fakePoster()
 

@@ -6,6 +6,7 @@ import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
 import { registerContentTypes } from '#src/builders/content-factory.js'
 import { ContentBuilder } from '#src/builders/content-builder.js'
 import { PageBuilder } from '#src/builders/page-builder.js'
+import { flexForm } from '#src/builders/fields.js'
 import type { ContentBuilderInterface, ContentFields } from '#src/types/content-builder.js'
 import type { RecordDataMap } from '#src/http/record-edit.js'
 
@@ -331,6 +332,26 @@ describe('ContentBuilder', () => {
         })
     })
 
+    it('keeps a flexform value nested instead of writing JSON into the column', async () => {
+        const { posted, page } = fakePage(5)
+
+        await contentBuilder(page)
+            .onPage('12')
+            .ofType('text')
+            .configure((content) => {
+                content.withField('pi_flexform', {
+                    data: { sDEF: { lDEF: { 'settings.limit': { vDEF: 10 } } } },
+                })
+            })
+            .create()
+
+        const identifier = identifierOf(posted[0].dataMap.tt_content)
+        expect(posted[0].fields).toMatchObject({
+            [`data[tt_content][${identifier}][pi_flexform][data][sDEF][lDEF][settings.limit][vDEF]`]:
+                '10',
+        })
+    })
+
     it('throws when the backend refuses the content element', async () => {
         registerContentTypes({ media_demo: MediaContent })
         const { page } = fakePage(1, 'CType not allowed')
@@ -395,7 +416,7 @@ function withFixtureIdentifiers(
     dataMap: Record<string, Record<string, Record<string, unknown>>>,
 ): Record<string, string> {
     const names: Record<string, string> = { [identifierOf(dataMap.tt_content)]: 'NEWcontent' }
-    Object.keys(dataMap.sys_file_reference).forEach((id, index) => {
+    Object.keys(dataMap.sys_file_reference ?? {}).forEach((id, index) => {
         names[id] = `NEWimage${index}`
     })
 
@@ -421,6 +442,36 @@ describe('the body an image element posts', () => {
             .onPage('1')
             .ofType('image')
             .configure((element) => element.withHeader('Gallery').withFiles([1, 2]))
+            .create()
+
+        expect(withFixtureIdentifiers(posted[0], posted[0].dataMap)).toEqual(fixture)
+    })
+})
+
+describe('the body a flexform element posts', () => {
+    it('is the one the extension proves the data structure is read against', async () => {
+        const fixturePath = path.resolve(
+            path.dirname(fileURLToPath(import.meta.url)),
+            '../../../../../contract/content-flexform-datamap.json',
+        )
+        const fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf-8')) as Record<string, string>
+        delete fixture._comment
+
+        const { posted, page } = fakePage(42)
+        await contentBuilder(page)
+            .onPage('1')
+            .ofType('text')
+            .configure((element) =>
+                element
+                    .withHeader('With settings')
+                    .withField(
+                        'pi_flexform',
+                        flexForm({
+                            sDEF: { 'settings.limit': ' 10 ' },
+                            sFilter: { 'settings.categories': ' 1,2 ' },
+                        }),
+                    ),
+            )
             .create()
 
         expect(withFixtureIdentifiers(posted[0], posted[0].dataMap)).toEqual(fixture)

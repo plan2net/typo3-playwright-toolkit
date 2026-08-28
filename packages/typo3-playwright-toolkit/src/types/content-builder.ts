@@ -1,8 +1,8 @@
-import { CropConfig } from './common.js'
+import { NestedFields } from './common.js'
 import type { RecordDataMap } from '../http/record-edit.js'
 
 export interface ContentFields {
-    [key: string]: string | number | CropConfig | boolean | undefined
+    [key: string]: string | number | NestedFields | boolean | undefined
 }
 
 export interface ContentBuilderInterface {

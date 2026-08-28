@@ -1,0 +1,12 @@
+{
+    "_comment": "What the toolkit posts to /typo3/record/edit for an element with a flexform column. A flexform field has no single input: the form posts one per value, named down the path to it. The npm side asserts create() produces exactly this; the extension feeds it to a real DataHandler and asserts the value reaches the stored XML. The NEW identifier is minted per request, so it is named here for a reader and renamed in the posted body before comparing. The value is padded on purpose: a name the data structure does not know is stored unchanged, so only a trimmed value proves the sheet and the field were found.",
+    "data[tt_content][NEWcontent][pid]": "1",
+    "data[tt_content][NEWcontent][sys_language_uid]": "0",
+    "data[tt_content][NEWcontent][CType]": "text",
+    "data[tt_content][NEWcontent][colPos]": "0",
+    "data[tt_content][NEWcontent][header]": "With settings",
+    "data[tt_content][NEWcontent][pi_flexform][data][sDEF][lDEF][settings.limit][vDEF]": " 10 ",
+    "data[tt_content][NEWcontent][pi_flexform][data][sFilter][lDEF][settings.categories][vDEF]": " 1,2 ",
+    "doSave": "1",
+    "_savedok": "1"
+}

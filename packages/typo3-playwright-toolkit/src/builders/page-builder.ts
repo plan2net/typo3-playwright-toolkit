@@ -1,5 +1,5 @@
 import { Page } from '@playwright/test'
-import { CropConfig } from '../types/common.js'
+import { CropConfig, NestedFields } from '../types/common.js'
 import { saveRecord, type RecordDataMap } from '../http/record-edit.js'
 import { replayParentId, requireTestId, resolveRequestContext, type RequestContext } from './request-context.js'
 import { coerceFields } from './fields.js'
@@ -7,7 +7,7 @@ import { newRecordIdentifier } from './identifier.js'
 import { getToolkitConfig } from '../config.js'
 
 interface Fields {
-    [key: string]: string | number | boolean | undefined | CropConfig
+    [key: string]: string | number | boolean | undefined | NestedFields
 }
 
 const DEFAULT_CROP =
