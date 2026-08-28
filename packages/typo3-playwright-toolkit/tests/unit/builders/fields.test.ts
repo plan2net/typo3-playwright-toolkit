@@ -1,5 +1,32 @@
 import { describe, expect, it } from 'vitest'
-import { flexForm } from '#src/builders/fields.js'
+import { flexForm, imageCrop } from '#src/builders/fields.js'
+
+describe('imageCrop', () => {
+    it('crops the whole image when only a ratio is named', () => {
+        expect(JSON.parse(imageCrop({ ratio: '16:9' }))).toEqual({
+            default: {
+                cropArea: { x: 0, y: 0, width: 1, height: 1 },
+                selectedRatio: '16:9',
+                focusArea: null,
+            },
+        })
+    })
+
+    it('takes an area of its own', () => {
+        expect(JSON.parse(imageCrop({ area: { x: 0.1, y: 0.2, width: 0.5, height: 0.4 } }))).toEqual({
+            default: {
+                cropArea: { x: 0.1, y: 0.2, width: 0.5, height: 0.4 },
+                selectedRatio: 'NaN',
+                focusArea: null,
+            },
+        })
+    })
+
+    // The column holds JSON text, so a builder can hand it straight to a record.
+    it('is a string', () => {
+        expect(typeof imageCrop()).toBe('string')
+    })
+})
 
 describe('flexForm', () => {
     // A structure with one sheet calls it sDEF; a test should not have to know that.

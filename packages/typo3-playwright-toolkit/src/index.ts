@@ -37,7 +37,7 @@ export {
 } from './builders/core-content.js'
 export type { RecordDataMap, RecordToSave } from './http/record-edit.js'
 export { newRecordIdentifier } from './builders/identifier.js'
-export { flexForm } from './builders/fields.js'
+export { flexForm, imageCrop } from './builders/fields.js'
 
 export { expectScreenshot, waitForAnimations } from './checks/screenshot.js'
 export {

@@ -1,5 +1,30 @@
 import type { NestedFields } from '../types/common.js'
 
+export interface CropRectangle {
+    x: number
+    y: number
+    width: number
+    height: number
+}
+
+const WHOLE_IMAGE: CropRectangle = { x: 0, y: 0, width: 1, height: 1 }
+
+/**
+ * The `crop` column of a file reference, which holds JSON text. Without an area it
+ * keeps the whole image, which is what a ratio on its own means.
+ */
+export function imageCrop(
+    options: { ratio?: string; area?: CropRectangle; focus?: CropRectangle | null } = {},
+): string {
+    return JSON.stringify({
+        default: {
+            cropArea: options.area ?? WHOLE_IMAGE,
+            selectedRatio: options.ratio ?? 'NaN',
+            focusArea: options.focus ?? null,
+        },
+    })
+}
+
 export type FlexFormValues = Record<string, string | number | boolean>
 
 /**

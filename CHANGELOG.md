@@ -22,6 +22,13 @@ the package a change belongs to.
   number, for a doktype your own project registered; for every other column,
   `withField` is the way out.
 
+### Added
+
+- **@plan2net/typo3-playwright-toolkit** — `imageCrop()` writes the JSON text the
+  `crop` column of a file reference holds: `imageCrop({ ratio: '16:9' })` keeps the
+  whole image at that ratio, and an `area` crops a part of it. It also returns a
+  string, so it cannot be mistaken for a value the request body should nest.
+
 ### Fixed
 
 - **plan2net/playwright-toolkit** — a test database whose seeded session cannot be

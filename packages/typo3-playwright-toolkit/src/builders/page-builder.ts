@@ -2,7 +2,7 @@ import { Page } from '@playwright/test'
 import { CropConfig, NestedFields } from '../types/common.js'
 import { saveRecord, type RecordDataMap } from '../http/record-edit.js'
 import { replayParentId, requireTestId, resolveRequestContext, type RequestContext } from './request-context.js'
-import { coerceFields } from './fields.js'
+import { coerceFields, imageCrop } from './fields.js'
 import { newRecordIdentifier } from './identifier.js'
 import { getToolkitConfig } from '../config.js'
 
@@ -21,9 +21,6 @@ const DOKTYPES = {
 } as const
 
 export type Doktype = keyof typeof DOKTYPES
-
-const DEFAULT_CROP =
-    '{"default":{"cropArea":{"x":0,"y":0,"width":1,"height":1},"selectedRatio":"NaN","focusArea":null}}'
 
 export class PageBuilder {
     protected fields: Fields = {
@@ -170,7 +167,7 @@ export class PageBuilder {
                     alternative: '',
                     description: '',
                     title: '',
-                    crop: this.imageCropConfig ? JSON.stringify(this.imageCropConfig) : DEFAULT_CROP,
+                    crop: this.imageCropConfig ? JSON.stringify(this.imageCropConfig) : imageCrop(),
                 },
             },
         }

@@ -389,6 +389,15 @@ element.withOrientation('in-text-right') // imageorient 17
 `PageBuilder` does the same for the page type: `withDoktype('folder')` writes 254.
 It also takes a number, for a doktype your own project registered.
 
+The `crop` column of a file reference holds JSON text, which `imageCrop()` writes for
+you. Without an area it keeps the whole image, which is what naming only a ratio
+means:
+
+```ts
+imageCrop({ ratio: '16:9' })
+imageCrop({ area: { x: 0.1, y: 0, width: 0.5, height: 1 } })
+```
+
 A flexform column takes `flexForm()`, because the form posts one field per value
 rather than one for the column:
 
