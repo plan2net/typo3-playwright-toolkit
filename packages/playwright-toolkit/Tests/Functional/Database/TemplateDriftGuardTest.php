@@ -35,7 +35,7 @@ final class TemplateDriftGuardTest extends FunctionalTestCase
         $this->scratchDirectory = sys_get_temp_dir() . '/pw-drift-' . uniqid('', true);
         mkdir($this->scratchDirectory, 0777, true);
 
-        DatabaseInitializer::forgetClone();
+        DatabaseInitializer::forgetProvisioning();
         $GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] = 'the-encryption-key';
         $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['playwright_toolkit'] = [
             'fixturesPath' => '',
@@ -47,7 +47,7 @@ final class TemplateDriftGuardTest extends FunctionalTestCase
 
     protected function tearDown(): void
     {
-        DatabaseInitializer::forgetClone();
+        DatabaseInitializer::forgetProvisioning();
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
 
         foreach (glob($this->scratchDirectory . '/*') ?: [] as $file) {
@@ -93,10 +93,48 @@ final class TemplateDriftGuardTest extends FunctionalTestCase
             // the rejection is the precondition
         }
 
-        DatabaseInitializer::forgetClone();
+        DatabaseInitializer::forgetProvisioning();
         $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
 
         $this->expectExceptionMessageMatches('/playwright-prepare/');
+
+        $this->get(TemplateDriftGuard::class)->__invoke(new BootCompletedEvent(true));
+    }
+
+    // A second request of the same test ID finds the database already seeded and
+    // clones nothing. It must still refuse to run on it until one request has
+    // checked the template.
+    #[Test]
+    public function aRequestThatClonedNothingStillRefusesAnUncheckedDatabase(): void
+    {
+        $this->get(TemplatePreparer::class)->prepare();
+        $this->driver()->finaliseTemplate('a-fingerprint-from-another-life');
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+        $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
+
+        DatabaseInitializer::forgetProvisioning();
+        $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
+
+        $this->expectExceptionMessageMatches('/playwright-prepare/');
+
+        $this->get(TemplateDriftGuard::class)->__invoke(new BootCompletedEvent(true));
+    }
+
+    #[Test]
+    public function checksTheTemplateOnlyOncePerDatabase(): void
+    {
+        $this->expectNotToPerformAssertions();
+
+        $this->get(TemplatePreparer::class)->prepare();
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+        $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
+        $this->get(TemplateDriftGuard::class)->__invoke(new BootCompletedEvent(true));
+
+        // Drifting the template afterwards changes nothing: this database was
+        // already checked, and a later request must not pay for that check again.
+        $this->driver()->finaliseTemplate('a-fingerprint-from-another-life');
+        DatabaseInitializer::forgetProvisioning();
+        $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
 
         $this->get(TemplateDriftGuard::class)->__invoke(new BootCompletedEvent(true));
     }
@@ -128,7 +166,7 @@ final class TemplateDriftGuardTest extends FunctionalTestCase
     }
 
     #[Test]
-    public function staysSilentWhenThisRequestClonedNothing(): void
+    public function staysSilentWhenThisRequestProvisionedNothing(): void
     {
         $this->expectNotToPerformAssertions();
 

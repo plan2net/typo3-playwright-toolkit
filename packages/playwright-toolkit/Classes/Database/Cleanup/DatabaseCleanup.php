@@ -235,6 +235,7 @@ final class DatabaseCleanup implements LoggerAwareInterface
             return CleanupOutcome::Failed;
         }
 
+        @unlink($this->lockFiles->checkedMarker($databaseName));
         $this->processedFiles?->remove($testId);
 
         $this->logger?->notice('Dropped a test database', ['database' => $databaseName]);

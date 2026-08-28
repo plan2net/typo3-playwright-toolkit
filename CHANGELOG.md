@@ -39,8 +39,9 @@ the package a change belongs to.
   between unrelated extensions is undefined, so this worked in one project and
   500ed in another. The one check
   that needs a booted TYPO3, comparing the template fingerprint against the
-  current TCA, stays at `BootCompletedEvent` in the new `TemplateDriftGuard` and
-  runs only for the request that cloned. The processed-folder isolation moved
+  current TCA, stays at `BootCompletedEvent` in the new `TemplateDriftGuard`. It
+  runs for every request that reached provisioning, and is paid once per database:
+  a marker file records that the template behind it was checked. The processed-folder isolation moved
   into the drivers (`isolateProcessedFiles`).
 
 - **plan2net/playwright-toolkit** — `playwright:prepare` skips the rebuild when the

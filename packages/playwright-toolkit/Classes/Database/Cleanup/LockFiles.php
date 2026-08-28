@@ -51,6 +51,12 @@ final class LockFiles
         return $this->directory . '/db-' . $databaseName . '.lock';
     }
 
+    /** Written once the template a database was cloned from has been checked. */
+    public function checkedMarker(string $databaseName): string
+    {
+        return $this->directory . '/checked-' . $databaseName . '.marker';
+    }
+
     public function databaseLock(string $databaseName): string
     {
         return 'playwright-create-' . $databaseName;

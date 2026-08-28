@@ -73,6 +73,19 @@ final class DatabaseCleanupTest extends FunctionalTestCase
         self::assertFileDoesNotExist($this->lockFiles->claim(self::DATABASE));
     }
 
+    // It says the template behind this database was checked, so it must not
+    // outlive it and vouch for the next database of that name.
+    #[Test]
+    public function removesTheCheckedMarkerOfTheDroppedDatabase(): void
+    {
+        $this->claim();
+        $this->createDatabaseFile();
+        touch($this->lockFiles->checkedMarker(self::DATABASE));
+
+        self::assertSame(CleanupOutcome::Dropped, $this->cleanup()->drop($this->driver(), self::TEST_ID));
+        self::assertFileDoesNotExist($this->lockFiles->checkedMarker(self::DATABASE));
+    }
+
     #[Test]
     public function removesTheProcessedImageFolderOfTheDroppedDatabase(): void
     {

@@ -42,7 +42,15 @@ final class TemplateDriftGuard implements LoggerAwareInterface
             return;
         }
 
-        if (!DatabaseInitializer::clonedThisRequest()) {
+        if (!DatabaseInitializer::provisionedThisRequest()) {
+            return;
+        }
+
+        // One check per database, not per request: computing the expected
+        // fingerprint reads the whole resolved schema.
+        $testId = TestContext::testId();
+        $marker = $this->lockFiles->checkedMarker(DatabaseName::forTestId($testId));
+        if (file_exists($marker)) {
             return;
         }
 
@@ -55,10 +63,12 @@ final class TemplateDriftGuard implements LoggerAwareInterface
         } catch (\RuntimeException $rejection) {
             // Dropped, or the next request would find a seeded database and run
             // on the stale clone.
-            $this->discardClone($driver, TestContext::testId());
+            $this->discardClone($driver, $testId);
 
             throw $rejection;
         }
+
+        @touch($marker);
     }
 
     private function discardClone(TestDatabaseDriver $driver, string $testId): void
@@ -76,6 +86,7 @@ final class TemplateDriftGuard implements LoggerAwareInterface
                 function () use ($driver, $testId, $databaseName): void {
                     $driver->drop($testId);
                     @unlink($this->lockFiles->claim($databaseName));
+                    @unlink($this->lockFiles->checkedMarker($databaseName));
                 }
             );
         } catch (\Throwable) {

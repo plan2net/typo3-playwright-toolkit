@@ -21,7 +21,7 @@ use TYPO3\CMS\Core\Core\Environment;
  */
 final class DatabaseInitializer
 {
-    private static bool $clonedThisRequest = false;
+    private static bool $provisionedThisRequest = false;
 
     public function __construct(
         private readonly ToolkitConfigurationFactory $configurationFactory,
@@ -39,15 +39,15 @@ final class DatabaseInitializer
         );
     }
 
-    public static function clonedThisRequest(): bool
+    public static function provisionedThisRequest(): bool
     {
-        return self::$clonedThisRequest;
+        return self::$provisionedThisRequest;
     }
 
     /** @internal only functional tests share a process */
-    public static function forgetClone(): void
+    public static function forgetProvisioning(): void
     {
-        self::$clonedThisRequest = false;
+        self::$provisionedThisRequest = false;
     }
 
     public function provisionCurrentRequest(): void
@@ -86,6 +86,10 @@ final class DatabaseInitializer
         $databaseName = DatabaseName::forTestId($testId);
         DatabaseName::assertProvisionable($databaseName);
 
+        // Set for a request that finds the database already there as well, so
+        // TemplateDriftGuard checks the template for that one too.
+        self::$provisionedThisRequest = true;
+
         $this->lockFiles->ensureDirectory();
         $seedMarker = $this->lockFiles->claim($databaseName);
 
@@ -121,7 +125,6 @@ final class DatabaseInitializer
 
                 $driver->materialise($testId);
                 $driver->isolateProcessedFiles($testId);
-                self::$clonedThisRequest = true;
             });
         });
     }
