@@ -14,9 +14,19 @@ export interface RelationOutput {
 
 const WIRED_COLUMNS = ['uid_local', 'uid_foreign', 'tablenames', 'fieldname', 'sorting_foreign']
 
-function mergeRecords(into: RecordDataMap, from: RecordDataMap): void {
+export function mergeRecords(into: RecordDataMap, from: RecordDataMap): void {
     for (const [table, rows] of Object.entries(from)) {
-        Object.assign((into[table] ??= {}), rows)
+        const existing = (into[table] ??= {})
+        for (const [identifier, row] of Object.entries(rows)) {
+            if (identifier in existing) {
+                throw new Error(
+                    `[typo3-playwright-toolkit] Two records claim the identifier ` +
+                        `"${identifier}" in ${table}. Each record needs its own, or one ` +
+                        'silently merges into the other.',
+                )
+            }
+            existing[identifier] = row
+        }
     }
 }
 

@@ -2,7 +2,8 @@ import { Page } from '@playwright/test'
 import { ContentBuilderInterface } from '../types/content-builder.js'
 import { createContent } from './content-factory.js'
 import type { ContentTypeFor, ContentTypeKey } from './core-content.js'
-import { saveRecord } from '../http/record-edit.js'
+import { saveRecord, type RecordDataMap } from '../http/record-edit.js'
+import { mergeRecords } from './relations.js'
 import { toColumnValues } from './fields.js'
 import { replayParentId, resolveRequestContext, type RequestContext } from './request-context.js'
 import { newRecordIdentifier } from './identifier.js'
@@ -89,15 +90,16 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
             ...relations.columns,
         }
 
+        // Merged per table, not spread: a child table may be tt_content itself.
+        const data: RecordDataMap = { tt_content: { [identifier]: record } }
+        mergeRecords(data, this.builder.getAdditionalRecords?.(identifier, pageId) ?? {})
+        mergeRecords(data, relations.records)
+
         const uid = await saveRecord(this.page.request, context, {
             table: 'tt_content',
             identifier: identifier,
             target: Number(pageId),
-            data: {
-                tt_content: { [identifier]: record },
-                ...(this.builder.getAdditionalRecords?.(identifier, pageId) ?? {}),
-                ...relations.records,
-            },
+            data,
         })
 
         lastElementOnPage.get(this.page)?.set(pageId, uid)

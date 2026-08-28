@@ -119,6 +119,30 @@ class MediaContent implements ContentBuilderInterface {
     }
 }
 
+class ContainerContent implements ContentBuilderInterface {
+    readonly type = 'container_demo'
+
+    getFields(): ContentFields {
+        return { CType: this.type, header: 'Container' }
+    }
+
+    getAdditionalRecords(): RecordDataMap {
+        return { tt_content: { NEWchild: { CType: 'header', header: 'Inside' } } }
+    }
+}
+
+class SelfOverwritingContent implements ContentBuilderInterface {
+    readonly type = 'collide_demo'
+
+    getFields(): ContentFields {
+        return { CType: this.type }
+    }
+
+    getAdditionalRecords(contentIdentifier: string): RecordDataMap {
+        return { tt_content: { [contentIdentifier]: { header: 'Oops' } } }
+    }
+}
+
 beforeEach(() => {
     setToolkitConfig(config())
     registerContentTypes({})
@@ -407,6 +431,29 @@ describe('ContentBuilder', () => {
             tablenames: 'tt_content',
             pid: '12',
         })
+    })
+
+    // The extra records used to be spread over the root table, replacing the element.
+    it('keeps its own element when a builder writes tt_content rows too', async () => {
+        registerContentTypes({ container_demo: ContainerContent })
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page).onPage('12').ofType('container_demo').create()
+
+        const rows = posted[0].dataMap.tt_content
+
+        expect(Object.values(rows).map((row) => row.header)).toEqual(['Container', 'Inside'])
+    })
+
+    // getAdditionalRecords is handed the element's identifier, which is how a
+    // builder ends up keying a row by it.
+    it('refuses a record that reuses an identifier another surface wrote', async () => {
+        registerContentTypes({ collide_demo: SelfOverwritingContent })
+        const { page } = fakePage(42)
+
+        await expect(
+            contentBuilder(page).onPage('12').ofType('collide_demo').create(),
+        ).rejects.toThrow(/tt_content/)
     })
 
     it('throws when the backend refuses the content element', async () => {

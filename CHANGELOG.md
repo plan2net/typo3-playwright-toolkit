@@ -31,6 +31,12 @@ the package a change belongs to.
 
 ### Fixed
 
+- **@plan2net/typo3-playwright-toolkit** — a builder whose extra records are `tt_content`
+  rows — a container element with content children — keeps its own element. The records
+  were spread over the datamap's root table, so the children replaced the element that
+  was being created. Two records claiming one identifier now fail instead of merging
+  into each other.
+
 - **@plan2net/typo3-playwright-toolkit** — content elements now appear in the order the
   scenario created them. Every element was posted with the page id, which puts it at the
   top, so pages came out reversed — and silently, which left the first screenshot run
