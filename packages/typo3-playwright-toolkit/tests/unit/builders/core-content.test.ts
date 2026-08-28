@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
     BulletsContent,
+    CoreContent,
     coreContentTypes,
     HtmlContent,
     ImageContent,
@@ -14,7 +15,6 @@ import {
 } from '#src/builders/core-content.js'
 import { createContent, registerContentTypes } from '#src/builders/content-factory.js'
 import type { ContentBuilderInterface, ContentFields } from '#src/types/content-builder.js'
-import type { RecordDataMap } from '#src/http/record-edit.js'
 
 describe('header_layout', () => {
     it.each([
@@ -172,15 +172,27 @@ describe('bodytext-shaped types', () => {
     })
 })
 
-function referenceKey(builder: { getAdditionalRecords(a: string, b: string): RecordDataMap }): string {
-    return Object.keys(builder.getAdditionalRecords('NEWcontent', '3').sys_file_reference)[0]
+const OWNER = { pid: '3', sys_language_uid: 0 }
+
+function referenceKey(builder: CoreContent): string {
+    return Object.keys(builder.getRelations(OWNER).records.sys_file_reference)[0]
 }
 
 describe('FAL relations', () => {
+    it('answers its files through getRelations like any other relation', () => {
+        const builder = new ImageContent().withFiles([11, 22])
+
+        const { columns, records } = builder.getRelations({ pid: '3', sys_language_uid: 0 })
+
+        expect(
+            columns.image.split(',').map((token) => records.sys_file_reference[token].uid_local),
+        ).toEqual([11, 22])
+    })
+
     it('writes no reference records when no file was added', () => {
         const builder = new TextmediaContent()
 
-        expect(builder.getAdditionalRecords('NEWcontent', '3')).toEqual({})
+        expect(builder.getRelations(OWNER).records).toEqual({})
         expect(builder.getFields().assets).toBeUndefined()
     })
 
@@ -188,10 +200,9 @@ describe('FAL relations', () => {
     // NEW ids and writes uid_foreign itself; a value we set there is ignored.
     it('lists its references on the element and leaves their parent to DataHandler', () => {
         const builder = new ImageContent().withFiles([11, 22])
-        const records = builder.getAdditionalRecords('NEWcontent', '3')
-        const [first, second] = Object.keys(records.sys_file_reference)
+        const { columns, records } = builder.getRelations(OWNER)
+        const [first, second] = columns.image.split(',')
 
-        expect(builder.getFields().image).toBe(`${first},${second}`)
         expect(records.sys_file_reference[first]).toMatchObject({
             uid_local: 11,
             tablenames: 'tt_content',
@@ -208,9 +219,9 @@ describe('FAL relations', () => {
         const uploads = new UploadsContent().withFile(1)
         const image = new ImageContent().withFile(1)
 
-        expect(textmedia.getFields().assets).toBe(referenceKey(textmedia))
-        expect(uploads.getFields().media).toBe(referenceKey(uploads))
-        expect(image.getFields().image).toBe(referenceKey(image))
+        expect(textmedia.getRelations(OWNER).columns.assets).toBe(referenceKey(textmedia))
+        expect(uploads.getRelations(OWNER).columns.media).toBe(referenceKey(uploads))
+        expect(image.getRelations(OWNER).columns.image).toBe(referenceKey(image))
     })
 
     it('sets the gallery columns', () => {

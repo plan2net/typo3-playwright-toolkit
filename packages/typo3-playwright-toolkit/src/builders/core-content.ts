@@ -1,6 +1,4 @@
 import type { ContentBuilderInterface, ContentFields } from '../types/content-builder.js'
-import type { RecordDataMap } from '../http/record-edit.js'
-import { newRecordIdentifier } from './identifier.js'
 import {
     RelationSet,
     type ChildRecord,
@@ -119,59 +117,12 @@ abstract class MediaCoreContent extends CoreContent {
     /** The tt_content column the references hang off — `assets`, `image`, `media`. */
     protected abstract readonly mediaColumn: string
 
-    private fileUids: number[] = []
-    private identifiers: string[] = []
-
     withFile(fileUid: number): this {
-        this.fileUids.push(fileUid)
-
-        return this
+        return this.withFileReference(this.mediaColumn, fileUid)
     }
 
     withFiles(fileUids: number[]): this {
-        this.fileUids.push(...fileUids)
-
-        return this
-    }
-
-    override getFields(): ContentFields {
-        const fields = super.getFields()
-        if (this.fileUids.length > 0) {
-            fields[this.mediaColumn] = this.referenceIdentifiers().join(',')
-        }
-
-        return fields
-    }
-
-    getAdditionalRecords(contentIdentifier: string, pageId: string): RecordDataMap {
-        if (this.fileUids.length === 0) {
-            return {}
-        }
-
-        const identifiers = this.referenceIdentifiers()
-        const references: Record<string, Record<string, unknown>> = {}
-        this.fileUids.forEach((fileUid, index) => {
-            references[identifiers[index]] = {
-                uid_local: fileUid,
-                pid: pageId,
-                tablenames: 'tt_content',
-                fieldname: this.mediaColumn,
-                sys_language_uid: 0,
-                sorting_foreign: index + 1,
-            }
-        })
-
-        return { sys_file_reference: references }
-    }
-
-    // Minted once: getFields() lists them in the parent column and
-    // getAdditionalRecords() keys the children by them, and the two must agree.
-    private referenceIdentifiers(): string[] {
-        while (this.identifiers.length < this.fileUids.length) {
-            this.identifiers.push(newRecordIdentifier())
-        }
-
-        return this.identifiers
+        return this.withFileReferences(this.mediaColumn, fileUids)
     }
 }
 
