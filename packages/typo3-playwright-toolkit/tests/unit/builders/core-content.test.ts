@@ -239,6 +239,58 @@ describe('relations on a content element', () => {
             pid: '3',
         })
     })
+
+    it('carries a child record and its own relations', () => {
+        const builder = new TextContent().withChild('items', 'tx_demo_item', (item) =>
+            item.withField('title', 'First').withFileReference('image', 9),
+        )
+
+        const { columns, records } = builder.getRelations({ pid: '3', sys_language_uid: 0 })
+
+        expect(columns.items).toBe(Object.keys(records.tx_demo_item)[0])
+        expect(Object.values(records.sys_file_reference)[0]).toMatchObject({
+            uid_local: 9,
+            tablenames: 'tx_demo_item',
+        })
+    })
+
+    it('builds one child per item a collection setter is given', () => {
+        const builder = new TextContent().withChildren(
+            'items',
+            'tx_demo_item',
+            ['First', 'Second'],
+            (item, title) => item.withField('title', title),
+        )
+
+        const { columns, records } = builder.getRelations({ pid: '3', sys_language_uid: 0 })
+
+        expect(columns.items.split(',').map((token) => records.tx_demo_item[token].title)).toEqual([
+            'First',
+            'Second',
+        ])
+    })
+
+    it('writes one reference per uid a plural setter is given', () => {
+        const builder = new TextContent().withFileReferences('assets', [11, 22])
+
+        const { columns, records } = builder.getRelations({ pid: '3', sys_language_uid: 0 })
+
+        expect(
+            columns.assets.split(',').map((token) => records.sys_file_reference[token].uid_local),
+        ).toEqual([11, 22])
+    })
+
+    it('refuses withField on a column a relation already holds', () => {
+        const builder = new TextContent().withFileReference('assets', 11)
+
+        expect(() => builder.withField('assets', 'something')).toThrow(/assets/)
+    })
+
+    it('refuses a relation on a column withField already set', () => {
+        const builder = new TextContent().withField('assets', 'something')
+
+        expect(() => builder.withFileReference('assets', 11)).toThrow(/assets/)
+    })
 })
 
 describe('menu types', () => {

@@ -1,7 +1,12 @@
 import type { ContentBuilderInterface, ContentFields } from '../types/content-builder.js'
 import type { RecordDataMap } from '../http/record-edit.js'
 import { newRecordIdentifier } from './identifier.js'
-import { RelationSet, type RelationOutput, type RelationOwner } from './relations.js'
+import {
+    RelationSet,
+    type ChildRecord,
+    type RelationOutput,
+    type RelationOwner,
+} from './relations.js'
 
 const HEADING_LEVELS = { h1: 1, h2: 2, h3: 3, h4: 4, h5: 5, hidden: 100 } as const
 const BULLET_TYPES = { bullets: 0, numbers: 1, definition: 2 } as const
@@ -28,7 +33,10 @@ export abstract class CoreContent implements ContentBuilderInterface {
     abstract readonly type: string
 
     protected fields: ContentFields = {}
-    protected readonly relations = new RelationSet('tt_content')
+    protected readonly relations = new RelationSet(
+        'tt_content',
+        (column) => column in this.fields,
+    )
 
     withHeader(header: string, level?: HeadingLevel): this {
         this.set('header', header)
@@ -68,6 +76,29 @@ export abstract class CoreContent implements ContentBuilderInterface {
         return this
     }
 
+    withFileReferences(column: string, fileUids: number[], fields: ContentFields = {}): this {
+        this.relations.withFileReferences(column, fileUids, fields)
+
+        return this
+    }
+
+    withChild(column: string, table: string, configure: (child: ChildRecord) => void): this {
+        this.relations.withChild(column, table, configure)
+
+        return this
+    }
+
+    withChildren<T>(
+        column: string,
+        table: string,
+        items: T[],
+        configure: (child: ChildRecord, item: T) => void,
+    ): this {
+        this.relations.withChildren(column, table, items, configure)
+
+        return this
+    }
+
     getRelations(owner: RelationOwner): RelationOutput {
         return this.relations.materialise(owner)
     }
@@ -77,6 +108,7 @@ export abstract class CoreContent implements ContentBuilderInterface {
     }
 
     protected set(column: string, value: ContentFields[string]): this {
+        this.relations.refuseColumnHeld(column)
         this.fields[column] = value
 
         return this

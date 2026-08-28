@@ -49,31 +49,23 @@ export class ChildRecord {
     private readonly relations: RelationSet
 
     constructor(table: string) {
-        this.relations = new RelationSet(table)
+        this.relations = new RelationSet(table, (column) => column in this.fields)
     }
 
     withField(column: string, value: ContentFields[string]): this {
-        if (this.relations.holds(column)) {
-            throw new Error(
-                `[typo3-playwright-toolkit] The column "${column}" already holds a relation, ` +
-                    'so setting it with withField would decide what the test builds by ' +
-                    'whichever call ran last.',
-            )
-        }
+        this.relations.refuseColumnHeld(column)
         this.fields[column] = value
 
         return this
     }
 
     withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
-        this.refuseSetColumn(column)
         this.relations.withFileReference(column, fileUid, fields)
 
         return this
     }
 
     withChild(column: string, table: string, configure: (child: ChildRecord) => void): this {
-        this.refuseSetColumn(column)
         this.relations.withChild(column, table, configure)
 
         return this
@@ -87,15 +79,6 @@ export class ChildRecord {
         return { row: { ...row, ...columns }, records }
     }
 
-    private refuseSetColumn(column: string): void {
-        if (column in this.fields) {
-            throw new Error(
-                `[typo3-playwright-toolkit] The column "${column}" is already set with ` +
-                    'withField, so a relation on it would decide what the test builds by ' +
-                    'whichever call ran last.',
-            )
-        }
-    }
 }
 
 export class RelationSet {
@@ -103,7 +86,10 @@ export class RelationSet {
     private readonly children: Child[] = []
     private readonly claims = new Map<string, string>()
 
-    constructor(private readonly ownerTable: string) {}
+    constructor(
+        private readonly ownerTable: string,
+        private readonly isColumnSet: (column: string) => boolean = () => false,
+    ) {}
 
     withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
         this.refuseWiredColumns(fields)
@@ -139,8 +125,14 @@ export class RelationSet {
         return this
     }
 
-    holds(column: string): boolean {
-        return this.claims.has(column)
+    refuseColumnHeld(column: string): void {
+        if (this.claims.has(column)) {
+            throw new Error(
+                `[typo3-playwright-toolkit] The column "${column}" already holds a relation, ` +
+                    'so setting it with withField would decide what the test builds by ' +
+                    'whichever call ran last.',
+            )
+        }
     }
 
     materialise(owner: RelationOwner): RelationOutput {
@@ -177,6 +169,14 @@ export class RelationSet {
     }
 
     private claim(column: string, table: string): void {
+        if (this.isColumnSet(column)) {
+            throw new Error(
+                `[typo3-playwright-toolkit] The column "${column}" is already set with ` +
+                    'withField, so a relation on it would decide what the test builds by ' +
+                    'whichever call ran last.',
+            )
+        }
+
         const claimed = this.claims.get(column)
         if (undefined !== claimed && claimed !== table) {
             throw new Error(
