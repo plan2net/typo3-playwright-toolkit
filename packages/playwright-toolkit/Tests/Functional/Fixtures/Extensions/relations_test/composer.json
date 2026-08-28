@@ -1,0 +1,13 @@
+{
+    "name": "plan2net/relations-test",
+    "type": "typo3-cms-extension",
+    "description": "A child table with a FAL column, which core has none of.",
+    "require": {
+        "typo3/cms-core": "^11.5 || ^12.4 || ^13.4 || ^14.3"
+    },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "relations_test"
+        }
+    }
+}

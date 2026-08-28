@@ -7,6 +7,10 @@ parameters:
     paths:
         - Classes
         - Tests
+    excludePaths:
+        # Extensions TYPO3 loads, not code this package calls: ext_emconf.php is
+        # handed its $_EXTKEY by the extension manager.
+        - Tests/Functional/Fixtures/Extensions/*
     treatPhpDocTypesAsCertain: false
     ignoreErrors:
         # Every connection this package opens sets PDO::ERRMODE_EXCEPTION, so
