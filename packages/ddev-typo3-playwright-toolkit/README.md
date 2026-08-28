@@ -184,8 +184,10 @@ ddev playwright test accordion       # one file
 ddev playwright show-report
 ```
 
-Before `test`, the command clears the Testing caches and rebuilds the template
-database, so a change to TCA or `ext_tables.sql` never runs against an old schema.
+Before `test`, the command clears the Testing caches and checks the template
+database: it is rebuilt when your schema, fixtures or session settings changed and
+reused otherwise, so a change to TCA or `ext_tables.sql` never runs against an old
+schema and an unchanged template costs no build time.
 
 When a test fails its database is kept, and the run prints a link for it. To get a
 link later, or for a specific file:
@@ -237,7 +239,7 @@ Then open `https://<project>.ddev.site:3000`.
 |---|---|
 | `ddev playwright` | Runs `npx playwright` with the arguments you pass |
 | `ddev playwright-inspect` | Prints links that open a kept test database in the backend |
-| `ddev playwright-prepare` | Builds the template database on its own |
+| `ddev playwright-prepare` | Builds the template database on its own; `--force` rebuilds one that is still up to date |
 | `ddev playwright-replay` | Replays every scenario's content into one browsable database |
 | `ddev playwright-ui` | Serves Playwright UI mode from the web container |
 
