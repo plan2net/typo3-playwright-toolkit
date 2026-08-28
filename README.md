@@ -73,7 +73,7 @@ sequenceDiagram
     rect rgba(127,127,127,0.12)
         note over CLI,DB: once per test run
         CLI->>EXT: typo3 playwright:prepare
-        EXT->>DB: build the template:<br>schema, your fixtures,<br>a ready-made session + backend user
+        EXT->>DB: build the template:<br>schema, your fixtures,<br>a ready-made session + backend user<br>— reused when nothing changed
         CLI->>PW: npx playwright test
         PW->>EXT: GET /typo3/test-api/health
         EXT-->>PW: API version — stop if it is too old
@@ -83,7 +83,7 @@ sequenceDiagram
         note over PW,DB: once per test file — the defineScenario setup
         PW->>PW: create a test ID and write it down first
         PW->>EXT: POST /typo3/test-api/session
-        EXT->>DB: copy the template → dbABCD…
+        EXT->>DB: copy the template → dbABCD…<br>before TYPO3 boots, so code that<br>runs during boot already finds it
         EXT->>EXT: point it at its own<br>_processed_ABCD… image folder
         EXT-->>PW: backend cookie + record_edit request token
         PW->>EXT: POST /typo3/record/edit — the fields FormEngine uses
