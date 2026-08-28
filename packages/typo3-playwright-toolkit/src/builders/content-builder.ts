@@ -73,12 +73,20 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
             ),
         )
 
+        const columnValues = toColumnValues(own)
+        // Not the record's own pid, which carries the -uid positioning the element.
+        const relations = this.builder.getRelations?.({
+            pid: (columnValues.pid as string | number) ?? pageId,
+            sys_language_uid: (columnValues.sys_language_uid as string | number) ?? 0,
+        }) ?? { columns: {}, records: {} }
+
         const record: Record<string, unknown> = {
             pid: insertPosition(this.page, pageId),
             sys_language_uid: 0,
             CType: fields.CType || this.builder.type,
             colPos: fields.colPos ?? 0,
-            ...toColumnValues(own),
+            ...columnValues,
+            ...relations.columns,
         }
 
         const uid = await saveRecord(this.page.request, context, {
@@ -88,6 +96,7 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
             data: {
                 tt_content: { [identifier]: record },
                 ...(this.builder.getAdditionalRecords?.(identifier, pageId) ?? {}),
+                ...relations.records,
             },
         })
 

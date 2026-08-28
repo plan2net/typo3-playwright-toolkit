@@ -1,6 +1,7 @@
 import type { ContentBuilderInterface, ContentFields } from '../types/content-builder.js'
 import type { RecordDataMap } from '../http/record-edit.js'
 import { newRecordIdentifier } from './identifier.js'
+import { RelationSet, type RelationOutput, type RelationOwner } from './relations.js'
 
 const HEADING_LEVELS = { h1: 1, h2: 2, h3: 3, h4: 4, h5: 5, hidden: 100 } as const
 const BULLET_TYPES = { bullets: 0, numbers: 1, definition: 2 } as const
@@ -27,6 +28,7 @@ export abstract class CoreContent implements ContentBuilderInterface {
     abstract readonly type: string
 
     protected fields: ContentFields = {}
+    protected readonly relations = new RelationSet('tt_content')
 
     withHeader(header: string, level?: HeadingLevel): this {
         this.set('header', header)
@@ -58,6 +60,16 @@ export abstract class CoreContent implements ContentBuilderInterface {
     /** Any column the typed setters do not cover, including your own. */
     withField(column: string, value: ContentFields[string]): this {
         return this.set(column, value)
+    }
+
+    withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
+        this.relations.withFileReference(column, fileUid, fields)
+
+        return this
+    }
+
+    getRelations(owner: RelationOwner): RelationOutput {
+        return this.relations.materialise(owner)
     }
 
     getFields(): ContentFields {

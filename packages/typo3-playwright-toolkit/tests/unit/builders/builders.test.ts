@@ -390,6 +390,25 @@ describe('ContentBuilder', () => {
         expect(only(posted[1].dataMap.tt_content)).toMatchObject({ pid: '-11' })
     })
 
+    it('posts a relation the builder declares', async () => {
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page)
+            .onPage('12')
+            .ofType('text')
+            .configure((content) => content.withFileReference('assets', 7))
+            .create()
+
+        const reference = identifierOf(posted[0].dataMap.sys_file_reference)
+
+        expect(only(posted[0].dataMap.tt_content).assets).toBe(reference)
+        expect(posted[0].dataMap.sys_file_reference[reference]).toMatchObject({
+            uid_local: '7',
+            tablenames: 'tt_content',
+            pid: '12',
+        })
+    })
+
     it('throws when the backend refuses the content element', async () => {
         registerContentTypes({ media_demo: MediaContent })
         const { page } = fakePage(1, 'CType not allowed')

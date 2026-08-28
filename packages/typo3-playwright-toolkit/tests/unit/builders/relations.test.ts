@@ -132,8 +132,7 @@ describe('a child record', () => {
     })
 })
 
-// A column resolves against one foreign_table, so rows of a second one would be
-// written and then never found.
+// Rows of a second table are written and then never found.
 describe('one column, one relation', () => {
     it('refuses a second table on a column already holding children', () => {
         const relations = new RelationSet('tt_content')

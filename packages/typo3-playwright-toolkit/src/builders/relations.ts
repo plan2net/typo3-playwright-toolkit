@@ -69,7 +69,7 @@ export class ChildRecord {
         return this
     }
 
-    /** Its own relations inherit from the merged row, so a pid it sets reaches them. */
+    /** Relations inherit from the merged row, so a pid the child sets reaches them. */
     materialise(owner: RelationOwner): { row: Record<string, unknown>; records: RecordDataMap } {
         const row = { pid: owner.pid, sys_language_uid: owner.sys_language_uid, ...this.fields }
         const { columns, records } = this.relations.materialise(row)

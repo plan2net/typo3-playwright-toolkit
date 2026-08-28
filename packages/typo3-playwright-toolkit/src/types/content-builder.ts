@@ -1,5 +1,6 @@
 import { NestedFields } from './common.js'
 import type { RecordDataMap } from '../http/record-edit.js'
+import type { RelationOutput, RelationOwner } from '../builders/relations.js'
 
 export interface ContentFields {
     [key: string]: string | number | NestedFields | boolean | undefined
@@ -14,4 +15,6 @@ export interface ContentBuilderInterface {
      * substitutes the real uid once it has assigned one.
      */
     getAdditionalRecords?(contentIdentifier: string, pageId: string): RecordDataMap
+    /** Beside the two above, never through them: an override would drop relations silently. */
+    getRelations?(owner: RelationOwner): RelationOutput
 }

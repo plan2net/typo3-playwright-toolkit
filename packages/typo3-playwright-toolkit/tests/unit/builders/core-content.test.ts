@@ -224,6 +224,23 @@ describe('FAL relations', () => {
     })
 })
 
+describe('relations on a content element', () => {
+    it('answers its relations through getRelations, not getFields', () => {
+        const builder = new TextContent().withFileReference('assets', 42)
+
+        const { columns, records } = builder.getRelations({ pid: '3', sys_language_uid: 0 })
+        const identifier = Object.keys(records.sys_file_reference)[0]
+
+        expect(columns.assets).toBe(identifier)
+        expect(builder.getFields().assets).toBeUndefined()
+        expect(records.sys_file_reference[identifier]).toMatchObject({
+            uid_local: 42,
+            tablenames: 'tt_content',
+            pid: '3',
+        })
+    })
+})
+
 describe('menu types', () => {
     it('gives every menu_* CType a builder carrying that CType', () => {
         for (const menuType of MENU_TYPES) {
