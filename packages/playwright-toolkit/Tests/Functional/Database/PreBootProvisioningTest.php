@@ -92,6 +92,24 @@ final class PreBootProvisioningTest extends FunctionalTestCase
         );
     }
 
+    // A project that merges the paths itself gets them from here, and a database
+    // nothing created would fail every request that follows.
+    #[Test]
+    public function noConnectionIsNamedWhenNothingWasCreated(): void
+    {
+        $this->get(TemplatePreparer::class)->prepare();
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+        unset($_SERVER[TestApiSecret::SERVER_KEY]);
+        $projectConnection = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
+
+        $overrides = [];
+        $this->asWebRequest(static function () use ($projectConnection, &$overrides): void {
+            $overrides = TestContext::databaseConnectionOverrides($projectConnection);
+        });
+
+        self::assertSame([], $overrides);
+    }
+
     private function asWebRequest(callable $body): void
     {
         $originalIsCli = Environment::isCli();

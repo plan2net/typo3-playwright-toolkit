@@ -30,14 +30,8 @@ final class TestContext
         /** @var array<string, mixed> $connection */
         $connection = $defaultConnection ?? $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [];
 
-        $overrides = self::databaseConnectionOverrides($connection);
-        foreach ($overrides as $path => $value) {
+        foreach (self::databaseConnectionOverrides($connection) as $path => $value) {
             $GLOBALS['TYPO3_CONF_VARS'] = ArrayUtility::setValueByPath($GLOBALS['TYPO3_CONF_VARS'], $path, $value);
-        }
-
-        // Create it right after redirecting, so nothing during boot finds it missing.
-        if ([] !== $overrides) {
-            DatabaseInitializer::fromGlobals()->provisionCurrentRequest();
         }
     }
 
@@ -50,6 +44,12 @@ final class TestContext
     {
         $testId = self::testId();
         if ('' === $testId) {
+            return [];
+        }
+
+        // Naming a database nothing created fails every later request with
+        // "Unknown database", so the connection moves only once it exists.
+        if (!DatabaseInitializer::fromGlobals()->provisionCurrentRequest($defaultConnection)) {
             return [];
         }
 

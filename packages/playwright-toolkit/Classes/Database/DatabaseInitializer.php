@@ -50,34 +50,42 @@ final class DatabaseInitializer
         self::$provisionedThisRequest = false;
     }
 
-    public function provisionCurrentRequest(): void
+    /**
+     * @param array<string, mixed>|null $defaultConnection the project's own Default connection
+     *
+     * @return bool whether this request may be pointed at its test database
+     */
+    public function provisionCurrentRequest(?array $defaultConnection = null): bool
     {
         if (!Environment::getContext()->isTesting()) {
-            return;
+            return false;
         }
 
         $testId = TestContext::testId();
         if ('' === $testId) {
-            return;
+            return false;
         }
 
         // playwright:prepare boots TYPO3 too, and it has no database to provision.
         if (Environment::isCli()) {
-            return;
+            return false;
         }
 
         // A test ID is sixteen public characters, so creating a database must cost
-        // more than guessing one.
+        // more than guessing one. An inspect session sends a cookie and no secret:
+        // it may use a database a run left behind, but not create one.
         if (!$this->secret->matchesCurrentRequest()) {
-            return;
+            return file_exists($this->lockFiles->claim(DatabaseName::forTestId($testId)));
         }
 
         $this->provision(
             TestDatabaseDriverFactory::fromConnection(
-                $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? []
+                $defaultConnection ?? $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? []
             ),
             $testId
         );
+
+        return true;
     }
 
     public function provision(TestDatabaseDriver $driver, string $testId): void

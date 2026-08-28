@@ -58,7 +58,9 @@ alone; called outside the Testing context it would let a request carrying that h
 switch the connection on an ordinary hostname.
 
 If a project needs its own merge, `databaseConnectionOverrides($defaultConnection)`
-returns the values instead. Those are paths like `DB/Connections/Default/dbname`,
+returns the values instead. It creates the test database too, so either entry point
+leaves the connection naming a database that exists — or naming nothing at all.
+Those values are paths like `DB/Connections/Default/dbname`,
 not keys. Merging them as keys creates a setting with a slash in its name, and every
 test then runs against the project's own database.
 

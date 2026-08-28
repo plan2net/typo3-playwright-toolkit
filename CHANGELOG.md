@@ -20,6 +20,15 @@ the package a change belongs to.
 
 ### Fixed
 
+- **plan2net/playwright-toolkit** — the Default connection is no longer pointed at a
+  test database that nothing created, which made TYPO3 fail during boot with
+  `Unknown database`, too early for any middleware to say something useful. It hit a
+  project calling `databaseConnectionOverrides()` to merge the paths into settings of
+  its own, because only `applyDatabaseConnectionOverrides()` created the database. It
+  also hit any request with a well-formed test ID and no secret, because creating
+  asked for the secret and pointing the connection did not. Both calls now decide the
+  same way, and neither moves the connection unless the database is there.
+
 - **DDEV add-on** — `ddev playwright-prepare` (and every command that reaches the
   test database) now refuses with "run `ddev restart`" when the db-test service is
   configured but not yet active in the web container — running prepare between

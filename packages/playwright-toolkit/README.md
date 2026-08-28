@@ -170,6 +170,9 @@ $configurationSettings = array_merge(
 > `applyDatabaseConnectionOverrides($defaultConnection)` takes the same argument, for
 > projects that write to `$GLOBALS` directly.
 
+Either call creates the test database as part of answering, so the connection is
+never moved to one that does not exist.
+
 Important: the returned keys are paths like `DB/Connections/Default/dbname`, not
 array keys. If your project writes them with `ArrayUtility::setValueByPath` (or the
 same helper it already uses for the other settings), they land correctly. A plain
