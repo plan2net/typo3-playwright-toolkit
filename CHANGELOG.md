@@ -16,7 +16,21 @@ the package a change belongs to.
   `{ uid, slug }` instead of the uid on its own. A setup that used the return value
   directly reads `.uid` now. The builders are unchanged.
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer passes the
+  tolerance on every call, where it beat a `threshold` a project had set through
+  Playwright's own `expect.toHaveScreenshot`. Both read the same default, so the two
+  only disagreed for a project that set it the Playwright way — and then only
+  `expectScreenshot` ignored it.
+
 ### Documentation
+
+- **@plan2net/typo3-playwright-toolkit** — the README says that screenshots are
+  stored in CSS pixels, which is Playwright's default and costs a project with a
+  `deviceScaleFactor` every device pixel it draws. A bug that only shows at 2x cannot
+  fail a test, and images from `element.screenshot()` never match. `scale: 'device'`
+  was always accepted; nothing said so.
 
 - `SETUP.md` is the one place the setup lives, and every README and the landing page
   link to it. It was spread over four READMEs before, and the three parts that cost a

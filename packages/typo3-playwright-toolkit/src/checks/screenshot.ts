@@ -162,11 +162,17 @@ export async function expectScreenshot(
     // Playwright creates a missing reference itself and has --update-snapshots
     // for the rest; hand-building the snapshot path got the platform suffix
     // wrong off Linux.
-    await expect(shot).toHaveScreenshot(`${name}.png`, {
+    await expect(shot).toHaveScreenshot(`${name}.png`, comparisonOptions(wholePage, screenshotOptions))
+}
+
+export function comparisonOptions(
+    wholePage: boolean,
+    perCall: PageAssertionsToHaveScreenshotOptions,
+): PageAssertionsToHaveScreenshotOptions {
+    return {
         animations: 'disabled',
         timeout: 15000,
-        threshold: config.screenshot?.threshold ?? 0.2,
         ...(wholePage ? { fullPage: true } : {}),
-        ...screenshotOptions,
-    })
+        ...perCall,
+    }
 }

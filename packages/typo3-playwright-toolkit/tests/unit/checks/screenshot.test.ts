@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { buildHideStyles, resolveScreenshotTarget, hiddenSelectors } from '#src/checks/screenshot.js'
+import { setToolkitConfig } from '#src/config.js'
+import {
+    buildHideStyles,
+    resolveScreenshotTarget,
+    hiddenSelectors,
+    comparisonOptions,
+} from '#src/checks/screenshot.js'
 
 describe('resolveScreenshotTarget', () => {
     const marker = { name: 'the element' }
@@ -61,5 +67,22 @@ describe('hiddenSelectors', () => {
 
     it('is empty when neither names anything', () => {
         expect(hiddenSelectors(undefined, undefined)).toEqual([])
+    })
+})
+
+describe('comparisonOptions', () => {
+    // Repeating it per call would override a value the project set the Playwright way.
+    it('leaves the tolerance to the Playwright config', () => {
+        setToolkitConfig({
+            testingURL: 'https://example-testing.test',
+            paths: {
+                consumerRoot: '/srv/project',
+                stateDir: '/srv/project/.test-state',
+                sessionDir: '/srv/project/var/session',
+            },
+            screenshot: { threshold: 0.3 },
+        })
+
+        expect(comparisonOptions(false, {})).not.toHaveProperty('threshold')
     })
 })

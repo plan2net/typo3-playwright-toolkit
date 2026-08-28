@@ -299,7 +299,22 @@ await expectScreenshot(page, 'accordion', { include: '.accordion' }) // one elem
 
 The name carries no file extension; Playwright adds `.png` and the platform suffix
 itself. The first run writes the missing image and fails, as Playwright always does.
-Every other option is passed on to `toHaveScreenshot`.
+Every other option is passed on to `toHaveScreenshot`, and the tolerances come from
+`screenshot` in `defineToolkitConfig`.
+
+> [!IMPORTANT]
+> Images are stored in CSS pixels, which is Playwright's default. If your projects
+> set a `deviceScaleFactor`, a bug that only shows at 2x cannot fail a test, and
+> images taken with `element.screenshot()` will not match. Ask for device pixels per
+> shot, or for the whole project:
+>
+> ```ts
+> await expectScreenshot(page, 'hero', { scale: 'device' })
+>
+> defineBasePlaywrightConfig(toolkit, {
+>     expect: { toHaveScreenshot: { scale: 'device' } },
+> })
+> ```
 
 `expectScreenshot` waits for animations itself. When you interact and then assert
 without a screenshot — an accessibility scan after opening an accordion, say — wait
