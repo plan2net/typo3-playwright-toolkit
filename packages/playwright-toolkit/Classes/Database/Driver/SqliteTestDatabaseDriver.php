@@ -214,6 +214,26 @@ final class SqliteTestDatabaseDriver implements TestDatabaseDriver
     }
 
     #[\Override]
+    public function hasSessionForUser(string $testId, int $sessionUserId): bool
+    {
+        $file = $this->fileFor($testId);
+        if (!is_file($file)) {
+            return false;
+        }
+
+        try {
+            $statement = $this->connect($file)->prepare(
+                'SELECT count(*) FROM ' . SeededSession::TABLE . ' WHERE ses_userid = :ses_userid'
+            );
+            $statement->execute(['ses_userid' => $sessionUserId]);
+        } catch (\PDOException) {
+            return false;
+        }
+
+        return (int) $statement->fetchColumn() > 0;
+    }
+
+    #[\Override]
     public function checkTestDatabase(string $testId): array
     {
         $file = $this->fileFor($testId);

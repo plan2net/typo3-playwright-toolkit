@@ -172,6 +172,21 @@ abstract class ServerTestDatabaseDriver implements TestDatabaseDriver
     }
 
     #[\Override]
+    public function hasSessionForUser(string $testId, int $sessionUserId): bool
+    {
+        try {
+            $statement = $this->connect($this->databaseFor($testId))->prepare(
+                'SELECT count(*) FROM ' . SeededSession::TABLE . ' WHERE ses_userid = :ses_userid'
+            );
+            $statement->execute(['ses_userid' => $sessionUserId]);
+        } catch (\PDOException) {
+            return false;
+        }
+
+        return (int) $statement->fetchColumn() > 0;
+    }
+
+    #[\Override]
     public function checkTestDatabase(string $testId): array
     {
         $database = $this->databaseFor($testId);

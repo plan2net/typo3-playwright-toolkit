@@ -114,6 +114,8 @@ final class DatabaseInitializer
                     return;
                 }
 
+                $this->refuseUnreadableSession($driver, $testId, $configuration, $seedMarker, $databaseName);
+
                 TemplateReadiness::assertFinalised($driver);
 
                 // Claim the name before the database exists. A crash inside
@@ -139,6 +141,29 @@ final class DatabaseInitializer
                 $driver->isolateProcessedFiles($testId);
             });
         });
+    }
+
+    // A session we cannot read means the database was seeded, only not by a key we
+    // have. Rebuilding it would drop what the running test has already written.
+    private function refuseUnreadableSession(
+        TestDatabaseDriver $driver,
+        string $testId,
+        ToolkitConfiguration $configuration,
+        string $seedMarker,
+        string $databaseName,
+    ): void {
+        if (!file_exists($seedMarker) || !$driver->hasSessionForUser($testId, $configuration->sessionUserId)) {
+            return;
+        }
+
+        throw new \RuntimeException(sprintf(
+            'Test database %s holds a backend session that is not the pre-seeded one, so it was left as it is. '
+            . 'The session id is hashed with SYS/encryptionKey, so this usually means the key in place now is not '
+            . 'the one "playwright:prepare" ran with — set it before the connection overrides are applied. '
+            . 'To rebuild the database instead, delete "%s".',
+            $databaseName,
+            $seedMarker
+        ));
     }
 
     /**

@@ -55,6 +55,9 @@ interface TestDatabaseDriver
         int $sessionUserId,
     ): bool;
 
+    /** Separates a database we cannot read from one that was never seeded. */
+    public function hasSessionForUser(string $testId, int $sessionUserId): bool;
+
     /**
      * @return array{ok: bool, detail: string}
      */

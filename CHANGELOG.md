@@ -10,7 +10,23 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **plan2net/playwright-toolkit** — a test database whose seeded session cannot be
+  read is left alone instead of rebuilt. The session id is hashed with
+  `SYS/encryptionKey`, so the wrong key makes the lookup miss, and every request then
+  dropped and re-cloned its own database — throwing away what the test had just
+  built, mid-run and silently. Such a database now fails with what to fix. One
+  holding no session at all is still rebuilt.
+
 ### Documentation
+
+- **plan2net/playwright-toolkit** — the README and `CONTRACT.md` now say that
+  `SYS/encryptionKey` has to be in `$GLOBALS['TYPO3_CONF_VARS']` before
+  `applyDatabaseConnectionOverrides()` runs. The seeded session id is hashed with it
+  to tell an already-seeded database from a new one, pre-boot, so a key a project
+  applies later makes every request re-clone its database and lose what the test
+  built.
 
 - The rotating claim in the landing page headline is readable: it carried the brand
   orange on white at 2.41:1, where large text needs 3:1. It now uses the TYPO3

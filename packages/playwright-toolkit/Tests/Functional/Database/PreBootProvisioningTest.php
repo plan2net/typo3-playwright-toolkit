@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Database;
 
 use PHPUnit\Framework\Attributes\Test;
+use Plan2net\PlaywrightToolkit\Database\DatabaseInitializer;
+use Plan2net\PlaywrightToolkit\Database\Driver\SqliteTestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\TemplatePreparer;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\TestContext;
@@ -74,6 +76,23 @@ final class PreBootProvisioningTest extends FunctionalTestCase
         self::assertFileExists(
             Environment::getVarPath() . '/test-databases/db' . self::TEST_ID . '.sqlite'
         );
+    }
+
+    // The session id is hashed with the encryption key. Another key finds nothing,
+    // and rebuilding the database would drop what the test has already written.
+    #[Test]
+    public function refusesToReplaceADatabaseWhoseSessionItCannotRead(): void
+    {
+        $this->get(TemplatePreparer::class)->prepare();
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+        $_SERVER[TestApiSecret::SERVER_KEY] = $this->get(TestApiSecret::class)->ensureExists();
+        $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
+
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] = 'a-different-encryption-key';
+
+        $this->expectExceptionMessageMatches('/encryptionKey/');
+
+        $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
     }
 
     #[Test]
@@ -146,6 +165,11 @@ final class PreBootProvisioningTest extends FunctionalTestCase
         });
 
         self::assertSame([], $overrides);
+    }
+
+    private function driver(): SqliteTestDatabaseDriver
+    {
+        return new SqliteTestDatabaseDriver(Environment::getVarPath() . '/test-databases');
     }
 
     private function asWebRequest(callable $body): void

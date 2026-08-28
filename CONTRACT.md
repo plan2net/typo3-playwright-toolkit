@@ -60,6 +60,12 @@ switch the connection on an ordinary hostname.
 If a project needs its own merge, `databaseConnectionOverrides($defaultConnection)`
 returns the values instead. It creates the test database too, so either entry point
 leaves the connection naming a database that exists — or naming nothing at all.
+
+**`SYS/encryptionKey` must be in `$GLOBALS['TYPO3_CONF_VARS']` before either call.**
+Both hash the pre-seeded session id with it to tell an already-seeded database from a
+new one, pre-boot. A key that a project applies afterwards arrives too late, and every
+request then re-clones its database and discards what the test built.
+
 Those values are paths like `DB/Connections/Default/dbname`,
 not keys. Merging them as keys creates a setting with a slash in its name, and every
 test then runs against the project's own database.

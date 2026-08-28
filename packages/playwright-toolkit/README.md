@@ -173,6 +173,24 @@ $configurationSettings = array_merge(
 Either call creates the test database as part of answering, so the connection is
 never moved to one that does not exist.
 
+> [!IMPORTANT]
+> When either call runs, `$GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey']` must
+> already hold the key your test databases were prepared with. The toolkit hashes the
+> pre-seeded session id with it to recognise a database it has already seeded, and it
+> does that before TYPO3 boots.
+>
+> Two setups get this wrong. One is a Testing configuration that uses a different key
+> than the rest of the site; the other is a configuration that collects its settings
+> in an array and writes them to `$GLOBALS` only afterwards. In both, assign the key
+> before the call:
+>
+> ```php
+> $GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] = '…the key playwright:prepare uses…';
+> ```
+>
+> Otherwise the lookup finds nothing, every request treats its database as unseeded
+> and clones it again, and the content the test just built is gone.
+
 Important: the returned keys are paths like `DB/Connections/Default/dbname`, not
 array keys. If your project writes them with `ArrayUtility::setValueByPath` (or the
 same helper it already uses for the other settings), they land correctly. A plain
