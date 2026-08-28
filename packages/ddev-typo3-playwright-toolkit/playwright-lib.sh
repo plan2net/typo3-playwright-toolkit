@@ -121,7 +121,7 @@ playwright_replay_prepare() {
     # $1 optional project root, so this is testable outside the web container.
     replay_root="${1:-/var/www/html}"
 
-    echo "[playwright] Rebuilding the testing site database from the template…"
+    echo "[playwright] Rebuilding the replay database on the db-test service…"
     (cd "${replay_root}" && TYPO3_CONTEXT=Testing ./vendor/bin/typo3 playwright:replay-prepare) || return 1
 }
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 #ddev-generated
 
-## Description: Replay every scenario setup into the testing site's own database
+## Description: Replay every scenario setup into one database on the db-test service
 ## Usage: playwright-replay [options]
 ## Example: "ddev playwright-replay" or "ddev playwright-replay --grep accordion"
 ## ExecRaw: true
@@ -9,9 +9,10 @@
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "Usage: ddev playwright-replay [options]"
     echo ""
-    echo "Rebuilds the testing site's own database from the template, then runs every"
-    echo "scenario's setup into it. Each scenario gets a folder named after it under"
-    echo "the fixture root, holding everything that scenario creates."
+    echo "Rebuilds the replay database on the db-test service from the template, then"
+    echo "runs every scenario's setup into it. Your project database is never touched."
+    echo "Each scenario gets a folder named after it under the fixture root, holding"
+    echo "everything that scenario creates."
     echo ""
     echo "The tests themselves are skipped: their assertions and screenshots belong"
     echo "to a per-test database. Use 'ddev playwright test' for those."

@@ -25,7 +25,7 @@ final class ReplayPrepareCommand extends Command
     protected function configure(): void
     {
         $this->setDescription(
-            'Rebuilds the testing site\'s own database from the template, so every scenario can replay into it.'
+            'Rebuilds the replay database on the test database service, so every scenario can replay into it.'
         );
     }
 

@@ -211,7 +211,8 @@ reachable from there. Links are signed and expire after 15 minutes.
 
 A test run spreads its content over one throwaway database per test, and drops them
 when it passes. To see it all at once — to click through it, or to export a branch of
-it — replay every scenario into the testing site's own database instead:
+it — replay every scenario into one database on the `db-test` service instead. Your
+project database is never touched:
 
 ```bash
 ddev playwright-replay                   # every scenario
