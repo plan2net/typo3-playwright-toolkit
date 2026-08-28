@@ -10,6 +10,8 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-08-28
+
 ### Breaking
 
 - **@plan2net/typo3-playwright-toolkit** — the `saveRecord` fixture returns
@@ -17,6 +19,15 @@ the package a change belongs to.
   directly reads `.uid` now. The builders are unchanged.
 
 ### Added
+
+- **both packages** — `builders.page().create()` reports the slug the site stored,
+  not the one it was asked for. The site does not always keep what you post — a
+  translation and a name already in use are two cases, and an extension can add more
+  — so a test that navigated to the string it passed in landed on a 404. The save
+  answers with `X-Playwright-Saved-Record`, a JSON header on the redirect it already
+  sends, so this costs no second request. The value is escaped JSON, which keeps a
+  slug with an umlaut ASCII in the header, and the header needs the API secret like
+  every other entry point.
 
 - **both packages** — the add-on says which release it is, in
   `.ddev/playwright-toolkit.version`, and `playwright:prepare` warns when that no
@@ -26,55 +37,48 @@ the package a change belongs to.
   development checkout of the extension says nothing, since the two can never match
   there.
 
-### Fixed
-
-- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer passes the
-  tolerance on every call, where it beat a `threshold` a project had set through
-  Playwright's own `expect.toHaveScreenshot`. Both read the same default, so the two
-  only disagreed for a project that set it the Playwright way — and then only
-  `expectScreenshot` ignored it.
-
-### Documentation
-
-- **@plan2net/typo3-playwright-toolkit** — the README says that screenshots are
-  stored in CSS pixels, which is Playwright's default and costs a project with a
-  `deviceScaleFactor` every device pixel it draws. A bug that only shows at 2x cannot
-  fail a test, and images from `element.screenshot()` never match. `scale: 'device'`
-  was always accepted; nothing said so.
-
-- `SETUP.md` is the one place the setup lives, and every README and the landing page
-  link to it. It was spread over four READMEs before, and the three parts that cost a
-  first-time consumer the most were the hardest to find: the testing hostname, which
-  was never explained as "your site on a second host name"; the root-page fixture,
-  which was never mentioned at all — without it the documented example returns a 404 —
-  and the `additional.php` ordering, which lived in the extension README only. Get
-  that last one wrong and the tests pass against the real database. The browser
-  install now comes after the setting that decides where the browsers go, not before.
-
-### Added
-
 - **plan2net/playwright-toolkit** — `playwright:prepare` warns when no fixtures are
   configured. Both fixture settings default to empty, which builds a template with
   the schema and a backend session and no content at all, so every test that opens a
   page got a 404 and no hint why. There is no sensible default to ship — the root
-  page id and the site are the project's — so the command names the two settings
+  page id and the site belong to your project — so the command names the two settings
   instead.
 
 - **ddev-typo3-playwright-toolkit** — `ddev playwright` says what to fix when the
   Testing context reaches a database with no TYPO3 tables. The cache flush is the
-  first step that touches it, so that project failed with a Doctrine trace naming no
-  cause; the command now names the two ways out, building the schema or pointing the
-  Testing context at the database the project already uses.
+  first step that touches it, and it used to fail with a Doctrine trace naming no
+  cause. The command now names the two ways out: build the schema there, or point the
+  Testing context at the database your project already uses.
 
-- **both packages** — `builders.page().create()` reports the slug the site stored,
-  not the one it was asked for. The site does not always keep what you post — a
-  translation and a name already in use are two cases, and an extension can add more
-  — so a test that navigated to the string it passed in landed on a 404. The
-  extension answers the save with
-  `X-Playwright-Saved-Record`, a JSON header carried on the redirect the save already
-  sends — no second request. It is escaped JSON so a slug with an umlaut stays ASCII
-  in the header, and it takes the API secret like every other entry point: without it
-  the backend's own answer goes back untouched.
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer passes the
+  tolerance on every call, where it beat a `threshold` set through Playwright's own
+  `expect.toHaveScreenshot`. Both read the same default, so they only disagreed for a
+  project that set it the Playwright way — and then only `expectScreenshot` ignored
+  it.
+
+- **ddev-typo3-playwright-toolkit** — `ddev playwright-replay` names the `db-test`
+  service in its messages. "Rebuilds the testing site database" read as if it drops
+  the database you work in.
+
+### Documentation
+
+- `SETUP.md` is the one place the setup lives, and every README and the landing page
+  link to it. It was spread over four READMEs before, and the three parts that cost a
+  first-time consumer the most were the hardest to find: the testing host name, never
+  explained as "your site on a second host name"; the root page fixture, never
+  mentioned at all, without which the documented example returns a 404; and the
+  `additional.php` ordering, which lived in the extension README only. Get that last
+  one wrong and your tests pass against your real database. The browser install now
+  comes after the setting that decides where the browsers go, not before it.
+
+- **@plan2net/typo3-playwright-toolkit** — the README says that screenshots are
+  stored in CSS pixels, which is Playwright's default. A project whose viewport
+  projects set a `deviceScaleFactor` therefore compares fewer pixels than its browser
+  drew: a bug that only shows at 2x cannot fail a test, and images taken with
+  `element.screenshot()` never match. `scale: 'device'` was always accepted; nothing
+  said so.
 
 ## [0.6.0] - 2026-08-28
 
@@ -335,7 +339,8 @@ the package a change belongs to.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.6.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.7.0...main
+[0.7.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.1...v0.4.2
