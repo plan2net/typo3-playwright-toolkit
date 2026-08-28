@@ -376,6 +376,19 @@ other TCA column. Types with images add `withFile` and `withFiles`, which write 
 `sys_file_reference` rows for you, plus `withColumns`, `withOrientation` and
 `withImageSize`.
 
+Where core stores a number that means nothing on its own, the setter takes the name
+and your editor suggests the options:
+
+```ts
+element.withHeader('Chapter', 'h3')      // header_layout 3, or 'hidden' for 100
+element.withBulletsType('numbers')       // bullets_type 1
+element.withHeaderPosition('top')        // table_header_position 1
+element.withOrientation('in-text-right') // imageorient 17
+```
+
+`PageBuilder` does the same for the page type: `withDoktype('folder')` writes 254.
+It also takes a number, for a doktype your own project registered.
+
 A flexform column takes `flexForm()`, because the form posts one field per value
 rather than one for the column:
 

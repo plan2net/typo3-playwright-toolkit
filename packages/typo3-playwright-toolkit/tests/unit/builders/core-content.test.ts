@@ -16,6 +16,71 @@ import { createContent, registerContentTypes } from '#src/builders/content-facto
 import type { ContentBuilderInterface, ContentFields } from '#src/types/content-builder.js'
 import type { RecordDataMap } from '#src/http/record-edit.js'
 
+describe('header_layout', () => {
+    it.each([
+        ['h1', 1],
+        ['h2', 2],
+        ['h3', 3],
+        ['h4', 4],
+        ['h5', 5],
+        ['hidden', 100],
+    ] as const)('writes %s as %i', (level, value) => {
+        expect(new TextContent().withHeader('Title', level).getFields()).toMatchObject({
+            header: 'Title',
+            header_layout: value,
+        })
+    })
+
+    // Naming no level must not post a layout core would otherwise default.
+    it('stays unset when no level is named', () => {
+        expect(new TextContent().withHeader('Title').getFields()).not.toHaveProperty('header_layout')
+    })
+})
+
+describe('bullets_type', () => {
+    it.each([
+        ['bullets', 0],
+        ['numbers', 1],
+        ['definition', 2],
+    ] as const)('writes %s as %i', (type, value) => {
+        expect(new BulletsContent().withBulletsType(type).getFields()).toMatchObject({
+            bullets_type: value,
+        })
+    })
+})
+
+describe('table_header_position', () => {
+    it.each([
+        ['none', 0],
+        ['top', 1],
+        ['left', 2],
+        ['both', 3],
+    ] as const)('writes %s as %i', (position, value) => {
+        expect(new TableContent().withHeaderPosition(position).getFields()).toMatchObject({
+            table_header_position: value,
+        })
+    })
+})
+
+describe('imageorient', () => {
+    it.each([
+        ['above-center', 0],
+        ['above-right', 1],
+        ['above-left', 2],
+        ['below-center', 8],
+        ['below-right', 9],
+        ['below-left', 10],
+        ['in-text-right', 17],
+        ['in-text-left', 18],
+        ['beside-text-right', 25],
+        ['beside-text-left', 26],
+    ] as const)('writes %s as %i', (orientation, value) => {
+        expect(new ImageContent().withOrientation(orientation).getFields()).toMatchObject({
+            imageorient: value,
+        })
+    })
+})
+
 describe('the shipped core CTypes', () => {
     it('covers every core CType a stock TYPO3 install registers', () => {
         const shipped = Object.keys(coreContentTypes())
@@ -149,7 +214,11 @@ describe('FAL relations', () => {
     })
 
     it('sets the gallery columns', () => {
-        const fields = new TextmediaContent().withColumns(3).withOrientation(8).withImageSize(600, 400).getFields()
+        const fields = new TextmediaContent()
+            .withColumns(3)
+            .withOrientation('below-center')
+            .withImageSize(600, 400)
+            .getFields()
 
         expect(fields).toMatchObject({ imagecols: 3, imageorient: 8, imagewidth: 600, imageheight: 400 })
     })

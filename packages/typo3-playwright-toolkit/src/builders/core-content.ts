@@ -2,13 +2,36 @@ import type { ContentBuilderInterface, ContentFields } from '../types/content-bu
 import type { RecordDataMap } from '../http/record-edit.js'
 import { newRecordIdentifier } from './identifier.js'
 
+const HEADING_LEVELS = { h1: 1, h2: 2, h3: 3, h4: 4, h5: 5, hidden: 100 } as const
+const BULLET_TYPES = { bullets: 0, numbers: 1, definition: 2 } as const
+const TABLE_HEADER_POSITIONS = { none: 0, top: 1, left: 2, both: 3 } as const
+const IMAGE_ORIENTATIONS = {
+    'above-center': 0,
+    'above-right': 1,
+    'above-left': 2,
+    'below-center': 8,
+    'below-right': 9,
+    'below-left': 10,
+    'in-text-right': 17,
+    'in-text-left': 18,
+    'beside-text-right': 25,
+    'beside-text-left': 26,
+} as const
+
+export type HeadingLevel = keyof typeof HEADING_LEVELS
+export type BulletType = keyof typeof BULLET_TYPES
+export type TableHeaderPosition = keyof typeof TABLE_HEADER_POSITIONS
+export type ImageOrientation = keyof typeof IMAGE_ORIENTATIONS
+
 export abstract class CoreContent implements ContentBuilderInterface {
     abstract readonly type: string
 
     protected fields: ContentFields = {}
 
-    withHeader(header: string): this {
-        return this.set('header', header)
+    withHeader(header: string, level?: HeadingLevel): this {
+        this.set('header', header)
+
+        return undefined === level ? this : this.withHeaderLayout(HEADING_LEVELS[level])
     }
 
     withSubheader(subheader: string): this {
@@ -113,9 +136,8 @@ abstract class GalleryCoreContent extends MediaCoreContent {
         return this.set('imagecols', imagecols)
     }
 
-    /** TCA `imageorient`: 0 above-center, 8 below-center, 17 in-text-right, … */
-    withOrientation(imageorient: number): this {
-        return this.set('imageorient', imageorient)
+    withOrientation(orientation: ImageOrientation): this {
+        return this.set('imageorient', IMAGE_ORIENTATIONS[orientation])
     }
 
     withImageSize(width?: number, height?: number): this {
@@ -176,9 +198,8 @@ export class BulletsContent extends CoreContent {
         return this.set('bodytext', items.join('\n'))
     }
 
-    /** TCA `bullets_type`: 0 disc, 1 numbered, 2 none. */
-    withBulletsType(bulletsType: number): this {
-        return this.set('bullets_type', bulletsType)
+    withBulletsType(type: BulletType): this {
+        return this.set('bullets_type', BULLET_TYPES[type])
     }
 }
 
@@ -198,9 +219,8 @@ export class TableContent extends CoreContent {
         return this.set('table_caption', caption)
     }
 
-    /** 1 puts the first row in a thead; 0 none, 2 first column, 3 both. */
-    withHeaderPosition(position: number): this {
-        return this.set('table_header_position', position)
+    withHeaderPosition(position: TableHeaderPosition): this {
+        return this.set('table_header_position', TABLE_HEADER_POSITIONS[position])
     }
 
     private delimiter(): number {

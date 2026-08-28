@@ -10,6 +10,18 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Breaking
+
+- **@plan2net/typo3-playwright-toolkit** — the setters for columns core stores as a
+  number now take a name instead: `withBulletsType('numbers')`,
+  `withHeaderPosition('top')` and `withOrientation('in-text-right')` no longer accept
+  `1`, `1` and `17`. `withHeader` takes the level as a second argument
+  (`withHeader('Chapter', 'h3')`), and `PageBuilder` gains `withDoktype('folder')`.
+  The numbers say nothing on their own — `header_layout` 100 means hidden — and a
+  name is something your editor can suggest and check. `withDoktype` also takes a
+  number, for a doktype your own project registered; for every other column,
+  `withField` is the way out.
+
 ### Fixed
 
 - **plan2net/playwright-toolkit** — a test database whose seeded session cannot be

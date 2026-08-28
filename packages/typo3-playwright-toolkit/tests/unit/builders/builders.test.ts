@@ -214,6 +214,30 @@ describe('PageBuilder', () => {
         expect(JSON.parse(crop as string).default.focusArea).toBeNull()
     })
 
+    it.each([
+        ['page', '1'],
+        ['link', '3'],
+        ['shortcut', '4'],
+        ['backend-user-section', '6'],
+        ['mountpoint', '7'],
+        ['spacer', '199'],
+        ['folder', '254'],
+    ] as const)('writes the %s doktype as %s', async (type, value) => {
+        const { posted, page } = fakePage(9)
+
+        await pageBuilder(page).withTitle('A page').withDoktype(type).create()
+
+        expect(only(posted[0].dataMap.pages).doktype).toBe(value)
+    })
+
+    it('takes the number of a doktype a project registered itself', async () => {
+        const { posted, page } = fakePage(9)
+
+        await pageBuilder(page).withTitle('A page').withDoktype(303).create()
+
+        expect(only(posted[0].dataMap.pages).doktype).toBe('303')
+    })
+
     it('suffixes the slug with the test id so parallel databases cannot collide', async () => {
         const { posted, page } = fakePage(1)
 

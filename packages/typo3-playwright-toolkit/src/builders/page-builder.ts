@@ -10,6 +10,18 @@ interface Fields {
     [key: string]: string | number | boolean | undefined | NestedFields
 }
 
+const DOKTYPES = {
+    page: 1,
+    link: 3,
+    shortcut: 4,
+    'backend-user-section': 6,
+    mountpoint: 7,
+    spacer: 199,
+    folder: 254,
+} as const
+
+export type Doktype = keyof typeof DOKTYPES
+
 const DEFAULT_CROP =
     '{"default":{"cropArea":{"x":0,"y":0,"width":1,"height":1},"selectedRatio":"NaN","focusArea":null}}'
 
@@ -66,6 +78,13 @@ export class PageBuilder {
 
     withImageCropFocus(cropConfig: CropConfig): this {
         this.imageCropConfig = cropConfig
+        return this
+    }
+
+    /** A name core ships, or a number if your project registered its own doktype. */
+    withDoktype(type: Doktype | number): this {
+        this.fields.doktype = 'number' === typeof type ? type : DOKTYPES[type]
+
         return this
     }
 
