@@ -43,13 +43,28 @@ export class ChildRecord {
     }
 
     withField(column: string, value: ContentFields[string]): this {
+        if (this.relations.holds(column)) {
+            throw new Error(
+                `[typo3-playwright-toolkit] The column "${column}" already holds a relation, ` +
+                    'so setting it with withField would decide what the test builds by ' +
+                    'whichever call ran last.',
+            )
+        }
         this.fields[column] = value
 
         return this
     }
 
     withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
+        this.refuseSetColumn(column)
         this.relations.withFileReference(column, fileUid, fields)
+
+        return this
+    }
+
+    withChild(column: string, table: string, configure: (child: ChildRecord) => void): this {
+        this.refuseSetColumn(column)
+        this.relations.withChild(column, table, configure)
 
         return this
     }
@@ -60,6 +75,16 @@ export class ChildRecord {
         const { columns, records } = this.relations.materialise(row)
 
         return { row: { ...row, ...columns }, records }
+    }
+
+    private refuseSetColumn(column: string): void {
+        if (column in this.fields) {
+            throw new Error(
+                `[typo3-playwright-toolkit] The column "${column}" is already set with ` +
+                    'withField, so a relation on it would decide what the test builds by ' +
+                    'whichever call ran last.',
+            )
+        }
     }
 }
 
@@ -102,6 +127,10 @@ export class RelationSet {
         items.forEach((item) => this.withChild(column, table, (child) => configure(child, item)))
 
         return this
+    }
+
+    holds(column: string): boolean {
+        return this.claims.has(column)
     }
 
     materialise(owner: RelationOwner): RelationOutput {
