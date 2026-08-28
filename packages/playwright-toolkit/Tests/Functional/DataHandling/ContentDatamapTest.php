@@ -153,6 +153,20 @@ final class ContentDatamapTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function theBodyANestedElementPostsLinksItsReferenceToTheChild(): void
+    {
+        $posted = ContractFixture::read('content-nested-datamap');
+
+        parse_str(http_build_query($posted), $body);
+
+        /** @var array<string, array<string, array<string, mixed>>> $datamap */
+        $datamap = $body['data'];
+        $ids = $this->substitutedIds($datamap);
+
+        self::assertSame([$ids['NEWitem']], $this->referenceParents());
+    }
+
+    #[Test]
     public function aPageLinksItsMediaTheSameWay(): void
     {
         $pageUid = $this->processDatamap([

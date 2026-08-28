@@ -24,6 +24,15 @@ the package a change belongs to.
 
 ### Added
 
+- **@plan2net/typo3-playwright-toolkit** — four setters attach a relation:
+  `withFileReference`, `withFileReferences`, `withChild` and `withChildren`. They work
+  the same on a content type, on a child record and on the builder in a test, so a
+  child carries its own files and children to any depth and no builder mints a `NEW`
+  identifier by hand. Call order decides the order; `pid` and `sys_language_uid` come
+  from the record above. The columns the toolkit writes itself are refused, as is a
+  column filled from two places — a `uid_foreign` of your own saves a row pointing at
+  nothing without failing.
+
 - **@plan2net/typo3-playwright-toolkit** — `imageCrop()` writes the JSON text the
   `crop` column of a file reference holds: `imageCrop({ ratio: '16:9' })` keeps the
   whole image at that ratio, and an `area` crops a part of it. It also returns a

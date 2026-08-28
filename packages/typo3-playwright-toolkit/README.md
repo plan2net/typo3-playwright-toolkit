@@ -211,6 +211,50 @@ A key with the name of a core CType replaces the built-in builder, and the other
 core types stay as they are. That works for the type too: `ContentTypeMap` starts
 empty, so your `text: MyTextContent` is what `.configure()` hands you.
 
+### Files and child records
+
+Four setters attach a relation, and they work the same on a content type, on a
+child record, and on the builder in a test:
+
+```ts
+export class AccordionContent extends CoreContent {
+    readonly type = 'accordion'
+
+    withItems(items: AccordionItem[]): this {
+        return this.withChildren('items', 'tx_myext_accordion_item', items, (item, data) =>
+            item
+                .withField('title', data.title)
+                .withFileReference('image', data.imageId),
+        )
+    }
+}
+```
+
+`withFileReference(column, fileUid)` and `withFileReferences(column, fileUids)` take
+the reference's own fields as a third argument, such as a `crop`. `withChild` and
+`withChildren` hand the callback a record with the same four setters, so a child can
+carry its own files and children.
+
+The order you call them in is the order the records get. A child takes `pid` and
+`sys_language_uid` from the record above it, so a translation sets the language once,
+at the top.
+
+Never set `uid_local`, `uid_foreign`, `tablenames`, `fieldname` or `sorting_foreign`:
+the toolkit writes them, and your own value fails. A wrong `uid_foreign` saves a row
+that points at nothing, and TYPO3 reports no error.
+
+If a builder has no setter for a column, add the relation in the test:
+
+```ts
+await builders.content().onPage(page.id).ofType('textmedia')
+    .configure((element) => element.withHeader('Gallery', 'h2'))
+    .withFileReferences('assets', [1, 2], { crop: imageCrop({ ratio: '16:9' }) })
+    .create()
+```
+
+Fill a column from one place only. Both the content type and the test, or `withField`
+on top, fails.
+
 ### Calling the site directly
 
 The `request` client — the one `defineScenario` hands your setup, and the `request`
@@ -372,9 +416,10 @@ Every CType of a normal TYPO3 installation has a builder, and you register nothi
 
 All builders share `withHeader`, `withSubheader`, `withHeaderLayout`,
 `withHeaderLink`, `withColPos`, `setHidden`, and `withField(column, value)` for any
-other TCA column. Types with images add `withFile` and `withFiles`, which write the
-`sys_file_reference` rows for you, plus `withColumns`, `withOrientation` and
-`withImageSize`.
+other TCA column. They also share the four relation setters above —
+`withFileReference`, `withFileReferences`, `withChild` and `withChildren`. Types with
+images add `withFile` and `withFiles` for their own media column, plus `withColumns`,
+`withOrientation` and `withImageSize`.
 
 Where core stores a number that means nothing on its own, the setter takes the name
 and your editor suggests the options:

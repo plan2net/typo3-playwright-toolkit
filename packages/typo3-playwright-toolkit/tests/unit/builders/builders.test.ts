@@ -662,6 +662,44 @@ describe('the body an image element posts', () => {
     })
 })
 
+describe('the body a nested element posts', () => {
+    it('is the one the extension proves DataHandler links to the child', async () => {
+        const fixturePath = path.resolve(
+            path.dirname(fileURLToPath(import.meta.url)),
+            '../../../../../contract/content-nested-datamap.json',
+        )
+        const fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf-8')) as Record<string, string>
+        delete fixture._comment
+
+        const { posted, page } = fakePage(42)
+        await contentBuilder(page)
+            .onPage('2')
+            .ofType('text')
+            .configure((element) => element.withHeader('With items'))
+            .withChild('tx_relationstest_items', 'tx_relationstest_item', (item) =>
+                item.withField('title', 'First').withFileReference('image', 1),
+            )
+            .create()
+
+        const names: Record<string, string> = {
+            [identifierOf(posted[0].dataMap.tt_content)]: 'NEWcontent',
+            [identifierOf(posted[0].dataMap.tx_relationstest_item)]: 'NEWitem',
+            [identifierOf(posted[0].dataMap.sys_file_reference)]: 'NEWitemimage',
+        }
+        const renamed = (value: string): string =>
+            Object.entries(names).reduce((text, [from, to]) => text.split(from).join(to), value)
+
+        expect(
+            Object.fromEntries(
+                Object.entries(posted[0].fields).map(([key, value]) => [
+                    renamed(key),
+                    renamed(value),
+                ]),
+            ),
+        ).toEqual(fixture)
+    })
+})
+
 describe('the body a flexform element posts', () => {
     it('is the one the extension proves the data structure is read against', async () => {
         const fixturePath = path.resolve(
