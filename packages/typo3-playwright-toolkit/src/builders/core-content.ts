@@ -1,4 +1,5 @@
 import type { ContentBuilderInterface, ContentFields } from '../types/content-builder.js'
+import { flexForm, type FlexFormValues } from './fields.js'
 import {
     RelationSet,
     type ChildRecord,
@@ -36,6 +37,8 @@ export abstract class CoreContent implements ContentBuilderInterface {
         (column) => column in this.fields,
     )
 
+    private readonly settings: FlexFormValues = {}
+
     withHeader(header: string, level?: HeadingLevel): this {
         this.set('header', header)
 
@@ -64,6 +67,13 @@ export abstract class CoreContent implements ContentBuilderInterface {
     }
 
     /** Any column the typed setters do not cover, including your own. */
+    /** Collected, so a second call does not drop the first. */
+    withSetting(name: string, value: string | number | boolean): this {
+        this.settings[`settings.${name}`] = value
+
+        return this
+    }
+
     withField(column: string, value: ContentFields[string]): this {
         return this.set(column, value)
     }
@@ -102,7 +112,12 @@ export abstract class CoreContent implements ContentBuilderInterface {
     }
 
     getFields(): ContentFields {
-        return { CType: this.type, ...this.fields }
+        // Before the fields, so withField('pi_flexform', …) still wins.
+        return {
+            ...(0 === Object.keys(this.settings).length ? {} : { pi_flexform: flexForm(this.settings) }),
+            CType: this.type,
+            ...this.fields,
+        }
     }
 
     protected set(column: string, value: ContentFields[string]): this {

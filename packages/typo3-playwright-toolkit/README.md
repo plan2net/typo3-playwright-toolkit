@@ -468,15 +468,33 @@ imageCrop({ ratio: '16:9' })
 imageCrop({ area: { x: 0.1, y: 0, width: 0.5, height: 1 } })
 ```
 
-A flexform column takes `flexForm()`, because the form posts one field per value
-rather than one for the column:
+A plugin's settings go through `withSetting`, one call per setting:
 
 ```ts
-element.withField('pi_flexform', flexForm({ 'settings.limit': 10 }))
+element.withSetting('limit', 10).withSetting('order', 'title')
 ```
 
-Plain values land on the single sheet a structure without named ones has. Where it
-has several, name one per group: `flexForm({ sDEF: {…}, sFilter: {…} })`.
+Each one becomes a `settings.` entry and they are written to `pi_flexform` together,
+so two calls never overwrite each other. That is what a builder for your own plugin
+uses:
+
+```ts
+export class EventListContent extends CoreContent {
+    readonly type = 'myext_eventlist'
+
+    upcomingOnly(): this {
+        return this.withSetting('onlyUpcoming', '1')
+    }
+}
+```
+
+For a structure with named sheets, or a key outside `settings.`, write the column
+yourself with `flexForm()` — the form posts one field per value, not one for the
+column:
+
+```ts
+element.withField('pi_flexform', flexForm({ sDEF: {…}, sFilter: {…} }))
+```
 
 ### The inspect command
 

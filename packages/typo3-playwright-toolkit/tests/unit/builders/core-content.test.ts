@@ -14,6 +14,7 @@ import {
     UploadsContent,
 } from '#src/builders/core-content.js'
 import { createContent, registerContentTypes } from '#src/builders/content-factory.js'
+import { flexForm } from '#src/builders/fields.js'
 import type { ContentBuilderInterface, ContentFields } from '#src/types/content-builder.js'
 
 describe('header_layout', () => {
@@ -137,6 +138,14 @@ describe('the shared header columns', () => {
         expect(new TextContent().withField('space_before_class', 'large').getFields()).toMatchObject({
             space_before_class: 'large',
         })
+    })
+})
+
+describe('plugin settings', () => {
+    it('gathers every setting into the one flexform column', () => {
+        const fields = new TextContent().withSetting('limit', 3).withSetting('order', 'title').getFields()
+
+        expect(fields.pi_flexform).toEqual(flexForm({ 'settings.limit': 3, 'settings.order': 'title' }))
     })
 })
 

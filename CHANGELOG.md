@@ -10,6 +10,20 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **@plan2net/typo3-playwright-toolkit** — `withSetting(name, value)` writes one of a
+  plugin's `settings.` values. Calls collect, and all of them land in `pi_flexform`
+  together:
+
+  ```ts
+  element.withSetting('limit', 10).withSetting('order', 'title')
+  ```
+
+  `withField('pi_flexform', …)` overwrites, so a builder with two settings had to
+  gather them itself and override `getFields()`. Named sheets still take
+  `flexForm()`.
+
 ## [0.7.0] - 2026-08-28
 
 ### Breaking
