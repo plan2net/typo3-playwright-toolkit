@@ -47,9 +47,10 @@ ddev add-on get https://github.com/plan2net/typo3-playwright-toolkit/releases/la
 ddev restart
 ```
 
-Important: use this release archive, not `ddev add-on get plan2net/…`. DDEV expects
-`install.yaml` at the top level of a repository, and this add-on lives in a subfolder
-of a monorepo.
+> [!IMPORTANT]
+> Use this release archive, not `ddev add-on get plan2net/…`. DDEV expects
+> `install.yaml` at the top level of a repository, and this add-on lives in a
+> subfolder of a monorepo.
 
 ## Configure
 

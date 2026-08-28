@@ -79,8 +79,9 @@ map $http_host $typo3_context {
 fastcgi_param TYPO3_CONTEXT $typo3_context;
 ```
 
-Important: a `.ddev/nginx/*.conf` file does not work here. DDEV includes those after
-the PHP location block, and nginx then ignores the value.
+> [!IMPORTANT]
+> A `.ddev/nginx/*.conf` file does not work here. DDEV includes those after the PHP
+> location block, and nginx then ignores the value.
 
 A complete file is checked in at
 [`tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf`](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf)
@@ -190,12 +191,12 @@ never moved to one that does not exist.
 >
 > Otherwise the lookup finds nothing, every request treats its database as unseeded
 > and clones it again, and the content the test just built is gone.
-
-Important: the returned keys are paths like `DB/Connections/Default/dbname`, not
-array keys. If your project writes them with `ArrayUtility::setValueByPath` (or the
-same helper it already uses for the other settings), they land correctly. A plain
-`array_merge` into `$GLOBALS['TYPO3_CONF_VARS']` creates one key with that literal
-name, and your tests then run against your real database.
+>
+> The returned keys are paths like `DB/Connections/Default/dbname`, not array keys.
+> If your project writes them with `ArrayUtility::setValueByPath` (or the same helper
+> it already uses for the other settings), they land correctly. A plain `array_merge`
+> into `$GLOBALS['TYPO3_CONF_VARS']` creates one key with that literal name, and your
+> tests then run against your real database.
 
 ### Fixtures
 

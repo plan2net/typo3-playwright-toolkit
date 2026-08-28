@@ -47,9 +47,10 @@ Add a `tsconfig.json` next to your tests that extends the one shipped here:
 }
 ```
 
-Important: this package is ESM and needs `"moduleResolution": "NodeNext"`. Without
-it TypeScript cannot read the package's exports, so `page` and `state` in your tests
-type as `any` and you lose every check your editor could give you.
+> [!IMPORTANT]
+> This package is ESM and needs `"moduleResolution": "NodeNext"`. Without it
+> TypeScript cannot read the package's exports, so `page` and `state` in your tests
+> type as `any` and you lose every check your editor could give you.
 
 ## Configure
 
@@ -82,8 +83,9 @@ directory is not an error: the run works and writes its state somewhere you did 
 expect. Use `fileURLToPath` rather than `new URL(...).pathname`, which
 percent-encodes a project path containing spaces or non-ASCII characters.
 
-Important: `defineToolkitConfig` must run before the first import from this package.
-Everything else reads the values it stores.
+> [!IMPORTANT]
+> `defineToolkitConfig` must run before the first import from this package.
+> Everything else reads the values it stores.
 
 ## Using the package
 
@@ -271,8 +273,9 @@ await runAccessibilityScan(page, { exclude: '#ads' })
 await runAccessibilityScan(page, { disabledRules: ['color-contrast'] })
 ```
 
-Important: the test also fails when the check ran no rules at all. An empty area
-would otherwise pass without testing anything.
+> [!IMPORTANT]
+> The test also fails when the check ran no rules at all. An empty area would
+> otherwise pass without testing anything.
 
 A check with `include` turns off the `heading-order` rule, because axe compares the
 headings of a part of the page with the structure of the whole page. Checks of a
@@ -307,8 +310,9 @@ await page.goto('/')
 await verifier.assertNoViolations(testInfo)  // testInfo is optional
 ```
 
-Important: `install()` must run before anything is loaded. A page that is already
-open reports nothing.
+> [!IMPORTANT]
+> `install()` must run before anything is loaded. A page that is already open
+> reports nothing.
 
 The test also fails if pages were requested but none of your own pages ever arrived,
 so a navigation that never loaded cannot pass. Pass `testInfo` to attach the full
