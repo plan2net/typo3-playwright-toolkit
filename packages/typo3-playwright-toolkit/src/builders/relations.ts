@@ -14,6 +14,12 @@ export interface RelationOutput {
 
 const WIRED_COLUMNS = ['uid_local', 'uid_foreign', 'tablenames', 'fieldname', 'sorting_foreign']
 
+function mergeRecords(into: RecordDataMap, from: RecordDataMap): void {
+    for (const [table, rows] of Object.entries(from)) {
+        Object.assign((into[table] ??= {}), rows)
+    }
+}
+
 interface FileReference {
     column: string
     identifier: string
@@ -30,6 +36,11 @@ interface Child {
 
 export class ChildRecord {
     private readonly fields: ContentFields = {}
+    private readonly relations: RelationSet
+
+    constructor(table: string) {
+        this.relations = new RelationSet(table)
+    }
 
     withField(column: string, value: ContentFields[string]): this {
         this.fields[column] = value
@@ -37,19 +48,31 @@ export class ChildRecord {
         return this
     }
 
-    materialise(owner: RelationOwner): Record<string, unknown> {
-        return { pid: owner.pid, sys_language_uid: owner.sys_language_uid, ...this.fields }
+    withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
+        this.relations.withFileReference(column, fileUid, fields)
+
+        return this
+    }
+
+    /** Its own relations inherit from the merged row, so a pid it sets reaches them. */
+    materialise(owner: RelationOwner): { row: Record<string, unknown>; records: RecordDataMap } {
+        const row = { pid: owner.pid, sys_language_uid: owner.sys_language_uid, ...this.fields }
+        const { columns, records } = this.relations.materialise(row)
+
+        return { row: { ...row, ...columns }, records }
     }
 }
 
 export class RelationSet {
     private readonly references: FileReference[] = []
     private readonly children: Child[] = []
+    private readonly claims = new Map<string, string>()
 
     constructor(private readonly ownerTable: string) {}
 
     withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
         this.refuseWiredColumns(fields)
+        this.claim(column, 'sys_file_reference')
         this.references.push({ column, identifier: newRecordIdentifier(), fileUid, fields })
 
         return this
@@ -62,9 +85,21 @@ export class RelationSet {
     }
 
     withChild(column: string, table: string, configure: (child: ChildRecord) => void): this {
-        const child = new ChildRecord()
+        this.claim(column, table)
+        const child = new ChildRecord(table)
         configure(child)
         this.children.push({ column, table, identifier: newRecordIdentifier(), child })
+
+        return this
+    }
+
+    withChildren<T>(
+        column: string,
+        table: string,
+        items: T[],
+        configure: (child: ChildRecord, item: T) => void,
+    ): this {
+        items.forEach((item) => this.withChild(column, table, (child) => configure(child, item)))
 
         return this
     }
@@ -90,8 +125,9 @@ export class RelationSet {
 
         this.children.forEach(({ column, table, identifier, child }) => {
             ;(tokens[column] ??= []).push(identifier)
-            const rows = (records[table] ??= {})
-            rows[identifier] = child.materialise(owner)
+            const { row, records: nested } = child.materialise(owner)
+            ;(records[table] ??= {})[identifier] = row
+            mergeRecords(records, nested)
         })
 
         const columns = Object.fromEntries(
@@ -99,6 +135,19 @@ export class RelationSet {
         )
 
         return { columns, records }
+    }
+
+    private claim(column: string, table: string): void {
+        const claimed = this.claims.get(column)
+        if (undefined !== claimed && claimed !== table) {
+            throw new Error(
+                `[typo3-playwright-toolkit] The column "${column}" already holds ${claimed} ` +
+                    `records and cannot also hold ${table} ones. A column resolves against a ` +
+                    'single foreign_table, so the others would be written and never found.',
+            )
+        }
+
+        this.claims.set(column, table)
     }
 
     private refuseWiredColumns(fields: ContentFields): void {

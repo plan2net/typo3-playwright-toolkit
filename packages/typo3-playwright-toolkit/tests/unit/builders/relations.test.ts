@@ -76,4 +76,54 @@ describe('a child record', () => {
             title: 'First',
         })
     })
+
+    it('writes one row per item, in the order the items are given', () => {
+        const relations = new RelationSet('tt_content')
+        relations.withChildren('items', 'tx_demo_item', ['First', 'Second'], (item, title) =>
+            item.withField('title', title),
+        )
+
+        const { columns, records } = relations.materialise({ pid: 7, sys_language_uid: 0 })
+        const rows = records.tx_demo_item
+
+        expect(columns.items.split(',').map((token) => rows[token].title)).toEqual([
+            'First',
+            'Second',
+        ])
+    })
+
+    it('names the child table on a reference the child carries, not the element', () => {
+        const relations = new RelationSet('tt_content')
+        relations.withChild('items', 'tx_demo_item', (item) => item.withFileReference('image', 42))
+
+        const { records } = relations.materialise({ pid: 7, sys_language_uid: 0 })
+
+        expect(only(records.sys_file_reference)).toMatchObject({
+            uid_local: 42,
+            tablenames: 'tx_demo_item',
+            fieldname: 'image',
+        })
+    })
+})
+
+// A column resolves against one foreign_table, so rows of a second one would be
+// written and then never found.
+describe('one column, one relation', () => {
+    it('refuses a second table on a column already holding children', () => {
+        const relations = new RelationSet('tt_content')
+        relations.withChild('items', 'tx_demo_item', (item) => item.withField('title', 'First'))
+
+        expect(() =>
+            relations.withChild('items', 'tx_other_item', (item) =>
+                item.withField('title', 'Second'),
+            ),
+        ).toThrow(/items/)
+    })
+
+    it('refuses a file reference on a column already holding children', () => {
+        const relations = new RelationSet('tt_content')
+        relations.withChild('items', 'tx_demo_item', (item) => item.withField('title', 'First'))
+
+        expect(() => relations.withFileReference('items', 42)).toThrow(/items/)
+    })
 })
