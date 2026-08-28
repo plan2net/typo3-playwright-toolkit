@@ -66,9 +66,9 @@ playwright_build_assets() {
     (cd "${build_root}" && npm run build) || return 1
 }
 
-# The db-test compose file only takes effect after `ddev restart`. Before that,
-# "db-test" does not resolve — or worse, resolves to ANOTHER project's service on
-# the shared ddev network, and prepare would write into that project's template.
+# The compose file only takes effect after `ddev restart`. Before that "db-test"
+# does not resolve, or resolves to another project's service on the shared ddev
+# network — and prepare would write into that project's template.
 playwright_require_db_test() {
     config_dir="${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}"
 

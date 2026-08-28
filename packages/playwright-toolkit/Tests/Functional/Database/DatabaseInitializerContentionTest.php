@@ -111,7 +111,9 @@ final class DatabaseInitializerContentionTest extends FunctionalTestCase
     private function lockHolderSource(string $finalFingerprint): string
     {
         $arguments = [
-            'lockFile' => Environment::getVarPath() . '/test-locks/' . LockFiles::TEMPLATE_LOCK_FILE,
+            'autoload' => __DIR__ . '/../../../vendor/autoload.php',
+            'lockDirectory' => LockFiles::inVarPath()->directory(),
+            'templateLock' => LockFiles::TEMPLATE_LOCK,
             'template' => $this->databaseDirectory() . '/playwright_db_template.sqlite',
             'signal' => $this->signalFile(),
             'fingerprint' => $finalFingerprint,
@@ -122,8 +124,13 @@ final class DatabaseInitializerContentionTest extends FunctionalTestCase
             '$a = %s;',
             var_export($arguments, true)
         ) . <<<'PHP'
-            $lock = fopen($a['lockFile'], 'c');
-            flock($lock, LOCK_EX);
+            require $a['autoload'];
+            // The same lock, or this would block nothing.
+            $factory = new Symfony\Component\Lock\LockFactory(
+                new Symfony\Component\Lock\Store\FlockStore($a['lockDirectory'])
+            );
+            $lock = $factory->createLock($a['templateLock'], null);
+            $lock->acquire(true);
             touch($a['signal']);
 
             $write = static function (string $fingerprint) use ($a): void {
@@ -140,8 +147,7 @@ final class DatabaseInitializerContentionTest extends FunctionalTestCase
             usleep($a['hold']);
             $write($a['fingerprint']);
 
-            flock($lock, LOCK_UN);
-            fclose($lock);
+            $lock->release();
             PHP;
     }
 

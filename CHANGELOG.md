@@ -10,6 +10,14 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Changed
+
+- **plan2net/playwright-toolkit** — locking now uses `symfony/lock` instead of
+  `flock()` calls spread over five places. `LockFiles` offers `shared()`,
+  `exclusively()` and `exclusivelyWithin()`, so no caller opens a file handle.
+  Lock file names never start with `db-`, which belongs to the claim files
+  cleanup looks for.
+
 ### Fixed
 
 - **DDEV add-on** — `ddev playwright-prepare` (and every command that reaches the

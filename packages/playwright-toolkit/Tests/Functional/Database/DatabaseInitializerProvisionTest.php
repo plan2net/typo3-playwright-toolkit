@@ -123,10 +123,11 @@ final class DatabaseInitializerProvisionTest extends FunctionalTestCase
         $this->prepareTemplate();
 
         // touch() succeeds on a directory, so the only real failure is an
-        // unwritable parent. Both locks are pre-created, since opening those comes
-        // first and would otherwise be what fails.
+        // unwritable parent. Both locks are taken once first, so their files exist
+        // — creating those comes first and would otherwise be what fails.
         $locks = LockFiles::inVarPath();
-        touch($locks->createLock('db' . self::TEST_ID));
+        $locks->shared(LockFiles::TEMPLATE_LOCK, static fn(): mixed => null);
+        $locks->exclusively($locks->databaseLock('db' . self::TEST_ID), static fn(): mixed => null);
         chmod($locks->directory(), 0500);
 
         try {

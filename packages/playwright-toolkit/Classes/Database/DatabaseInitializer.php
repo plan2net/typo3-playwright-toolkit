@@ -16,9 +16,8 @@ use TYPO3\CMS\Core\Core\Environment;
 
 /**
  * Runs before TYPO3 boots, from the same call that redirects the connection, so
- * no query during boot can hit a missing database. There is no container yet, so
- * the dependencies are created by hand. The check that needs TCA lives in
- * TemplateDriftGuard.
+ * no query during boot can hit a missing database. No container exists there, so
+ * the dependencies are created by hand.
  */
 final class DatabaseInitializer
 {
@@ -57,22 +56,18 @@ final class DatabaseInitializer
             return;
         }
 
-        // No test ID means this request is not part of a test run; provisioning here
-        // would drop and rebuild whatever database the Default connection points at.
         $testId = TestContext::testId();
         if ('' === $testId) {
             return;
         }
 
-        // A test ID only ever arrives as an HTTP header, so a CLI process has nothing
-        // to provision — and playwright:prepare boots TYPO3, which would otherwise
-        // trip the "not prepared" guard before it can build anything.
+        // playwright:prepare boots TYPO3 too, and it has no database to provision.
         if (Environment::isCli()) {
             return;
         }
 
-        // A well-formed test ID is public knowledge — it is just sixteen characters
-        // in a header. Creating a database must cost more than guessing one.
+        // A test ID is sixteen public characters, so creating a database must cost
+        // more than guessing one.
         if (!$this->secret->matchesCurrentRequest()) {
             return;
         }
@@ -100,21 +95,9 @@ final class DatabaseInitializer
 
         // Shared, so several workers can clone at once but none of them observes a
         // template that playwright:prepare is midway through replacing.
-        $templateHandle = $this->lockFiles->open($this->lockFiles->templateLock());
-
-        try {
-            if (!flock($templateHandle, LOCK_SH)) {
-                throw new \RuntimeException('Could not acquire the template lock');
-            }
-
-            $createHandle = $this->lockFiles->open($this->lockFiles->createLock($databaseName));
-
-            try {
-                // Parallel workers can share one test ID; serialize per database.
-                if (!flock($createHandle, LOCK_EX)) {
-                    throw new \RuntimeException('Could not acquire the database create lock');
-                }
-
+        $this->lockFiles->shared(LockFiles::TEMPLATE_LOCK, function () use ($driver, $testId, $configuration, $seedMarker, $databaseName): void {
+            // Parallel workers can share one test ID; serialize per database.
+            $this->lockFiles->exclusively($this->lockFiles->databaseLock($databaseName), function () use ($driver, $testId, $configuration, $seedMarker): void {
                 if ($this->isAlreadySeeded($driver, $testId, $configuration, $seedMarker)) {
                     return;
                 }
@@ -139,14 +122,8 @@ final class DatabaseInitializer
                 $driver->materialise($testId);
                 $driver->isolateProcessedFiles($testId);
                 self::$clonedThisRequest = true;
-            } finally {
-                flock($createHandle, LOCK_UN);
-                fclose($createHandle);
-            }
-        } finally {
-            flock($templateHandle, LOCK_UN);
-            fclose($templateHandle);
-        }
+            });
+        });
     }
 
     /**

@@ -11,8 +11,8 @@ use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 final class LockFileNamingTest extends TestCase
 {
     /**
-     * Cleanup discovers disposable test databases by globbing "db-*.lock"; the
-     * serialization locks and the reusable template must stay invisible to it.
+     * Cleanup finds test databases by globbing "db-*.lock". Lock files land in the
+     * same directory and are named after the key, so no key may start with it.
      */
     #[Test]
     public function exposesOnlyTheClaimToTheCleanupGlob(): void
@@ -20,7 +20,7 @@ final class LockFileNamingTest extends TestCase
         $lockFiles = new LockFiles('/locks');
 
         self::assertStringStartsWith('db-', basename($lockFiles->claim('dbABCDEF0123456789')));
-        self::assertStringStartsNotWith('db-', basename($lockFiles->createLock('dbABCDEF0123456789')));
-        self::assertStringStartsNotWith('db-', LockFiles::TEMPLATE_LOCK_FILE);
+        self::assertStringStartsNotWith('db-', $lockFiles->databaseLock('dbABCDEF0123456789'));
+        self::assertStringStartsNotWith('db-', LockFiles::TEMPLATE_LOCK);
     }
 }

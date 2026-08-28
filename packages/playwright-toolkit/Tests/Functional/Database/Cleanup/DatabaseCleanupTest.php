@@ -178,16 +178,10 @@ final class DatabaseCleanupTest extends FunctionalTestCase
         $this->claim();
         $this->createDatabaseFile();
 
-        $handle = fopen($this->lockFiles->createLock(self::DATABASE), 'c');
-        self::assertNotFalse($handle);
-        flock($handle, LOCK_EX);
-
-        try {
-            $outcome = $this->cleanup(lockTimeoutMs: 200)->drop($this->driver(), self::TEST_ID);
-        } finally {
-            flock($handle, LOCK_UN);
-            fclose($handle);
-        }
+        $outcome = $this->lockFiles->exclusively(
+            $this->lockFiles->databaseLock(self::DATABASE),
+            fn(): CleanupOutcome => $this->cleanup(lockTimeoutMs: 200)->drop($this->driver(), self::TEST_ID)
+        );
 
         self::assertSame(CleanupOutcome::Failed, $outcome);
         self::assertFileExists($this->databaseFile(), 'dropped a database while it was locked');
@@ -199,11 +193,7 @@ final class DatabaseCleanupTest extends FunctionalTestCase
         $this->claim();
         $this->createDatabaseFile();
 
-        $handle = fopen($this->lockFiles->createLock(self::DATABASE), 'c');
-        self::assertNotFalse($handle);
-        flock($handle, LOCK_EX);
-        flock($handle, LOCK_UN);
-        fclose($handle);
+        $this->lockFiles->exclusively($this->lockFiles->databaseLock(self::DATABASE), static fn(): mixed => null);
 
         self::assertSame(CleanupOutcome::Dropped, $this->cleanup()->drop($this->driver(), self::TEST_ID));
     }
@@ -382,9 +372,13 @@ final class DatabaseCleanupTest extends FunctionalTestCase
     {
         $script = $this->root . '/refresh-claim.php';
         file_put_contents($script, sprintf(
-            '<?php $lock = fopen(%s, "c"); flock($lock, LOCK_EX); usleep(400000);'
-            . ' touch(%s); flock($lock, LOCK_UN); fclose($lock);',
-            var_export($this->lockFiles->createLock(self::DATABASE), true),
+            '<?php require %s;'
+            . ' $lock = (new Symfony\Component\Lock\LockFactory('
+            . 'new Symfony\Component\Lock\Store\FlockStore(%s)))->createLock(%s, null);'
+            . ' $lock->acquire(true); usleep(400000); touch(%s); $lock->release();',
+            var_export(__DIR__ . '/../../../../vendor/autoload.php', true),
+            var_export($this->lockFiles->directory(), true),
+            var_export($this->lockFiles->databaseLock(self::DATABASE), true),
             var_export($this->lockFiles->claim(self::DATABASE), true)
         ));
 

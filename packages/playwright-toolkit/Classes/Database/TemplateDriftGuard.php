@@ -68,8 +68,20 @@ final class TemplateDriftGuard implements LoggerAwareInterface
             return;
         }
 
-        $driver->drop($testId);
-        @unlink($this->lockFiles->claim($databaseName));
+        try {
+            // The lock provisioning takes: a request creating this database in
+            // between would lose its claim, and cleanup never finds it.
+            $this->lockFiles->exclusively(
+                $this->lockFiles->databaseLock($databaseName),
+                function () use ($driver, $testId, $databaseName): void {
+                    $driver->drop($testId);
+                    @unlink($this->lockFiles->claim($databaseName));
+                }
+            );
+        } catch (\Throwable) {
+            // Left claimed, so cleanup still finds it, and the caller can rethrow
+            // the message that helps.
+        }
     }
 
     private function logMalformedTestId(): void

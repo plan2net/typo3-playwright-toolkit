@@ -36,20 +36,11 @@ final class ReplayPreparer
 
         // Shared, like every clone: a concurrent playwright:prepare must not
         // replace the template midway through.
-        $handle = $this->lockFiles->open($this->lockFiles->templateLock());
-
-        try {
-            if (!flock($handle, LOCK_SH)) {
-                throw new \RuntimeException('Could not acquire the template lock');
-            }
-
+        $this->lockFiles->shared(LockFiles::TEMPLATE_LOCK, function () use ($driver, $configuration): void {
             $this->readiness->assertPrepared($driver, $configuration);
             // Cleanup refuses this name, so a clean start has to come from here.
             $driver->materialise(DatabaseName::REPLAY_TEST_ID);
-        } finally {
-            flock($handle, LOCK_UN);
-            fclose($handle);
-        }
+        });
 
         return DatabaseName::forTestId(DatabaseName::REPLAY_TEST_ID);
     }

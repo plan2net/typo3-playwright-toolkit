@@ -35,8 +35,7 @@ final class TestContext
             $GLOBALS['TYPO3_CONF_VARS'] = ArrayUtility::setValueByPath($GLOBALS['TYPO3_CONF_VARS'], $path, $value);
         }
 
-        // Create the database right after redirecting to it, so no query during
-        // boot can hit a missing database.
+        // Create it right after redirecting, so nothing during boot finds it missing.
         if ([] !== $overrides) {
             DatabaseInitializer::fromGlobals()->provisionCurrentRequest();
         }

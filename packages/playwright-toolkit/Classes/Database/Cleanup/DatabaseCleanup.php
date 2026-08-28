@@ -131,32 +131,37 @@ final class DatabaseCleanup implements LoggerAwareInterface
             return CleanupOutcome::Refused;
         }
 
-        $this->lockFiles->ensureDirectory();
-
-        $handle = @fopen($this->lockFiles->createLock($databaseName), 'c');
-        if (false === $handle) {
-            $this->logger?->error('Could not open the create lock', ['database' => $databaseName]);
-
-            return CleanupOutcome::Failed;
-        }
+        $outcome = null;
 
         try {
             // Provisioning holds this exclusively across the claim and
             // materialise(), so waiting here is what stops a drop mid-rebuild.
-            if (!$this->acquireExclusive($handle)) {
-                $this->logger?->error('Timed out waiting for the create lock', [
-                    'database' => $databaseName,
-                    'timeoutMs' => $this->lockTimeoutMs,
-                ]);
+            $acquired = $this->lockFiles->exclusivelyWithin(
+                $this->lockFiles->databaseLock($databaseName),
+                $this->lockTimeoutMs,
+                function () use ($driver, $testId, $databaseName, $minimumAgeMs, &$outcome): void {
+                    $outcome = $this->dropUnderLock($driver, $testId, $databaseName, $minimumAgeMs);
+                }
+            );
+        } catch (\Throwable $exception) {
+            $this->logger?->error('Could not take the create lock', [
+                'database' => $databaseName,
+                'exception' => $exception->getMessage(),
+            ]);
 
-                return CleanupOutcome::Failed;
-            }
-
-            return $this->dropUnderLock($driver, $testId, $databaseName, $minimumAgeMs);
-        } finally {
-            flock($handle, LOCK_UN);
-            fclose($handle);
+            return CleanupOutcome::Failed;
         }
+
+        if (!$acquired) {
+            $this->logger?->error('Timed out waiting for the create lock', [
+                'database' => $databaseName,
+                'timeoutMs' => $this->lockTimeoutMs,
+            ]);
+
+            return CleanupOutcome::Failed;
+        }
+
+        return $outcome;
     }
 
     private function dropUnderLock(
@@ -235,19 +240,5 @@ final class DatabaseCleanup implements LoggerAwareInterface
         $this->logger?->notice('Dropped a test database', ['database' => $databaseName]);
 
         return CleanupOutcome::Dropped;
-    }
-
-    private function acquireExclusive(mixed $handle): bool
-    {
-        $deadline = microtime(true) + $this->lockTimeoutMs / 1000;
-
-        do {
-            if (flock($handle, LOCK_EX | LOCK_NB)) {
-                return true;
-            }
-            usleep(20000);
-        } while (microtime(true) < $deadline);
-
-        return false;
     }
 }

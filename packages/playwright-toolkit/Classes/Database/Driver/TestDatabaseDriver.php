@@ -42,7 +42,6 @@ interface TestDatabaseDriver
 
     public function materialise(string $testId): void;
 
-    /** Points every Local storage in the test database at its per-test processing folder. */
     public function isolateProcessedFiles(string $testId): void;
 
     /** Lets cleanup tell "nothing to do" from "something else owns this name". */

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Database\Cleanup;
 
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\SharedLockInterface;
+use Symfony\Component\Lock\Store\FlockStore;
 use TYPO3\CMS\Core\Core\Environment;
 
 final class LockFiles
@@ -11,7 +14,9 @@ final class LockFiles
     /**
      * @var string
      */
-    public const TEMPLATE_LOCK_FILE = 'template-build.lock';
+    public const TEMPLATE_LOCK = 'playwright-template-build';
+
+    private ?LockFactory $lockFactory = null;
 
     public function __construct(
         private readonly string $directory,
@@ -46,29 +51,59 @@ final class LockFiles
         return $this->directory . '/db-' . $databaseName . '.lock';
     }
 
-    public function createLock(string $databaseName): string
+    public function databaseLock(string $databaseName): string
     {
-        return $this->directory . '/create-' . $databaseName . '.lock';
-    }
-
-    public function templateLock(): string
-    {
-        return $this->directory . '/' . self::TEMPLATE_LOCK_FILE;
+        return 'playwright-create-' . $databaseName;
     }
 
     /**
-     * @return resource
+     * @template T
+     *
+     * @param callable(): T $body
+     *
+     * @return T
      */
-    public function open(string $lockFile)
+    public function exclusively(string $key, callable $body): mixed
     {
-        $this->ensureDirectory();
+        return $this->holding($key, false, $body);
+    }
 
-        $handle = fopen($lockFile, 'c');
-        if (false === $handle) {
-            throw new \RuntimeException(sprintf('Could not open the lock file "%s"', $lockFile));
-        }
+    /**
+     * @template T
+     *
+     * @param callable(): T $body
+     *
+     * @return T
+     */
+    public function shared(string $key, callable $body): mixed
+    {
+        return $this->holding($key, true, $body);
+    }
 
-        return $handle;
+    /**
+     * @param callable(): void $body
+     *
+     * @return bool false when the lock stayed taken for the whole timeout
+     */
+    public function exclusivelyWithin(string $key, float $timeoutMs, callable $body): bool
+    {
+        $lock = $this->lock($key);
+        $deadline = microtime(true) + $timeoutMs / 1000;
+
+        do {
+            if ($lock->acquire()) {
+                try {
+                    $body();
+
+                    return true;
+                } finally {
+                    $lock->release();
+                }
+            }
+            usleep(20000);
+        } while (microtime(true) < $deadline);
+
+        return false;
     }
 
     /**
@@ -115,5 +150,36 @@ final class LockFiles
         $contents = @file_get_contents($this->claim($databaseName));
 
         return false === $contents ? '' : trim($contents);
+    }
+
+    /**
+     * @template T
+     *
+     * @param callable(): T $body
+     *
+     * @return T
+     */
+    private function holding(string $key, bool $sharedAccess, callable $body): mixed
+    {
+        $lock = $this->lock($key);
+
+        // Blocking: a clone waits for a running preparation.
+        $sharedAccess ? $lock->acquireRead(true) : $lock->acquire(true);
+
+        try {
+            return $body();
+        } finally {
+            $lock->release();
+        }
+    }
+
+    private function lock(string $key): SharedLockInterface
+    {
+        if (null === $this->lockFactory) {
+            $this->lockFactory = new LockFactory(new FlockStore($this->ensureDirectory()));
+        }
+
+        // No expiry: a long build must not lose its lock.
+        return $this->lockFactory->createLock($key, null);
     }
 }

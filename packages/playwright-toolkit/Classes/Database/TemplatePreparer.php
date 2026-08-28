@@ -33,13 +33,7 @@ final class TemplatePreparer
 
         $snapshot = $this->seedSources->snapshot($configuration);
 
-        $handle = $this->lockFiles->open($this->lockFiles->templateLock());
-
-        try {
-            if (!flock($handle, LOCK_EX)) {
-                throw new \RuntimeException('Could not acquire the template build lock');
-            }
-
+        return $this->lockFiles->exclusively(LockFiles::TEMPLATE_LOCK, function () use ($driver, $snapshot, $force): array {
             // The fingerprint is written last, so a build that died in the middle
             // reads as null here and is rebuilt.
             if (!$force && $driver->templateFingerprint() === $snapshot->fingerprint) {
@@ -50,12 +44,9 @@ final class TemplatePreparer
             $this->buildSchema($driver, $snapshot->schemaStatements);
             $driver->seedTemplate($snapshot->templateSeed());
             $driver->finaliseTemplate($snapshot->fingerprint);
-        } finally {
-            flock($handle, LOCK_UN);
-            fclose($handle);
-        }
 
-        return ['fingerprint' => $snapshot->fingerprint, 'built' => true];
+            return ['fingerprint' => $snapshot->fingerprint, 'built' => true];
+        });
     }
 
     /**
