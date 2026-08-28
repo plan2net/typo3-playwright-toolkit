@@ -68,6 +68,19 @@ STUB
     [ "$output" -eq 1 ]
 }
 
+@test "names the missing schema when the flush cannot find TYPO3 tables" {
+    cat > "${HTML}/vendor/bin/typo3" <<'STUB'
+#!/bin/sh
+echo "Doctrine\DBAL\Exception\TableNotFoundException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'testing.sys_registry' doesn't exist" >&2
+exit 1
+STUB
+    chmod +x "${HTML}/vendor/bin/typo3"
+
+    run playwright_prepare_template "${HTML}"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *'database:updateschema'* ]]
+}
+
 @test "every command that runs tests prepares the template first" {
     for command in playwright playwright-ui; do
         grep -q 'playwright_prepare_template' "${ADDON_DIR}/commands/web/${command}"

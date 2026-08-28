@@ -18,6 +18,12 @@ the package a change belongs to.
 
 ### Added
 
+- **ddev-typo3-playwright-toolkit** — `ddev playwright` says what to fix when the
+  Testing context reaches a database with no TYPO3 tables. The cache flush is the
+  first step that touches it, so that project failed with a Doctrine trace naming no
+  cause; the command now names the two ways out, building the schema or pointing the
+  Testing context at the database the project already uses.
+
 - **both packages** — `builders.page().create()` reports the slug the site stored,
   not the one it was asked for. The site does not always keep what you post — a
   translation and a name already in use are two cases, and an extension can add more
