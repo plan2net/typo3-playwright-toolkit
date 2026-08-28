@@ -110,103 +110,14 @@ the databases. That is why Node and PHP can run in different containers.
 
 ## Setup
 
-```bash
-# 1. DDEV add-on — the db-test service and the commands
-ddev add-on get https://github.com/plan2net/typo3-playwright-toolkit/releases/latest/download/ddev-typo3-playwright-toolkit.tar.gz
-ddev restart
-
-# 2. The extension
-ddev composer require --dev plan2net/playwright-toolkit
-
-# 3. A directory for the Playwright tests, and the npm package inside it.
-#    `ddev npm` runs in the container directory matching the one you are in.
-mkdir -p tests/playwright && cd tests/playwright
-ddev npm init -y && ddev npm pkg set type=module
-ddev npm i -D @plan2net/typo3-playwright-toolkit @playwright/test
-
-# 4. The browsers, in the container that runs the tests
-ddev npx playwright install --with-deps chromium
-```
-
-Step 4 puts the browsers in the web container, where `ddev playwright` runs them. They
-land in the container's home directory, which DDEV drops on a rebuild — keep them
-under the project instead, `ddev restart`, and gitignore `.cache/`:
-
-```yaml
-web_environment:
-    - PLAYWRIGHT_BROWSERS_PATH=/var/www/html/.cache/ms-playwright
-```
-
-To keep browsers in a container of their own — another architecture, or an image you
-already have — see [browsers in a container of their
-own](packages/ddev-typo3-playwright-toolkit/README.md#browsers-in-a-container-of-their-own).
-
-The `npm init` matters: without a `package.json` of its own, `npm i` walks up and
-installs into whatever project it finds above. `type: module` matters because the
-config below uses `import.meta.url`.
-
-`tests/playwright` is only the default. To keep your tests somewhere else, put
-`PW_TEST_DIR=<your directory>` in the `web_environment` of `.ddev/config.yaml` and
-adjust the paths below to match.
-
-Then three files of your own. `tests/playwright/tsconfig.json`, so your editor and
-`tsc` can see the package's types — without `NodeNext` resolution everything in your
-tests is `any`:
-
-```json
-{
-    "extends": "@plan2net/typo3-playwright-toolkit/tsconfig.base.json",
-    "include": ["**/*.ts"]
-}
-```
-
-And `config/system/additional.php`. TYPO3 loads that file and nothing else, so the
-Testing configuration is reached from there or not at all:
-
-```php
-<?php
-// config/system/additional.php
-
-if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {
-    \Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
-}
-```
-
-Keep the context check. It is what stops a request carrying a test-ID header from
-redirecting the database connection on your ordinary hostname.
-
-> [!NOTE]
-> That path is where TYPO3 12.4, 13.4 and 14.3 look under Composer. TYPO3 11.5 loads
-> `typo3conf/AdditionalConfiguration.php` instead, and classic-mode 12.4 and 13.4 load
-> `typo3conf/system/additional.php`. Only the file name changes.
-
-And `tests/playwright/playwright.config.ts`:
-
-```ts
-import { fileURLToPath } from 'url'
-import { defineToolkitConfig, defineBasePlaywrightConfig } from '@plan2net/typo3-playwright-toolkit/playwright'
-
-const toolkit = defineToolkitConfig({
-    testingURL: 'https://example-testing.ddev.site',
-    paths: { consumerRoot: fileURLToPath(new URL('../..', import.meta.url)) },
-})
-
-export default defineBasePlaywrightConfig(toolkit, { testDir: './tests' })
-```
-
-`testingURL` is the only URL you have to give. It is a second host name that runs in
-the Testing context, so your normal project keeps running in Development. You set
-that up in your web server; the examples for apache and nginx, and the fixture
-files, are in the
-**[extension README](packages/playwright-toolkit#testing-host)**.
-
-Everything else has a default value — the
-**[npm README](packages/typo3-playwright-toolkit#configure)** lists all of them.
+**[SETUP.md](SETUP.md)** takes you from nothing to a passing test: the testing
+hostname, the three packages, the browsers, the files your project needs, and a first
+test that proves it works.
 
 ### A working example
 
-Every file above exists in **[`tests/e2e/consumer/`](tests/e2e/consumer)**, a small
-TYPO3 project you can copy from.
+Every file it asks for exists in **[`tests/e2e/consumer/`](tests/e2e/consumer)**, a
+small TYPO3 project you can copy from.
 
 It cannot go out of date: CI installs all three packages into it on every push to
 `main`, on TYPO3 13.4 and 14.3, and runs a test that builds a page in the backend
@@ -221,24 +132,26 @@ backend, and the tests that read it.
 ```ts
 import { defineScenario, expect } from '@plan2net/typo3-playwright-toolkit'
 
+const HEADER = 'Hello from the toolkit'
+
 const test = defineScenario(async ({ builders }) => {
-    const { id, slug } = await builders.page().withTitle('My Page').withSlug('/my-page').create()
+    const page = await builders.page().withTitle('First').withSlug('/first').atParentId(1).create()
 
     // Every TYPO3 core CType already has a builder. You do not have to register it.
     await builders
         .content()
-        .onPage(id)
-        .ofType('textmedia')
-        .configure((element) => element.withHeader('Hello').withBodyText('<p>Copy.</p>'))
+        .onPage(page.id)
+        .ofType('header')
+        .configure((content) => content.withHeader(HEADER))
         .create()
 
-    return { slug }
+    return { slug: page.slug }
 })
 
-test('renders the page title', async ({ page, state }) => {
+test('renders what the builders wrote', async ({ page, state }) => {
     await page.goto(state.slug)
 
-    await expect(page.locator('h1')).toHaveText('My Page')
+    await expect(page.getByText(HEADER)).toBeVisible()
 })
 ```
 
@@ -247,6 +160,9 @@ ddev playwright test                # all tests
 ddev playwright test my-feature     # one file
 ddev playwright-ui                  # Playwright UI mode
 ```
+
+The [npm README](packages/typo3-playwright-toolkit#writing-a-test) documents the
+builders in full: your own content types, file references and child records.
 
 ### Two people, two files
 

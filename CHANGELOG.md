@@ -16,6 +16,17 @@ the package a change belongs to.
   `{ uid, slug }` instead of the uid on its own. A setup that used the return value
   directly reads `.uid` now. The builders are unchanged.
 
+### Documentation
+
+- `SETUP.md` is the one place the setup lives, and every README and the landing page
+  link to it. It was spread over four READMEs before, and the three parts that cost a
+  first-time consumer the most were the hardest to find: the testing hostname, which
+  was never explained as "your site on a second host name"; the root-page fixture,
+  which was never mentioned at all — without it the documented example returns a 404 —
+  and the `additional.php` ordering, which lived in the extension README only. Get
+  that last one wrong and the tests pass against the real database. The browser
+  install now comes after the setting that decides where the browsers go, not before.
+
 ### Added
 
 - **plan2net/playwright-toolkit** — `playwright:prepare` warns when no fixtures are

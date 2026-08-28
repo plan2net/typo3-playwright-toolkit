@@ -18,6 +18,12 @@ It needs the [Composer extension](https://github.com/plan2net/typo3-playwright-t
 databases, and the [npm package](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit), which contains the
 test helpers.
 
+> [!IMPORTANT]
+> Setting this up for the first time? Follow
+> **[SETUP.md](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md)**
+> instead. It covers all three packages in order. This README documents the add-on
+> on its own.
+
 [Requirements](#requirements) · [Install](#install) · [Configure](#configure) ·
 [Using the package](#using-the-package) · [Reference](#reference) ·
 [Troubleshooting](#troubleshooting) · [Related packages](#related-packages)
