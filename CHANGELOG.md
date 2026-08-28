@@ -24,6 +24,11 @@ the package a change belongs to.
 
 ### Changed
 
+- **@plan2net/typo3-playwright-toolkit** — a second `defineScenario` in one test file
+  now fails instead of running. A scenario is named after its file, so both calls
+  shared one test database and only the first setup ran, leaving the second one's
+  tests reading content nobody built.
+
 - **@plan2net/typo3-playwright-toolkit** — a nested value passed to `withField` is
   now posted as one field per value instead of as JSON. `CropConfig` left the field
   types with it: a crop belongs to `sys_file_reference`, not to a column of `pages`

@@ -156,15 +156,39 @@ export async function openAuthenticatedPage(
     }
 }
 
+const scenarioOwners = new Map<string, symbol>()
+
+/** Only a worker that runs tests from both scenarios can see the clash. */
+export function claimScenarioFile(file: string, owner: symbol): void {
+    const claimed = scenarioOwners.get(file)
+    if (undefined === claimed) {
+        scenarioOwners.set(file, owner)
+
+        return
+    }
+
+    if (claimed !== owner) {
+        throw new Error(
+            `[typo3-playwright-toolkit] ${file} calls defineScenario more than once. ` +
+                'A scenario is named after its file, so both calls share one test database ' +
+                'and only the first setup runs. Move the second one into a file of its own.',
+        )
+    }
+}
+
 /**
  * One test file is one scenario: the first test that needs state runs the setup,
  * the rest wait for it or are skipped if it failed.
  */
 export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupTools) => Promise<S>) {
+    const owner = Symbol('scenario')
+
     return base.extend<
         ScenarioFixtures<S> & { resolvedScenario: ResolvedScenario<S>; automaticAccessibilityScan: void }
     >({
         resolvedScenario: async ({ browser }, use, testInfo: TestInfo) => {
+            claimScenarioFile(testInfo.file, owner)
+
             const config = getToolkitConfig()
             const key = sanitizeScenarioKey(testInfo.file)
             const name = scenarioName(testInfo.file)
