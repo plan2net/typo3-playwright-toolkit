@@ -36,6 +36,16 @@ jobs:
             exit 1
           fi
 
+      - name: Assert the add-on version file matches the tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          declared=$(grep -v '^#' packages/ddev-typo3-playwright-toolkit/playwright-toolkit.version | head -1)
+          tagged="${GITHUB_REF_NAME#v}"
+          if [ "${declared}" != "${tagged}" ]; then
+            echo "playwright-toolkit.version says ${declared}, tag says ${tagged}"
+            exit 1
+          fi
+
       # One top-level directory, verified against DDEV itself: a tarball whose
       # files sit at the root makes DDEV treat the alphabetically first entry as
       # the add-on directory and fail looking for install.yaml inside it.

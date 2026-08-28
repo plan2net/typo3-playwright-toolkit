@@ -18,6 +18,9 @@ project_files:
   - commands/web/playwright-replay
   - commands/web/playwright-ui
   - config.playwright-toolkit.yaml
+  # DDEV records no version for an add-on installed from a release tarball, and the
+  # files it copies never update themselves. This is how the extension notices.
+  - playwright-toolkit.version
 
 global_files: []
 

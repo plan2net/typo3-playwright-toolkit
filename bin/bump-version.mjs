@@ -5,9 +5,10 @@
  *
  *   node bin/bump-version.mjs 0.2.0
  *
- * Composer and the DDEV add-on take their version from the git tag and declare
- * none. These two do: npm publishes what package.json says, and a classic-mode
- * install reads ext_emconf.php. release.yml checks both against the tag.
+ * Composer takes its version from the git tag and declares none. The other three
+ * do: npm publishes what package.json says, a classic-mode install reads
+ * ext_emconf.php, and the add-on carries a file because DDEV records no version
+ * for one installed from a release tarball. release.yml checks all three.
  */
 import { execFileSync } from 'node:child_process'
 import * as fs from 'node:fs'
@@ -40,5 +41,11 @@ if (!versionKey.test(emconf)) {
 }
 fs.writeFileSync(emconfPath, emconf.replace(versionKey, `$1${version}$2`))
 
-console.log(`${version}: package.json, package-lock.json, ext_emconf.php`)
+const addonVersionPath = path.join(
+    repoRoot,
+    'packages/ddev-typo3-playwright-toolkit/playwright-toolkit.version'
+)
+fs.writeFileSync(addonVersionPath, `#ddev-generated\n${version}\n`)
+
+console.log(`${version}: package.json, package-lock.json, ext_emconf.php, playwright-toolkit.version`)
 console.log(`Commit, then: git tag v${version} && git push --tags`)

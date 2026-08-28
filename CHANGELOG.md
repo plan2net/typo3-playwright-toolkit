@@ -16,6 +16,13 @@ the package a change belongs to.
   `{ uid, slug }` instead of the uid on its own. A setup that used the return value
   directly reads `.uid` now. The builders are unchanged.
 
+### Added
+
+- **ddev-typo3-playwright-toolkit** — the add-on says which release it is, in
+  `.ddev/playwright-toolkit.version`. DDEV records no version for an add-on installed
+  from a release tarball, and the files it copies never update themselves, so there
+  was no way to tell whether yours still matched the other two packages.
+
 ### Fixed
 
 - **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer passes the
