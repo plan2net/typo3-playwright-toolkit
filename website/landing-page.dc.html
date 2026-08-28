@@ -16,9 +16,10 @@
 @font-face { font-family:'Open Sans'; font-style:normal; font-weight:400 800; font-display:swap; src:url(fonts/open-sans.woff2) format('woff2'); }
 @font-face { font-family:'Source Code Pro'; font-style:normal; font-weight:400 600; font-display:swap; src:url(fonts/source-code-pro.woff2) format('woff2'); }
 /* --org is a surface colour: white text on it is 2.4:1, so anything sitting on it
-   uses --ink. --org-d carries orange text at body sizes, --org-lg at display sizes,
-   where 3:1 is the bar. --fail and the terminal greys are tuned for --term. */
-:root { --org:#FF8700; --org-d:#A05E00; --org-lg:#DC7600; --ink:#1A1E24; --dim:#5B6570; --line:#E3E7EC; --soft:#F7F8FA; --term:#1D2129; --pass:#2FBF71; --fail:#F0696D; }
+   uses --ink, and it never carries text on a light ground. --org-lg is the TYPO3
+   GmbH's text orange and carries orange at display sizes, where 3:1 is the bar;
+   --org-d at body sizes, where it is 4.5:1. The terminal greys are tuned for --term. */
+:root { --org:#FF8700; --org-d:#A05E00; --org-lg:#ED6D05; --ink:#1A1E24; --dim:#5B6570; --line:#E3E7EC; --soft:#F7F8FA; --term:#1D2129; --pass:#2FBF71; --fail:#F0696D; }
 html { scroll-behavior:smooth; }
 body { margin:0; background:#fff; color:#1A1E24; font-family:'Open Sans',sans-serif; -webkit-font-smoothing:antialiased; }
 a { color:var(--ink); text-decoration:none; }
@@ -117,14 +118,14 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
     <li><a href="#failure" style="color:var(--dim);" style-hover="color:var(--ink);">When it fails</a></li>
     <li><a href="#replay" style="color:var(--dim);" style-hover="color:var(--ink);">Sample content</a></li>
   </ul>
-  <a class="nav-cta" href="https://github.com/plan2net/typo3-playwright-toolkit" style="color:var(--ink); background:var(--org); padding:9px 18px; border-radius:6px; font-weight:700; font-size:13.5px;" style-hover="background:var(--org-lg); color:#fff;">GitHub ↗</a>
+  <a class="nav-cta" href="https://github.com/plan2net/typo3-playwright-toolkit" style="color:var(--ink); background:var(--org); padding:9px 18px; border-radius:6px; font-weight:700; font-size:13.5px;" style-hover="background:var(--org-lg); color:var(--ink);">GitHub ↗</a>
 </nav>
 
 <main id="main">
 
 <header data-screen-label="Hero" class="split pad" style="max-width:1200px; margin:0 auto; padding:88px 40px 72px;">
   <div>
-    <h1 class="h1" style="font-weight:800; font-size:44px; line-height:1.15; margin:0 0 14px; letter-spacing:-0.01em;">End-to-end tests for TYPO3, with <span style="display:inline-grid; max-width:100%; vertical-align:top;"><sc-for list="{{ claims }}" as="c" hint-placeholder-count="3"><span data-claim aria-hidden="{{ c.hidden }}" style="grid-area:1/1; color:var(--org); opacity:{{ c.opacity }}; transition:opacity 900ms ease-in-out;">{{ c.text }}<span style="color:var(--ink);">.</span></span></sc-for></span></h1>
+    <h1 class="h1" style="font-weight:800; font-size:44px; line-height:1.15; margin:0 0 14px; letter-spacing:-0.01em;">End-to-end tests for TYPO3, with <span style="display:inline-grid; max-width:100%; vertical-align:top;"><sc-for list="{{ claims }}" as="c" hint-placeholder-count="3"><span data-claim aria-hidden="{{ c.hidden }}" style="grid-area:1/1; color:var(--org-lg); opacity:{{ c.opacity }}; transition:opacity 900ms ease-in-out;">{{ c.text }}<span style="color:var(--ink);">.</span></span></sc-for></span></h1>
     <div style="display:flex; justify-content:flex-end;">
     <sc-if value="{{ rotates }}" hint-placeholder-val="{{ true }}">
       <button type="button" data-rotate-toggle onClick="{{ toggleRotation }}" style="background:none; border:none; padding:4px 0; margin:0 0 12px; color:var(--dim); font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:7px; cursor:pointer;" style-hover="color:var(--ink);">
@@ -141,7 +142,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
     </div>
     <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">Every spec file gets its own database, cloned from a prepared template in milliseconds. Files run at the same time without sharing data, so one test can never break another. And the content comes from the real TYPO3 backend, not from SQL fixtures, so your tests see pages the way an editor would build them. For TYPO3 projects that run on DDEV.</p>
     <div style="display:flex; gap:14px; flex-wrap:wrap;">
-      <a href="#packages" style="background:var(--org); color:var(--ink); font-weight:700; padding:13px 26px; border-radius:6px; font-size:15px;" style-hover="background:var(--org-lg); color:#fff;">Get started</a>
+      <a href="#packages" style="background:var(--org); color:var(--ink); font-weight:700; padding:13px 26px; border-radius:6px; font-size:15px;" style-hover="background:var(--org-lg); color:var(--ink);">Get started</a>
       <a href="#example" style="border:1.5px solid var(--line); color:var(--ink); padding:13px 26px; border-radius:6px; font-size:15px; font-weight:600;" style-hover="border-color:var(--org); color:var(--org-d);">See a test</a>
     </div>
   </div>
@@ -453,7 +454,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
     </div>
 
     <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
-      <a href="https://github.com/plan2net/typo3-playwright-toolkit#setup" style="background:var(--org); color:var(--ink); font-weight:700; padding:15px 32px; border-radius:6px; font-size:15.5px;" style-hover="background:var(--org-lg); color:#fff;">Set it up</a>
+      <a href="https://github.com/plan2net/typo3-playwright-toolkit#setup" style="background:var(--org); color:var(--ink); font-weight:700; padding:15px 32px; border-radius:6px; font-size:15.5px;" style-hover="background:var(--org-lg); color:var(--ink);">Set it up</a>
       <a href="https://github.com/plan2net/typo3-playwright-toolkit/tree/main/tests/e2e/consumer" style="border:1px solid var(--line); color:var(--ink); font-weight:700; padding:14px 28px; border-radius:6px; font-size:15.5px;" style-hover="border-color:var(--ink); color:var(--ink);">See a project using it ↗</a>
     </div>
 

@@ -12,6 +12,11 @@ the package a change belongs to.
 
 ### Documentation
 
+- The rotating claim in the landing page headline is readable: it carried the brand
+  orange on white at 2.41:1, where large text needs 3:1. It now uses the TYPO3
+  GmbH's text orange, `#ED6D05`, which is the second orange their own palette keeps
+  for exactly this. `#FF8700` stays the identity colour and still fills the buttons.
+
 - The landing page serves its three fonts from its own origin instead of linking
   Google Fonts, so opening it sends no visitor's IP address to a third party. The
   build fails if any subresource points off-site again.
