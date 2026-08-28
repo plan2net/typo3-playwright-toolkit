@@ -7,6 +7,8 @@ import { toColumnValues } from './fields.js'
 import { replayParentId, resolveRequestContext, type RequestContext } from './request-context.js'
 import { newRecordIdentifier } from './identifier.js'
 
+const lastElementOnPage = new WeakMap<Page, Map<string, number>>()
+
 export class ContentBuilder {
     private page: Page
     private pageId = ''
@@ -72,7 +74,7 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         )
 
         const record: Record<string, unknown> = {
-            pid: pageId,
+            pid: insertPosition(this.page, pageId),
             sys_language_uid: 0,
             CType: fields.CType || this.builder.type,
             colPos: fields.colPos ?? 0,
@@ -89,6 +91,21 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
             },
         })
 
+        lastElementOnPage.get(this.page)?.set(pageId, uid)
+
         return { id: String(uid) }
     }
+}
+
+/** Keyed by the page: `builders.content()` hands out a fresh builder per call. */
+function insertPosition(page: Page, pageId: string): string {
+    let created = lastElementOnPage.get(page)
+    if (undefined === created) {
+        created = new Map()
+        lastElementOnPage.set(page, created)
+    }
+
+    const previous = created.get(pageId)
+
+    return undefined === previous ? pageId : `-${previous}`
 }

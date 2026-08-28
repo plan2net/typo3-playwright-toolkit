@@ -64,8 +64,10 @@ function toDataMap(fields: Record<string, string>): RecordDataMap {
  * and `request.post()`. Answers the way the backend does — a redirect naming the
  * saved uid, or a rendered page when it refused the save.
  */
-function fakePage(uid: number, refusalBody?: string, testId: string = TEST_ID) {
+function fakePage(uid: number | number[], refusalBody?: string, testId: string = TEST_ID) {
     const posted: Posted[] = []
+    const remaining = Array.isArray(uid) ? [...uid] : []
+    const nextUid = () => (Array.isArray(uid) ? (remaining.shift() ?? 0) : uid)
 
     const page = {
         url: () => 'https://example-testing.test/typo3/module/web/layout',
@@ -83,7 +85,7 @@ function fakePage(uid: number, refusalBody?: string, testId: string = TEST_ID) {
 
                 return {
                     status: () => 302,
-                    headers: () => ({ location: `/typo3/record/edit?edit[${table}][${uid}]=edit` }),
+                    headers: () => ({ location: `/typo3/record/edit?edit[${table}][${nextUid()}]=edit` }),
                     text: async () => '',
                 }
             },
@@ -374,6 +376,18 @@ describe('ContentBuilder', () => {
             [`data[tt_content][${identifier}][pi_flexform][data][sDEF][lDEF][settings.limit][vDEF]`]:
                 '10',
         })
+    })
+
+    // Every element used to be posted with the page id, so a scenario's elements
+    // rendered in the reverse of the order it created them.
+    it('appends each element after the previous one on the same page', async () => {
+        const { posted, page } = fakePage([11, 22])
+
+        await contentBuilder(page).onPage('12').ofType('text').create()
+        await contentBuilder(page).onPage('12').ofType('text').create()
+
+        expect(only(posted[0].dataMap.tt_content)).toMatchObject({ pid: '12' })
+        expect(only(posted[1].dataMap.tt_content)).toMatchObject({ pid: '-11' })
     })
 
     it('throws when the backend refuses the content element', async () => {

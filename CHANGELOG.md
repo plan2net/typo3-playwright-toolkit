@@ -31,6 +31,12 @@ the package a change belongs to.
 
 ### Fixed
 
+- **@plan2net/typo3-playwright-toolkit** — content elements now appear in the order the
+  scenario created them. Every element was posted with the page id, which puts it at the
+  top, so pages came out reversed — and silently, which left the first screenshot run
+  recording that as its baseline. A scenario that compensated by building backwards
+  needs turning around.
+
 - **plan2net/playwright-toolkit** — a test database whose seeded session cannot be
   read is left alone instead of rebuilt. The session id is hashed with
   `SYS/encryptionKey`, so the wrong key makes the lookup miss, and every request then
