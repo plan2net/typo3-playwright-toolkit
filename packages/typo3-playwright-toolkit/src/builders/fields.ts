@@ -56,19 +56,19 @@ export function flexForm(
  * A boolean is a 0/1 int column. An undefined field is left out rather than sent
  * as null, which DataHandler would write.
  */
-export function coerceFields(fields: Record<string, unknown>): Record<string, unknown> {
-    const coerced: Record<string, unknown> = {}
+export function toColumnValues(fields: Record<string, unknown>): Record<string, unknown> {
+    const values: Record<string, unknown> = {}
 
     for (const [column, value] of Object.entries(fields)) {
         if (value === undefined) {
             continue
         }
         if ('boolean' === typeof value) {
-            coerced[column] = value ? 1 : 0
+            values[column] = value ? 1 : 0
             continue
         }
-        coerced[column] = value
+        values[column] = value
     }
 
-    return coerced
+    return values
 }

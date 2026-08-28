@@ -2,7 +2,7 @@ import { Page } from '@playwright/test'
 import { CropConfig, NestedFields } from '../types/common.js'
 import { saveRecord, type RecordDataMap } from '../http/record-edit.js'
 import { replayParentId, requireTestId, resolveRequestContext, type RequestContext } from './request-context.js'
-import { coerceFields, imageCrop } from './fields.js'
+import { toColumnValues, imageCrop } from './fields.js'
 import { newRecordIdentifier } from './identifier.js'
 import { getToolkitConfig } from '../config.js'
 
@@ -174,7 +174,7 @@ export class PageBuilder {
     }
 
     private pageFields(): Record<string, unknown> {
-        const fields = coerceFields(this.fields)
+        const fields = toColumnValues(this.fields)
 
         if (this.imageFileId) {
             fields.media = this.mediaIdentifier()

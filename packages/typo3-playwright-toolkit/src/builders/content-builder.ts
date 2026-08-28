@@ -3,7 +3,7 @@ import { ContentBuilderInterface } from '../types/content-builder.js'
 import { createContent } from './content-factory.js'
 import type { ContentTypeFor, ContentTypeKey } from './core-content.js'
 import { saveRecord } from '../http/record-edit.js'
-import { coerceFields } from './fields.js'
+import { toColumnValues } from './fields.js'
 import { replayParentId, resolveRequestContext, type RequestContext } from './request-context.js'
 import { newRecordIdentifier } from './identifier.js'
 
@@ -76,7 +76,7 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
             sys_language_uid: 0,
             CType: fields.CType || this.builder.type,
             colPos: fields.colPos ?? 0,
-            ...coerceFields(own),
+            ...toColumnValues(own),
         }
 
         const uid = await saveRecord(this.page.request, context, {
