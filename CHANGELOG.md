@@ -10,6 +10,12 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Documentation
+
+- The landing page serves its three fonts from its own origin instead of linking
+  Google Fonts, so opening it sends no visitor's IP address to a third party. The
+  build fails if any subresource points off-site again.
+
 ## [0.5.0] - 2026-08-28
 
 ### Breaking

@@ -9,10 +9,12 @@
 <x-dc>
 <helmet>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&amp;family=Open+Sans:wght@400;600;700;800&amp;family=Source+Code+Pro:wght@400;600&amp;display=swap" rel="stylesheet">
 <style>
+/* Self-hosted: a Google Fonts stylesheet would send every visitor's IP address to
+   Google before the page renders. website/fonts/README.md says where they come from. */
+@font-face { font-family:'Caveat'; font-style:normal; font-weight:600; font-display:swap; src:url(fonts/caveat.woff2) format('woff2'); }
+@font-face { font-family:'Open Sans'; font-style:normal; font-weight:400 800; font-display:swap; src:url(fonts/open-sans.woff2) format('woff2'); }
+@font-face { font-family:'Source Code Pro'; font-style:normal; font-weight:400 600; font-display:swap; src:url(fonts/source-code-pro.woff2) format('woff2'); }
 /* --org is a surface colour: white text on it is 2.4:1, so anything sitting on it
    uses --ink. --org-d carries orange text at body sizes, --org-lg at display sizes,
    where 3:1 is the bar. --fail and the terminal greys are tuned for --term. */

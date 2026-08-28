@@ -427,5 +427,19 @@ fs.writeFileSync(path.join(outDir, 'robots.txt'), robotsTxt)
 fs.writeFileSync(path.join(outDir, 'sitemap.xml'), sitemapXml)
 fs.copyFileSync(path.join(here, 'logo.svg'), path.join(outDir, 'logo.svg'))
 fs.copyFileSync(path.join(here, 'og-image.png'), path.join(outDir, 'og-image.png'))
+// The licence ships beside them: the OFL asks for it wherever the fonts go.
+fs.mkdirSync(path.join(outDir, 'fonts'), { recursive: true })
+for (const file of ['caveat.woff2', 'open-sans.woff2', 'source-code-pro.woff2', 'OFL.txt']) {
+    fs.copyFileSync(path.join(here, 'fonts', file), path.join(outDir, 'fonts', file))
+}
+
+// The page must fetch nothing from anywhere else: a stylesheet, a font or an image
+// from a third party sends every visitor's IP address there before it renders.
+const offSite = page.match(/(?:src|href)="https?:\/\/[^"]*"|url\(\s*['"]?https?:/g) ?? []
+const requests = offSite.filter((reference) => !/^href=/.test(reference))
+if (requests.length > 0) {
+    console.error(`build-docs: the page would request ${requests.join(', ')}`)
+    process.exit(1)
+}
 
 console.log(`site/index.html — ${Math.round(page.length / 1024)} KB, plus llms.txt, robots.txt, sitemap.xml`)
