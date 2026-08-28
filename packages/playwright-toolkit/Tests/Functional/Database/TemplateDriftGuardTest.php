@@ -139,6 +139,26 @@ final class TemplateDriftGuardTest extends FunctionalTestCase
         $this->get(TemplateDriftGuard::class)->__invoke(new BootCompletedEvent(true));
     }
 
+    // A database that lost its seeded session is cloned again. That new clone was
+    // never checked, whatever was true of the one it replaced.
+    #[Test]
+    public function aDatabaseThatWasClonedAgainIsCheckedAgain(): void
+    {
+        $this->get(TemplatePreparer::class)->prepare();
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+        $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
+        $this->get(TemplateDriftGuard::class)->__invoke(new BootCompletedEvent(true));
+
+        $this->testDatabase()->exec('DELETE FROM be_sessions');
+        $this->driver()->finaliseTemplate('a-fingerprint-from-another-life');
+        DatabaseInitializer::forgetProvisioning();
+        $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
+
+        $this->expectExceptionMessageMatches('/playwright-prepare/');
+
+        $this->get(TemplateDriftGuard::class)->__invoke(new BootCompletedEvent(true));
+    }
+
     // A request provisioning between the drop and the claim removal would end up
     // with a database that has no claim, which cleanup never finds.
     #[Test]
@@ -224,5 +244,15 @@ final class TemplateDriftGuardTest extends FunctionalTestCase
     private function driver(): SqliteTestDatabaseDriver
     {
         return new SqliteTestDatabaseDriver(Environment::getVarPath() . '/test-databases');
+    }
+
+    private function testDatabase(): \PDO
+    {
+        $connection = new \PDO(
+            'sqlite:' . Environment::getVarPath() . '/test-databases/db' . self::TEST_ID . '.sqlite'
+        );
+        $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+
+        return $connection;
     }
 }

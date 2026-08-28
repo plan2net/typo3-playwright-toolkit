@@ -101,7 +101,7 @@ final class DatabaseInitializer
         // template that playwright:prepare is midway through replacing.
         $this->lockFiles->shared(LockFiles::TEMPLATE_LOCK, function () use ($driver, $testId, $configuration, $seedMarker, $databaseName): void {
             // Parallel workers can share one test ID; serialize per database.
-            $this->lockFiles->exclusively($this->lockFiles->databaseLock($databaseName), function () use ($driver, $testId, $configuration, $seedMarker): void {
+            $this->lockFiles->exclusively($this->lockFiles->databaseLock($databaseName), function () use ($driver, $testId, $configuration, $seedMarker, $databaseName): void {
                 if ($this->isAlreadySeeded($driver, $testId, $configuration, $seedMarker)) {
                     return;
                 }
@@ -122,6 +122,10 @@ final class DatabaseInitializer
                         $seedMarker
                     ));
                 }
+
+                // The marker describes the database this one replaces, so it must
+                // go before the new clone exists.
+                @unlink($this->lockFiles->checkedMarker($databaseName));
 
                 $driver->materialise($testId);
                 $driver->isolateProcessedFiles($testId);
