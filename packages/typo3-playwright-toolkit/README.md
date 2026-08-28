@@ -136,6 +136,10 @@ test('renders the page title', async ({ page, state }) => {
 setup, and the other tests wait. If the setup fails, the tests are skipped with the
 reason instead of failing because content is missing.
 
+The `slug` you get back is the one the site stored, which is not always the one you
+asked for — a translation and a name already in use are two cases, and an extension
+can add more. Navigate with the returned value, never with the string you passed in.
+
 The setup runs once per file, even when the file runs in several browser projects.
 The other projects use the state and the test database that the first one created.
 

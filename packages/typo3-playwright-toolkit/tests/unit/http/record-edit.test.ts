@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
 import { recordSaver, saveRecord, type FormPoster } from '#src/http/record-edit.js'
+import { SAVED_RECORD_HEADER } from '#src/contract.js'
 
 const TEST_ID = 'ABCD1234EFGH5678'
 
@@ -23,7 +24,7 @@ interface Posted {
 }
 
 function fakePoster(
-    response: { status: number; location?: string; body?: string } = {
+    response: { status: number; location?: string; body?: string; storedSlug?: string } = {
         status: 302,
         location: '/typo3/record/edit?edit%5Bpages%5D%5B42%5D=edit&token=abc',
     },
@@ -41,8 +42,16 @@ function fakePoster(
 
             return {
                 status: () => response.status,
-                headers: (): Record<string, string> =>
-                    response.location ? { location: response.location } : {},
+                headers: (): Record<string, string> => ({
+                    ...(response.location ? { location: response.location } : {}),
+                    ...(response.storedSlug
+                        ? {
+                              [SAVED_RECORD_HEADER.toLowerCase()]: JSON.stringify({
+                                  slug: response.storedSlug,
+                              }),
+                          }
+                        : {}),
+                }),
                 text: async () => response.body ?? '',
             }
         },
@@ -63,6 +72,23 @@ beforeEach(() => {
 })
 
 describe('saveRecord', () => {
+    it('reports the slug the site stored, not the one it was asked for', async () => {
+        const { poster } = fakePoster({
+            status: 302,
+            location: '/typo3/record/edit?edit%5Bpages%5D%5B42%5D=edit&token=abc',
+            storedSlug: '/a-page-1',
+        })
+
+        const saved = await saveRecord(poster, context, {
+            table: 'pages',
+            identifier: 'NEWpage',
+            target: 1,
+            data: { pages: { NEWpage: { title: 'A page', slug: '/a-page' } } },
+        })
+
+        expect(saved.slug).toBe('/a-page-1')
+    })
+
     it('posts to the backend edit route the browser posts to', async () => {
         const { poster, posted } = fakePoster()
 
@@ -109,7 +135,7 @@ describe('saveRecord', () => {
             location: '/typo3/record/edit?edit%5Bpages%5D%5B7%5D=edit',
         })
 
-        const uid = await saveRecord(poster, context, {
+        const saved = await saveRecord(poster, context, {
             table: 'pages',
             identifier: '7',
             target: 7,
@@ -117,7 +143,7 @@ describe('saveRecord', () => {
         })
 
         expect(posted[0].url).toContain('edit%5Bpages%5D%5B7%5D=edit')
-        expect(uid).toBe(7)
+        expect(saved.uid).toBe(7)
     })
 
     it('sends the fields the way the edit form sends them', async () => {
@@ -186,14 +212,14 @@ describe('saveRecord', () => {
     it('reads the new uid out of the redirect the controller answers with', async () => {
         const { poster } = fakePoster()
 
-        const uid = await saveRecord(poster, context, {
+        const saved = await saveRecord(poster, context, {
             table: 'pages',
             identifier: 'NEWpage',
             target: 1,
             data: { pages: { NEWpage: { title: 'A page' } } },
         })
 
-        expect(uid).toBe(42)
+        expect(saved.uid).toBe(42)
     })
 
     it('follows no redirect, or the uid would be gone by the time we look', async () => {
@@ -262,14 +288,14 @@ describe('recordSaver', () => {
             location: '/typo3/record/edit?edit%5Btx_vendor_domain_model_thing%5D%5B42%5D=edit&token=abc',
         })
 
-        const uid = await recordSaver(poster, context)({
+        const saved = await recordSaver(poster, context)({
             table: 'tx_vendor_domain_model_thing',
             identifier: '1',
             target: 1,
             data: { tx_vendor_domain_model_thing: { 1: { title: 'A thing' } } },
         })
 
-        expect(uid).toBe(42)
+        expect(saved.uid).toBe(42)
         expect(posted[0].url).toContain('edit%5Btx_vendor_domain_model_thing%5D%5B1%5D=edit')
         expect(posted[0].multipart['data[tx_vendor_domain_model_thing][1][title]']).toBe('A thing')
     })

@@ -137,16 +137,16 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         mergeRecords(data, inner.records)
         mergeRecords(data, outer.records)
 
-        const uid = await saveRecord(this.page.request, context, {
+        const saved = await saveRecord(this.page.request, context, {
             table: 'tt_content',
             identifier: identifier,
             target: Number(pageId),
             data,
         })
 
-        lastElementOnPage.get(this.page)?.set(pageId, uid)
+        lastElementOnPage.get(this.page)?.set(pageId, saved.uid)
 
-        return { id: String(uid) }
+        return { id: String(saved.uid) }
     }
 }
 

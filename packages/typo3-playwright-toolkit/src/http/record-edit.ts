@@ -1,5 +1,5 @@
 import { getToolkitConfig } from '../config.js'
-import { toolkitHeaders } from '../contract.js'
+import { SAVED_RECORD_HEADER, toolkitHeaders } from '../contract.js'
 
 /** Relative to the backend entry point, which a project may have moved. */
 export const RECORD_EDIT_ROUTE = '/record/edit'
@@ -27,11 +27,17 @@ export interface EditContext {
     routeToken: string
 }
 
+export interface SavedRecord {
+    uid: number
+    /** Absent where the table has no slug column. */
+    slug?: string
+}
+
 /** saveRecord with the poster and context already bound. */
 export function recordSaver(
     poster: FormPoster,
     context: EditContext,
-): (record: RecordToSave) => Promise<number> {
+): (record: RecordToSave) => Promise<SavedRecord> {
     return (record) => saveRecord(poster, context, record)
 }
 
@@ -53,7 +59,7 @@ export async function saveRecord(
     poster: FormPoster,
     context: EditContext,
     record: RecordToSave,
-): Promise<number> {
+): Promise<SavedRecord> {
     if (!context.routeToken) {
         throw new Error(
             '[typo3-playwright-toolkit] No route token for record_edit. The backend refuses a POST ' +
@@ -75,7 +81,8 @@ export async function saveRecord(
         maxRedirects: 0,
     })
 
-    const location = redirectTarget(response)
+    const headers = response.headers()
+    const location = redirectTarget(response.status(), headers)
     if (undefined === location) {
         throw new Error(
             `[typo3-playwright-toolkit] ${record.table} did not save (status ${response.status()}). ` +
@@ -92,7 +99,7 @@ export async function saveRecord(
         )
     }
 
-    return uid
+    return { uid, ...savedRecord(headers) }
 }
 
 /** `data[table][identifier][field]`, the names FormEngine gives its inputs. */
@@ -144,14 +151,32 @@ function formValue(value: unknown): string {
     return JSON.stringify(value) ?? ''
 }
 
-function redirectTarget(response: FormResponse): string | undefined {
-    if (response.status() < 300 || response.status() >= 400) {
+function redirectTarget(status: number, headers: Record<string, string>): string | undefined {
+    if (status < 300 || status >= 400) {
         return undefined
     }
 
-    const headers = response.headers()
+    return header(headers, 'location')
+}
 
-    return headers.location ?? headers.Location
+function header(headers: Record<string, string>, name: string): string | undefined {
+    return headers[name.toLowerCase()] ?? headers[name]
+}
+
+/** A malformed envelope is not worth failing a save over: the uid still stands. */
+function savedRecord(headers: Record<string, string>): { slug?: string } {
+    const value = header(headers, SAVED_RECORD_HEADER)
+    if (undefined === value) {
+        return {}
+    }
+
+    try {
+        const parsed = JSON.parse(value) as { slug?: unknown }
+
+        return 'string' === typeof parsed.slug ? { slug: parsed.slug } : {}
+    } catch {
+        return {}
+    }
 }
 
 /** `edit[tt_content][42]=edit`, in whatever encoding the header carries. */

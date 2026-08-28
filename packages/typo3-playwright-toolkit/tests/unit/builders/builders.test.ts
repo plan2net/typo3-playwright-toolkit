@@ -82,10 +82,11 @@ function fakePage(uid: number | number[], refusalBody?: string, testId: string =
                 }
 
                 const table = decodeURIComponent(url).match(/edit\[(\w+)\]/)?.[1] ?? 'pages'
+                const location = `/typo3/record/edit?edit[${table}][${nextUid()}]=edit`
 
                 return {
                     status: () => 302,
-                    headers: () => ({ location: `/typo3/record/edit?edit[${table}][${nextUid()}]=edit` }),
+                    headers: () => ({ location }),
                     text: async () => '',
                 }
             },

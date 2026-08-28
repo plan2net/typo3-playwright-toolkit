@@ -96,7 +96,7 @@ export class PageBuilder {
         const identifier = newRecordIdentifier()
         const parentId = replayParentId(context, String(Number(this.fields.pid)))
 
-        const uid = await saveRecord(this.page.request, context, {
+        const saved = await saveRecord(this.page.request, context, {
             table: 'pages',
             identifier,
             target: Number(parentId),
@@ -107,15 +107,15 @@ export class PageBuilder {
         })
 
         // So its children keep it as their parent.
-        context.replayFolder?.ownPages.add(String(uid))
+        context.replayFolder?.ownPages.add(String(saved.uid))
 
-        return { id: String(uid), slug: (this.fields.slug as string) || '' }
+        return { id: String(saved.uid), slug: saved.slug ?? ((this.fields.slug as string) || '') }
     }
 
     async update(pageId: string): Promise<{ id: string; slug: string }> {
         const context = resolveRequestContext(this.page, this.requestContext)
 
-        await saveRecord(this.page.request, context, {
+        const saved = await saveRecord(this.page.request, context, {
             table: 'pages',
             identifier: pageId,
             target: Number(pageId),
@@ -125,7 +125,7 @@ export class PageBuilder {
             },
         })
 
-        return { id: pageId, slug: (this.fields.slug as string) || '' }
+        return { id: pageId, slug: saved.slug ?? ((this.fields.slug as string) || '') }
     }
 
     // TYPO3 would store the repeat elsewhere while create() still reports this slug.

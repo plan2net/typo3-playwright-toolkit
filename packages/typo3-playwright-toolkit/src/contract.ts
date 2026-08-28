@@ -5,6 +5,9 @@ import { SECRET_HEADER, resolveApiSecret } from './http/api-secret.js'
 export const TEST_ID_HEADER = 'X-Playwright-Test-Id'
 export const TEST_ID_PATTERN = /^[A-Z0-9]{16}$/
 
+/** JSON, so a value stays ASCII in a header field and a later field needs no second header. */
+export const SAVED_RECORD_HEADER = 'X-Playwright-Saved-Record'
+
 /** Replay's own test ID; the extension maps it to the throwaway base database. */
 export const REPLAY_TEST_ID = 'REPLAY0000000000'
 

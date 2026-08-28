@@ -10,6 +10,24 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Breaking
+
+- **@plan2net/typo3-playwright-toolkit** — the `saveRecord` fixture returns
+  `{ uid, slug }` instead of the uid on its own. A setup that used the return value
+  directly reads `.uid` now. The builders are unchanged.
+
+### Added
+
+- **both packages** — `builders.page().create()` reports the slug the site stored,
+  not the one it was asked for. The site does not always keep what you post — a
+  translation and a name already in use are two cases, and an extension can add more
+  — so a test that navigated to the string it passed in landed on a 404. The
+  extension answers the save with
+  `X-Playwright-Saved-Record`, a JSON header carried on the redirect the save already
+  sends — no second request. It is escaped JSON so a slug with an umlaut stays ASCII
+  in the header, and it takes the API secret like every other entry point: without it
+  the backend's own answer goes back untouched.
+
 ## [0.6.0] - 2026-08-28
 
 ### Breaking

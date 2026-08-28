@@ -10,7 +10,7 @@ import {
     type ReplayFolder,
     type RequestContext,
 } from './builders/request-context.js'
-import { recordSaver, type RecordToSave } from './http/record-edit.js'
+import { recordSaver, type RecordToSave, type SavedRecord } from './http/record-edit.js'
 import { ContentBuilder } from './builders/content-builder.js'
 import { PageBuilder } from './builders/page-builder.js'
 import { ContextWithTestId, PageWithTestId } from './types/playwright-extensions.js'
@@ -31,8 +31,8 @@ export interface SetupTools {
     page: Page
     request: APIRequestContext
     builders: ScenarioBuilders
-    /** For a table no builder covers; returns the uid TYPO3 assigned. */
-    saveRecord(record: RecordToSave): Promise<number>
+    /** For a table no builder covers. */
+    saveRecord(record: RecordToSave): Promise<SavedRecord>
 }
 
 export interface ScenarioFixtures<S> {

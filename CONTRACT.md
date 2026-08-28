@@ -12,6 +12,7 @@ Read this before you change anything that touches a test ID.
 | Test ID header | `X-Playwright-Test-Id` | npm `TEST_ID_HEADER`, PHP `TestContext::TEST_ID_HEADER` |
 | Test ID format | `^[A-Z0-9]{16}$` | npm `TEST_ID_PATTERN`, PHP `TestContext::TEST_ID_PATTERN` |
 | Secret header | `X-Playwright-Toolkit-Secret` | npm `SECRET_HEADER`, PHP `TestApiSecret::HEADER` |
+| Saved record header | `X-Playwright-Saved-Record` | npm `SAVED_RECORD_HEADER`, PHP `SavedRecord::HEADER` |
 | Secret file | `var/playwright/api-secret` | PHP writes it, npm reads it |
 | Secret override | `PLAYWRIGHT_TOOLKIT_SECRET` | environment, read by both |
 | Server key | `HTTP_X_PLAYWRIGHT_TEST_ID` | PHP `TestContext::TEST_ID_SERVER_KEY` |
@@ -126,6 +127,13 @@ There is no toolkit endpoint for creating content. The builders post to
 `record/edit`, the same route the TYPO3 backend form uses. Keep it that way:
 if TYPO3 changes that route or its fields, the tests must fail rather than pass on
 an endpoint of our own.
+
+The save answers with a redirect naming the new uid, and `SavedRecordHeader` adds
+`X-Playwright-Saved-Record` to it — JSON, today `{"slug": "…"}`. The site does not
+always keep the slug that was posted, so this is the only way the caller learns the
+page's URL without a second request. The middleware only reads; it takes the secret like
+every other entry point and, without it, hands back the backend's own answer
+untouched. A new field belongs in that JSON, not in a header of its own.
 
 `POST /typo3/test-api/session` returns the session cookie and the tokens:
 
