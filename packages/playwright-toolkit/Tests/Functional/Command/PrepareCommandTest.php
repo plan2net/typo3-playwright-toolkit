@@ -7,6 +7,9 @@ namespace Plan2net\PlaywrightToolkit\Tests\Functional\Command;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Command\PrepareCommand;
+use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
+use Plan2net\PlaywrightToolkit\Database\TemplatePreparer;
+use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use TYPO3\CMS\Core\Core\ApplicationContext;
@@ -81,6 +84,29 @@ final class PrepareCommandTest extends FunctionalTestCase
         self::assertSame(Command::SUCCESS, $exitCode);
         self::assertStringContainsString('fingerprint', $tester->getDisplay());
         self::assertFileExists(Environment::getVarPath() . '/test-databases/playwright_db_template.sqlite');
+    }
+
+    #[Test]
+    public function warnsWhenTheDdevAddOnIsFromAnotherRelease(): void
+    {
+        $ddev = Environment::getProjectPath() . '/.ddev';
+        @mkdir($ddev, 0o777, true);
+        file_put_contents($ddev . '/playwright-toolkit.version', "#ddev-generated\n0.0.1\n");
+
+        $tester = new CommandTester(new PrepareCommand(
+            $this->get(TemplatePreparer::class),
+            $this->get(TestApiSecret::class),
+            $this->get(ToolkitConfigurationFactory::class),
+            '0.6.0'
+        ));
+
+        try {
+            $tester->execute([]);
+
+            self::assertStringContainsString('0.0.1', $tester->getDisplay());
+        } finally {
+            unlink($ddev . '/playwright-toolkit.version');
+        }
     }
 
     #[Test]

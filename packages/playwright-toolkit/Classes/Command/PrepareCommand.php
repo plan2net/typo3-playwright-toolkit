@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Command;
 
+use Composer\InstalledVersions;
+use Plan2net\PlaywrightToolkit\Configuration\AddonVersion;
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use Plan2net\PlaywrightToolkit\Database\TemplatePreparer;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
@@ -20,6 +22,7 @@ final class PrepareCommand extends Command
         private readonly TemplatePreparer $preparer,
         private readonly TestApiSecret $secret,
         private readonly ToolkitConfigurationFactory $configurationFactory,
+        private readonly ?string $installedVersion = null,
     ) {
         parent::__construct();
     }
@@ -55,6 +58,14 @@ final class PrepareCommand extends Command
         // Before the template: without a secret every endpoint refuses, and this is
         // the one command that always runs before a test run.
         $this->secret->ensureExists();
+
+        $drift = AddonVersion::driftInProject(
+            Environment::getProjectPath(),
+            $this->installedVersion ?? InstalledVersions::getPrettyVersion('plan2net/playwright-toolkit')
+        );
+        if (null !== $drift) {
+            $io->warning($drift);
+        }
 
         if ([] === $this->configurationFactory->create()->fixtureManifest) {
             $io->warning(

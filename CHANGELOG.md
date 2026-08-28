@@ -18,10 +18,13 @@ the package a change belongs to.
 
 ### Added
 
-- **ddev-typo3-playwright-toolkit** — the add-on says which release it is, in
-  `.ddev/playwright-toolkit.version`. DDEV records no version for an add-on installed
-  from a release tarball, and the files it copies never update themselves, so there
-  was no way to tell whether yours still matched the other two packages.
+- **both packages** — the add-on says which release it is, in
+  `.ddev/playwright-toolkit.version`, and `playwright:prepare` warns when that no
+  longer matches the installed extension. DDEV records no version for an add-on
+  installed from a release tarball, and the files it copies into `.ddev` never update
+  themselves, so an add-on left behind by a `composer update` was invisible. A
+  development checkout of the extension says nothing, since the two can never match
+  there.
 
 ### Fixed
 
