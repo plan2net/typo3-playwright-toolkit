@@ -84,6 +84,16 @@ final class PrepareCommandTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function warnsThatATemplateWithNoFixturesHoldsNoContent(): void
+    {
+        $tester = new CommandTester($this->get(PrepareCommand::class));
+
+        $tester->execute([]);
+
+        self::assertStringContainsString('fixtureManifest', $tester->getDisplay());
+    }
+
+    #[Test]
     public function aSecondRunReportsTheTemplateAsAlreadyCurrentInsteadOfRebuilding(): void
     {
         $tester = new CommandTester($this->get(PrepareCommand::class));

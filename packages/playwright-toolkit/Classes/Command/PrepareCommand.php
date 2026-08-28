@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Command;
 
+use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use Plan2net\PlaywrightToolkit\Database\TemplatePreparer;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Symfony\Component\Console\Command\Command;
@@ -18,6 +19,7 @@ final class PrepareCommand extends Command
     public function __construct(
         private readonly TemplatePreparer $preparer,
         private readonly TestApiSecret $secret,
+        private readonly ToolkitConfigurationFactory $configurationFactory,
     ) {
         parent::__construct();
     }
@@ -53,6 +55,14 @@ final class PrepareCommand extends Command
         // Before the template: without a secret every endpoint refuses, and this is
         // the one command that always runs before a test run.
         $this->secret->ensureExists();
+
+        if ([] === $this->configurationFactory->create()->fixtureManifest) {
+            $io->warning(
+                'No fixtures configured, so the template gets the schema and a backend session '
+                . 'and no content. A test that opens a page will get a 404 until you set '
+                . 'fixturesPath and fixtureManifest to a root page and whatever else your site needs.'
+            );
+        }
 
         $result = $this->preparer->prepare((bool) $input->getOption('force'));
         $io->success($result['built']

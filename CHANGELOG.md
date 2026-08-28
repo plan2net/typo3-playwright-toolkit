@@ -18,6 +18,13 @@ the package a change belongs to.
 
 ### Added
 
+- **plan2net/playwright-toolkit** — `playwright:prepare` warns when no fixtures are
+  configured. Both fixture settings default to empty, which builds a template with
+  the schema and a backend session and no content at all, so every test that opens a
+  page got a 404 and no hint why. There is no sensible default to ship — the root
+  page id and the site are the project's — so the command names the two settings
+  instead.
+
 - **ddev-typo3-playwright-toolkit** — `ddev playwright` says what to fix when the
   Testing context reaches a database with no TYPO3 tables. The cache flush is the
   first step that touches it, so that project failed with a Doctrine trace naming no
