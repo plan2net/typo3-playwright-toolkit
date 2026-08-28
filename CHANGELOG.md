@@ -10,6 +10,8 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-28
+
 ### Breaking
 
 - **@plan2net/typo3-playwright-toolkit** — the setters for columns core stores as a
@@ -67,6 +69,9 @@ the package a change belongs to.
   to tell an already-seeded database from a new one, pre-boot, so a key a project
   applies later makes every request re-clone its database and lose what the test
   built.
+
+- The landing page example attaches its files with `withFileReferences` and
+  `imageCrop`, so the page shows how a relation is written.
 
 - The rotating claim in the landing page headline is readable: it carried the brand
   orange on white at 2.41:1, where large text needs 3:1. It now uses the TYPO3
@@ -264,7 +269,8 @@ the package a change belongs to.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.5.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.6.0...main
+[0.6.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.0...v0.4.1
