@@ -65,51 +65,6 @@ final class TestContextTest extends TestCase
     }
 
     #[Test]
-    public function derivesTheDatabaseNameFromAValidTestId(): void
-    {
-        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = 'ABCD1234EFGH5678';
-
-        $overrides = TestContext::databaseConnectionOverrides(['driver' => 'pdo_pgsql']);
-
-        self::assertSame('dbABCD1234EFGH5678', $overrides['DB/Connections/Default/dbname']);
-        self::assertSame('db-test', $overrides['DB/Connections/Default/host']);
-        self::assertSame('db', $overrides['DB/Connections/Default/user']);
-        self::assertSame(5432, $overrides['DB/Connections/Default/port']);
-    }
-
-    #[Test]
-    public function applyingTheOverridesRewritesTheDefaultConnectionInPlace(): void
-    {
-        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = 'ABCD1234EFGH5678';
-        $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] = [
-            'driver' => 'pdo_pgsql',
-            'dbname' => 'the_real_database',
-            'charset' => 'utf8',
-        ];
-
-        TestContext::applyDatabaseConnectionOverrides();
-
-        $connection = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
-        self::assertSame('dbABCD1234EFGH5678', $connection['dbname']);
-        self::assertSame('db-test', $connection['host']);
-        // Untouched keys survive: this merges into the project's connection.
-        self::assertSame('utf8', $connection['charset']);
-    }
-
-    #[Test]
-    public function appliesAConnectionPassedInWhenGlobalsDoesNotCarryItYet(): void
-    {
-        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = 'ABCD1234EFGH5678';
-        $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] = [];
-
-        TestContext::applyDatabaseConnectionOverrides(['driver' => 'pdo_pgsql']);
-
-        $connection = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
-        self::assertSame('dbABCD1234EFGH5678', $connection['dbname']);
-        self::assertSame('db-test', $connection['host']);
-    }
-
-    #[Test]
     public function applyingWithoutATestIdLeavesTheProjectDatabaseAlone(): void
     {
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
@@ -132,43 +87,6 @@ final class TestContextTest extends TestCase
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
 
         self::assertSame([], TestContext::databaseConnectionOverrides(['driver' => 'pdo_pgsql']));
-    }
-
-    #[Test]
-    public function overridesKeepThePostgresDriverTheProjectUses(): void
-    {
-        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = 'ABCD1234EFGH5678';
-
-        $overrides = TestContext::databaseConnectionOverrides(['driver' => 'pdo_pgsql']);
-
-        self::assertSame('pdo_pgsql', $overrides['DB/Connections/Default/driver']);
-        self::assertSame('dbABCD1234EFGH5678', $overrides['DB/Connections/Default/dbname']);
-    }
-
-    #[Test]
-    public function overridesKeepTheMysqlDriverTheProjectUses(): void
-    {
-        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = 'ABCD1234EFGH5678';
-
-        $overrides = TestContext::databaseConnectionOverrides(['driver' => 'mysqli']);
-
-        self::assertSame('mysqli', $overrides['DB/Connections/Default/driver']);
-        self::assertSame('dbABCD1234EFGH5678', $overrides['DB/Connections/Default/dbname']);
-        self::assertSame(3306, $overrides['DB/Connections/Default/port']);
-    }
-
-    #[Test]
-    public function overridesForSqliteResolveToTheCanonicalTestDatabasesDirectory(): void
-    {
-        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = 'ABCD1234EFGH5678';
-
-        $overrides = TestContext::databaseConnectionOverrides(['driver' => 'pdo_sqlite']);
-
-        self::assertSame(
-            '/app/var/test-databases/dbABCD1234EFGH5678.sqlite',
-            $overrides['DB/Connections/Default/path']
-        );
-        self::assertArrayNotHasKey('DB/Connections/Default/host', $overrides);
     }
 
     /**

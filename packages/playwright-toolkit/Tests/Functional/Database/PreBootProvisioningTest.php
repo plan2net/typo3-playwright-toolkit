@@ -77,6 +77,44 @@ final class PreBootProvisioningTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function theProjectConnectionKeepsTheKeysTheOverridesDoNotName(): void
+    {
+        $this->get(TemplatePreparer::class)->prepare();
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+        $_SERVER[TestApiSecret::SERVER_KEY] = $this->get(TestApiSecret::class)->ensureExists();
+        $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'] = 'utf8';
+
+        $this->asWebRequest(static function (): void {
+            TestContext::applyDatabaseConnectionOverrides();
+        });
+
+        $connection = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
+        self::assertStringEndsWith('db' . self::TEST_ID . '.sqlite', $connection['path']);
+        self::assertSame('utf8', $connection['charset']);
+    }
+
+    // A project whose credentials come from environment variables has nothing in
+    // $GLOBALS yet at this point.
+    #[Test]
+    public function theConnectionPassedInIsUsedWhenGlobalsCarriesNoneYet(): void
+    {
+        $this->get(TemplatePreparer::class)->prepare();
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+        $_SERVER[TestApiSecret::SERVER_KEY] = $this->get(TestApiSecret::class)->ensureExists();
+        $passedIn = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
+        $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] = [];
+
+        $this->asWebRequest(static function () use ($passedIn): void {
+            TestContext::applyDatabaseConnectionOverrides($passedIn);
+        });
+
+        self::assertStringEndsWith(
+            'db' . self::TEST_ID . '.sqlite',
+            $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['path']
+        );
+    }
+
+    #[Test]
     public function redirectingWithoutTheSecretCreatesNothing(): void
     {
         $this->get(TemplatePreparer::class)->prepare();
