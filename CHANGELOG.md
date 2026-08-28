@@ -10,84 +10,62 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-28
+
+### Breaking
+
+- **@plan2net/typo3-playwright-toolkit** — `defineBasePlaywrightConfig` refuses
+  overrides of `globalSetup`, `globalTeardown`, `use.baseURL` and
+  `use.serviceWorkers`. The hooks carry the preflight, the run bookkeeping and the
+  database cleanup; the other two keep the toolkit headers on one origin.
+
+- **@plan2net/typo3-playwright-toolkit** — a nested value passed to `withField` is
+  posted as one field per value, not as JSON. `CropConfig` left the field types with
+  it: a crop belongs to `sys_file_reference`, not to a `pages` or `tt_content` column.
+
+- **@plan2net/typo3-playwright-toolkit** — a second `defineScenario` in one test file
+  now fails. A scenario is named after its file, so both shared one test database and
+  only the first setup ran.
+
 ### Added
 
 - **@plan2net/typo3-playwright-toolkit** — flexform columns can be written:
   `withField('pi_flexform', flexForm({ 'settings.limit': 10 }))`. The form posts one
-  input per value, not one for the column, so such a value used to end up in the
-  column as JSON. Plain values go to the sheet a structure with a single one calls
-  `sDEF`; name a sheet per group where it has several. The input name is the same in
-  11.5, 12.4, 13.4 and 14.3. `contract/content-flexform-datamap.json` holds the body
-  both packages check, and the extension feeds it to a real DataHandler: a name the
-  structure does not know is stored unchanged instead of refused, so the fixture
-  sends padded values and only a trimmed result proves the name was found.
+  input per value, not one for the column, so such a value used to land in the column
+  as JSON. Plain values go to `sDEF`; name a sheet per group where the structure has
+  several. The input name is the same in 11.5, 12.4, 13.4 and 14.3.
 
 ### Changed
 
-- **@plan2net/typo3-playwright-toolkit** — a second `defineScenario` in one test file
-  now fails instead of running. A scenario is named after its file, so both calls
-  shared one test database and only the first setup ran, leaving the second one's
-  tests reading content nobody built.
+- **plan2net/playwright-toolkit** — the per-test database is created *before* TYPO3
+  boots, in the same call that points the connection at it, instead of in a
+  `BootCompletedEvent` listener. Another extension's listener could run first and
+  query a database that did not exist yet, and listener order between extensions is
+  undefined, so whether it worked was luck. The template check needs a booted TYPO3
+  and stays behind, in the new `TemplateDriftGuard`, once per database.
 
-- **@plan2net/typo3-playwright-toolkit** — a nested value passed to `withField` is
-  now posted as one field per value instead of as JSON. `CropConfig` left the field
-  types with it: a crop belongs to `sys_file_reference`, not to a column of `pages`
-  or `tt_content`, and the builder that writes one serialises it itself.
+- **plan2net/playwright-toolkit** — `playwright:prepare` skips the rebuild when the
+  stored fingerprint matches the current schema, fixtures and session seed, so an
+  unchanged template no longer costs 30–60s per run. `--force` rebuilds anyway.
 
-- **plan2net/playwright-toolkit** — locking now uses `symfony/lock` instead of
-  `flock()` calls spread over five places. `LockFiles` offers `shared()`,
-  `exclusively()` and `exclusivelyWithin()`, so no caller opens a file handle.
-  Lock file names never start with `db-`, which belongs to the claim files
-  cleanup looks for.
+- **plan2net/playwright-toolkit** — locking uses `symfony/lock` instead of `flock()`
+  in five places. `LockFiles` offers `shared()`, `exclusively()` and
+  `exclusivelyWithin()`, so no caller opens a file handle.
 
 ### Fixed
 
 - **plan2net/playwright-toolkit** — the Default connection is no longer pointed at a
-  test database that nothing created, which made TYPO3 fail during boot with
-  `Unknown database`, too early for any middleware to say something useful. It hit a
-  project calling `databaseConnectionOverrides()` to merge the paths into settings of
-  its own, because only `applyDatabaseConnectionOverrides()` created the database. It
-  also hit any request with a well-formed test ID and no secret, because creating
-  asked for the secret and pointing the connection did not. Both calls now decide the
-  same way, and neither moves the connection unless the database is there.
+  test database nothing created, which failed the request during boot with
+  `Unknown database`. It happened wherever the paths are merged by hand through
+  `databaseConnectionOverrides()`, since only `applyDatabaseConnectionOverrides()`
+  created the database, and for every request with a well-formed test ID and no
+  secret. Both calls now decide the same way.
 
-- **DDEV add-on** — `ddev playwright-prepare` (and every command that reaches the
-  test database) now refuses with "run `ddev restart`" when the db-test service is
-  configured but not yet active in the web container — running prepare between
-  `ddev add-on get` and the enabling `ddev restart` used to fail with a bare
-  connection error, or worse: on a host with several toolkit projects, `db-test`
-  resolves to *another* project's service on the shared ddev network and prepare
-  silently wrote into that project's template.
-
-### Changed
-
-- **plan2net/playwright-toolkit** — the per-test database is now created *before*
-  TYPO3 boots, in the same call that redirects the Default connection
-  (`TestContext::applyDatabaseConnectionOverrides()`), instead of in a
-  `BootCompletedEvent` listener. Any extension that queries the database from its
-  own `BootCompletedEvent` listener used to hit a database that did not exist yet
-  whenever its listener happened to run before the toolkit's; listener order
-  between unrelated extensions is undefined, so this worked in one project and
-  500ed in another. The one check
-  that needs a booted TYPO3, comparing the template fingerprint against the
-  current TCA, stays at `BootCompletedEvent` in the new `TemplateDriftGuard`. It
-  runs for every request that reached provisioning, and is paid once per database:
-  a marker file records that the template behind it was checked. The processed-folder isolation moved
-  into the drivers (`isolateProcessedFiles`).
-
-- **plan2net/playwright-toolkit** — `playwright:prepare` skips the rebuild when the
-  stored template fingerprint matches the current schema, fixtures and session seed,
-  so an unchanged template no longer costs 30–60s on every `ddev playwright test`.
-  The skip uses the same fingerprint `DatabaseInitializer` gates every run on, so it
-  is exactly as safe as the runtime check. `--force` rebuilds anyway, and
-  `ddev playwright-prepare` forwards it.
-- **@plan2net/typo3-playwright-toolkit** — `defineBasePlaywrightConfig` refuses
-  overrides of `globalSetup`, `globalTeardown`, `use.baseURL` and
-  `use.serviceWorkers` instead of silently accepting them: the hooks carry the
-  preflight, run bookkeeping and database cleanup (including leak detection), and
-  the other two are the header-routing invariants. The new
-  `BasePlaywrightOverrides` type excludes them, and a runtime check catches plain-JS
-  consumers with an actionable error.
+- **DDEV add-on** — `ddev playwright-prepare` refuses with "run `ddev restart`" while
+  the db-test service is configured but not active yet. Running it before that
+  restart failed with a bare connection error — or worse, on a host with several
+  toolkit projects `db-test` resolved to another project's service and prepare wrote
+  into its template.
 
 ## [0.4.2] - 2026-08-27
 
@@ -219,7 +197,8 @@ the package a change belongs to.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.2...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.5.0...main
+[0.5.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.3.0...v0.4.0
