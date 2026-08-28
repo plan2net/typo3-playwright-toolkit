@@ -6,7 +6,7 @@ import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
 import { registerContentTypes } from '#src/builders/content-factory.js'
 import { ContentBuilder } from '#src/builders/content-builder.js'
 import { PageBuilder } from '#src/builders/page-builder.js'
-import { flexForm } from '#src/builders/fields.js'
+import { flexForm, imageCrop } from '#src/builders/fields.js'
 import type { ContentBuilderInterface, ContentFields } from '#src/types/content-builder.js'
 import type { RecordDataMap } from '#src/http/record-edit.js'
 
@@ -128,6 +128,15 @@ class ContainerContent implements ContentBuilderInterface {
 
     getAdditionalRecords(): RecordDataMap {
         return { tt_content: { NEWchild: { CType: 'header', header: 'Inside' } } }
+    }
+}
+
+/** A consumer CType with an item collection its builder exposes no setter for. */
+class AccordionContent implements ContentBuilderInterface {
+    readonly type = 'demo_accordion'
+
+    getFields(): ContentFields {
+        return { CType: this.type, header: 'Accordion' }
     }
 }
 
@@ -454,6 +463,107 @@ describe('ContentBuilder', () => {
         await expect(
             contentBuilder(page).onPage('12').ofType('collide_demo').create(),
         ).rejects.toThrow(/tt_content/)
+    })
+
+    // For a CType whose builder has no convenience for the column.
+    it('posts a relation named on the builder rather than the content type', async () => {
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page)
+            .onPage('12')
+            .ofType('textmedia')
+            .withFileReference('assets', 7)
+            .create()
+
+        const reference = identifierOf(posted[0].dataMap.sys_file_reference)
+
+        expect(only(posted[0].dataMap.tt_content).assets).toBe(reference)
+        expect(posted[0].dataMap.sys_file_reference[reference]).toMatchObject({ uid_local: '7' })
+    })
+
+    // Nothing the reader can see decides which surface ran first, so the token
+    // order — which image is first — would be arbitrary.
+    it('refuses a relation on a column the content type already relates', async () => {
+        const { page } = fakePage(42)
+
+        await expect(
+            contentBuilder(page)
+                .onPage('12')
+                .ofType('textmedia')
+                .configure((content) => content.withFileReference('assets', 1))
+                .withFileReference('assets', 2)
+                .create(),
+        ).rejects.toThrow(/assets/)
+    })
+
+    it('lets a value on the builder override the content type', async () => {
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page)
+            .onPage('12')
+            .ofType('text')
+            .configure((content) => content.withHeader('From the type'))
+            .withField('header', 'From the spec')
+            .create()
+
+        expect(only(posted[0].dataMap.tt_content).header).toBe('From the spec')
+    })
+
+    it('posts several references named on the builder', async () => {
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page)
+            .onPage('12')
+            .ofType('textmedia')
+            .withFileReferences('assets', [1, 2], { crop: imageCrop({ ratio: '16:9' }) })
+            .create()
+
+        const tokens = String(only(posted[0].dataMap.tt_content).assets).split(',')
+
+        expect(tokens).toHaveLength(2)
+        expect(posted[0].dataMap.sys_file_reference[tokens[0]].crop).toContain('16:9')
+    })
+
+    it('posts a child record named on the builder', async () => {
+        registerContentTypes({ demo_accordion: AccordionContent })
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page)
+            .onPage('12')
+            .ofType('demo_accordion')
+            .withChild('items', 'tx_demo_accordion_item', (item) =>
+                item.withField('title', 'First'),
+            )
+            .create()
+
+        expect(only(posted[0].dataMap.tt_content).items).toBe(
+            identifierOf(posted[0].dataMap.tx_demo_accordion_item),
+        )
+        expect(only(posted[0].dataMap.tx_demo_accordion_item)).toMatchObject({
+            title: 'First',
+            pid: '12',
+        })
+    })
+
+    it('posts one child per item named on the builder', async () => {
+        registerContentTypes({ demo_accordion: AccordionContent })
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page)
+            .onPage('12')
+            .ofType('demo_accordion')
+            .withChildren(
+                'items',
+                'tx_demo_accordion_item',
+                ['First', 'Second'],
+                (item, title) => item.withField('title', title),
+            )
+            .create()
+
+        const rows = posted[0].dataMap.tx_demo_accordion_item
+        const tokens = String(only(posted[0].dataMap.tt_content).items).split(',')
+
+        expect(tokens.map((token) => rows[token].title)).toEqual(['First', 'Second'])
     })
 
     it('throws when the backend refuses the content element', async () => {

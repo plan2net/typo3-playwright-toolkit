@@ -1,9 +1,9 @@
 import { Page } from '@playwright/test'
-import { ContentBuilderInterface } from '../types/content-builder.js'
+import { ContentBuilderInterface, type ContentFields } from '../types/content-builder.js'
 import { createContent } from './content-factory.js'
 import type { ContentTypeFor, ContentTypeKey } from './core-content.js'
 import { saveRecord, type RecordDataMap } from '../http/record-edit.js'
-import { mergeRecords } from './relations.js'
+import { mergeRecords, RelationSet, type ChildRecord } from './relations.js'
 import { toColumnValues } from './fields.js'
 import { replayParentId, resolveRequestContext, type RequestContext } from './request-context.js'
 import { newRecordIdentifier } from './identifier.js'
@@ -45,6 +45,8 @@ export class ContentBuilder {
 
 class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInterface> {
     private builder: ContentBuilderInterface
+    private readonly fields: ContentFields = {}
+    private readonly relations = new RelationSet('tt_content', (column) => column in this.fields)
 
     constructor(
         private page: Page,
@@ -57,6 +59,41 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
 
     configure(fn: (builder: B) => void): this {
         fn(this.builder as B)
+        return this
+    }
+
+    withField(column: string, value: ContentFields[string]): this {
+        this.fields[column] = value
+
+        return this
+    }
+
+    withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
+        this.relations.withFileReference(column, fileUid, fields)
+
+        return this
+    }
+
+    withFileReferences(column: string, fileUids: number[], fields: ContentFields = {}): this {
+        this.relations.withFileReferences(column, fileUids, fields)
+
+        return this
+    }
+
+    withChild(column: string, table: string, configure: (child: ChildRecord) => void): this {
+        this.relations.withChild(column, table, configure)
+
+        return this
+    }
+
+    withChildren<T>(
+        column: string,
+        table: string,
+        items: T[],
+        configure: (child: ChildRecord, item: T) => void,
+    ): this {
+        this.relations.withChildren(column, table, items, configure)
+
         return this
     }
 
@@ -74,12 +111,15 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
             ),
         )
 
-        const columnValues = toColumnValues(own)
+        const columnValues = toColumnValues({ ...own, ...this.fields })
         // Not the record's own pid, which carries the -uid positioning the element.
-        const relations = this.builder.getRelations?.({
+        const owner = {
             pid: (columnValues.pid as string | number) ?? pageId,
             sys_language_uid: (columnValues.sys_language_uid as string | number) ?? 0,
-        }) ?? { columns: {}, records: {} }
+        }
+        const inner = this.builder.getRelations?.(owner) ?? { columns: {}, records: {} }
+        const outer = this.relations.materialise(owner)
+        refuseSharedColumns(inner.columns, outer.columns)
 
         const record: Record<string, unknown> = {
             pid: insertPosition(this.page, pageId),
@@ -87,13 +127,15 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
             CType: fields.CType || this.builder.type,
             colPos: fields.colPos ?? 0,
             ...columnValues,
-            ...relations.columns,
+            ...inner.columns,
+            ...outer.columns,
         }
 
         // Merged per table, not spread: a child table may be tt_content itself.
         const data: RecordDataMap = { tt_content: { [identifier]: record } }
         mergeRecords(data, this.builder.getAdditionalRecords?.(identifier, pageId) ?? {})
-        mergeRecords(data, relations.records)
+        mergeRecords(data, inner.records)
+        mergeRecords(data, outer.records)
 
         const uid = await saveRecord(this.page.request, context, {
             table: 'tt_content',
@@ -105,6 +147,21 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         lastElementOnPage.get(this.page)?.set(pageId, uid)
 
         return { id: String(uid) }
+    }
+}
+
+function refuseSharedColumns(
+    inner: Record<string, string>,
+    outer: Record<string, string>,
+): void {
+    const shared = Object.keys(outer).filter((column) => column in inner)
+    if (shared.length > 0) {
+        throw new Error(
+            `[typo3-playwright-toolkit] The column ${shared.join(' and ')} is filled twice — ` +
+                'once inside configure() and once on the builder. Nothing decides which of ' +
+                'the two comes first, so the records would end up in a random order. Put ' +
+                'them all in one place.',
+        )
     }
 }
 
