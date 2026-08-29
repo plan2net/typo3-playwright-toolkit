@@ -15,7 +15,7 @@ final class MysqlTestDatabaseDriverTest extends ServerTestDatabaseDriverTestCase
     /**
      * @var string
      */
-    private const TEMPLATE = 'playwright_tmpl_phpunit';
+    protected const TEMPLATE = 'playwright_tmpl_phpunit';
 
     /**
      * @var string

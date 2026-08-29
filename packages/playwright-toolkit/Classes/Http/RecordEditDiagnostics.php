@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Http;
 
+use Plan2net\PlaywrightToolkit\Log\RecordedErrors;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -12,7 +13,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 
-final class SavedRecordHeader implements MiddlewareInterface
+final class RecordEditDiagnostics implements MiddlewareInterface
 {
     /**
      * @var string
@@ -22,6 +23,7 @@ final class SavedRecordHeader implements MiddlewareInterface
     public function __construct(
         private readonly TestApiSecret $secret,
         private readonly ConnectionPool $connectionPool,
+        private readonly RecordedErrors $recordedErrors,
     ) {
     }
 
@@ -41,13 +43,45 @@ final class SavedRecordHeader implements MiddlewareInterface
             return $handler->handle($request);
         }
 
+        $before = $this->lastLogUid();
         $response = $handler->handle($request);
+
         $slug = $this->slugOf($response->getHeaderLine('location'));
-        if (null === $slug) {
+        if (null !== $slug) {
+            $response = $response->withHeader(SavedRecord::HEADER, (string) json_encode(['slug' => $slug]));
+        }
+
+        return $this->withDiagnostics($response, $before);
+    }
+
+    private function lastLogUid(): int
+    {
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('sys_log');
+
+        return (int) $queryBuilder
+            ->select('uid')
+            ->from('sys_log')
+            ->orderBy('uid', 'DESC')
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchOne();
+    }
+
+    private function withDiagnostics(ResponseInterface $response, int $before): ResponseInterface
+    {
+        $refused = $this->recordedErrors->refusalsAfter(
+            $this->connectionPool->getConnectionForTable('sys_log'),
+            $before
+        );
+
+        if ([] === $refused) {
             return $response;
         }
 
-        return $response->withHeader(SavedRecord::HEADER, (string) json_encode(['slug' => $slug]));
+        return $response->withHeader(
+            RecordDiagnostics::HEADER,
+            (string) json_encode(['errors' => \array_slice($refused, 0, 1), 'count' => \count($refused)])
+        );
     }
 
     private function slugOf(string $location): ?string

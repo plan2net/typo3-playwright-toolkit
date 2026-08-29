@@ -18,7 +18,29 @@ import { applyToolkitHeaders } from './http/off-site-headers.js'
 import { prepareScenarioContext } from './http/prepare-context.js'
 import { toolkitRequest } from './http/toolkit-request.js'
 import { runAccessibilityScan, shouldScanAutomatically } from './checks/accessibility.js'
-import { reportRecordedErrors } from './report/recorded-error-report.js'
+import { reportRecordedErrors, reportSetupFailure } from './report/recorded-error-report.js'
+
+type SetupFailureReporter = (
+    config: ToolkitConfig,
+    scenarioKey: string,
+    testInfo: TestInfo,
+    error: unknown,
+) => Promise<never>
+
+/** A failed setup throws out of ensureState, so it never reaches the fixture's end. */
+export async function resolveSetupOutcome<T>(
+    config: ToolkitConfig,
+    scenarioKey: string,
+    testInfo: TestInfo,
+    run: () => Promise<T>,
+    report: SetupFailureReporter = reportSetupFailure,
+): Promise<T> {
+    try {
+        return await run()
+    } catch (error) {
+        return await report(config, scenarioKey, testInfo, error)
+    }
+}
 
 export interface ScenarioBuilders {
     page(): PageBuilder
@@ -194,7 +216,8 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
             const key = sanitizeScenarioKey(testInfo.file)
             const name = scenarioName(testInfo.file)
 
-            const outcome = await ensureState<S>(config, {
+            const outcome = await resolveSetupOutcome(config, key, testInfo, () =>
+                ensureState<S>(config, {
                 key,
                 name,
                 triggerId: testInfo.testId,
@@ -233,7 +256,8 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
                         await session.close()
                     }
                 },
-            })
+                }),
+            )
 
             const data = applyScenarioOutcome(
                 outcome,

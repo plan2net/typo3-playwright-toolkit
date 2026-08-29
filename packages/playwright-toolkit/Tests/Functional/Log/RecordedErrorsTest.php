@@ -6,6 +6,7 @@ namespace Plan2net\PlaywrightToolkit\Tests\Functional\Log;
 
 use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Log\RecordedErrors;
+use Plan2net\PlaywrightToolkit\Tests\ContractFixture;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class RecordedErrorsTest extends FunctionalTestCase
@@ -44,6 +45,33 @@ final class RecordedErrorsTest extends FunctionalTestCase
 
         self::assertSame(['the same failure', 'a different failure'], array_column($errors, 'message'));
         self::assertSame([3, 1], array_column($errors, 'count'));
+    }
+
+    #[Test]
+    public function countsOnlyRefusedRecordsAsRefusals(): void
+    {
+        $this->insertRow(['type' => 5, 'channel' => 'php', 'error' => 2, 'details' => 'PHP Warning: Undefined array key']);
+        $this->insertRow(['type' => 1, 'channel' => 'content', 'error' => 1, 'details' => 'this table is not allowed', 'tablename' => 'tt_content']);
+
+        $refusals = (new RecordedErrors())->refusalsAfter($this->getConnectionPool()->getConnectionForTable('sys_log'), 0);
+
+        self::assertSame([['message' => 'this table is not allowed', 'table' => 'tt_content']], $refusals);
+    }
+
+    #[Test]
+    public function answersExactlyWhatTheContractFixtureHolds(): void
+    {
+        $this->insertRow(['type' => 1, 'channel' => 'content', 'error' => 1, 'tstamp' => 1760954471, 'details' => "Attempt to insert a record on page '%s' (%s) where this table, %s, is not allowed", 'log_data' => '["\/gallery","127","sys_file_reference"]', 'tablename' => 'sys_file_reference']);
+        $this->insertRow(['type' => 5, 'channel' => 'php', 'error' => 2, 'level' => 'error', 'tstamp' => 1760954471, 'details' => 'Core: Exception handler (WEB): Uncaught TYPO3 Exception: no page configured']);
+        $this->insertRow(['type' => 5, 'channel' => 'php', 'error' => 2, 'level' => 'error', 'tstamp' => 1760954471, 'details' => 'Core: Exception handler (WEB): Uncaught TYPO3 Exception: no page configured']);
+        $this->insertRow(['type' => 0, 'component' => 'TYPO3.CMS.Core.Resource.ResourceStorage', 'level' => '2', 'tstamp' => 1760954471, 'message' => 'Failed initializing storage']);
+
+        $errors = (new RecordedErrors())->readFrom($this->getConnectionPool()->getConnectionForTable('sys_log'), 20);
+
+        self::assertSame(
+            ContractFixture::read('errors-response')['errors'],
+            $errors
+        );
     }
 
     #[Test]

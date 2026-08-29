@@ -1,0 +1,33 @@
+{
+    "success": true,
+    "testId": "ABCD1234EFGH5678",
+    "truncated": false,
+    "errors": [
+        {
+            "uid": 1,
+            "source": "datahandler",
+            "at": "2025-10-20T10:01:11+00:00",
+            "message": "Attempt to insert a record on page '/gallery' (127) where this table, sys_file_reference, is not allowed",
+            "table": "sys_file_reference",
+            "recordUid": 0,
+            "count": 1
+        },
+        {
+            "uid": 2,
+            "source": "php",
+            "at": "2025-10-20T10:01:11+00:00",
+            "level": "error",
+            "message": "Core: Exception handler (WEB): Uncaught TYPO3 Exception: no page configured",
+            "count": 2
+        },
+        {
+            "uid": 4,
+            "source": "log",
+            "at": "2025-10-20T10:01:11+00:00",
+            "level": "critical",
+            "component": "TYPO3.CMS.Core.Resource.ResourceStorage",
+            "message": "Failed initializing storage",
+            "count": 1
+        }
+    ]
+}

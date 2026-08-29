@@ -52,6 +52,39 @@ final class RecordedErrors
     }
 
     /**
+     * What DataHandler refused while handling one request.
+     *
+     * @return list<array{message: string, table: string}>
+     */
+    public function refusalsAfter(Connection $connection, int $afterUid): array
+    {
+        $queryBuilder = $connection->createQueryBuilder();
+
+        $rows = $queryBuilder
+            ->select('*')
+            ->from('sys_log')
+            ->where(
+                $queryBuilder->expr()->gt('uid', $queryBuilder->createNamedParameter($afterUid, Connection::PARAM_INT)),
+                $queryBuilder->expr()->gt('error', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
+                // DataHandler only. The php channel also carries error rows, and a
+                // warning there is not a record anybody refused.
+                $queryBuilder->expr()->eq('type', $queryBuilder->createNamedParameter(SystemLogType::DB, Connection::PARAM_INT))
+            )
+            ->orderBy('uid', 'ASC')
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        return array_map(function (array $row): array {
+            $mapped = $this->fromRow($row);
+
+            return [
+                'message' => (string) $mapped['message'],
+                'table' => (string) ($mapped['table'] ?? ''),
+            ];
+        }, $rows);
+    }
+
+    /**
      * @param array<string, mixed> $row
      *
      * @return array<string, mixed>

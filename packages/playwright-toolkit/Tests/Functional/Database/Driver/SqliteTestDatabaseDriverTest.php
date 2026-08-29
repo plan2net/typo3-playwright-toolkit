@@ -42,6 +42,25 @@ final class SqliteTestDatabaseDriverTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function finalisingTheTemplateEmptiesSysLog(): void
+    {
+        $driver = $this->driver();
+        $driver->createEmptyTemplate();
+        $driver->seedTemplate($this->seed());
+
+        $template = $this->connectTo('playwright_db_template.sqlite');
+        $template->exec('CREATE TABLE IF NOT EXISTS sys_log (uid INTEGER PRIMARY KEY, details TEXT)');
+        $template->exec("INSERT INTO sys_log (details) VALUES ('left over from building the template')");
+
+        $driver->finaliseTemplate('abc');
+
+        self::assertSame(
+            0,
+            (int) $this->connectTo('playwright_db_template.sqlite')->query('SELECT COUNT(*) FROM sys_log')->fetchColumn()
+        );
+    }
+
+    #[Test]
     public function reportsItsEngine(): void
     {
         self::assertSame(Engine::Sqlite, $this->driver()->engine());

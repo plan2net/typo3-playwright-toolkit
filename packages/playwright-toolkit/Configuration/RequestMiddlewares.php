@@ -6,7 +6,7 @@ use Plan2net\PlaywrightToolkit\Http\DatabaseCleanupProvider;
 use Plan2net\PlaywrightToolkit\Http\HealthCheckProvider;
 use Plan2net\PlaywrightToolkit\Http\InspectProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordedErrorProvider;
-use Plan2net\PlaywrightToolkit\Http\SavedRecordHeader;
+use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
 
 return [
@@ -42,7 +42,7 @@ return [
             ],
         ],
         'plan2net/playwright-toolkit/saved-slug' => [
-            'target' => SavedRecordHeader::class,
+            'target' => RecordEditDiagnostics::class,
             'before' => [
                 'typo3/cms-backend/backend-routing',
             ],

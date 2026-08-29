@@ -1,3 +1,6 @@
+import * as fs from 'fs'
+import * as path from 'path'
+import { fileURLToPath } from 'url'
 import { describe, expect, it } from 'vitest'
 import { fetchRecordedErrors, formatRecordedErrors } from '#src/http/recorded-errors.js'
 import type { ToolkitConfig } from '#src/config.js'
@@ -49,6 +52,27 @@ describe('fetchRecordedErrors', () => {
         await expect(
             fetchRecordedErrors(config, 'K7F2QX9M4TB6WZ1P', { fetchImpl, secret: 's' }),
         ).resolves.toBeUndefined()
+    })
+})
+
+describe('the errors endpoint answer', () => {
+    it('parses the body the extension proves it returns', async () => {
+        const fixturePath = path.resolve(
+            path.dirname(fileURLToPath(import.meta.url)),
+            '../../../../contract/errors-response.json',
+        )
+        const body = JSON.parse(fs.readFileSync(fixturePath, 'utf-8')) as Record<string, unknown>
+        const fetchImpl = (async () => ({ ok: true, status: 200, json: async () => body })) as unknown as typeof fetch
+
+        const report = await fetchRecordedErrors(config, 'ABCD1234EFGH5678', {
+            fetchImpl,
+            secret: 's',
+        })
+
+        expect(report?.testId).toBe('ABCD1234EFGH5678')
+        expect(report?.errors.map((error) => error.source)).toEqual(['datahandler', 'php', 'log'])
+        expect(report?.errors[1].count).toBe(2)
+        expect(formatRecordedErrors('teaser.spec.ts', report!)).toContain('PHP error (2x)')
     })
 })
 

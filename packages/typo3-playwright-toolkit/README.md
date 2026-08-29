@@ -149,6 +149,32 @@ can add more. Navigate with the returned value, never with the string you passed
 The setup runs once per file, even when the file runs in several browser projects.
 The other projects use the state and the test database that the first one created.
 
+### When something fails, TYPO3 says why
+
+A failing test now prints what TYPO3 wrote to its log while that test ran, under the
+failure itself:
+
+```
+    Error: expect(locator).toBeVisible() failed
+    Locator: locator('.teaser figure img')
+
+    Error: [typo3-playwright-toolkit] TYPO3 recorded 2 errors for scenario
+    "tests/teaser.spec.ts" (test 2C8F069F788D3F20):
+
+      1. log error
+         No page configured for type=99999.
+
+      2. DataHandler sys_file_reference
+         Attempt to insert a record on page '/gallery' (127) where this table is not allowed
+```
+
+The same list is attached to the test as `typo3-errors.json`. A message that repeats
+is counted, not printed again. A failing setup shows the same list next to its own
+error.
+
+If TYPO3 refuses a record while a builder saves it, the builder stops at that line.
+Before, the save looked fine and the test failed later, somewhere unrelated.
+
 <picture>
   <source media="(max-width: 700px)" srcset="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/scenario-fan-out-narrow.svg">
   <img width="880" src="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/scenario-fan-out.svg"

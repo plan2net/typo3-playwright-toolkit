@@ -105,6 +105,7 @@ abstract class ServerTestDatabaseDriver implements TestDatabaseDriver
     public function finaliseTemplate(string $fingerprint): void
     {
         $template = $this->connect($this->templateDatabase);
+        $this->emptySysLog($template);
         $template->exec(sprintf(
             'CREATE TABLE IF NOT EXISTS playwright_seed (fingerprint %s NOT NULL)',
             $this->fingerprintColumnType()
@@ -256,6 +257,16 @@ abstract class ServerTestDatabaseDriver implements TestDatabaseDriver
     protected function admin(): \PDO
     {
         return $this->connect($this->adminDatabase());
+    }
+
+    /** Building the template can log, and every clone would inherit those rows. */
+    protected function emptySysLog(\PDO $template): void
+    {
+        try {
+            $template->exec('DELETE FROM sys_log');
+        } catch (\PDOException) {
+            // A template built without TYPO3's schema has no sys_log to empty.
+        }
     }
 
     protected function connect(?string $database): \PDO

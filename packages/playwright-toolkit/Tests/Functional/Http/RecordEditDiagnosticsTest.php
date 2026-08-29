@@ -5,18 +5,19 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Http;
 
 use PHPUnit\Framework\Attributes\Test;
+use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
 use Plan2net\PlaywrightToolkit\Http\SavedRecord;
-use Plan2net\PlaywrightToolkit\Http\SavedRecordHeader;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\TestContext;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Http\RedirectResponse;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
-final class SavedRecordHeaderTest extends FunctionalTestCase
+final class RecordEditDiagnosticsTest extends FunctionalTestCase
 {
     /**
      * @var string
@@ -76,6 +77,22 @@ final class SavedRecordHeaderTest extends FunctionalTestCase
         self::assertFalse($response->hasHeader(SavedRecord::HEADER));
     }
 
+    #[Test]
+    public function reportsWhatTypo3RefusedWhileSaving(): void
+    {
+        $this->givenPage('/a-page-1');
+
+        $response = $this->saveWhileTypo3Logs(
+            'index.php?route=%2Frecord%2Fedit&edit[pages][17]=edit',
+            'this table is not allowed here',
+        );
+
+        self::assertSame(
+            ['errors' => [['message' => 'this table is not allowed here', 'table' => 'tt_content']], 'count' => 1],
+            $this->diagnostics($response)
+        );
+    }
+
     private function givenPage(string $slug): void
     {
         $this->getConnectionPool()->getConnectionForTable('pages')->insert('pages', [
@@ -102,6 +119,52 @@ final class SavedRecordHeaderTest extends FunctionalTestCase
             }
         };
 
-        return $this->get(SavedRecordHeader::class)->process($request, $handler);
+        return $this->get(RecordEditDiagnostics::class)->process($request, $handler);
+    }
+
+    private function saveWhileTypo3Logs(string $location, string $details): ResponseInterface
+    {
+        $request = (new ServerRequest('https://testing.test/typo3/record/edit', 'POST'))
+            ->withHeader(TestApiSecret::HEADER, $this->secret);
+
+        $connection = $this->getConnectionPool()->getConnectionForTable('sys_log');
+        $handler = new class($location, $connection, $details) implements RequestHandlerInterface {
+            public function __construct(
+                private readonly string $location,
+                private readonly Connection $connection,
+                private readonly string $details,
+            ) {
+            }
+
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                $this->connection->insert('sys_log', [
+                    'type' => 1,
+                    'channel' => 'content',
+                    'level' => 'error',
+                    'error' => 1,
+                    'details' => $this->details,
+                    'log_data' => '',
+                    'tablename' => 'tt_content',
+                    'recuid' => 0,
+                    'tstamp' => 1760954471,
+                    'component' => '',
+                    'message' => '',
+                    'data' => '',
+                ]);
+
+                return new RedirectResponse($this->location, 302);
+            }
+        };
+
+        return $this->get(RecordEditDiagnostics::class)->process($request, $handler);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function diagnostics(ResponseInterface $response): array
+    {
+        return (array) json_decode($response->getHeaderLine('X-Playwright-Record-Diagnostics'), true);
     }
 }

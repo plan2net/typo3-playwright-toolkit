@@ -7,6 +7,7 @@ export const TEST_ID_PATTERN = /^[A-Z0-9]{16}$/
 
 /** JSON, so a value stays ASCII in a header field and a later field needs no second header. */
 export const SAVED_RECORD_HEADER = 'X-Playwright-Saved-Record'
+export const RECORD_DIAGNOSTICS_HEADER = 'X-Playwright-Record-Diagnostics'
 
 /** Replay's own test ID; the extension maps it to the throwaway base database. */
 export const REPLAY_TEST_ID = 'REPLAY0000000000'

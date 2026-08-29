@@ -1,5 +1,5 @@
 import { getToolkitConfig } from '../config.js'
-import { SAVED_RECORD_HEADER, toolkitHeaders } from '../contract.js'
+import { RECORD_DIAGNOSTICS_HEADER, SAVED_RECORD_HEADER, toolkitHeaders } from '../contract.js'
 
 /** Relative to the backend entry point, which a project may have moved. */
 export const RECORD_EDIT_ROUTE = '/record/edit'
@@ -91,6 +91,8 @@ export async function saveRecord(
         )
     }
 
+    refuseWhatTypo3Rejected(headers, record.table)
+
     const uid = uidFrom(location, record.table)
     if (undefined === uid) {
         throw new Error(
@@ -100,6 +102,30 @@ export async function saveRecord(
     }
 
     return { uid, ...savedRecord(headers) }
+}
+
+/**
+ * A refused child leaves the parent saved, so the request looks like a success
+ * and the failure would only show up much later, somewhere else.
+ */
+function refuseWhatTypo3Rejected(headers: Record<string, string>, table: string): void {
+    const raw = header(headers, RECORD_DIAGNOSTICS_HEADER)
+    if (undefined === raw) {
+        return
+    }
+
+    const { errors, count } = JSON.parse(raw) as {
+        errors: Array<{ message: string; table: string }>
+        count: number
+    }
+    const first = errors[0]
+    const more = count > 1 ? `\n(and ${count - 1} more, see /typo3/test-api/errors)` : ''
+
+    throw new Error(
+        `[typo3-playwright-toolkit] TYPO3 refused a record while saving ${table}.\n` +
+            `  table:   ${first.table}\n` +
+            `  message: ${first.message}${more}`,
+    )
 }
 
 /** `data[table][identifier][field]`, the names FormEngine gives its inputs. */

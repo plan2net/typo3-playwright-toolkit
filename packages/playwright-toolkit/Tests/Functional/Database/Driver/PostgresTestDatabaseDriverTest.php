@@ -15,7 +15,7 @@ final class PostgresTestDatabaseDriverTest extends ServerTestDatabaseDriverTestC
     /**
      * @var string
      */
-    private const TEMPLATE = 'playwright_db_template_phpunit';
+    protected const TEMPLATE = 'playwright_db_template_phpunit';
 
     /**
      * @var string

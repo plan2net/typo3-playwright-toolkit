@@ -20,6 +20,11 @@ abstract class ServerTestDatabaseDriverTestCase extends FunctionalTestCase
      * @var string
      */
     protected const TEST_ID = 'ABCD1234EFGH5678';
+
+    /**
+     * @var string
+     */
+    protected const TEMPLATE = 'playwright_db_template';
     protected array $testExtensionsToLoad = [
         'plan2net/playwright-toolkit',
     ];
@@ -173,6 +178,25 @@ abstract class ServerTestDatabaseDriverTestCase extends FunctionalTestCase
         $driver->materialise(self::TEST_ID);
 
         self::assertTrue($driver->checkTestDatabase(self::TEST_ID)['ok']);
+    }
+
+    #[Test]
+    public function finalisingTheTemplateEmptiesSysLog(): void
+    {
+        $driver = $this->driver();
+        $driver->createEmptyTemplate();
+        $driver->seedTemplate($this->seed());
+
+        $template = $this->connectTo(static::TEMPLATE);
+        $template->exec('CREATE TABLE IF NOT EXISTS sys_log (uid integer, details text)');
+        $template->exec("INSERT INTO sys_log (uid, details) VALUES (1, 'left over from building the template')");
+
+        $driver->finaliseTemplate('abc');
+
+        self::assertSame(
+            0,
+            (int) $this->connectTo(static::TEMPLATE)->query('SELECT COUNT(*) FROM sys_log')->fetchColumn()
+        );
     }
 
     abstract protected function driver(): ServerTestDatabaseDriver;

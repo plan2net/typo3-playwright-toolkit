@@ -148,6 +148,12 @@ final class SqliteTestDatabaseDriver implements TestDatabaseDriver
     public function finaliseTemplate(string $fingerprint): void
     {
         $connection = $this->connect($this->templateFile());
+        // Building the template can log, and every clone would inherit those rows.
+        try {
+            $connection->exec('DELETE FROM sys_log');
+        } catch (\PDOException) {
+            // A template built without TYPO3's schema has no sys_log to empty.
+        }
         $connection->exec('CREATE TABLE IF NOT EXISTS playwright_seed (fingerprint TEXT NOT NULL)');
         $connection->exec('DELETE FROM playwright_seed');
 

@@ -12,40 +12,38 @@ the package a change belongs to.
 
 ### Changed
 
-- **plan2net/playwright-toolkit** — **Breaking.** Two methods were renamed. Change the
+- **plan2net/playwright-toolkit** — **Breaking.** Two methods have new names. Change the
   call in your `config/system/additional.php`:
 
   ```php
   \Plan2net\PlaywrightToolkit\TestContext::configureCurrentRequest();
   ```
 
-  It used to be `applyDatabaseConnectionOverrides()`. The new name fits, because the call
-  now does more than point the database connection at the test database — it also switches
-  on error recording.
+  It was `applyDatabaseConnectionOverrides()`. The call now does more than pick the test
+  database, so the old name no longer fitted.
 
-  If your project merges the settings itself, `databaseConnectionOverrides()` is now
-  `resolveTestDatabaseConnection()`. The old name sounded like it only returned values,
-  but it creates the test database as well.
+  If your project merges the settings itself, use `resolveTestDatabaseConnection()`
+  instead of `databaseConnectionOverrides()`. The old name sounded like it only returned
+  values, but it creates the test database as well.
 
-  There are no aliases. An old name now fails with "undefined method" on the first test
-  run, and only in the Testing context, so nothing on a live site is affected.
+  There are no aliases. An old name stops the first test run with "undefined method". A
+  live site cannot be affected, because the call only runs in the Testing context.
 
 ### Added
 
-- **plan2net/playwright-toolkit** — errors that TYPO3 records while a test runs are now
-  written to that test's own database, into the `sys_log` table, using TYPO3's own
-  database log writer. It is switched on for every logger rather than only the top-level
-  one, so problems reported by file handling or by your own extensions are recorded too.
+- **plan2net/playwright-toolkit** and **@plan2net/typo3-playwright-toolkit** — when a
+  test fails, the report now shows what TYPO3 wrote to its log while that test ran:
+  records it refused to save, uncaught exceptions, and anything logged as an error. The
+  full list is attached to the test as `typo3-errors.json`. A message that repeats is
+  counted, not printed again.
 
-- **plan2net/playwright-toolkit** — a new endpoint hands those errors back:
+- **plan2net/playwright-toolkit** and **@plan2net/typo3-playwright-toolkit** — a builder
+  now stops at the line that saved, if TYPO3 refused the record. Until now the save
+  looked fine and the test failed later, somewhere else.
 
-  ```
-  GET /typo3/test-api/errors?id=<testId>
-  ```
-
-  Refused records, uncaught exceptions and anything logged at error level come back
-  with the message already filled in. Repeats of the same message are counted rather
-  than listed again, and asking about a database that is gone answers an empty list.
+- **plan2net/playwright-toolkit** and **@plan2net/typo3-playwright-toolkit** — a scenario
+  setup that fails shows the same list, and still shows its own error and the line it
+  came from.
 
 ## [0.8.0] - 2026-08-29
 

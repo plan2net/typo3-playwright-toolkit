@@ -24,7 +24,13 @@ interface Posted {
 }
 
 function fakePoster(
-    response: { status: number; location?: string; body?: string; storedSlug?: string } = {
+    response: {
+        status: number
+        location?: string
+        body?: string
+        storedSlug?: string
+        refused?: { errors: Array<{ message: string; table: string }>; count: number }
+    } = {
         status: 302,
         location: '/typo3/record/edit?edit%5Bpages%5D%5B42%5D=edit&token=abc',
     },
@@ -50,6 +56,9 @@ function fakePoster(
                                   slug: response.storedSlug,
                               }),
                           }
+                        : {}),
+                    ...(response.refused
+                        ? { 'x-playwright-record-diagnostics': JSON.stringify(response.refused) }
                         : {}),
                 }),
                 text: async () => response.body ?? '',
@@ -87,6 +96,31 @@ describe('saveRecord', () => {
         })
 
         expect(saved.slug).toBe('/a-page-1')
+    })
+
+    it('fails at the call that saved when TYPO3 refused something', async () => {
+        const { poster } = fakePoster({
+            status: 302,
+            location: '/typo3/record/edit?edit%5Bpages%5D%5B42%5D=edit&token=abc',
+            refused: {
+                errors: [
+                    {
+                        message: "Attempt to insert a record on page '/gallery' (127) where this table is not allowed",
+                        table: 'sys_file_reference',
+                    },
+                ],
+                count: 2,
+            },
+        })
+
+        await expect(
+            saveRecord(poster, context, {
+                table: 'pages',
+                identifier: 'NEW1',
+                target: 1,
+                data: { pages: { NEW1: { title: 'x' } } },
+            }),
+        ).rejects.toThrow(/sys_file_reference[\s\S]*not allowed[\s\S]*1 more/)
     })
 
     it('posts to the backend edit route the browser posts to', async () => {
