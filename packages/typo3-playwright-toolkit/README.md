@@ -265,6 +265,19 @@ await builders.content().onPage(page.id).ofType('textmedia')
 Fill a column from one place only. Both the content type and the test, or `withField`
 on top, fails.
 
+A setter that changes the reference, such as a crop, may run after the one that
+attaches the file. Write the reference at the end then, and hand the rest to `super`:
+
+```ts
+import type { RelationOwner, RelationOutput } from '@plan2net/typo3-playwright-toolkit'
+
+override getRelations(owner: RelationOwner): RelationOutput {
+    this.withFileReference('image', this.fileUid, { crop: imageCrop({ ratio: this.ratio }) })
+
+    return super.getRelations(owner)
+}
+```
+
 ### Calling the site directly
 
 The `request` client — the one `defineScenario` hands your setup, and the `request`

@@ -12,6 +12,12 @@ the package a change belongs to.
 
 ### Added
 
+- **@plan2net/typo3-playwright-toolkit** — `RelationOwner`, `RelationOutput` and
+  `ChildRecord` are exported. `getRelations` is part of `ContentBuilderInterface`, but
+  its types were not public, so a content type whose crop or metadata setter runs
+  after the one attaching the file could not write its relation at the end and had to
+  fall back to `getAdditionalRecords` and its own `NEW` identifiers.
+
 - **@plan2net/typo3-playwright-toolkit** — `imageCrops()` writes a crop for each name
   in a column's `cropVariants`:
 

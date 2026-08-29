@@ -8,6 +8,9 @@ import {
     TEST_ID_PATTERN,
     type ToolkitConfig,
     type ContentBuilderInterface,
+    CoreContent,
+    type RelationOwner,
+    type RelationOutput,
     defineScenario,
     expect as playwrightExpect,
 } from '#src/index.js'
@@ -42,6 +45,24 @@ describe('public API smoke', () => {
     it('re-exports expect, so a test file needs one import', () => {
         expect(playwrightExpect).toBeTypeOf('function')
         expect(playwrightExpect).toBe(playwrightsOwnExpect)
+    })
+
+    // getRelations is part of the interface, so a builder that defers its relations
+    // has to be able to name the types it takes and returns.
+    it('lets a content type of its own carry the relation types', () => {
+        class Deferred extends CoreContent {
+            readonly type = 'deferred'
+
+            override getRelations(owner: RelationOwner): RelationOutput {
+                this.withFileReference('assets', 1)
+
+                return super.getRelations(owner)
+            }
+        }
+
+        const relations = new Deferred().getRelations({ pid: '3', sys_language_uid: 0 })
+
+        expect(relations.columns.assets).toMatch(/^NEW/)
     })
 
     it('builds a trivial generic content type through the registry', () => {

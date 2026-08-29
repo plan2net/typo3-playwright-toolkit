@@ -54,6 +54,11 @@ describe('the documented configuration example', () => {
 
         for (const match of matches) {
             for (const name of match[1].split(',').map((entry) => entry.trim()).filter(Boolean)) {
+                // A type is gone at runtime; tsc is what checks those.
+                if (name.startsWith('type ')) {
+                    continue
+                }
+
                 expect(Object.keys(rootEntry)).toContain(name)
             }
         }
