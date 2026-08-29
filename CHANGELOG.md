@@ -12,6 +12,16 @@ the package a change belongs to.
 
 ### Added
 
+- **@plan2net/typo3-playwright-toolkit** — `imageCrops()` writes a crop for each name
+  in a column's `cropVariants`:
+
+  ```ts
+  imageCrops({ mobile: { ratio: '9:16' }, desktop: { ratio: '16:9' } })
+  ```
+
+  `imageCrop()` writes the `default` variant only, so a responsive crop had to be
+  hand-written JSON.
+
 - **@plan2net/typo3-playwright-toolkit** — `withSetting(name, value)` writes one of a
   plugin's `settings.` values. Calls collect, and all of them land in `pi_flexform`
   together:

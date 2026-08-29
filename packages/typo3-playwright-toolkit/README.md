@@ -468,6 +468,12 @@ imageCrop({ ratio: '16:9' })
 imageCrop({ area: { x: 0.1, y: 0, width: 0.5, height: 1 } })
 ```
 
+Where the column declares `cropVariants`, name each one with `imageCrops()`:
+
+```ts
+imageCrops({ mobile: { ratio: '9:16' }, desktop: { ratio: '16:9' } })
+```
+
 A plugin's settings go through `withSetting`, one call per setting:
 
 ```ts

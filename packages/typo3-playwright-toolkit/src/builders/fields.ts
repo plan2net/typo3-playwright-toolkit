@@ -9,20 +9,33 @@ export interface CropRectangle {
 
 const WHOLE_IMAGE: CropRectangle = { x: 0, y: 0, width: 1, height: 1 }
 
+export interface CropOptions {
+    ratio?: string
+    area?: CropRectangle
+    focus?: CropRectangle | null
+}
+
 /**
  * The `crop` column of a file reference, which holds JSON text. Without an area it
  * keeps the whole image, which is what a ratio on its own means.
  */
-export function imageCrop(
-    options: { ratio?: string; area?: CropRectangle; focus?: CropRectangle | null } = {},
-): string {
-    return JSON.stringify({
-        default: {
+export function imageCrop(options: CropOptions = {}): string {
+    return imageCrops({ default: options })
+}
+
+/** One entry per name in the column's `cropVariants`, for a project that configured them. */
+export function imageCrops(variants: Record<string, CropOptions>): string {
+    const crops: Record<string, unknown> = {}
+
+    for (const [name, options] of Object.entries(variants)) {
+        crops[name] = {
             cropArea: options.area ?? WHOLE_IMAGE,
             selectedRatio: options.ratio ?? 'NaN',
             focusArea: options.focus ?? null,
-        },
-    })
+        }
+    }
+
+    return JSON.stringify(crops)
 }
 
 export type FlexFormValues = Record<string, string | number | boolean>

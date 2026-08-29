@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { flexForm, imageCrop } from '#src/builders/fields.js'
+import { flexForm, imageCrop, imageCrops } from '#src/builders/fields.js'
 
 describe('imageCrop', () => {
     it('crops the whole image when only a ratio is named', () => {
@@ -25,6 +25,17 @@ describe('imageCrop', () => {
     // The column holds JSON text, so a builder can hand it straight to a record.
     it('is a string', () => {
         expect(typeof imageCrop()).toBe('string')
+    })
+})
+
+describe('imageCrops', () => {
+    it('writes one entry per crop variant the project configured', () => {
+        const crops = JSON.parse(imageCrops({ mobile: { ratio: '9:16' }, desktop: { ratio: '16:9' } }))
+
+        expect(crops).toEqual({
+            mobile: { cropArea: { x: 0, y: 0, width: 1, height: 1 }, selectedRatio: '9:16', focusArea: null },
+            desktop: { cropArea: { x: 0, y: 0, width: 1, height: 1 }, selectedRatio: '16:9', focusArea: null },
+        })
     })
 })
 
