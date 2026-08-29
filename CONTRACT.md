@@ -202,6 +202,46 @@ Only `failed` is kept in the run records, so the problem stays visible. `absent`
 makes a repeated request safe: if an answer is lost, asking again returns `absent`
 instead of an error.
 
+## What TYPO3 recorded
+
+While a test runs, TYPO3 writes its own errors into that test's database, in the
+`sys_log` table: records DataHandler refused, uncaught exceptions, and anything
+logged at error level or worse. The toolkit reads them back when a test fails.
+
+```
+GET /typo3/test-api/errors?id=<testId>
+```
+
+**Send the test ID as the `id` parameter, never as a header** — for the same reason
+as cleanup. With the header, the database would be created on the way in, so asking
+about a test that never ran would bring its database into existence.
+
+```json
+{
+  "success": true,
+  "testId": "K7F2QX9M4TB6WZ1P",
+  "truncated": false,
+  "errors": [
+    {
+      "uid": 412,
+      "source": "datahandler",
+      "at": "2026-08-29T09:14:21+00:00",
+      "message": "Attempt to insert a record on page '/gallery' (127) where this table, sys_file_reference, is not allowed",
+      "table": "sys_file_reference",
+      "recordUid": 0,
+      "count": 1
+    }
+  ]
+}
+```
+
+`source` says where the entry came from: `datahandler` for a refused record, `log`
+for something an extension logged, and otherwise the channel TYPO3 filed it under —
+`php` is where uncaught exceptions land. Repeats of the same message collapse into
+one entry and are counted. At most 20 entries come back; `truncated` says there were
+more. A database that no longer exists answers with an empty list rather than an
+error, so asking about a dropped test is safe.
+
 ## Who owns what
 
 The two packages share no files.

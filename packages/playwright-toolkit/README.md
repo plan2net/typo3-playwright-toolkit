@@ -316,6 +316,28 @@ Nothing to configure; the marker appears whenever a request carries a test ID.
 The link is signed with the API secret and lives **15 minutes**. It sets two
 session cookies, so closing the browser ends the visit.
 
+### What TYPO3 recorded during a test
+
+While a test runs, TYPO3 writes its own errors into that test's database, and the
+endpoint hands them back:
+
+```
+GET /typo3/test-api/errors?id=<testId>
+```
+
+Records DataHandler refused, uncaught exceptions, and anything logged at error level
+or worse, with the message already filled in. Repeats are counted rather than listed
+again.
+
+Some problems never reach the log, so they cannot show up here:
+
+- PHP fatal errors, such as running out of memory or hitting the time limit.
+- The few exceptions TYPO3 skips on purpose, like a wrong host header or a blocked
+  login attempt.
+- Anything that goes wrong while the database itself is broken.
+- A relation that ended up empty. TYPO3 reports records it **rejected**, not records
+  it saved with a link pointing nowhere.
+
 ### One database holding every scenario
 
 `ddev playwright-replay` runs every scenario's setup into a single database instead

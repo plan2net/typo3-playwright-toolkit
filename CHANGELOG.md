@@ -37,6 +37,16 @@ the package a change belongs to.
   database log writer. It is switched on for every logger rather than only the top-level
   one, so problems reported by file handling or by your own extensions are recorded too.
 
+- **plan2net/playwright-toolkit** — a new endpoint hands those errors back:
+
+  ```
+  GET /typo3/test-api/errors?id=<testId>
+  ```
+
+  Refused records, uncaught exceptions and anything logged at error level come back
+  with the message already filled in. Repeats of the same message are counted rather
+  than listed again, and asking about a database that is gone answers an empty list.
+
 ## [0.8.0] - 2026-08-29
 
 ### Added

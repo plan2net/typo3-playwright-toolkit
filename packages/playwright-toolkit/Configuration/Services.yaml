@@ -19,6 +19,9 @@ services:
   Plan2net\PlaywrightToolkit\Http\DatabaseCleanupProvider:
     public: true
 
+  Plan2net\PlaywrightToolkit\Http\RecordedErrorProvider:
+    public: true
+
   Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles:
     factory: ['Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles', 'inVarPath']
     public: true

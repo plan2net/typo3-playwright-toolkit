@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Plan2net\PlaywrightToolkit\Http\DatabaseCleanupProvider;
 use Plan2net\PlaywrightToolkit\Http\HealthCheckProvider;
 use Plan2net\PlaywrightToolkit\Http\InspectProvider;
+use Plan2net\PlaywrightToolkit\Http\RecordedErrorProvider;
 use Plan2net\PlaywrightToolkit\Http\SavedRecordHeader;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
 
@@ -34,6 +35,12 @@ return [
                 'typo3/cms-backend/backend-routing',
             ],
         ],
+        'plan2net/playwright-toolkit/test-errors' => [
+            'target' => RecordedErrorProvider::class,
+            'before' => [
+                'typo3/cms-backend/backend-routing',
+            ],
+        ],
         'plan2net/playwright-toolkit/saved-slug' => [
             'target' => SavedRecordHeader::class,
             'before' => [
@@ -47,6 +54,9 @@ return [
         ],
         'plan2net/playwright-toolkit/test-database-cleanup' => [
             'target' => DatabaseCleanupProvider::class,
+        ],
+        'plan2net/playwright-toolkit/test-errors' => [
+            'target' => RecordedErrorProvider::class,
         ],
     ],
 ];

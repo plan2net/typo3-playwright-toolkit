@@ -18,6 +18,7 @@ import { applyToolkitHeaders } from './http/off-site-headers.js'
 import { prepareScenarioContext } from './http/prepare-context.js'
 import { toolkitRequest } from './http/toolkit-request.js'
 import { runAccessibilityScan, shouldScanAutomatically } from './checks/accessibility.js'
+import { reportRecordedErrors } from './report/recorded-error-report.js'
 
 export interface ScenarioBuilders {
     page(): PageBuilder
@@ -244,6 +245,12 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
 
             if (testInfo.status !== testInfo.expectedStatus) {
                 recordTestFailure(config, key, testInfo.error?.message ?? `test ${testInfo.status}`)
+                await reportRecordedErrors(
+                    config,
+                    key,
+                    outcome.status === 'ready' ? outcome.testId : '',
+                    testInfo,
+                )
             }
         },
 
