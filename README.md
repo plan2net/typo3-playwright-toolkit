@@ -36,8 +36,9 @@ Three packages. You need all three:
 ## How it works
 
 Every test gets a 16-character ID, sent as the request header
-`X-Playwright-Test-Id`. Apache and nginx hand it to PHP without any extra
-configuration, and the extension turns it into a database name.
+`X-Playwright-Test-Id`. Apache and nginx hand it to PHP as
+`HTTP_X_PLAYWRIGHT_TEST_ID` without any extra configuration, and the extension
+turns it into a database name.
 
 Nothing sits in between: no web server configuration, no environment variable. This
 chain is the whole idea, and `CONTRACT.md` describes it in detail.
@@ -54,42 +55,11 @@ Each package does one job. At test time they talk to each other only over HTTP; 
 bootstrap coordinates differently — the add-on calls the extension's CLI command, and
 the npm package reads the API secret file the extension wrote:
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant CLI as ddev playwright<br>— DDEV add-on
-    participant PW as Playwright<br>— npm package
-    participant EXT as TYPO3<br>— extension
-    participant DB as db-test<br>— database service
-
-    rect rgba(127,127,127,0.12)
-        note over CLI,DB: once per test run
-        CLI->>EXT: typo3 playwright:prepare
-        EXT->>DB: build the template:<br>schema, your fixtures,<br>a ready-made session + backend user<br>— reused when nothing changed
-        CLI->>PW: npx playwright test
-        PW->>EXT: GET /typo3/test-api/health
-        EXT-->>PW: API version — stop if it is too old
-    end
-
-    rect rgba(127,127,127,0.12)
-        note over PW,DB: once per test file — the defineScenario setup
-        PW->>PW: create a test ID and write it down first
-        PW->>EXT: POST /typo3/test-api/session
-        EXT->>DB: copy the template → dbABCD…<br>before TYPO3 boots, so code that<br>runs during boot already finds it
-        EXT->>EXT: point it at its own<br>_processed_ABCD… image folder
-        EXT-->>PW: backend cookie + record_edit request token
-        PW->>EXT: POST /typo3/record/edit — the fields FormEngine uses
-        EXT-->>PW: 302 Location that contains the new uid
-    end
-
-    rect rgba(127,127,127,0.12)
-        note over PW,DB: every test — then cleanup, once per test run
-        PW->>EXT: page.goto(…) — same test ID, so the same database
-        PW->>EXT: POST /typo3/test-api/databases/drop
-        EXT->>DB: DROP DATABASE dbABCD…
-        EXT->>EXT: remove _processed_ABCD…
-    end
-```
+<picture>
+  <source media="(max-width: 700px)" srcset="diagrams/full-test-run-narrow.svg">
+  <img width="880" src="diagrams/full-test-run.svg"
+       alt="Once per run, the DDEV command has TYPO3 rebuild the database template if the schema or fixtures changed, then starts Playwright, whose preflight checks the API version and provisions a first database. Once per test file, Playwright writes down that file's test ID, asks TYPO3 for a backend session, and TYPO3 copies the template into a database of its own before it boots; content is then posted to the backend's own record edit route, which answers with the record it saved. Every test in the file reuses that database, and teardown asks TYPO3 to drop every database the run created.">
+</picture>
 
 Two choices here are on purpose. Content is created through
 **`/typo3/record/edit`**, the same route the TYPO3 backend uses when you save a
@@ -97,8 +67,9 @@ record, including its request token. No SQL fixtures and no clicking in the
 interface. If a new TYPO3 version changes that route or its field names, your tests
 fail and tell you, instead of passing while nothing works.
 
-And the npm package **never runs SQL**. It only sends test IDs; the extension deletes
-the databases. That is why Node and PHP can run in different containers.
+And the npm package **never runs SQL**. It sends a test ID and the API secret; the
+extension creates and deletes the databases. That is why Node and PHP can run in
+different containers.
 
 ## Setup
 

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="../playwright-toolkit/Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
+  <img src="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/packages/playwright-toolkit/Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
 </p>
 <h1 align="center">ddev-typo3-playwright-toolkit</h1>
 <p align="center"><em>The test-database service and the ddev playwright commands.</em></p>

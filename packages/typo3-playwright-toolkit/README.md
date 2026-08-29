@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="../playwright-toolkit/Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
+  <img src="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/packages/playwright-toolkit/Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
 </p>
 <h1 align="center">@plan2net/typo3-playwright-toolkit</h1>
 <p align="center"><em>Playwright fixtures and content builders for TYPO3, one test database per test file.</em></p>
@@ -149,26 +149,11 @@ can add more. Navigate with the returned value, never with the string you passed
 The setup runs once per file, even when the file runs in several browser projects.
 The other projects use the state and the test database that the first one created.
 
-```mermaid
-flowchart TD
-    F["one test file"]
-    S["setup — runs once<br>builds content through the backend"]
-    D["state + its own test database"]
-    X["tests skip, with the reason"]
-    P1["chromium-desktop"]
-    P2["firefox"]
-    P3["webkit"]
-
-    F --> S
-    S -->|built| D
-    S -->|failed| X
-    D --> P1 & P2 & P3
-
-    classDef ok fill:#2ea04326,stroke:#2ea043b3
-    classDef bad fill:#f8514926,stroke:#f85149b3
-    class D ok
-    class X bad
-```
+<picture>
+  <source media="(max-width: 700px)" srcset="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/scenario-fan-out-narrow.svg">
+  <img width="880" src="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/scenario-fan-out.svg"
+       alt="One test file runs its setup once. If the setup succeeds it produces state and a test database of its own, which every browser project then reuses. If the setup fails, the tests of that file are skipped with the reason rather than failing individually.">
+</picture>
 
 Besides `builders`, the setup receives `testId` (the database this attempt runs
 against), `attempt` (`1` on the first try), `signal` (aborted when the attempt times
