@@ -34,7 +34,9 @@ final class SessionCookieValueTest extends TestCase
 
         $cookieValue = SessionCookieValue::of($session);
 
-        self::assertSame($session->getJwt(), $cookieValue);
+        // getJwt() stamps the current second into the payload, so a second call
+        // returns a different token and cannot serve as the expected value.
+        self::assertSame(self::IDENTIFIER, self::identifierClaimOf($cookieValue));
         // Core rejects the bare identifier, and the failure looks like a login
         // redirect rather than a bad cookie.
         self::assertNotSame(self::IDENTIFIER, $cookieValue);
@@ -50,5 +52,18 @@ final class SessionCookieValueTest extends TestCase
         }
 
         self::assertSame(self::IDENTIFIER, SessionCookieValue::of($session));
+    }
+
+    private static function identifierClaimOf(string $jwt): ?string
+    {
+        $segments = explode('.', $jwt);
+        if (3 !== \count($segments)) {
+            return null;
+        }
+
+        $payload = json_decode((string) base64_decode(strtr($segments[1], '-_', '+/'), true), true);
+        $identifier = \is_array($payload) ? ($payload['identifier'] ?? null) : null;
+
+        return \is_string($identifier) ? $identifier : null;
     }
 }
