@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+// Stands in for public/index.php in test.bats: a project with no TYPO3, whose
+// only job is to report whether the webserver forwarded the test ID header to
+// PHP and whether a per-test database can be reached from there.
+
 header('Content-Type: text/plain');
 
 $testId = trim((string) ($_SERVER['HTTP_X_PLAYWRIGHT_TEST_ID'] ?? ''));

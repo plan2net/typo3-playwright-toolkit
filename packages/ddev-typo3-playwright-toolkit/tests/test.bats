@@ -19,7 +19,7 @@ setup_fixture() {
     rm -rf "${TESTDIR}"
 
     mkdir -p "${TESTDIR}/public"
-    cp "${ADDON_DIR}/tests/fixtures/additional-testing.php" "${TESTDIR}/public/index.php"
+    cp "${ADDON_DIR}/tests/fixtures/test-id-probe.php" "${TESTDIR}/public/index.php"
     cd "${TESTDIR}" || return 1
     ddev config \
         --project-name="${PROJNAME}" \
