@@ -1,6 +1,6 @@
 {
     "name": "@plan2net/typo3-playwright-toolkit",
-    "version": "0.7.0",
+    "version": "0.8.0",
     "description": "Playwright toolkit for TYPO3 end-to-end tests: fixtures, content builders, per-test databases.",
     "keywords": [
         "typo3",

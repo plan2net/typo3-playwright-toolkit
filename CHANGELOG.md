@@ -10,23 +10,9 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-08-29
+
 ### Added
-
-- **@plan2net/typo3-playwright-toolkit** — `RelationOwner`, `RelationOutput` and
-  `ChildRecord` are exported. `getRelations` is part of `ContentBuilderInterface`, but
-  its types were not public, so a content type whose crop or metadata setter runs
-  after the one attaching the file could not write its relation at the end and had to
-  fall back to `getAdditionalRecords` and its own `NEW` identifiers.
-
-- **@plan2net/typo3-playwright-toolkit** — `imageCrops()` writes a crop for each name
-  in a column's `cropVariants`:
-
-  ```ts
-  imageCrops({ mobile: { ratio: '9:16' }, desktop: { ratio: '16:9' } })
-  ```
-
-  `imageCrop()` writes the `default` variant only, so a responsive crop had to be
-  hand-written JSON.
 
 - **@plan2net/typo3-playwright-toolkit** — `withSetting(name, value)` writes one of a
   plugin's `settings.` values. Calls collect, and all of them land in `pi_flexform`
@@ -39,6 +25,22 @@ the package a change belongs to.
   `withField('pi_flexform', …)` overwrites, so a builder with two settings had to
   gather them itself and override `getFields()`. Named sheets still take
   `flexForm()`.
+
+- **@plan2net/typo3-playwright-toolkit** — `imageCrops()` writes a crop for each name
+  in a column's `cropVariants`:
+
+  ```ts
+  imageCrops({ mobile: { ratio: '9:16' }, desktop: { ratio: '16:9' } })
+  ```
+
+  `imageCrop()` writes the `default` variant only, so a responsive crop had to be
+  hand-written JSON.
+
+- **@plan2net/typo3-playwright-toolkit** — `RelationOwner`, `RelationOutput` and
+  `ChildRecord` are exported. `getRelations` is part of `ContentBuilderInterface`, but
+  its types were not public, so a content type whose crop or metadata setter runs
+  after the one attaching the file could not write its relation at the end and had to
+  fall back to `getAdditionalRecords` and its own `NEW` identifiers.
 
 ## [0.7.0] - 2026-08-28
 
@@ -369,7 +371,8 @@ the package a change belongs to.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.7.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.8.0...main
+[0.8.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.4.2...v0.5.0
