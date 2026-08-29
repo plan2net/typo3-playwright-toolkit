@@ -366,9 +366,30 @@ ${helmet}
 <style>[hidden]{display:none !important}${squeezeCss(hoverRules.join(''))}</style>`) +
     `<script type="application/ld+json">${JSON.stringify(structuredData)}</script>`
 
-const page = `<!DOCTYPE html><html lang="en"><head>${head}</head><body>${squeezeHtml(
+let page = `<!DOCTYPE html><html lang="en"><head>${head}</head><body>${squeezeHtml(
     body,
 )}<script>${squeezeJs(RUNTIME)}</script></body></html>`
+
+/**
+ * Inlined, not linked: an SVG loaded through <img> never fetches the self-hosted
+ * fonts. Injected after squeezeHtml, whose <pre> placeholder pass rewrites any
+ * " 123 " it finds and would corrupt path data — so squeeze the markup here.
+ */
+page = page.replace(/<div class="figure"([^>]*) data-diagram="([\w-]+)"([^>]*)><\/div>/g, (whole, before, name, after) => {
+    const source = fs.readFileSync(path.join(repoRoot, `diagrams/${name}.html`), 'utf-8')
+    const variants = source.match(/<svg[\s\S]*?<\/svg>/g) ?? []
+    if (variants.length === 0) {
+        console.error(`build-docs: no <svg> in diagrams/${name}.html`)
+        process.exit(1)
+    }
+
+    const markup = variants
+        .join('')
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .replace(/>\s+</g, '><')
+
+    return `<div class="figure"${before}${after}>${markup}</div>`
+})
 
 const leftovers = page.match(/\{\{[^}]*\}\}|<sc-(for|if)\b|style-hover=/g)
 if (leftovers) {

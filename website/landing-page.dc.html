@@ -71,6 +71,15 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
   .grid-4, .grid-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .grid-3, .compare { grid-template-columns:minmax(0,1fr); gap:32px; }
 }
+/* Container query, not viewport: a section is not always as wide as the window,
+   and a viewport query would answer "wide" and shrink the drawing to fit. */
+.figure { container-type:inline-size; }
+.figure svg { display:block; width:100%; height:auto; margin:0 auto; }
+.figure .tablet, .figure .narrow { display:none; }
+.figure .tablet { max-width:720px; }
+.figure .narrow { max-width:384px; }
+@container (max-width:1099px) { .figure .wide { display:none; } .figure .tablet { display:block; } }
+@container (max-width:699px) { .figure .tablet { display:none; } .figure .narrow { display:block; } }
 /* Both stack earlier than the card grids: the terminal and the code sample are the
    first things two columns stop fitting. */
 @media (max-width:1279px) {
@@ -264,6 +273,7 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
       </li>
     </sc-for>
   </ul>
+  <div class="figure" data-diagram="packages-overview" style="margin:48px 0 8px;"></div>
   <p style="margin:24px 0 0; font-size:15.5px;">These three commands only install the packages. For the whole setup, follow <a href="https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md" style="font-weight:700;">SETUP.md ↗</a>.</p>
 </section>
 

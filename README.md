@@ -27,25 +27,17 @@ Three packages. You need all three:
 | [`plan2net/playwright-toolkit`](packages/playwright-toolkit) | [Composer](https://getcomposer.org) | the test databases, the backend session, and the test API |
 | [`@plan2net/typo3-playwright-toolkit`](packages/typo3-playwright-toolkit) | [npm](https://www.npmjs.com/package/@plan2net/typo3-playwright-toolkit) | Playwright fixtures, content builders, cleanup, screenshots, [axe](https://github.com/dequelabs/axe-core) |
 
+<picture>
+  <source media="(max-width: 700px)" srcset="diagrams/packages-overview-narrow.svg">
+  <img width="720" src="diagrams/packages-overview.svg"
+       alt="One DDEV command runs the Playwright test files and asks the TYPO3 extension to prepare one database template up front. Every test file then sends its own test ID to TYPO3, which copies that template into a fresh database in about thirty milliseconds, on a separate database container.">
+</picture>
+
 ## How it works
 
-Every test gets a 16-character ID. It is sent as a request header. Apache and nginx
-pass that header on to PHP without any extra configuration, and the extension turns
-it into a database name:
-
-```mermaid
-flowchart LR
-    A["test ID<br>ABCD1234EFGH5678"]
-    B["request header<br>X-Playwright-Test-Id"]
-    C["web server<br>passes it on"]
-    D["PHP<br>HTTP_X_PLAYWRIGHT_TEST_ID"]
-    E["database dbABCD1234EFGH5678<br>copied from the template"]
-
-    A --> B --> C --> D --> E
-
-    classDef endpoint fill:#2ea04326,stroke:#2ea043b3
-    class A,E endpoint
-```
+Every test gets a 16-character ID, sent as the request header
+`X-Playwright-Test-Id`. Apache and nginx hand it to PHP without any extra
+configuration, and the extension turns it into a database name.
 
 Nothing sits in between: no web server configuration, no environment variable. This
 chain is the whole idea, and `CONTRACT.md` describes it in detail.
