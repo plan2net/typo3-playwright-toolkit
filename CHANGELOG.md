@@ -10,6 +10,33 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Changed
+
+- **plan2net/playwright-toolkit** — **Breaking.** Two methods were renamed. Change the
+  call in your `config/system/additional.php`:
+
+  ```php
+  \Plan2net\PlaywrightToolkit\TestContext::configureCurrentRequest();
+  ```
+
+  It used to be `applyDatabaseConnectionOverrides()`. The new name fits, because the call
+  now does more than point the database connection at the test database — it also switches
+  on error recording.
+
+  If your project merges the settings itself, `databaseConnectionOverrides()` is now
+  `resolveTestDatabaseConnection()`. The old name sounded like it only returned values,
+  but it creates the test database as well.
+
+  There are no aliases. An old name now fails with "undefined method" on the first test
+  run, and only in the Testing context, so nothing on a live site is affected.
+
+### Added
+
+- **plan2net/playwright-toolkit** — errors that TYPO3 records while a test runs are now
+  written to that test's own database, into the `sys_log` table, using TYPO3's own
+  database log writer. It is switched on for every logger rather than only the top-level
+  one, so problems reported by file handling or by your own extensions are recorded too.
+
 ## [0.8.0] - 2026-08-29
 
 ### Added

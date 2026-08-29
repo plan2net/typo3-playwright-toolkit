@@ -6,6 +6,7 @@ namespace Plan2net\PlaywrightToolkit;
 
 use Plan2net\PlaywrightToolkit\Database\DatabaseInitializer;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
+use Plan2net\PlaywrightToolkit\Log\ErrorCapture;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 
 final class TestContext
@@ -25,12 +26,14 @@ final class TestContext
     /**
      * @param array<string, mixed>|null $defaultConnection pass it when $GLOBALS does not carry it yet
      */
-    public static function applyDatabaseConnectionOverrides(?array $defaultConnection = null): void
+    public static function configureCurrentRequest(?array $defaultConnection = null): void
     {
+        ErrorCapture::register();
+
         /** @var array<string, mixed> $connection */
         $connection = $defaultConnection ?? $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [];
 
-        foreach (self::databaseConnectionOverrides($connection) as $path => $value) {
+        foreach (self::resolveTestDatabaseConnection($connection) as $path => $value) {
             $GLOBALS['TYPO3_CONF_VARS'] = ArrayUtility::setValueByPath($GLOBALS['TYPO3_CONF_VARS'], $path, $value);
         }
     }
@@ -40,7 +43,7 @@ final class TestContext
      *
      * @return array<string, mixed> empty when no test ID was sent
      */
-    public static function databaseConnectionOverrides(array $defaultConnection): array
+    public static function resolveTestDatabaseConnection(array $defaultConnection): array
     {
         $testId = self::testId();
         if ('' === $testId) {

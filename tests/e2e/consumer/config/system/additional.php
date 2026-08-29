@@ -18,5 +18,5 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['trustedHostsPattern'] = '.*';
 // below acts on the test ID alone, so without it a request carrying that header
 // would switch the database on the ordinary hostname too.
 if (Environment::getContext()->isTesting()) {
-    \Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
+    \Plan2net\PlaywrightToolkit\TestContext::configureCurrentRequest();
 }

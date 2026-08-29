@@ -50,15 +50,15 @@ the two older layouts.
 
 ```php
 if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {
-    \Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
+    \Plan2net\PlaywrightToolkit\TestContext::configureCurrentRequest();
 }
 ```
 
-**The check must stay.** `applyDatabaseConnectionOverrides()` acts on the test ID
+**The check must stay.** `configureCurrentRequest()` acts on the test ID
 alone; called outside the Testing context it would let a request carrying that header
 switch the connection on an ordinary hostname.
 
-If a project needs its own merge, `databaseConnectionOverrides($defaultConnection)`
+If a project needs its own merge, `resolveTestDatabaseConnection($defaultConnection)`
 returns the values instead. It creates the test database too, so either entry point
 leaves the connection naming a database that exists — or naming nothing at all.
 

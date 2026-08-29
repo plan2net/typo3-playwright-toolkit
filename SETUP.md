@@ -104,7 +104,7 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['playwright_toolkit'] = [
 ];
 
 if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {
-    \Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
+    \Plan2net\PlaywrightToolkit\TestContext::configureCurrentRequest();
 }
 ```
 

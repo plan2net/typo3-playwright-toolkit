@@ -70,7 +70,7 @@ final class PreBootProvisioningTest extends FunctionalTestCase
         $_SERVER[TestApiSecret::SERVER_KEY] = $this->get(TestApiSecret::class)->ensureExists();
 
         $this->asWebRequest(static function (): void {
-            TestContext::applyDatabaseConnectionOverrides();
+            TestContext::configureCurrentRequest();
         });
 
         self::assertFileExists(
@@ -104,7 +104,7 @@ final class PreBootProvisioningTest extends FunctionalTestCase
         $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['charset'] = 'utf8';
 
         $this->asWebRequest(static function (): void {
-            TestContext::applyDatabaseConnectionOverrides();
+            TestContext::configureCurrentRequest();
         });
 
         $connection = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
@@ -124,7 +124,7 @@ final class PreBootProvisioningTest extends FunctionalTestCase
         $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] = [];
 
         $this->asWebRequest(static function () use ($passedIn): void {
-            TestContext::applyDatabaseConnectionOverrides($passedIn);
+            TestContext::configureCurrentRequest($passedIn);
         });
 
         self::assertStringEndsWith(
@@ -141,7 +141,7 @@ final class PreBootProvisioningTest extends FunctionalTestCase
         unset($_SERVER[TestApiSecret::SERVER_KEY]);
 
         $this->asWebRequest(static function (): void {
-            TestContext::applyDatabaseConnectionOverrides();
+            TestContext::configureCurrentRequest();
         });
 
         self::assertFileDoesNotExist(
@@ -161,7 +161,7 @@ final class PreBootProvisioningTest extends FunctionalTestCase
 
         $overrides = [];
         $this->asWebRequest(static function () use ($projectConnection, &$overrides): void {
-            $overrides = TestContext::databaseConnectionOverrides($projectConnection);
+            $overrides = TestContext::resolveTestDatabaseConnection($projectConnection);
         });
 
         self::assertSame([], $overrides);

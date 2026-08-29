@@ -8,8 +8,10 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Plan2net\PlaywrightToolkit\TestContext;
+use Psr\Log\LogLevel;
 use TYPO3\CMS\Core\Core\ApplicationContext;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Log\Writer\DatabaseWriter;
 
 final class TestContextTest extends TestCase
 {
@@ -73,7 +75,7 @@ final class TestContextTest extends TestCase
             'dbname' => 'the_real_database',
         ];
 
-        TestContext::applyDatabaseConnectionOverrides();
+        TestContext::configureCurrentRequest();
 
         self::assertSame(
             'the_real_database',
@@ -82,11 +84,25 @@ final class TestContextTest extends TestCase
     }
 
     #[Test]
+    public function registersErrorCaptureForTheRequest(): void
+    {
+        unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
+        $GLOBALS['TYPO3_CONF_VARS']['LOG'] = [];
+
+        TestContext::configureCurrentRequest();
+
+        self::assertArrayHasKey(
+            DatabaseWriter::class,
+            $GLOBALS['TYPO3_CONF_VARS']['LOG']['writerConfiguration'][LogLevel::ERROR]
+        );
+    }
+
+    #[Test]
     public function anEmptyTestIdYieldsNoOverridesAtAll(): void
     {
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
 
-        self::assertSame([], TestContext::databaseConnectionOverrides(['driver' => 'pdo_pgsql']));
+        self::assertSame([], TestContext::resolveTestDatabaseConnection(['driver' => 'pdo_pgsql']));
     }
 
     /**
@@ -115,7 +131,7 @@ final class TestContextTest extends TestCase
         $_SERVER[TestContext::TEST_ID_SERVER_KEY] = $testId;
 
         self::assertSame('', TestContext::testId());
-        self::assertSame([], TestContext::databaseConnectionOverrides(['driver' => 'pdo_pgsql']));
+        self::assertSame([], TestContext::resolveTestDatabaseConnection(['driver' => 'pdo_pgsql']));
     }
 
     #[Test]

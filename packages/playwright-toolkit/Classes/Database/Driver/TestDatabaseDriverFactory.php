@@ -16,7 +16,7 @@ final class TestDatabaseDriverFactory
         if ('' === $driverName) {
             throw new \InvalidArgumentException(
                 'The Default database connection names no driver, so no test database engine can be derived. '
-                . 'Pass the connection to applyDatabaseConnectionOverrides() if your configuration assembles '
+                . 'Pass the connection to configureCurrentRequest() if your configuration assembles '
                 . 'it after that call.'
             );
         }

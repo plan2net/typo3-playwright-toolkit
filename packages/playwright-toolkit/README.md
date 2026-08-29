@@ -106,12 +106,12 @@ variant, so this is the place:
 <?php
 
 if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {
-    \Plan2net\PlaywrightToolkit\TestContext::applyDatabaseConnectionOverrides();
+    \Plan2net\PlaywrightToolkit\TestContext::configureCurrentRequest();
 }
 ```
 
 Without those lines the overrides never run and every test uses your ordinary
-database. Keep the context check: `applyDatabaseConnectionOverrides()` acts on the
+database. Keep the context check: `configureCurrentRequest()` acts on the
 test ID alone, so outside the Testing context a request carrying that header would
 switch the connection on your ordinary hostname too.
 
@@ -148,7 +148,7 @@ again. Merge the overrides into that array instead, **last**:
 ```php
 $configurationSettings = array_merge(
     $configurationSettings,
-    TestContext::databaseConnectionOverrides($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [])
+    TestContext::resolveTestDatabaseConnection($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [])
 );
 ```
 
@@ -170,11 +170,11 @@ $configurationSettings = array_merge(
 >
 > $configurationSettings = array_merge(
 >     $configurationSettings,
->     TestContext::databaseConnectionOverrides($defaultConnection)
+>     TestContext::resolveTestDatabaseConnection($defaultConnection)
 > );
 > ```
 >
-> `applyDatabaseConnectionOverrides($defaultConnection)` takes the same argument, for
+> `configureCurrentRequest($defaultConnection)` takes the same argument, for
 > projects that write to `$GLOBALS` directly.
 
 Either call creates the test database as part of answering, so the connection is
