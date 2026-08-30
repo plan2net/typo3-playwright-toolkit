@@ -13,85 +13,56 @@ use TYPO3\CMS\Core\Log\Writer\FileWriter;
 
 final class ErrorCaptureTest extends TestCase
 {
-    /** @var array<string, mixed>|null */
-    private ?array $originalConfiguration = null;
+    private const ROOT_PATH = 'LOG/writerConfiguration/' . LogLevel::ERROR . '/' . DatabaseWriter::class;
 
-    private bool $hadConfiguration = false;
-
-    protected function setUp(): void
+    #[Test]
+    public function settingsNameTheDatabaseWriterAtErrorLevel(): void
     {
-        $this->hadConfiguration = isset($GLOBALS['TYPO3_CONF_VARS']['LOG']);
-        $this->originalConfiguration = $GLOBALS['TYPO3_CONF_VARS']['LOG'] ?? null;
-    }
-
-    protected function tearDown(): void
-    {
-        if (!$this->hadConfiguration) {
-            unset($GLOBALS['TYPO3_CONF_VARS']['LOG']);
-
-            return;
-        }
-
-        $GLOBALS['TYPO3_CONF_VARS']['LOG'] = $this->originalConfiguration;
+        self::assertSame([self::ROOT_PATH => []], ErrorCapture::settings([]));
     }
 
     #[Test]
-    public function registersTheDatabaseWriterAtErrorLevel(): void
+    public function settingsReachALoggerThatCarriesItsOwnWriterConfiguration(): void
     {
-        $GLOBALS['TYPO3_CONF_VARS']['LOG'] = [];
-
-        ErrorCapture::register();
-
-        self::assertArrayHasKey(
-            DatabaseWriter::class,
-            $GLOBALS['TYPO3_CONF_VARS']['LOG']['writerConfiguration'][LogLevel::ERROR]
-        );
-    }
-
-    #[Test]
-    public function registersTheDatabaseWriterInANestedConfiguration(): void
-    {
-        $GLOBALS['TYPO3_CONF_VARS']['LOG'] = [
+        $configuration = [
             'TYPO3' => ['CMS' => ['Core' => ['Resource' => ['ResourceStorage' => [
                 'writerConfiguration' => [LogLevel::ERROR => [FileWriter::class => []]],
             ]]]]],
         ];
 
-        ErrorCapture::register();
-
         self::assertArrayHasKey(
-            DatabaseWriter::class,
-            $GLOBALS['TYPO3_CONF_VARS']['LOG']['TYPO3']['CMS']['Core']['Resource']['ResourceStorage']['writerConfiguration'][LogLevel::ERROR]
+            'LOG/TYPO3/CMS/Core/Resource/ResourceStorage/writerConfiguration/' . LogLevel::ERROR . '/' . DatabaseWriter::class,
+            ErrorCapture::settings($configuration)
         );
     }
 
     #[Test]
-    public function keepsAWriterTheProjectAlreadyConfigured(): void
+    public function settingsSkipADatabaseWriterTheProjectAlreadyConfigured(): void
     {
-        $GLOBALS['TYPO3_CONF_VARS']['LOG'] = [
+        $configuration = [
+            'writerConfiguration' => [LogLevel::ERROR => [DatabaseWriter::class => ['logTable' => 'own_log']]],
+        ];
+
+        self::assertSame([], ErrorCapture::settings($configuration));
+    }
+
+    #[Test]
+    public function settingsTouchNothingBesideAWriterTheProjectConfigured(): void
+    {
+        $configuration = [
             'writerConfiguration' => [LogLevel::ERROR => [FileWriter::class => ['logFile' => 'var/log/own.log']]],
         ];
 
-        ErrorCapture::register();
-
-        self::assertSame(
-            ['logFile' => 'var/log/own.log'],
-            $GLOBALS['TYPO3_CONF_VARS']['LOG']['writerConfiguration'][LogLevel::ERROR][FileWriter::class]
-        );
+        self::assertSame([self::ROOT_PATH => []], ErrorCapture::settings($configuration));
     }
 
     #[Test]
-    public function leavesANodeThatHasNoConfigurationAlone(): void
+    public function settingsLeaveALoggerWithoutAWriterConfigurationAlone(): void
     {
-        $GLOBALS['TYPO3_CONF_VARS']['LOG'] = [
+        $configuration = [
             'TYPO3' => ['CMS' => ['deprecations' => ['someOtherSetting' => true]]],
         ];
 
-        ErrorCapture::register();
-
-        self::assertSame(
-            ['someOtherSetting' => true],
-            $GLOBALS['TYPO3_CONF_VARS']['LOG']['TYPO3']['CMS']['deprecations']
-        );
+        self::assertSame([self::ROOT_PATH => []], ErrorCapture::settings($configuration));
     }
 }

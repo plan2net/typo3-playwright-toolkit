@@ -84,6 +84,23 @@ final class TestContextTest extends TestCase
     }
 
     #[Test]
+    public function resolvedSettingsCarryErrorCaptureForAProjectThatAppliesThemItself(): void
+    {
+        unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
+        $GLOBALS['TYPO3_CONF_VARS']['LOG'] = [];
+
+        $settings = TestContext::resolveCurrentRequestSettings([
+            'driver' => 'pdo_pgsql',
+            'dbname' => 'the_real_database',
+        ]);
+
+        self::assertArrayHasKey(
+            'LOG/writerConfiguration/' . LogLevel::ERROR . '/' . DatabaseWriter::class,
+            $settings
+        );
+    }
+
+    #[Test]
     public function registersErrorCaptureForTheRequest(): void
     {
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
@@ -98,11 +115,11 @@ final class TestContextTest extends TestCase
     }
 
     #[Test]
-    public function anEmptyTestIdYieldsNoOverridesAtAll(): void
+    public function anEmptyTestIdNamesNoDatabase(): void
     {
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
 
-        self::assertSame([], TestContext::resolveTestDatabaseConnection(['driver' => 'pdo_pgsql']));
+        self::assertSame([], self::databasePaths(TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql'])));
     }
 
     /**
@@ -131,7 +148,7 @@ final class TestContextTest extends TestCase
         $_SERVER[TestContext::TEST_ID_SERVER_KEY] = $testId;
 
         self::assertSame('', TestContext::testId());
-        self::assertSame([], TestContext::resolveTestDatabaseConnection(['driver' => 'pdo_pgsql']));
+        self::assertSame([], self::databasePaths(TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql'])));
     }
 
     #[Test]
@@ -188,6 +205,20 @@ final class TestContextTest extends TestCase
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
 
         self::assertNull(TestContext::malformedTestId());
+    }
+
+    /**
+     * @param array<string, mixed> $settings
+     *
+     * @return array<string, mixed>
+     */
+    private static function databasePaths(array $settings): array
+    {
+        return array_filter(
+            $settings,
+            static fn(string $path): bool => str_starts_with($path, 'DB/'),
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
     /**

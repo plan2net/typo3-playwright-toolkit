@@ -28,12 +28,10 @@ final class TestContext
      */
     public static function configureCurrentRequest(?array $defaultConnection = null): void
     {
-        ErrorCapture::register();
-
         /** @var array<string, mixed> $connection */
         $connection = $defaultConnection ?? $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [];
 
-        foreach (self::resolveTestDatabaseConnection($connection) as $path => $value) {
+        foreach (self::resolveCurrentRequestSettings($connection) as $path => $value) {
             $GLOBALS['TYPO3_CONF_VARS'] = ArrayUtility::setValueByPath($GLOBALS['TYPO3_CONF_VARS'], $path, $value);
         }
     }
@@ -41,22 +39,26 @@ final class TestContext
     /**
      * @param array<string, mixed> $defaultConnection the project's own Default connection
      *
-     * @return array<string, mixed> empty when no test ID was sent
+     * @return array<string, mixed> TYPO3_CONF_VARS paths; only error capture when no test ID was sent
      */
-    public static function resolveTestDatabaseConnection(array $defaultConnection): array
+    public static function resolveCurrentRequestSettings(array $defaultConnection): array
     {
+        /** @var array<string, mixed> $logConfiguration */
+        $logConfiguration = $GLOBALS['TYPO3_CONF_VARS']['LOG'] ?? [];
+        $settings = ErrorCapture::settings($logConfiguration);
+
         $testId = self::testId();
         if ('' === $testId) {
-            return [];
+            return $settings;
         }
 
         // Naming a database nothing created fails every later request with
         // "Unknown database", so the connection moves only once it exists.
         if (!DatabaseInitializer::fromGlobals()->provisionCurrentRequest($defaultConnection)) {
-            return [];
+            return $settings;
         }
 
-        return TestDatabaseDriverFactory::fromConnection($defaultConnection)->connectionOverrides($testId);
+        return $settings + TestDatabaseDriverFactory::fromConnection($defaultConnection)->connectionOverrides($testId);
     }
 
     // Malformed reads as absent, so a request the toolkit did not send changes

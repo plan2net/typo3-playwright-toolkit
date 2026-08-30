@@ -7,6 +7,7 @@ namespace Plan2net\PlaywrightToolkit\Tests\Functional\Log;
 use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Log\ErrorCapture;
 use TYPO3\CMS\Core\Log\LogManager;
+use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 /**
@@ -27,7 +28,11 @@ final class ErrorCaptureArrivalTest extends FunctionalTestCase
     #[Test]
     public function anErrorReachesSysLogEvenForALoggerCoreConfiguresItself(): void
     {
-        ErrorCapture::register();
+        /** @var array<string, mixed> $logConfiguration */
+        $logConfiguration = $GLOBALS['TYPO3_CONF_VARS']['LOG'] ?? [];
+        foreach (ErrorCapture::settings($logConfiguration) as $path => $value) {
+            $GLOBALS['TYPO3_CONF_VARS'] = ArrayUtility::setValueByPath($GLOBALS['TYPO3_CONF_VARS'], $path, $value);
+        }
 
         // Core gives this logger notices and a file, and no database — so a row
         // here can only come from the walk that reaches nested configurations.

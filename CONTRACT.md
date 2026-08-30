@@ -59,9 +59,10 @@ if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {
 alone; called outside the Testing context it would let a request carrying that header
 switch the connection on an ordinary hostname.
 
-If a project needs its own merge, `resolveTestDatabaseConnection($defaultConnection)`
-returns the values instead. It creates the test database too, so either entry point
-leaves the connection naming a database that exists — or naming nothing at all.
+If a project needs its own merge, `resolveCurrentRequestSettings($defaultConnection)`
+returns the values instead. The two differ only in who writes `$GLOBALS`: both create
+the test database and both register the error capture, so either entry point leaves
+the connection naming a database that exists — or naming nothing at all.
 
 **`SYS/encryptionKey` must be in `$GLOBALS['TYPO3_CONF_VARS']` before either call.**
 Both hash the pre-seeded session id with it to tell an already-seeded database from a

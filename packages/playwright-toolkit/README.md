@@ -141,14 +141,27 @@ It reads your `Default` connection and writes the per-test one back. If a reques
 carries no test ID, nothing changes and nothing is created: the site uses its normal
 database.
 
-Most projects already have this file, holding their own Testing settings. If yours
-collects them in an array that is applied afterwards, the line above is overwritten
-again. Merge the overrides into that array instead, **last**:
+#### Which of the two calls
+
+There are two, and the only question they answer is **who writes `$GLOBALS`**:
+
+| Your `additional.php` | Call |
+|---|---|
+| writes `$GLOBALS` itself | `configureCurrentRequest()`, as above |
+| collects settings in an array and applies them at the end | `resolveCurrentRequestSettings()`, merged in **last** |
+
+They do the same work otherwise. Both pick the test database, create it as part of
+answering, and switch on the error capture behind `typo3-errors.json`. Neither is a
+lesser version of the other.
+
+If your project collects its settings in an array that is applied afterwards, the
+one-line call above is overwritten again. Merge the settings into that array instead,
+**last**:
 
 ```php
 $configurationSettings = array_merge(
     $configurationSettings,
-    TestContext::resolveTestDatabaseConnection($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [])
+    TestContext::resolveCurrentRequestSettings($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [])
 );
 ```
 
@@ -170,39 +183,40 @@ $configurationSettings = array_merge(
 >
 > $configurationSettings = array_merge(
 >     $configurationSettings,
->     TestContext::resolveTestDatabaseConnection($defaultConnection)
+>     TestContext::resolveCurrentRequestSettings($defaultConnection)
 > );
 > ```
 >
 > `configureCurrentRequest($defaultConnection)` takes the same argument, for
 > projects that write to `$GLOBALS` directly.
 
-Either call creates the test database as part of answering, so the connection is
-never moved to one that does not exist.
+#### Two things to get right
 
-> [!IMPORTANT]
-> When either call runs, `$GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey']` must
-> already hold the key your test databases were prepared with. The toolkit hashes the
-> pre-seeded session id with it to recognise a database it has already seeded, and it
-> does that before TYPO3 boots.
->
-> Two setups get this wrong. One is a Testing configuration that uses a different key
-> than the rest of the site; the other is a configuration that collects its settings
-> in an array and writes them to `$GLOBALS` only afterwards. In both, assign the key
-> before the call:
->
-> ```php
-> $GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] = '…the key playwright:prepare uses…';
-> ```
->
-> Otherwise the lookup finds nothing, every request treats its database as unseeded
-> and clones it again, and the content the test just built is gone.
->
-> The returned keys are paths like `DB/Connections/Default/dbname`, not array keys.
-> If your project writes them with `ArrayUtility::setValueByPath` (or the same helper
-> it already uses for the other settings), they land correctly. A plain `array_merge`
-> into `$GLOBALS['TYPO3_CONF_VARS']` creates one key with that literal name, and your
-> tests then run against your real database.
+Whichever call you use:
+
+1. **`SYS/encryptionKey` must already hold the key your test databases were prepared
+   with.**
+2. **The returned `DB/Connections/Default/*` values are paths, not array keys, and
+   have to land last.**
+
+On the first: the toolkit hashes the pre-seeded session id with that key to tell an
+already-seeded database from a new one, and it does so before TYPO3 boots. Two setups
+get it wrong — a Testing configuration using a different key than the rest of the
+site, and one that collects its settings in an array and writes them to `$GLOBALS`
+only afterwards. In both, assign the key before the call:
+
+```php
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['encryptionKey'] = '…the key playwright:prepare uses…';
+```
+
+Otherwise the lookup finds nothing, every request treats its database as unseeded and
+clones it again, and the content the test just built is gone.
+
+On the second: a returned key looks like `DB/Connections/Default/dbname`. Write it
+with `ArrayUtility::setValueByPath`, or the helper your project already uses for its
+other settings, and it lands correctly. A plain `array_merge` into
+`$GLOBALS['TYPO3_CONF_VARS']` creates one key with that literal name, and your tests
+then run against your real database.
 
 ### Fixtures
 

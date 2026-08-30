@@ -9,42 +9,55 @@ use TYPO3\CMS\Core\Log\Writer\DatabaseWriter;
 
 final class ErrorCapture
 {
-    public static function register(): void
+    /**
+     * @param array<string, mixed> $logConfiguration
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function settings(array $logConfiguration): array
     {
-        if (!isset($GLOBALS['TYPO3_CONF_VARS']['LOG']) || !\is_array($GLOBALS['TYPO3_CONF_VARS']['LOG'])) {
-            $GLOBALS['TYPO3_CONF_VARS']['LOG'] = [];
-        }
-
-        $configuration = &$GLOBALS['TYPO3_CONF_VARS']['LOG'];
-        self::addWriter($configuration);
-        self::addToNested($configuration);
+        return self::writerPathFor($logConfiguration, 'LOG') + self::nestedWriterPaths($logConfiguration, 'LOG');
     }
 
     /**
      * @param array<string, mixed> $node
+     *
+     * @return array<string, array<string, mixed>>
      */
-    private static function addToNested(array &$node): void
+    private static function nestedWriterPaths(array $node, string $path): array
     {
-        foreach ($node as $key => &$child) {
+        $paths = [];
+
+        foreach ($node as $key => $child) {
             if ('writerConfiguration' === $key || !\is_array($child)) {
                 continue;
             }
 
-            // LogManager takes the most specific non-empty configuration instead of
-            // merging, so creating one here would shadow the root for that logger.
+            $childPath = $path . '/' . $key;
+
+            // LogManager uses the most specific configuration instead of merging, so
+            // a logger that has one of its own never sees the root writer.
             if (isset($child['writerConfiguration'])) {
-                self::addWriter($child);
+                $paths += self::writerPathFor($child, $childPath);
             }
 
-            self::addToNested($child);
+            $paths += self::nestedWriterPaths($child, $childPath);
         }
+
+        return $paths;
     }
 
     /**
      * @param array<string, mixed> $node
+     *
+     * @return array<string, array<string, mixed>>
      */
-    private static function addWriter(array &$node): void
+    private static function writerPathFor(array $node, string $path): array
     {
-        $node['writerConfiguration'][LogLevel::ERROR][DatabaseWriter::class] ??= [];
+        if (isset($node['writerConfiguration'][LogLevel::ERROR][DatabaseWriter::class])) {
+            return [];
+        }
+
+        return [$path . '/writerConfiguration/' . LogLevel::ERROR . '/' . DatabaseWriter::class => []];
     }
 }

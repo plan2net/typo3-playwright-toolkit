@@ -159,12 +159,16 @@ final class PreBootProvisioningTest extends FunctionalTestCase
         unset($_SERVER[TestApiSecret::SERVER_KEY]);
         $projectConnection = $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'];
 
-        $overrides = [];
-        $this->asWebRequest(static function () use ($projectConnection, &$overrides): void {
-            $overrides = TestContext::resolveTestDatabaseConnection($projectConnection);
+        $settings = [];
+        $this->asWebRequest(static function () use ($projectConnection, &$settings): void {
+            $settings = TestContext::resolveCurrentRequestSettings($projectConnection);
         });
 
-        self::assertSame([], $overrides);
+        self::assertSame([], array_filter(
+            $settings,
+            static fn(string $path): bool => str_starts_with($path, 'DB/'),
+            ARRAY_FILTER_USE_KEY
+        ));
     }
 
     private function driver(): SqliteTestDatabaseDriver
