@@ -32,7 +32,10 @@ a:hover { color:var(--org-d); }
 section, header { scroll-margin-top:104px; }
 /* A link inside a paragraph must not rely on colour alone to be recognisable. */
 footer a, p a { text-decoration:underline; text-underline-offset:2px; }
-a:focus-visible, button:focus-visible, pre:focus-visible { outline:2px solid var(--org); outline-offset:3px; border-radius:4px; }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible { outline:2px solid var(--org); outline-offset:3px; border-radius:4px; }
+/* Each carries the UA's own monospace, which would outrank the family inherited
+   from the panel it sits in. */
+pre code, samp, kbd { font:inherit; color:inherit; }
 .skip { position:absolute; left:-9999px; background:var(--ink); color:#fff; padding:12px 20px; z-index:40; }
 .skip:focus { left:16px; top:16px; }
 h1,h2,h3 { text-wrap:balance; }
@@ -133,7 +136,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
     <li><a href="#failure" style="color:var(--dim);" style-hover="color:var(--ink);">When it fails</a></li>
     <li><a href="#replay" style="color:var(--dim);" style-hover="color:var(--ink);">Sample content</a></li>
   </ul>
-  <a class="nav-cta" href="https://github.com/plan2net/typo3-playwright-toolkit" style="color:var(--ink); background:var(--org); padding:9px 18px; border-radius:6px; font-weight:700; font-size:13.5px;" style-hover="background:var(--org-lg); color:var(--ink);">GitHub ↗</a>
+  <a class="nav-cta" href="https://github.com/plan2net/typo3-playwright-toolkit" style="color:var(--ink); background:var(--org); padding:9px 18px; border-radius:6px; font-weight:700; font-size:13.5px;" style-hover="background:var(--org-lg); color:var(--ink);">GitHub</a>
 </nav>
 
 <main id="main">
@@ -156,21 +159,27 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
     </sc-if>
     </div>
     <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 14px; max-width:50ch;">Every spec file gets its own database, cloned from a prepared template in milliseconds. Files run at the same time without sharing data, so <strong style="color:var(--ink); font-weight:700;">one test can never break another</strong>. And the content comes from the real TYPO3 backend, not from SQL fixtures, so your tests see pages the way an editor would build them.</p>
-    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">For TYPO3 projects that run on DDEV (optional).</p>
+    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">For <a href="https://typo3.org">TYPO3</a> projects that run on <a href="https://ddev.com">DDEV</a> (optional).</p>
     <div style="display:flex; gap:14px; flex-wrap:wrap;">
-      <a href="#packages" style="background:var(--org); color:var(--ink); font-weight:700; padding:13px 26px; border-radius:6px; font-size:15px;" style-hover="background:var(--org-lg); color:var(--ink);">Get started</a>
+      <a href="https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md" style="background:var(--org); color:var(--ink); font-weight:700; padding:13px 26px; border-radius:6px; font-size:15px;" style-hover="background:var(--org-lg); color:var(--ink);">Get started</a>
       <a href="#example" style="border:1.5px solid var(--line); color:var(--ink); padding:13px 26px; border-radius:6px; font-size:15px; font-weight:600;" style-hover="border-color:var(--org); color:var(--org-d);">See a test</a>
     </div>
+    <p style="font-size:15.5px; line-height:1.65; color:var(--dim); margin:18px 0 0; max-width:50ch;">Not using DDEV? See the <a href="https://github.com/plan2net/typo3-playwright-toolkit/blob/main/README.md#without-ddev">custom database setup ↗</a>.</p>
   </div>
   <div style="background:var(--term); border-radius:10px; box-shadow:0 20px 50px rgba(26,30,36,0.18); overflow:hidden;">
-    <div style="display:flex; align-items:center; gap:8px; padding:12px 16px; border-bottom:1px solid #2C323C;">
+    <div style="display:flex; align-items:center; gap:8px; padding:8px 16px; border-bottom:1px solid #2C323C;">
       <span style="width:11px; height:11px; border-radius:50%; background:#FF5F57;"></span>
       <span style="width:11px; height:11px; border-radius:50%; background:#FEBC2E;"></span>
       <span style="width:11px; height:11px; border-radius:50%; background:#28C840;"></span>
       <span style="margin-left:10px; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">ddev playwright test</span>
+      <span data-copy-status role="status" class="offscreen"></span>
+      <button type="button" data-copy-text="ddev playwright test" title="Copy the command" aria-label="Copy the ddev playwright test command" style="margin-left:auto; flex-shrink:0; background:none; border:1px solid #3C434F; border-radius:5px; color:#AEB7C4; padding:4px; cursor:pointer; display:grid; place-items:center; width:24px; height:24px;" style-hover="border-color:var(--org); color:var(--org);">
+        <span data-copy-state="done" hidden style="display:inline-flex; align-items:center;"><svg viewBox="0 0 16 16" width="13" height="13" fill="#2FBF71" style="display:block;" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+        <span data-copy-state="idle" style="display:inline-flex; align-items:center;"><svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="display:block;" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg></span>
+      </button>
     </div>
-    <div style="padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.85; min-height:330px; overflow-x:auto;">
-      <div style="color:#AEB7C4;"><span style="color:#949DAC;">$</span> ddev playwright test</div>
+    <div tabindex="0" role="group" aria-label="Terminal output of ddev playwright test" style="padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.85; min-height:330px; overflow-x:auto;">
+      <div style="color:#AEB7C4;"><span style="color:#949DAC;">$</span> <kbd>ddev playwright test</kbd></div>
       <div style="color:#949DAC;">[playwright] Preparing the test database template…</div>
       <div style="color:#949DAC; margin-bottom:6px;">Running 6 tests using 3 workers</div>
       <sc-for list="{{ runLines }}" as="r" hint-placeholder-count="6">
@@ -218,13 +227,13 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
           <span style="font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">tests/fixtures/pages.sql</span>
           <span style="display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:800; letter-spacing:0.08em; color:#F0696D; border:1px solid #F0696D; border-radius:3px; padding:3px 8px; flex-shrink:0;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block;"><path d="M12 4.5 3 19.5h18L12 4.5Z"/><path d="M12 10.5v4"/></svg>CONFLICT</span>
         </div>
-        <pre style="margin:0; padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.85; color:#C9D2DE; overflow-x:auto; flex:1;"><span style="color:#F0696D;">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
+        <pre role="group" aria-label="A merge conflict in tests/fixtures/pages.sql" style="margin:0; padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.85; color:#C9D2DE; overflow-x:auto; flex:1;"><code><span style="color:#F0696D;">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</span>
 INSERT INTO pages (uid, pid, title, slug)
 VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">'Newsroom'</span>, <span style="color:#8FD48A;">'/newsroom'</span>);
 <span style="color:#949DAC;">=======</span>
 INSERT INTO pages (uid, pid, title, slug)
 VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">'Careers'</span>, <span style="color:#8FD48A;">'/careers'</span>);
-<span style="color:#F0696D;">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/careers</span></pre>
+<span style="color:#F0696D;">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/careers</span></code></pre>
         <div style="padding:12px 18px; border-top:1px solid #2C323C; font-size:12.5px; line-height:1.6; color:#949DAC;">Both sides look right. Keep either one and a test loses its page — the ID is the reference.</div>
       </div>
 
@@ -238,13 +247,13 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
           <span style="font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">git merge feature/careers</span>
           <span style="display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:800; letter-spacing:0.08em; color:#2FBF71; border:1px solid #2FBF71; border-radius:3px; padding:3px 8px; flex-shrink:0;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:block;"><path d="M4 12.5 9.5 18 20 6.5"/></svg>CLEAN</span>
         </div>
-        <pre style="margin:0; padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.85; color:#C9D2DE; overflow-x:auto; flex:1;"><span style="color:#949DAC;">Fast-forward</span>
+        <pre role="group" aria-label="Output of git merge feature/careers" style="margin:0; padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.85; color:#C9D2DE; overflow-x:auto; flex:1;"><samp><span style="color:#949DAC;">Fast-forward</span>
  <span style="color:#2FBF71;">tests/newsroom.spec.ts</span> | 34 <span style="color:#2FBF71;">++++++++++</span>
  <span style="color:#2FBF71;">tests/careers.spec.ts</span>  | 28 <span style="color:#2FBF71;">+++++++++</span>
  2 files changed, 62 insertions(+)
 
 <span style="color:#949DAC;">create mode 100644 tests/newsroom.spec.ts</span>
-<span style="color:#949DAC;">create mode 100644 tests/careers.spec.ts</span></pre>
+<span style="color:#949DAC;">create mode 100644 tests/careers.spec.ts</span></samp></pre>
         <div style="padding:12px 18px; border-top:1px solid #2C323C; font-size:12.5px; line-height:1.6; color:#949DAC;">Each test builds its own pages through the backend, so a new test is a new file and nobody else&rsquo;s lines move.</div>
         </div>
       </div>
@@ -269,7 +278,7 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
         <h3 style="padding:16px 24px 0; margin:0; font-weight:800; font-size:16px; line-height:1.4; word-break:break-word; font-family:'Source Code Pro',monospace;"><code>{{ p.name }}</code></h3>
         <p style="padding:10px 24px 22px; margin:0; font-size:14px; line-height:1.65; color:var(--dim);">{{ p.gives }}</p>
         <div style="background:var(--term); padding:14px 18px; display:flex; gap:12px; align-items:flex-start;">
-          <div style="font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.65; color:#E6EBF2; white-space:pre-wrap; overflow-wrap:anywhere; flex:1;"><span style="color:#949DAC;">$ </span>{{ p.cmd }}</div>
+          <div style="font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.65; color:#E6EBF2; white-space:pre-wrap; overflow-wrap:anywhere; flex:1;"><span style="color:#949DAC;">$ </span><kbd>{{ p.cmd }}</kbd></div>
           <span data-copy-status role="status" class="offscreen"></span>
           <button type="button" onClick="{{ p.onCopy }}" title="Copy the {{ p.name }} command" aria-label="Copy the {{ p.name }} command" style="flex-shrink:0; background:none; border:1px solid #3C434F; border-radius:5px; color:#AEB7C4; padding:5px; cursor:pointer; display:grid; place-items:center; width:28px; height:28px;" style-hover="border-color:var(--org); color:var(--org);">
             <sc-if value="{{ p.isCopied }}" hint-placeholder-val="{{ false }}">
@@ -284,7 +293,7 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
     </sc-for>
   </ul>
   <div class="figure" data-diagram="packages-overview" style="margin:48px 0 8px;"></div>
-  <p style="margin:24px 0 0; font-size:15.5px;">These three commands only install the packages. For the whole setup, follow <a href="https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md" style="font-weight:700;">SETUP.md ↗</a>.</p>
+  <p style="margin:24px 0 0; font-size:15.5px;">These three commands only install the packages. For the whole setup, follow <a href="https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md">SETUP.md ↗</a>.</p>
 </section>
 
 <section id="example" data-screen-label="Example" style="background:var(--soft); border-top:1px solid var(--line);">
@@ -299,8 +308,14 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
       <p style="font-size:15.5px; line-height:1.7; color:var(--dim); margin:0;">A save that TYPO3 rejected still answers like a save. The builder reads that answer and <strong style="color:var(--ink); font-weight:700;">stops on the line that saved</strong>, naming the record and the reason. A failed test also brings along what TYPO3 wrote to its log while it ran — refused records, uncaught exceptions, anything logged as an error — attached to the report as <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">typo3-errors.json</span>.</p>
     </div>
     <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.14);">
-      <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">tests/news.spec.ts</div>
-      <pre style="margin:0; padding:20px 22px; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.8; color:#C9D2DE; overflow-x:auto;"><span style="color:#FFB151;">import</span> {
+      <div style="display:flex; align-items:center; gap:10px; padding:8px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">tests/news.spec.ts
+        <span data-copy-status role="status" class="offscreen"></span>
+        <button type="button" data-copy-target="example-code" title="Copy the example" aria-label="Copy the tests/news.spec.ts example" style="margin-left:auto; flex-shrink:0; background:none; border:1px solid #3C434F; border-radius:5px; color:#AEB7C4; padding:4px; cursor:pointer; display:grid; place-items:center; width:24px; height:24px;" style-hover="border-color:var(--org); color:var(--org);">
+          <span data-copy-state="done" hidden style="display:inline-flex; align-items:center;"><svg viewBox="0 0 16 16" width="13" height="13" fill="#2FBF71" style="display:block;" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span data-copy-state="idle" style="display:inline-flex; align-items:center;"><svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="display:block;" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg></span>
+        </button>
+      </div>
+      <pre id="example-code" role="group" aria-label="tests/news.spec.ts" style="margin:0; padding:20px 22px; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.8; color:#C9D2DE; overflow-x:auto;"><code><span style="color:#FFB151;">import</span> {
     defineScenario, expect, expectScreenshot,
     imageCrop, runAccessibilityScan,
 } <span style="color:#FFB151;">from</span> <span style="color:#8FD48A;">'@plan2net/typo3-playwright-toolkit'&#10;&#10;</span><span style="color:#7FB8E8;">export const</span> test = defineScenario(<span style="color:#FFB151;">async</span> ({ builders }) =&gt; {
@@ -326,7 +341,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
     <span style="color:#949DAC;">// Fonts, images and animations have settled.&#10;</span>    <span style="color:#FFB151;">await</span> expectScreenshot(page, <span style="color:#8FD48A;">'newsroom'</span>)
 
     <span style="color:#949DAC;">// axe, on the page as the test left it.&#10;</span>    <span style="color:#FFB151;">await</span> runAccessibilityScan(page)
-})</pre>
+})</code></pre>
       <div style="padding:12px 18px; border-top:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">Content is posted to <span style="color:#C9D2DE;">/typo3/record/edit</span> — the route the backend itself uses on save, request token included.</div>
     </div>
   </div>
@@ -349,11 +364,17 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
     </div>
     <div style="display:flex; flex-direction:column; gap:18px;">
       <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.14);">
-        <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">ddev playwright-inspect</div>
-        <div style="padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.9; overflow-x:auto;">
+        <div style="display:flex; align-items:center; gap:10px; padding:8px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">ddev playwright-inspect
+          <span data-copy-status role="status" class="offscreen"></span>
+          <button type="button" data-copy-text="ddev playwright-inspect" title="Copy the command" aria-label="Copy the ddev playwright-inspect command" style="margin-left:auto; flex-shrink:0; background:none; border:1px solid #3C434F; border-radius:5px; color:#AEB7C4; padding:4px; cursor:pointer; display:grid; place-items:center; width:24px; height:24px;" style-hover="border-color:var(--org); color:var(--org);">
+            <span data-copy-state="done" hidden style="display:inline-flex; align-items:center;"><svg viewBox="0 0 16 16" width="13" height="13" fill="#2FBF71" style="display:block;" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+            <span data-copy-state="idle" style="display:inline-flex; align-items:center;"><svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="display:block;" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg></span>
+          </button>
+        </div>
+        <div tabindex="0" role="group" aria-label="Terminal output of ddev playwright-inspect" style="padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.9; overflow-x:auto;">
           <div style="color:#F0696D;">  ✘  1 tests/courses.spec.ts:12:1 › a course page lists its lecture dates (2.4s)</div>
           <div style="color:#949DAC; margin-bottom:10px;">[teardown] Kept 1 DB for a failed scenario.</div>
-          <div style="color:#AEB7C4;"><span style="color:#949DAC;">$</span> ddev playwright-inspect</div>
+          <div style="color:#AEB7C4;"><span style="color:#949DAC;">$</span> <kbd>ddev playwright-inspect</kbd></div>
           <div style="color:#949DAC; margin-bottom:8px;">Links log you into the backend and expire in 15&nbsp;minutes.</div>
           <div style="color:#E6EBF2;">courses</div>
           <div style="color:#FFB151;">&nbsp;&nbsp;db09D933A1066CD448</div>
@@ -419,9 +440,15 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
     </div>
     <div style="display:flex; flex-direction:column; gap:18px;">
       <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.14);">
-        <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">ddev playwright-replay</div>
-        <div style="padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.9; overflow-x:auto;">
-          <div style="color:#AEB7C4;"><span style="color:#949DAC;">$</span> ddev playwright-replay</div>
+        <div style="display:flex; align-items:center; gap:10px; padding:8px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">ddev playwright-replay
+          <span data-copy-status role="status" class="offscreen"></span>
+          <button type="button" data-copy-text="ddev playwright-replay" title="Copy the command" aria-label="Copy the ddev playwright-replay command" style="margin-left:auto; flex-shrink:0; background:none; border:1px solid #3C434F; border-radius:5px; color:#AEB7C4; padding:4px; cursor:pointer; display:grid; place-items:center; width:24px; height:24px;" style-hover="border-color:var(--org); color:var(--org);">
+            <span data-copy-state="done" hidden style="display:inline-flex; align-items:center;"><svg viewBox="0 0 16 16" width="13" height="13" fill="#2FBF71" style="display:block;" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+            <span data-copy-state="idle" style="display:inline-flex; align-items:center;"><svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="display:block;" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg></span>
+          </button>
+        </div>
+        <div tabindex="0" role="group" aria-label="Terminal output of ddev playwright-replay" style="padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.9; overflow-x:auto;">
+          <div style="color:#AEB7C4;"><span style="color:#949DAC;">$</span> <kbd>ddev playwright-replay</kbd></div>
           <div style="color:#949DAC;">[replay] Everything was replayed into the testing site's own database.</div>
           <div style="color:#949DAC; margin-bottom:8px;">[replay] This link logs you into its backend for the next 15 minutes:</div>
           <div style="color:#7FB8E8; overflow-wrap:anywhere; white-space:normal;">&nbsp;&nbsp;https://university-testing.ddev.site/typo3/test-api/inspect?id=REPLAY0000000000&amp;t=…</div>
@@ -458,7 +485,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
     <div style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:30px 32px; display:flex; flex-direction:column; gap:14px;">
       <h3 style="font-weight:800; font-size:19px; margin:0;">There is a whole TYPO3 project in the repository, and CI reinstalls it on every push</h3>
       <p style="margin:0; font-size:15px; line-height:1.7; color:var(--dim); max-width:88ch;">Site configuration, seed fixture, web-server binding, Playwright config: a working project rather than a snippet. On every push CI installs all three packages into it on TYPO3 13.4 and 14.3, builds a page through the backend and checks the frontend renders it. <strong style="color:var(--ink); font-weight:700;">The setup instructions cannot go stale, because CI executes them.</strong></p>
-      <a href="https://github.com/plan2net/typo3-playwright-toolkit/tree/main/tests/e2e/consumer" style="font-size:15px; font-weight:700;">Read the fixture ↗</a>
+      <a href="https://github.com/plan2net/typo3-playwright-toolkit/tree/main/tests/e2e/consumer" style="font-size:15px; text-decoration:underline; text-underline-offset:2px;">Read the fixture ↗</a>
     </div>
   </div>
 </section>
@@ -472,7 +499,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
 
     <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
       <a href="https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md" style="background:var(--org); color:var(--ink); font-weight:700; padding:15px 32px; border-radius:6px; font-size:15.5px;" style-hover="background:var(--org-lg); color:var(--ink);">Set it up</a>
-      <a href="https://github.com/plan2net/typo3-playwright-toolkit/tree/main/tests/e2e/consumer" style="border:1px solid var(--line); color:var(--ink); font-weight:700; padding:14px 28px; border-radius:6px; font-size:15.5px;" style-hover="border-color:var(--ink); color:var(--ink);">See a project using it ↗</a>
+      <a href="https://github.com/plan2net/typo3-playwright-toolkit/tree/main/tests/e2e/consumer" style="border:1px solid var(--line); color:var(--ink); font-weight:700; padding:14px 28px; border-radius:6px; font-size:15.5px;" style-hover="border-color:var(--ink); color:var(--ink);">See a project using it</a>
     </div>
 
     <p style="color:var(--dim); font-size:14px; line-height:1.7; margin:0; max-width:56ch;">TYPO3 11.5, 12.4, 13.4 and 14.3 on PHP 8.1 to 8.4. MariaDB, MySQL, PostgreSQL and SQLite each have a driver. Installs as a dev dependency; every endpoint it adds exists <strong style="color:var(--ink); font-weight:700;">only in the Testing context</strong>.</p>
@@ -483,9 +510,9 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
 
 <footer data-screen-label="Footer" style="border-top:1px solid var(--line);">
   <div class="pad" style="max-width:1200px; margin:0 auto; padding:28px 40px; display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; font-size:13.5px; color:var(--dim);">
-    <div>Built by <a href="https://www.plan2.net/">plan2net</a> · Vienna, Austria<br>Built on <a href="https://playwright.dev">Playwright</a>, <a href="https://ddev.com">DDEV</a> and <a href="https://typo3.org">TYPO3</a></div>
+    <div>Built by <a href="https://www.plan2.net/">plan2net</a> · Vienna, Austria<br>Built on <a href="https://playwright.dev">Playwright</a>, <a href="https://typo3.org">TYPO3</a> and <a href="https://ddev.com">DDEV</a></div>
     <div style="display:flex; gap:24px;">
-      <a href="https://github.com/plan2net/typo3-playwright-toolkit">GitHub</a>
+      <a href="https://github.com/plan2net/typo3-playwright-toolkit" style="color:var(--dim);" style-hover="color:var(--ink);">GitHub</a>
       <a href="https://packagist.org/packages/plan2net/playwright-toolkit" style="color:var(--dim);" style-hover="color:var(--ink);">Packagist</a>
       <a href="https://www.npmjs.com/package/@plan2net/typo3-playwright-toolkit" style="color:var(--dim);" style-hover="color:var(--ink);">npm</a>
     </div>

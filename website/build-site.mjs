@@ -130,7 +130,18 @@ let body = render(bodySource, values)
 body = body.replace(/onClick="\{\{ p\.onCopy \}\}"/g, 'data-copy')
 const commands = values.packages.map((entry) => entry.cmd)
 let copyIndex = 0
-body = body.replace(/data-copy(?=[\s>])/g, () => `data-copy="${escapeAttribute(commands[copyIndex++])}"`)
+body = body.replace(/data-copy(?=[\s>])/g, () => {
+    const command = commands[copyIndex++]
+    if (!command) {
+        console.error('build-docs: more package copy buttons than package commands')
+        process.exit(1)
+    }
+
+    return `data-copy="${escapeAttribute(command)}"`
+})
+
+// Only the package buttons are positional; the hand-written ones name their own command.
+body = body.replace(/data-copy-text=/g, 'data-copy=')
 
 body = body.replace(/onClick="\{\{ toggleRotation \}\}"/g, '')
 
@@ -253,22 +264,29 @@ if (runSteps.length > 0 && !stillMedia.matches) {
 }
 
 function announce(button, message) {
-    const status = button.closest('li')?.querySelector('[data-copy-status]')
+    const status = button.parentElement?.querySelector('[data-copy-status]')
     if (status) {
         status.textContent = message
     }
 }
 
-document.querySelectorAll('[data-copy]').forEach((button) => {
+// A block copies itself, so the code on the page and the copied text cannot drift.
+function copyText(button) {
+    const target = button.dataset.copyTarget
+
+    return target ? document.getElementById(target).textContent : button.dataset.copy
+}
+
+document.querySelectorAll('[data-copy], [data-copy-target]').forEach((button) => {
     button.addEventListener('click', async () => {
         // Awaited: the tick has to mean the clipboard actually took it.
         try {
-            await navigator.clipboard.writeText(button.dataset.copy)
+            await navigator.clipboard.writeText(copyText(button))
         } catch {
-            announce(button, 'Copying failed. Select the command and copy it yourself.')
+            announce(button, 'Copying failed. Select the text and copy it yourself.')
             return
         }
-        announce(button, 'Command copied')
+        announce(button, 'Copied to the clipboard')
         setBranch(button, 'done')
         clearTimeout(button.resetTimer)
         button.resetTimer = setTimeout(() => {
@@ -277,7 +295,7 @@ document.querySelectorAll('[data-copy]').forEach((button) => {
         }, 1600)
     })
 })
-document.querySelectorAll('[data-copy] [data-copy-state]').forEach((part) => {
+document.querySelectorAll('[data-copy-state]').forEach((part) => {
     part.dataset.rot = part.dataset.copyState
 })
 `
@@ -395,6 +413,13 @@ const leftovers = page.match(/\{\{[^}]*\}\}|<sc-(for|if)\b|style-hover=/g)
 if (leftovers) {
     console.error(`build-docs: unresolved template syntax: ${[...new Set(leftovers)].join(', ')}`)
     process.exit(1)
+}
+
+for (const [, id] of page.matchAll(/data-copy-target="([^"]+)"/g)) {
+    if (!page.includes(`id="${id}"`)) {
+        console.error(`build-docs: a copy button reads #${id}, which the page does not have`)
+        process.exit(1)
+    }
 }
 
 // llmstxt.org
