@@ -115,9 +115,10 @@ Run the `typo3` commands where PHP is, the `npx` ones where Playwright is. They 
 be different containers: set `PLAYWRIGHT_TOOLKIT_SECRET` to the same value on both
 sides and neither needs the other's filesystem.
 
-Two things stay yours either way, DDEV or not: binding the Testing context to a
-separate hostname in your web server, and clearing `fileadmin/_processed_` before a
-run so screenshots do not compare against stale images.
+One thing stays yours either way, DDEV or not: binding the Testing context to a
+separate hostname in your web server. Processed images need no attention — every test
+database has its `processingfolder` pointed at `_processed_<testId>`, and cleanup
+removes that folder with the database.
 
 What you give up is proof. CI exercises the DDEV path on every push; a setup of your
 own is not covered by it.

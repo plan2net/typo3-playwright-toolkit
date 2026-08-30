@@ -51,10 +51,4 @@ fi
 
 playwright_prepare_template || exit 1
 
-# Stale processed images survive a database drop, so we clear them here
-processed="/var/www/html/${DDEV_DOCROOT:-public}/fileadmin/_processed_"
-if [ -d "${processed}" ] && ! rm -rf "${processed:?}"/*; then
-    echo "[playwright] Could not clear ${processed} — screenshots may compare against stale images." >&2
-fi
-
 exec npx playwright "${PW_ARGS[@]}"

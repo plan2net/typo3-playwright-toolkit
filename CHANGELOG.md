@@ -47,6 +47,11 @@ the package a change belongs to.
 
 ### Fixed
 
+- **ddev-typo3-playwright-toolkit** — `ddev playwright test` and `ddev
+  playwright-replay` no longer empty `fileadmin/_processed_`. Every test database
+  gets its own `_processed_<testId>` folder, which is removed with the database, so
+  the deletion only ever hit the images your own site had built.
+
 - **plan2net/playwright-toolkit** — `playwright:prepare` no longer warns about the DDEV
   add-on when no add-on is installed. It read a missing version file as an empty
   version, so a project that runs without DDEV was told on every run to install a
