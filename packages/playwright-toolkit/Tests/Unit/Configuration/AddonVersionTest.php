@@ -46,6 +46,14 @@ final class AddonVersionTest extends TestCase
         self::assertNull(AddonVersion::drift('0.6.0', 'dev-main'));
     }
 
+    // No version file means no add-on, which a project that does not run DDEV is
+    // entitled to. Telling it to run `ddev add-on get` is advice it cannot follow.
+    #[Test]
+    public function saysNothingWhenNoAddonIsInstalled(): void
+    {
+        self::assertNull(AddonVersion::drift(null, '0.6.0'));
+    }
+
     #[Test]
     public function readsTheAddonVersionOutOfTheProjectsDdevDirectory(): void
     {

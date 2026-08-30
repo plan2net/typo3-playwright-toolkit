@@ -30,12 +30,17 @@ final class AddonVersion
 
     public static function drift(?string $addon, ?string $extension): ?string
     {
+        // No file, no add-on: a project may run the commands without DDEV.
+        if (null === $addon) {
+            return null;
+        }
+
         $installed = ltrim((string) $extension, 'v');
         if (1 !== preg_match('/^\d+\.\d+\.\d+$/', $installed)) {
             return null;
         }
 
-        if ((string) $addon === $installed) {
+        if ($addon === $installed) {
             return null;
         }
 
