@@ -10,9 +10,11 @@ the package a change belongs to.
 
 ## [Unreleased]
 
-### Changed
+## [0.9.0] - 2026-08-30
 
-- **plan2net/playwright-toolkit** — **Breaking.** Two methods have new names. Change the
+### Breaking
+
+- **plan2net/playwright-toolkit** — two methods have new names. Change the
   call in your `config/system/additional.php`:
 
   ```php
@@ -56,6 +58,16 @@ the package a change belongs to.
   add-on when no add-on is installed. It read a missing version file as an empty
   version, so a project that runs without DDEV was told on every run to install a
   release it does not use.
+
+### Documentation
+
+- The README says what to do without DDEV, and `SETUP.md` points at it. The add-on
+  gives you the `db-test` service and the `ddev playwright*` commands; nothing in the
+  other two packages reads anything DDEV-specific. The extension finds the test
+  database server through four environment variables, and the npm package only speaks
+  HTTP. What you provide instead is a second database server and the two commands the
+  wrappers run, and what you give up is proof: CI exercises the DDEV path on every
+  push and a setup of your own is not covered by it.
 
 ## [0.8.0] - 2026-08-29
 
@@ -418,7 +430,8 @@ the package a change belongs to.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.8.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.9.0...main
+[0.9.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.5.0...v0.6.0
