@@ -9,6 +9,10 @@
 <x-dc>
 <helmet>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The diagrams carry their own colours. Without this, a phone's automatic dark
+     mode inverts the text inside them and leaves their white shapes alone, which
+     turns every heading white on white. -->
+<meta name="color-scheme" content="only light">
 <style>
 /* Self-hosted: a Google Fonts stylesheet would send every visitor's IP address to
    Google before the page renders. website/fonts/README.md says where they come from. */
