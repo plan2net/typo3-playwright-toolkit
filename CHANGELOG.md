@@ -10,6 +10,42 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Breaking
+
+- **plan2net/playwright-toolkit** — one method has a new name. If your project merges the
+  settings itself, change the call in your `config/system/additional.php`:
+
+  ```php
+  $configurationSettings = array_merge(
+      $configurationSettings,
+      TestContext::resolveCurrentRequestSettings($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? [])
+  );
+  ```
+
+  It was `resolveTestDatabaseConnection()`. The call now returns more than the database
+  connection — see the first fix below — so the old name no longer fitted.
+
+  There are no aliases. The old name stops the first test run with "undefined method". A
+  live site cannot be affected, because the call only runs in the Testing context.
+
+### Fixed
+
+- **plan2net/playwright-toolkit** — projects that merge the settings themselves record
+  errors too now. `typo3-errors.json` stayed empty for them, and nothing said why: only
+  `configureCurrentRequest()` switched the recording on, never the merge the README
+  describes. Both calls now do the same work, so they cannot fall apart again.
+
+- **plan2net/playwright-toolkit** — on TYPO3 11.5 and 12.4, a recorded error showed the
+  message with its `{placeholders}` still in it, lost the exception class, code, file and
+  line, and listed every uncaught exception twice. Those two versions store the details of
+  a log entry in another format, which the reader did not know about.
+
+- **plan2net/playwright-toolkit** — an error that repeats no longer hides the ones after
+  it. The reader took twenty rows and only then counted repeats, so twenty copies of one
+  message could push every other error out of the list while still calling the list
+  complete. A test with exactly twenty different errors is no longer marked as cut short
+  either.
+
 ## [0.9.0] - 2026-08-30
 
 ### Breaking

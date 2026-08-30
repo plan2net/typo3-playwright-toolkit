@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Log;
 
+use Plan2net\PlaywrightToolkit\Compatibility\LogContextData;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Log\LogDataTrait;
 use TYPO3\CMS\Core\Log\LogLevel;
@@ -13,8 +14,15 @@ final class RecordedErrors
 {
     use LogDataTrait;
 
+    // Repeats are collapsed after the read, so stopping at the caller's limit would
+    // let a few repeated rows push out every error after them.
     /**
-     * @return list<array<string, mixed>>
+     * @var int
+     */
+    private const RAW_SCAN_LIMIT = 500;
+
+    /**
+     * @return array{errors: list<array<string, mixed>>, truncated: bool}
      */
     public function readFrom(Connection $connection, int $limit): array
     {
@@ -42,13 +50,21 @@ final class RecordedErrors
                 )
             )
             ->orderBy('uid', 'ASC')
-            ->setMaxResults($limit)
+            ->setMaxResults(self::RAW_SCAN_LIMIT + 1)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        $errors = $this->collapseRepeats(array_map(fn(array $row): array => $this->fromRow($row), $rows));
+        $scannedEveryRow = \count($rows) <= self::RAW_SCAN_LIMIT;
+        $rows = \array_slice($rows, 0, self::RAW_SCAN_LIMIT);
 
-        return $this->dropLegacyExceptionTwins($errors);
+        $errors = $this->dropLegacyExceptionTwins(
+            $this->collapseRepeats(array_map(fn(array $row): array => $this->fromRow($row), $rows))
+        );
+
+        return [
+            'errors' => \array_slice($errors, 0, $limit),
+            'truncated' => !$scannedEveryRow || \count($errors) > $limit,
+        ];
     }
 
     /**
@@ -215,7 +231,7 @@ final class RecordedErrors
      */
     private function logFields(array $row): array
     {
-        $context = $this->unserializeLogData($row['data'] ?? '') ?? [];
+        $context = $this->unserializeLogData(LogContextData::unprefixed($row['data'] ?? '')) ?? [];
 
         $fields = [
             'level' => $this->levelName($row['level'] ?? ''),

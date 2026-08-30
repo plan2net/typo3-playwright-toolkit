@@ -24,7 +24,7 @@ final class RecordedErrorsTest extends FunctionalTestCase
         $this->insertRow(['type' => 0, 'component' => 'TYPO3.CMS.Core.Resource.ResourceStorage', 'level' => '3', 'message' => 'a storage failure']);
         $this->insertRow(['type' => 5, 'channel' => 'php', 'error' => 2, 'details' => 'Core: Exception handler (WEB): Uncaught TYPO3 Exception']);
 
-        $errors = (new RecordedErrors())->readFrom($this->getConnectionPool()->getConnectionForTable('sys_log'), 200);
+        $errors = (new RecordedErrors())->readFrom($this->getConnectionPool()->getConnectionForTable('sys_log'), 200)['errors'];
 
         self::assertSame(
             ['a refusal', 'a storage failure', 'Core: Exception handler (WEB): Uncaught TYPO3 Exception'],
@@ -41,7 +41,7 @@ final class RecordedErrorsTest extends FunctionalTestCase
         $this->insertRow(['type' => 5, 'channel' => 'php', 'error' => 2, 'details' => 'a different failure']);
         $this->insertRow(['type' => 5, 'channel' => 'php', 'error' => 2, 'details' => 'the same failure']);
 
-        $errors = (new RecordedErrors())->readFrom($this->getConnectionPool()->getConnectionForTable('sys_log'), 200);
+        $errors = (new RecordedErrors())->readFrom($this->getConnectionPool()->getConnectionForTable('sys_log'), 200)['errors'];
 
         self::assertSame(['the same failure', 'a different failure'], array_column($errors, 'message'));
         self::assertSame([3, 1], array_column($errors, 'count'));
@@ -66,12 +66,13 @@ final class RecordedErrorsTest extends FunctionalTestCase
         $this->insertRow(['type' => 5, 'channel' => 'php', 'error' => 2, 'level' => 'error', 'tstamp' => 1760954471, 'details' => 'Core: Exception handler (WEB): Uncaught TYPO3 Exception: no page configured']);
         $this->insertRow(['type' => 0, 'component' => 'TYPO3.CMS.Core.Resource.ResourceStorage', 'level' => '2', 'tstamp' => 1760954471, 'message' => 'Failed initializing storage']);
 
-        $errors = (new RecordedErrors())->readFrom($this->getConnectionPool()->getConnectionForTable('sys_log'), 20);
+        $result = (new RecordedErrors())->readFrom($this->getConnectionPool()->getConnectionForTable('sys_log'), 20);
 
         self::assertSame(
             ContractFixture::read('errors-response')['errors'],
-            $errors
+            $result['errors']
         );
+        self::assertSame(ContractFixture::read('errors-response')['truncated'], $result['truncated']);
     }
 
     #[Test]
@@ -91,9 +92,26 @@ final class RecordedErrorsTest extends FunctionalTestCase
             'details' => 'Core: Exception handler (WEB): Uncaught TYPO3 Exception: #1607585445: No page configured | RuntimeException thrown in file x in line 5.',
         ]);
 
-        $errors = (new RecordedErrors())->readFrom($this->getConnectionPool()->getConnectionForTable('sys_log'), 200);
+        $errors = (new RecordedErrors())->readFrom($this->getConnectionPool()->getConnectionForTable('sys_log'), 200)['errors'];
 
         self::assertSame(['log'], array_column($errors, 'source'));
+    }
+
+    #[Test]
+    public function repeatsDoNotUseUpTheRoomForDistinctErrors(): void
+    {
+        for ($index = 0; $index < 25; ++$index) {
+            $this->insertRow(['type' => 5, 'channel' => 'php', 'error' => 2, 'details' => 'the same failure']);
+        }
+        $this->insertRow(['type' => 5, 'channel' => 'php', 'error' => 2, 'details' => 'the last distinct failure']);
+
+        $result = (new RecordedErrors())->readFrom($this->getConnectionPool()->getConnectionForTable('sys_log'), 20);
+
+        self::assertSame(
+            ['the same failure', 'the last distinct failure'],
+            array_column($result['errors'], 'message')
+        );
+        self::assertFalse($result['truncated']);
     }
 
     /**

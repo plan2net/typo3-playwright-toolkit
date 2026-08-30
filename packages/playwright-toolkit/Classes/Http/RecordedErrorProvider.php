@@ -59,18 +59,18 @@ final class RecordedErrorProvider implements MiddlewareInterface
             return TestApi::error('A test id is required', 400);
         }
 
-        $errors = $this->errorsOf($testId);
+        $recorded = $this->errorsOf($testId);
 
         return new JsonResponse([
             'success' => true,
             'testId' => $testId,
-            'truncated' => \count($errors) >= self::MAXIMUM_ROWS,
-            'errors' => \array_slice($errors, 0, self::MAXIMUM_ROWS),
+            'truncated' => $recorded['truncated'],
+            'errors' => $recorded['errors'],
         ]);
     }
 
     /**
-     * @return list<array<string, mixed>>
+     * @return array{errors: list<array<string, mixed>>, truncated: bool}
      */
     private function errorsOf(string $testId): array
     {
@@ -84,13 +84,13 @@ final class RecordedErrorProvider implements MiddlewareInterface
                 $overrides,
                 fn(): array => $this->recordedErrors->readFrom(
                     $this->connectionPool->getConnectionForTable('sys_log'),
-                    self::MAXIMUM_ROWS + 1
+                    self::MAXIMUM_ROWS
                 )
             );
         } catch (\Throwable) {
             // A database that cannot be reached has nothing to report, and asking
             // about one must never fail the request that asked.
-            return [];
+            return ['errors' => [], 'truncated' => false];
         }
     }
 }

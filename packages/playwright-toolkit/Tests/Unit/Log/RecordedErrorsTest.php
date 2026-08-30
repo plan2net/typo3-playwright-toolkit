@@ -105,4 +105,53 @@ final class RecordedErrorsTest extends TestCase
             (new RecordedErrors())->fromRow($row)
         );
     }
+
+    #[Test]
+    public function decodesTheDashPrefixedContextWrittenByTypo3ElevenAndTwelve(): void
+    {
+        $context = [
+            'mode' => 'WEB',
+            'application_mode' => 'FE',
+            'exception_class' => 'RuntimeException',
+            'exception_code' => 1614849885,
+            'file' => '/var/www/html/vendor/acme/thing/Classes/Thing.php',
+            'line' => 42,
+            'message' => 'Something went wrong',
+            'request_url' => 'https://example.ddev.site/',
+            'exception' => null,
+        ];
+
+        $row = [
+            'uid' => 501,
+            'type' => 0,
+            'channel' => 'php',
+            'tstamp' => 0,
+            'time_micro' => 1761251868.0143,
+            'component' => 'TYPO3.CMS.Core.Error.ProductionExceptionHandler',
+            'level' => '2',
+            'error' => 0,
+            'details' => null,
+            'log_data' => null,
+            'tablename' => '',
+            'recuid' => 0,
+            'message' => 'Core: Exception handler ({mode}: {application_mode}): {exception_class}, code #{exception_code}, file {file}, line {line}: {message}',
+            'data' => '- ' . json_encode($context),
+        ];
+
+        self::assertSame(
+            [
+                'uid' => 501,
+                'source' => 'log',
+                'at' => '2025-10-23T20:37:48+00:00',
+                'level' => 'critical',
+                'component' => 'TYPO3.CMS.Core.Error.ProductionExceptionHandler',
+                'message' => 'Core: Exception handler (WEB: FE): RuntimeException, code #1614849885, file /var/www/html/vendor/acme/thing/Classes/Thing.php, line 42: Something went wrong',
+                'class' => 'RuntimeException',
+                'code' => 1614849885,
+                'file' => '/var/www/html/vendor/acme/thing/Classes/Thing.php',
+                'line' => 42,
+            ],
+            (new RecordedErrors())->fromRow($row)
+        );
+    }
 }
