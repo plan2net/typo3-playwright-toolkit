@@ -10,6 +10,8 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-08-30
+
 ### Breaking
 
 - **plan2net/playwright-toolkit** — one method has a new name. If your project merges the
@@ -466,7 +468,8 @@ the package a change belongs to.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.9.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.10.0...main
+[0.10.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.6.0...v0.7.0
