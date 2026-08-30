@@ -11,8 +11,13 @@ parameters:
         # Extensions TYPO3 loads, not code this package calls: ext_emconf.php is
         # handed its $_EXTKEY by the extension manager.
         - Tests/Functional/Fixtures/Extensions/*
-    treatPhpDocTypesAsCertain: false
     ignoreErrors:
+        # Only true for the core installed here: rebuild() arrived with the 13.4
+        # schema API, so the guard is load-bearing on 11.5 and 12.4.
+        -
+            message: '#^Call to function method_exists\(\) with TYPO3\\CMS\\Core\\Schema\\TcaSchemaFactory and .rebuild. will always evaluate to true\.$#'
+            identifier: function.alreadyNarrowedType
+            path: '*/Tests/Functional/DataHandling/ContentDatamapTest.php'
         # Every connection this package opens sets PDO::ERRMODE_EXCEPTION, so
         # query() and prepare() throw rather than returning false. Narrowing 20
         # call sites for a branch that cannot be reached would only add noise.
