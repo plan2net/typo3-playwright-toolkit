@@ -3,6 +3,10 @@
 Six steps, in order. At the end you have a passing test. For what the toolkit is and
 why, read the [README](README.md) first.
 
+This guide takes the DDEV route, which is the shortest one and the one CI proves on
+every push. DDEV is not a requirement: see
+[Without DDEV](README.md#without-ddev) for what to provide instead.
+
 ## 1. A second hostname, in the Testing context
 
 The toolkit does not install a second site. It uses **your** site, reached through a
@@ -59,6 +63,12 @@ ddev npm i -D @plan2net/typo3-playwright-toolkit @playwright/test
 Do not skip the `npm init`. Without a `package.json` of its own, `npm i` walks up the
 directories and installs into the project above. `type: module` is needed because the
 Playwright config in step 4 uses `import.meta.url`.
+
+The add-on is the optional one. It gives you the `db-test` database service and the
+`ddev playwright*` commands; without it you point four environment variables at a
+database server of your own and run the underlying commands yourself, as
+[Without DDEV](README.md#without-ddev) describes. The other two packages are
+required.
 
 Keep all three packages on the same version. `tests/playwright` is only the default
 directory; `PW_TEST_DIR` in `web_environment` moves it. If your project already uses

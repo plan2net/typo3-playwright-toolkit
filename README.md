@@ -17,9 +17,11 @@ Content is created through the real TYPO3 backend, not from SQL fixtures — so 
 test is a new file, and two people writing tests never meet in the same one.
 
 It drives [Playwright](https://playwright.dev) against a [TYPO3](https://typo3.org)
-project running under [DDEV](https://ddev.com).
+project. [DDEV](https://ddev.com) is what it is built and tested for, and the add-on
+below is the shortest way in — but nothing in the other two packages depends on it,
+see [Without DDEV](#without-ddev).
 
-Three packages. You need all three:
+Three packages:
 
 | Package | Install with | What it gives you |
 |---|---|---|
@@ -76,6 +78,49 @@ different containers.
 **[SETUP.md](SETUP.md)** takes you from nothing to a passing test: the testing
 hostname, the three packages, the browsers, the files your project needs, and a first
 test that proves it works.
+
+### Without DDEV
+
+DDEV is a convenience, not a requirement. The extension and the npm package do not
+read anything DDEV-specific: the extension finds the test database server through
+four environment variables, and the npm package only speaks HTTP.
+
+| Variable | Default |
+|---|---|
+| `PLAYWRIGHT_DB_TEST_HOST` | `db-test` |
+| `PLAYWRIGHT_DB_TEST_PORT` | the engine's default port |
+| `PLAYWRIGHT_DB_TEST_USER` | `db` |
+| `PLAYWRIGHT_DB_TEST_PASSWORD` | `db` |
+
+So the add-on gives you two things you otherwise provide yourself.
+
+**A second database server**, reachable from the web container under those
+variables. Point them at a MariaDB, MySQL or PostgreSQL of your own. Copy the
+tuning from
+[`db-test/`](packages/ddev-typo3-playwright-toolkit/db-test) — `fsync=off` and the
+rest — since it is what makes a clone take milliseconds. Give it a volume, not a
+tmpfs: test databases grow, and runners run out of memory.
+
+**Five commands**, each a wrapper you can run yourself:
+
+| Command | Runs |
+|---|---|
+| `ddev playwright test` | `typo3 cache:flush`, `typo3 playwright:prepare`, then `npx playwright test` |
+| `ddev playwright-prepare` | `typo3 playwright:prepare` |
+| `ddev playwright-ui` | `npx playwright test --ui` |
+| `ddev playwright-replay` | `typo3 playwright:replay-prepare`, then `npx playwright test` with `PW_REPLAY=1` |
+| `ddev playwright-inspect` | `npx typo3-playwright-inspect` |
+
+Run the `typo3` commands where PHP is, the `npx` ones where Playwright is. They may
+be different containers: set `PLAYWRIGHT_TOOLKIT_SECRET` to the same value on both
+sides and neither needs the other's filesystem.
+
+Two things stay yours either way, DDEV or not: binding the Testing context to a
+separate hostname in your web server, and clearing `fileadmin/_processed_` before a
+run so screenshots do not compare against stale images.
+
+What you give up is proof. CI exercises the DDEV path on every push; a setup of your
+own is not covered by it.
 
 ### A working example
 

@@ -40,7 +40,9 @@ pre::-webkit-scrollbar { height:8px; }
 pre::-webkit-scrollbar-track { background:transparent; }
 pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 .grid-4 { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:20px; }
-.grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; grid-template-rows:repeat(4,auto); }
+/* Subgrid, so the terminal strip starts at one height in all three cards. */
+.grid-3 > li { display:grid; grid-row:span 4; grid-template-rows:subgrid; }
 .grid-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
 .split { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.4fr); gap:52px; align-items:center; }
 /* The code panel decides this ratio: it holds a 75-character import that must not
@@ -149,7 +151,8 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
       </button>
     </sc-if>
     </div>
-    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">Every spec file gets its own database, cloned from a prepared template in milliseconds. Files run at the same time without sharing data, so one test can never break another. And the content comes from the real TYPO3 backend, not from SQL fixtures, so your tests see pages the way an editor would build them. For TYPO3 projects that run on DDEV.</p>
+    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 14px; max-width:50ch;">Every spec file gets its own database, cloned from a prepared template in milliseconds. Files run at the same time without sharing data, so <strong style="color:var(--ink); font-weight:700;">one test can never break another</strong>. And the content comes from the real TYPO3 backend, not from SQL fixtures, so your tests see pages the way an editor would build them.</p>
+    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">For TYPO3 projects that run on DDEV (optional).</p>
     <div style="display:flex; gap:14px; flex-wrap:wrap;">
       <a href="#packages" style="background:var(--org); color:var(--ink); font-weight:700; padding:13px 26px; border-radius:6px; font-size:15px;" style-hover="background:var(--org-lg); color:var(--ink);">Get started</a>
       <a href="#example" style="border:1.5px solid var(--line); color:var(--ink); padding:13px 26px; border-radius:6px; font-size:15px; font-weight:600;" style-hover="border-color:var(--org); color:var(--org-d);">See a test</a>
@@ -180,7 +183,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
       </sc-if>
       <span style="display:inline-block; width:8px; height:14px; background:#AEB7C4; animation:blink 1s steps(1) infinite;"></span>
     </div>
-    <div style="padding:10px 20px; border-top:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:12.5px; color:#949DAC;">Three files, three databases — six tests. Two tests from one file share that file's database and nothing else.</div>
+    <div style="padding:10px 20px; border-top:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:12.5px; color:#949DAC;">Three files, three databases — six tests. Two tests from one file share that file&rsquo;s database and nothing else.</div>
   </div>
 </header>
 
@@ -189,7 +192,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
     <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px;">Why this toolkit</h2>
     <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">Your tests check the real thing, and they cannot break each other.</p>
     <ul class="grid-cards bare">
-      <sc-for list="{{ values }}" as="v" hint-placeholder-count="6">
+      <sc-for list="{{ values }}" as="v" hint-placeholder-count="8">
         <li style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:26px 24px; display:flex; flex-direction:column; gap:12px;">
           <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#1A1E24" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="display:block;" aria-hidden="true"><path d="{{ v.d }}"></path></svg>
           <h3 style="font-weight:800; font-size:16px; margin:0;">{{ v.title }}</h3>
@@ -203,7 +206,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 <section id="teamwork" data-screen-label="Merge conflicts" style="background:#454C57;">
   <div class="pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
     <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px; color:#fff;">Two people, two files</h2>
-    <p style="font-size:16px; line-height:1.7; color:#E6EBF2; margin:0 0 40px; max-width:64ch;">Git has no trouble with two people working in separate files. It has no answer for two people picking the same uid, which is what a shared fixture file asks them to do.</p>
+    <p style="font-size:16px; line-height:1.7; color:#E6EBF2; margin:0 0 40px; max-width:64ch;">Git has no trouble with two people working in separate files. It has <strong style="color:#fff; font-weight:700;">no answer for two people picking the same ID</strong>, which is what a shared fixture file asks them to do.</p>
 
     <div class="compare">
       <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 14px 34px rgba(26,30,36,0.22); display:flex; flex-direction:column;">
@@ -218,7 +221,7 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
 INSERT INTO pages (uid, pid, title, slug)
 VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">'Careers'</span>, <span style="color:#8FD48A;">'/careers'</span>);
 <span style="color:#F0696D;">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature/careers</span></pre>
-        <div style="padding:12px 18px; border-top:1px solid #2C323C; font-size:12.5px; line-height:1.6; color:#949DAC;">Both sides look right. Keep either one and a test loses its page — the uid is the reference.</div>
+        <div style="padding:12px 18px; border-top:1px solid #2C323C; font-size:12.5px; line-height:1.6; color:#949DAC;">Both sides look right. Keep either one and a test loses its page — the ID is the reference.</div>
       </div>
 
       <div class="annotated">
@@ -238,26 +241,29 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
 
 <span style="color:#949DAC;">create mode 100644 tests/newsroom.spec.ts</span>
 <span style="color:#949DAC;">create mode 100644 tests/careers.spec.ts</span></pre>
-        <div style="padding:12px 18px; border-top:1px solid #2C323C; font-size:12.5px; line-height:1.6; color:#949DAC;">Each test builds its own pages through the backend, so a new test is a new file and nobody else's lines move.</div>
+        <div style="padding:12px 18px; border-top:1px solid #2C323C; font-size:12.5px; line-height:1.6; color:#949DAC;">Each test builds its own pages through the backend, so a new test is a new file and nobody else&rsquo;s lines move.</div>
         </div>
       </div>
     </div>
 
-    <p style="font-size:15.5px; line-height:1.7; color:#E6EBF2; margin:32px 0 0; max-width:70ch;">Your fixture manifest stays at what every test genuinely needs: a site root and a TypoScript template. It stops growing with the suite, and the merge conflicts over IDs stop with it.</p>
+    <p style="font-size:15.5px; line-height:1.7; color:#E6EBF2; margin:32px 0 0; max-width:70ch;">Your fixture manifest stays at what every test genuinely needs: a site root and a TypoScript template. <strong style="color:#fff; font-weight:700;">It stops growing with the suite</strong>, and the merge conflicts over IDs stop with it.</p>
   </div>
 </section>
 
 <section id="packages" data-screen-label="Packages" class="pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
   <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px;">Three packages</h2>
-  <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">You need all three.</p>
+  <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">Two of them do the work. The DDEV add-on is the shortest way to the third piece &mdash; a second database server &mdash; and you can bring your own instead.</p>
   <ul class="grid-3 bare">
     <sc-for list="{{ packages }}" as="p" hint-placeholder-count="3">
-      <li style="border:1px solid var(--line); border-radius:10px; display:flex; flex-direction:column; overflow:hidden;">
-        <div style="padding:22px 24px 0; display:flex; align-items:center; gap:10px;">
+      <li style="border:{{ p.border }}; border-radius:10px; overflow:hidden;">
+        <div style="padding:22px 24px 0; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
           <span style="font-size:12.5px; font-weight:800; letter-spacing:0.08em; color:var(--org-d); background:#FFF3E4; padding:4px 10px; border-radius:4px;">{{ p.kind }}</span>
+          <sc-if value="{{ p.optional }}" hint-placeholder-val="{{ false }}">
+            <span style="font-size:12.5px; font-weight:800; letter-spacing:0.08em; color:var(--dim); border:1px dashed #B9C2CE; padding:3px 9px; border-radius:4px;">OPTIONAL</span>
+          </sc-if>
         </div>
         <h3 style="padding:16px 24px 0; margin:0; font-weight:800; font-size:16px; line-height:1.4; word-break:break-word; font-family:'Source Code Pro',monospace;"><code>{{ p.name }}</code></h3>
-        <p style="padding:10px 24px 22px; margin:0; font-size:14px; line-height:1.65; color:var(--dim); flex:1;">{{ p.gives }}</p>
+        <p style="padding:10px 24px 22px; margin:0; font-size:14px; line-height:1.65; color:var(--dim);">{{ p.gives }}</p>
         <div style="background:var(--term); padding:14px 18px; display:flex; gap:12px; align-items:flex-start;">
           <div style="font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.65; color:#E6EBF2; white-space:pre-wrap; overflow-wrap:anywhere; flex:1;"><span style="color:#949DAC;">$ </span>{{ p.cmd }}</div>
           <span data-copy-status role="status" class="offscreen"></span>
@@ -282,17 +288,11 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
     <div>
       <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 20px;">One file is one scenario</h2>
       <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">A setup that builds content once, and the tests that read it. Between the two sits one header, and nothing routes it: Apache and nginx hand <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">X-Playwright-Test-Id</span> to PHP by themselves. No <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">SetEnvIf</span> mapping it to an environment variable, and nothing to keep in sync when it changes.</p>
-      <ol class="bare" style="display:flex; flex-direction:column; gap:10px;">
-        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
-          <li style="display:flex; align-items:center; gap:14px; background:#fff; border:1px solid var(--line); border-radius:8px; padding:13px 16px;">
-            <div style="width:26px; height:26px; border-radius:50%; background:var(--org); color:var(--ink); display:grid; place-items:center; font-size:12.5px; font-weight:800; flex-shrink:0;">{{ s.n }}</div>
-            <div style="font-size:13.5px; font-weight:600; font-family:'Source Code Pro',monospace; overflow-wrap:anywhere;">{{ s.code }}</div>
-          </li>
-        </sc-for>
-      </ol>
+      <h3 style="font-weight:800; font-size:17px; margin:0 0 8px;">Why not click through the backend?</h3>
+      <p style="font-size:15.5px; line-height:1.7; color:var(--dim); margin:0;">Playwright could open the TYPO3 backend and fill in the forms the way an editor does. That is slow, several seconds per record, and fragile: the markup changes between TYPO3 versions and FormEngine builds the fields from your TCA, so a selector that works today can stop working after an update. You gain little for it. The builders post the same fields and the same request token to <strong style="color:var(--ink); font-weight:700;">the route the form itself uses</strong>.</p>
 
-      <h3 style="font-weight:800; font-size:17px; margin:32px 0 8px;">Why not click through the backend?</h3>
-      <p style="font-size:15.5px; line-height:1.7; color:var(--dim); margin:0;">Playwright could open the TYPO3 backend and fill in the forms the way an editor does. That is slow, several seconds per record, and fragile: the markup changes between TYPO3 versions and FormEngine builds the fields from your TCA, so a selector that works today can stop working after an update. You gain little for it. The builders post the same fields and the same request token to the route the form itself uses.</p>
+      <h3 style="font-weight:800; font-size:17px; margin:32px 0 8px;">When TYPO3 refuses a record</h3>
+      <p style="font-size:15.5px; line-height:1.7; color:var(--dim); margin:0;">A save that TYPO3 rejected still answers like a save. The builder reads that answer and <strong style="color:var(--ink); font-weight:700;">stops on the line that saved</strong>, naming the record and the reason. A failed test also brings along what TYPO3 wrote to its log while it ran — refused records, uncaught exceptions, anything logged as an error — attached to the report as <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">typo3-errors.json</span>.</p>
     </div>
     <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 12px 32px rgba(26,30,36,0.14);">
       <div style="padding:12px 18px; border-bottom:1px solid #2C323C; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">tests/news.spec.ts</div>
@@ -333,7 +333,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
     <div>
       <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 20px;">When a test fails, open its backend</h2>
       <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 20px;">A screenshot tells you that something broke, but not what the database looked like at that moment.</p>
-      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">That is why a failed file keeps its database instead of dropping it, and <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">ddev playwright-inspect</span> prints a signed link for each one. Open it and you are inside the TYPO3 backend of that exact run — already logged in, page tree intact, content exactly as the test left it, the frontend one click away. The scenario name and its test ID sit beside the site name, so two open tabs are never confused.</p>
+      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">That is why a failed file keeps its database instead of dropping it, and <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">ddev playwright-inspect</span> prints a signed link for each one. Open it and you are inside the TYPO3 backend of that exact run — already logged in, page tree intact, <strong style="color:var(--ink); font-weight:700;">content exactly as the test left it</strong>, the frontend one click away. The scenario name and its test ID sit beside the site name, so two open tabs are never confused.</p>
       <ul class="bare" style="display:flex; flex-direction:column; gap:10px;">
         <sc-for list="{{ failNotes }}" as="f" hint-placeholder-count="3">
           <li style="display:flex; align-items:flex-start; gap:12px; font-size:14.5px; color:var(--dim);">
@@ -350,7 +350,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
           <div style="color:#F0696D;">  ✘  1 tests/courses.spec.ts:12:1 › a course page lists its lecture dates (2.4s)</div>
           <div style="color:#949DAC; margin-bottom:10px;">[teardown] Kept 1 DB for a failed scenario.</div>
           <div style="color:#AEB7C4;"><span style="color:#949DAC;">$</span> ddev playwright-inspect</div>
-          <div style="color:#949DAC; margin-bottom:8px;">Links log you into the backend and expire in 15 minutes.</div>
+          <div style="color:#949DAC; margin-bottom:8px;">Links log you into the backend and expire in 15&nbsp;minutes.</div>
           <div style="color:#E6EBF2;">courses</div>
           <div style="color:#FFB151;">&nbsp;&nbsp;db09D933A1066CD448</div>
           <div style="color:#7FB8E8; overflow-wrap:anywhere; white-space:normal;">&nbsp;&nbsp;https://university-testing.ddev.site/typo3/test-api/inspect?id=09D933A1066CD448&amp;t=…</div>
@@ -403,7 +403,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
     <div>
       <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 20px;">Your suite already built a demo site</h2>
       <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 20px;">Every scenario builds content. <span style="font-family:'Source Code Pro',monospace; font-size:14px; color:var(--ink);">ddev playwright-replay</span> runs all of them into one database instead of one per test file, each scenario in its own sysfolder, and prints a single link into that backend.</p>
-      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">So the pages your tests need are also pages people can look at. Show a client every content element, or check a template change against all of them at once. Nobody had to build any of it by hand.</p>
+      <p style="font-size:16px; line-height:1.7; color:var(--dim); margin:0 0 28px;">So the pages your tests need are also pages people can look at. Show a client every content element, or check a template change against all of them at once. <strong style="color:var(--ink); font-weight:700;">Nobody had to build any of it by hand.</strong></p>
       <ul class="bare" style="display:flex; flex-direction:column; gap:10px;">
         <sc-for list="{{ replayNotes }}" as="r" hint-placeholder-count="3">
           <li style="display:flex; align-items:flex-start; gap:12px; font-size:14.5px; color:var(--dim);">
@@ -453,7 +453,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
     </dl>
     <div style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:30px 32px; display:flex; flex-direction:column; gap:14px;">
       <h3 style="font-weight:800; font-size:19px; margin:0;">There is a whole TYPO3 project in the repository, and CI reinstalls it on every push</h3>
-      <p style="margin:0; font-size:15px; line-height:1.7; color:var(--dim); max-width:88ch;">Site configuration, seed fixture, web-server binding, Playwright config: a working project rather than a snippet. On every push CI installs all three packages into it on TYPO3 13.4 and 14.3, builds a page through the backend and checks the frontend renders it. The setup instructions cannot go stale, because CI executes them.</p>
+      <p style="margin:0; font-size:15px; line-height:1.7; color:var(--dim); max-width:88ch;">Site configuration, seed fixture, web-server binding, Playwright config: a working project rather than a snippet. On every push CI installs all three packages into it on TYPO3 13.4 and 14.3, builds a page through the backend and checks the frontend renders it. <strong style="color:var(--ink); font-weight:700;">The setup instructions cannot go stale, because CI executes them.</strong></p>
       <a href="https://github.com/plan2net/typo3-playwright-toolkit/tree/main/tests/e2e/consumer" style="font-size:15px; font-weight:700;">Read the fixture ↗</a>
     </div>
   </div>
@@ -463,7 +463,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
   <div style="max-width:760px; margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:24px; text-align:center;">
     <div>
       <h2 class="h2" style="font-weight:800; font-size:30px; margin:0 0 12px; line-height:1.25;">The next upgrade tells you what broke</h2>
-      <p style="color:var(--dim); font-size:17px; line-height:1.7; margin:0 auto; max-width:62ch;">Your content is built through the backend's own save route, so a TYPO3 release that renames a field fails a test instead of slipping past. And when one fails, its database is still there — one signed link and you are inside that backend, on that content, looking at what the test saw.</p>
+      <p style="color:var(--dim); font-size:17px; line-height:1.7; margin:0 auto; max-width:62ch;">Your content is built through the backend&rsquo;s own save route, so a TYPO3 release that renames a field <strong style="color:var(--ink); font-weight:700;">fails a test instead of slipping past</strong>. And when one fails, its database is still there — one signed link and you are inside that backend, on that content, looking at what the test saw.</p>
     </div>
 
     <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
@@ -471,7 +471,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
       <a href="https://github.com/plan2net/typo3-playwright-toolkit/tree/main/tests/e2e/consumer" style="border:1px solid var(--line); color:var(--ink); font-weight:700; padding:14px 28px; border-radius:6px; font-size:15.5px;" style-hover="border-color:var(--ink); color:var(--ink);">See a project using it ↗</a>
     </div>
 
-    <p style="color:var(--dim); font-size:14px; line-height:1.7; margin:0; max-width:56ch;">TYPO3 11.5, 12.4, 13.4 and 14.3 on PHP 8.1 to 8.4. MariaDB, MySQL, PostgreSQL and SQLite each have a driver. Installs as a dev dependency; every endpoint it adds exists only in the Testing context.</p>
+    <p style="color:var(--dim); font-size:14px; line-height:1.7; margin:0; max-width:56ch;">TYPO3 11.5, 12.4, 13.4 and 14.3 on PHP 8.1 to 8.4. MariaDB, MySQL, PostgreSQL and SQLite each have a driver. Installs as a dev dependency; every endpoint it adds exists <strong style="color:var(--ink); font-weight:700;">only in the Testing context</strong>.</p>
   </div>
 </section>
 
@@ -560,28 +560,26 @@ class Component extends DCLogic {
       toggleRotation: () => this.setState(s => ({ rotating: !s.rotating })),
       values: [
         { d: 'M3 8h14m0 0-3-3m3 3-3 3M21 16H7m0 0 3-3m-3 3 3 3', title: 'Real end-to-end', lead: 'Rename a field in TCA and the suite fails.', body: 'Pages and content elements are posted to /typo3/record/edit, the route the backend itself uses on save. When your data model changes, a test fails instead of passing against data that no longer matches it.' },
-        { d: 'M12 3c-4.4 0-8 1.3-8 3s3.6 3 8 3 8-1.3 8-3-3.6-3-8-3Zm-8 3v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', title: 'A database per test file', lead: 'Run order stops mattering.', body: 'The template is built once per run and cloned in 27 ms, so every spec file can afford its own database. With nothing shared, a test can never fail because another one ran first.' },
+        { d: 'M12 3c-4.4 0-8 1.3-8 3s3.6 3 8 3 8-1.3 8-3-3.6-3-8-3Zm-8 3v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', title: 'A database per test file', lead: 'Run order stops mattering.', body: 'The template is built once per run and cloned in 27 ms, so every spec file can afford its own database. With nothing shared, a test can never fail because another one ran first.' },
         { d: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z', title: 'Its own files too', lead: 'Two tests never overwrite one image.', body: 'Each test has its own folder for processed images and its own temporary files. Both are deleted with its database.' },
         { d: 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 10a8 8 0 0 1 16 0', title: 'A real backend session', lead: 'No login form, no disabled checks.', body: 'Tests start with a pre-seeded session and a genuine request token, so saving a record goes through the real backend route with its CSRF checks intact.' },
+        { d: 'M3 10a2 2 0 0 1 2-2h3.5L10 5.5h4L15.5 8H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm9 .5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z', title: 'Screenshots that hold still', lead: 'The waiting is done for you.', body: 'Before a shot is compared, the toolkit loads the lazy images, waits for the fonts and for every image to decode, lets the animations finish, and hides the elements you named, such as a cookie banner. A diff then means the page changed.' },
+        { d: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', title: 'Accessibility and CSP', lead: 'Two more checks, already wired.', body: 'One call runs axe over a page or a single element, with the WCAG 2.1 AA rules on by default. Turn it on for the whole suite and every page a test visits is scanned. Content Security Policy violations are collected the same way.' },
         { d: 'M12 3 4 6v5c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-3Zm-3.5 8.5 2.5 2.5 4.5-4.5', title: 'Cleans up after itself', lead: 'Two runs can happen at once.', body: 'Teardown drops only the databases this run recorded, and the image folder that went with each one. A run that leaves a database behind fails in CI, so you find out right away, not when the disk is full.' },
-        { d: 'm12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5m-18 4 9 5 9-5', title: 'TYPO3 11.5 – 14.3', lead: 'Works on the version you run.', body: 'TYPO3 11.5, 12.4, 13.4 and 14.3, PHP 8.1 or newer. Moving between them does not change your tests.' },
+        { d: 'm12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5m-18 4 9 5 9-5', title: 'TYPO3 11.5–14.3', lead: 'Works on the version you run.', body: 'TYPO3 11.5, 12.4, 13.4 and 14.3, PHP 8.1 or newer. Moving between them does not change your tests.' },
       ],
       packages: [
-        { kind: 'DDEV ADD-ON', name: 'ddev-typo3-playwright-toolkit', cmd: 'ddev add-on get https://github.com/plan2net/typo3-playwright-toolkit/releases/latest/download/ddev-typo3-playwright-toolkit.tar.gz', gives: 'The db-test database service and the ddev playwright, playwright-prepare, playwright-ui and playwright-inspect commands.' },
+        { kind: 'DDEV ADD-ON', name: 'ddev-typo3-playwright-toolkit', cmd: 'ddev add-on get https://github.com/plan2net/typo3-playwright-toolkit/releases/latest/download/ddev-typo3-playwright-toolkit.tar.gz', optional: true, border: '1px dashed #B9C2CE', gives: 'The db-test database service and the ddev playwright, playwright-prepare, playwright-ui, playwright-replay and playwright-inspect commands. Without it, point four environment variables at a database server of your own and run the commands yourself.' },
         { kind: 'COMPOSER', name: 'plan2net/playwright-toolkit', cmd: 'ddev composer require --dev plan2net/playwright-toolkit', gives: 'Clones the databases, hands out a ready-made backend session and a real record_edit token, and drops the databases again.' },
         { kind: 'NPM', name: '@plan2net/typo3-playwright-toolkit', cmd: "ddev exec 'cd tests/playwright && npm i -D @plan2net/typo3-playwright-toolkit @playwright/test'", gives: 'defineScenario, the page and content builders for every core CType, setters that attach files and child records at any depth, screenshots, axe accessibility scans, and the setup and teardown that provision and drop the databases.' },
       ].map((p, i) => ({
+        optional: false,
+        border: '1px solid var(--line)',
         ...p,
         isCopied: this.state.copied === i,
         notCopied: this.state.copied !== i,
         onCopy: () => this.copy(i, p.cmd),
       })),
-      steps: [
-        { n: '1', code: 'X-Playwright-Test-Id: F75A83B46445273A' },
-        { n: '2', code: 'HTTP_X_PLAYWRIGHT_TEST_ID — forwarded unaided' },
-        { n: '3', code: 'dbF75A83B46445273A ← playwright_db_template' },
-        { n: '4', code: 'page.goto() lands in that same database' },
-      ],
       tree: [
         { label: 'University Relaunch', indent: '10px', bg: 'transparent', border: 'transparent', color: '#1A1E24', weight: '700', stroke: '#FF8700' },
         { label: 'Home', indent: '24px', bg: 'transparent', border: 'transparent', color: '#5B6570', weight: '400', stroke: '#9AA3AE' },
@@ -607,7 +605,7 @@ class Component extends DCLogic {
         { t: 'The link is signed and expires after fifteen minutes, like the ones for a failed test.' },
       ],
       stats: [
-        { label: 'Per test file', value: '~27 ms', note: 'What a private database costs, measured cloning a seeded TYPO3 13 template on PostgreSQL 15. You stop trading isolation for speed.' },
+        { label: 'Per test file', value: '~27 ms', note: 'What a private database costs, measured cloning a seeded TYPO3 13 template on PostgreSQL 15. You stop trading isolation for speed.' },
         { label: 'Content builders', value: '22', note: 'One for every content type that comes with TYPO3, fully typed. You only write builders for your own elements.' },
         { label: 'Config values', value: '2', note: 'Your testing URL and your project root, in playwright.config.ts. Every other setting has a default you can leave alone.' },
         { label: 'Login steps in your tests', value: '0', note: 'The backend session is seeded into the template database, so your tests never touch the login form and there is no stored session to keep fresh.' },
