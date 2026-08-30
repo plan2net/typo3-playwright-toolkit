@@ -433,7 +433,7 @@ which clones the databases and hands out a backend session), and an npm package
 (\`@plan2net/typo3-playwright-toolkit\`, the Playwright fixtures and content builders).
 
 Version ${version}. GPL-2.0-or-later. TYPO3 CMS 11.5, 12.4, 13.4 and 14.3 on PHP 8.1
-to 8.4, with drivers for MariaDB, MySQL, PostgreSQL and SQLite.
+to 8.5, with drivers for MariaDB, MySQL, PostgreSQL and SQLite.
 
 What is unusual about it: every spec file runs against its own database, cloned from a
 prepared template in about 27 ms, so files cannot break each other. Content is created

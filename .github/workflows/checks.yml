@@ -90,19 +90,25 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # 11.5 allows 7.4-8.2; 8.1 is the package's own floor.
+          # 11.5 allows 7.4-8.2; 8.1 is the package's own floor. 8.5 reaches the
+          # other three because each declares ^8.1 or ^8.2. The one thing 8.5
+          # changes is in core, not here: 12.4's sqlite driver still calls
+          # PDO::sqliteCreateFunction(), deprecated in 8.5 and gone from 13.4.
           - { typo3: '11.5', php: '8.1', framework: '^7.1', phpunit: '^10.1' }
           - { typo3: '11.5', php: '8.2', framework: '^7.1', phpunit: '^10.1' }
           - { typo3: '12.4', php: '8.1', framework: '^8.3', phpunit: '^10.1' }
           - { typo3: '12.4', php: '8.2', framework: '^8.3', phpunit: '^11.0' }
           - { typo3: '12.4', php: '8.3', framework: '^8.3', phpunit: '^11.0' }
           - { typo3: '12.4', php: '8.4', framework: '^8.3', phpunit: '^11.0' }
+          - { typo3: '12.4', php: '8.5', framework: '^8.3', phpunit: '^11.0' }
           - { typo3: '13.4', php: '8.2', framework: '^9.0', phpunit: '^11.2' }
           - { typo3: '13.4', php: '8.3', framework: '^9.0', phpunit: '^12.1' }
           - { typo3: '13.4', php: '8.4', framework: '^9.0', phpunit: '^12.1' }
+          - { typo3: '13.4', php: '8.5', framework: '^9.0', phpunit: '^12.1' }
           - { typo3: '14.3', php: '8.2', framework: '^9.0', phpunit: '^11.2' }
           - { typo3: '14.3', php: '8.3', framework: '^9.0', phpunit: '^12.1' }
           - { typo3: '14.3', php: '8.4', framework: '^9.0', phpunit: '^12.1' }
+          - { typo3: '14.3', php: '8.5', framework: '^9.0', phpunit: '^12.1' }
     defaults:
       run:
         working-directory: packages/playwright-toolkit
