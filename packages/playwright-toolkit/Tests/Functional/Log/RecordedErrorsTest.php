@@ -98,6 +98,28 @@ final class RecordedErrorsTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function dropsTheLegacyTwinOfAnExceptionThatCarriesNoCode(): void
+    {
+        $this->insertRow([
+            'type' => 0,
+            'component' => 'TYPO3.CMS.Core.Error.ProductionExceptionHandler',
+            'level' => '2',
+            'message' => 'Core: Exception handler (WEB: FE): {exception_class}, code #{exception_code}, file {file}, line {line}: {message}',
+            'data' => '{"exception_class":"TypeError","exception_code":0,"file":"/app/Thing.php","line":42,"message":"Argument #1 must be of type string"}',
+        ]);
+        $this->insertRow([
+            'type' => 5,
+            'channel' => 'php',
+            'error' => 2,
+            'details' => 'Core: Exception handler (WEB): Uncaught TYPO3 Exception: Argument #1 must be of type string | TypeError thrown in file /app/Thing.php in line 42.',
+        ]);
+
+        $errors = (new RecordedErrors())->readFrom($this->getConnectionPool()->getConnectionForTable('sys_log'), 200)['errors'];
+
+        self::assertSame(['log'], array_column($errors, 'source'));
+    }
+
+    #[Test]
     public function repeatsDoNotUseUpTheRoomForDistinctErrors(): void
     {
         for ($index = 0; $index < 25; ++$index) {

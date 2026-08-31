@@ -134,26 +134,43 @@ final class RecordedErrors
      */
     private function dropLegacyExceptionTwins(array $errors): array
     {
-        $codes = [];
+        $signatures = [];
         foreach ($errors as $error) {
-            if ('log' === $error['source'] && isset($error['code'])) {
-                $codes[] = '#' . $error['code'];
+            if ('log' !== $error['source']) {
+                continue;
+            }
+
+            // Core leaves a code of 0 out of the plain message, so an exception
+            // without one is found by its class and line instead.
+            $signature = array_values(array_filter([
+                isset($error['code']) && 0 !== $error['code'] ? '#' . $error['code'] : null,
+                $error['class'] ?? null,
+                isset($error['line']) ? 'in line ' . $error['line'] : null,
+            ]));
+
+            if ([] !== $signature) {
+                $signatures[] = $signature;
             }
         }
 
-        if ([] === $codes) {
+        if ([] === $signatures) {
             return $errors;
         }
 
-        return array_values(array_filter($errors, static function (array $error) use ($codes): bool {
+        return array_values(array_filter($errors, static function (array $error) use ($signatures): bool {
             if (\in_array($error['source'], ['log', 'datahandler'], true)) {
                 return true;
             }
 
-            foreach ($codes as $code) {
-                if (str_contains((string) $error['message'], $code)) {
-                    return false;
+            $message = (string) $error['message'];
+            foreach ($signatures as $signature) {
+                foreach ($signature as $part) {
+                    if (!str_contains($message, (string) $part)) {
+                        continue 2;
+                    }
                 }
+
+                return false;
             }
 
             return true;

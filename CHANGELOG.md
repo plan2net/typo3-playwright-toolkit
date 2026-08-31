@@ -16,6 +16,11 @@ the package a change belongs to.
   Setting a column to an empty value inside `.configure()` was dropped, while the same
   call on the builder itself went through, so the two disagreed about the same column.
 
+- **plan2net/playwright-toolkit** — an uncaught exception with no error code is listed
+  once again, not twice. TYPO3 writes every uncaught exception to its log twice, and
+  the second copy was only recognised by its code — which TYPO3 leaves out when it is
+  zero, as it is for every `TypeError` and `ValueError`.
+
 ## [0.10.0] - 2026-08-30
 
 ### Breaking
