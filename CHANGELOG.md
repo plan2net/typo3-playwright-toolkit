@@ -10,10 +10,12 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-08-31
+
 ### Breaking
 
 - **@plan2net/typo3-playwright-toolkit** — pages attach files the way content already
-  did, and the three page-only methods for it are gone. `withExistingImage(5)` becomes
+  did, and the two page-only methods for it are gone. `withExistingImage(5)` becomes
   `withFileReference('media', 5)`, which also takes the reference's own fields, so
   `withImageCropFocus(...)` becomes `withFileReference('media', 5, { crop: imageCrop() })`.
   A page can now carry a reference on any column, several of them, and give each one an
@@ -502,7 +504,8 @@ the package a change belongs to.
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.10.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.11.0...main
+[0.11.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.7.0...v0.8.0
