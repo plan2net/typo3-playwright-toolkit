@@ -510,6 +510,18 @@ describe('ContentBuilder', () => {
         expect(only(posted[0].dataMap.tt_content).header).toBe('From the spec')
     })
 
+    it('posts a column the content type cleared, the way the builder does', async () => {
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page)
+            .onPage('12')
+            .ofType('text')
+            .configure((content) => content.withField('subtitle', ''))
+            .create()
+
+        expect(only(posted[0].dataMap.tt_content)).toMatchObject({ subtitle: '' })
+    })
+
     it('posts several references named on the builder', async () => {
         const { posted, page } = fakePage(42)
 

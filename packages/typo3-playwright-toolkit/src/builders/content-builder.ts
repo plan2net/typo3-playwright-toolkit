@@ -103,12 +103,9 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         const pageId = replayParentId(context, this.pageId)
         const fields = this.builder.getFields()
 
-        // CType and colPos are set below; an empty string means "the type did not
-        // set it".
+        // Kept out so the explicit CType and colPos below survive the spread.
         const own = Object.fromEntries(
-            Object.entries(fields).filter(
-                ([column, value]) => value !== '' && !['CType', 'colPos'].includes(column),
-            ),
+            Object.entries(fields).filter(([column]) => !['CType', 'colPos'].includes(column)),
         )
 
         const columnValues = toColumnValues({ ...own, ...this.fields })

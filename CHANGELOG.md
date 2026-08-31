@@ -10,6 +10,12 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — a content type can clear a field again.
+  Setting a column to an empty value inside `.configure()` was dropped, while the same
+  call on the builder itself went through, so the two disagreed about the same column.
+
 ## [0.10.0] - 2026-08-30
 
 ### Breaking
