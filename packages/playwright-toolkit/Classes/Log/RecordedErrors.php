@@ -15,7 +15,7 @@ final class RecordedErrors
     use LogDataTrait;
 
     // Repeats are collapsed after the read, so stopping at the caller's limit would
-    // let a few repeated rows push out every error after them.
+    // let a few repeated rows push out the rest.
     /**
      * @var int
      */

@@ -35,8 +35,8 @@ final class ErrorCapture
 
             $childPath = $path . '/' . $key;
 
-            // LogManager uses the most specific configuration instead of merging, so
-            // a logger that has one of its own never sees the root writer.
+            // LogManager picks the most specific configuration instead of merging,
+            // so a logger with one of its own never sees the root writer.
             if (isset($child['writerConfiguration'])) {
                 $paths += self::writerPathFor($child, $childPath);
             }

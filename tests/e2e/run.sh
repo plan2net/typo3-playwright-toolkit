@@ -98,8 +98,7 @@ ddev exec vendor/bin/typo3 cache:flush
 say 'installing the Playwright side'
 (
     cd tests/playwright
-    # --no-save: both versions are resolved above, and saving them would write the
-    # release number into a package.json nothing here reads.
+    # --no-save: saving would write the release number into a package.json nothing reads.
     ddev npm install --no-audit --no-fund --no-save \
         "/var/www/html/.artifacts/${TARBALL}" "@playwright/test@${PLAYWRIGHT_VERSION}"
     ddev npx playwright install --with-deps chromium
