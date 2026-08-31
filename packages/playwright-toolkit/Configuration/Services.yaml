@@ -50,6 +50,15 @@ services:
         identifier: 'plan2net/playwright-toolkit/site-name'
         event: TYPO3\CMS\Core\Core\Event\BootCompletedEvent
 
+  Plan2net\PlaywrightToolkit\Database\TestDatabaseGuard:
+    public: true
+    arguments:
+      $secret: '@Plan2net\PlaywrightToolkit\Security\TestApiSecret'
+    tags:
+      - name: event.listener
+        identifier: 'plan2net/playwright-toolkit/test-database-guard'
+        event: TYPO3\CMS\Core\Core\Event\BootCompletedEvent
+
   Plan2net\PlaywrightToolkit\Imaging\TestScopedGraphicalFunctions:
     public: true
 

@@ -25,6 +25,14 @@ the package a change belongs to.
   job, and the older one let a builder write `uid_foreign` by hand, which is the one
   column that silently breaks the link.
 
+### Added
+
+- **plan2net/playwright-toolkit** — a test that would have run against your own database
+  now stops with an error saying so. If the settings in `config/system/additional.php` are
+  applied after the toolkit's, they put the normal database back and the whole suite ran
+  against it without a word. The error names the database the test expected and what to
+  change.
+
 ### Fixed
 
 - **@plan2net/typo3-playwright-toolkit** — a content type can clear a field again.
