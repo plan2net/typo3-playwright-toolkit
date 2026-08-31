@@ -159,7 +159,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
     </sc-if>
     </div>
     <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 14px; max-width:50ch;">Every spec file gets its own database, cloned from a prepared template in milliseconds. Files run at the same time without sharing data, so <strong style="color:var(--ink); font-weight:700;">one test can never break another</strong>. And the content comes from the real TYPO3 backend, not from SQL fixtures, so your tests see pages the way an editor would build them.</p>
-    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">For <a href="https://typo3.org">TYPO3</a> projects that run on <a href="https://ddev.com">DDEV</a> (optional).</p>
+    <p style="font-size:18px; line-height:1.65; color:var(--dim); margin:0 0 32px; max-width:50ch;">For <a href="https://typo3.org">TYPO3</a> projects that run on <a href="https://ddev.com">DDEV</a>.</p>
     <div style="display:flex; gap:14px; flex-wrap:wrap;">
       <a href="https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md" style="background:var(--org); color:var(--ink); font-weight:700; padding:13px 26px; border-radius:6px; font-size:15px;" style-hover="background:var(--org-lg); color:var(--ink);">Get started</a>
       <a href="#example" style="border:1.5px solid var(--line); color:var(--ink); padding:13px 26px; border-radius:6px; font-size:15px; font-weight:600;" style-hover="border-color:var(--org); color:var(--org-d);">See a test</a>
@@ -203,7 +203,7 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 <section id="why" data-screen-label="Value" style="background:var(--soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
   <div class="pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
     <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px;">Why this toolkit</h2>
-    <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">Your tests check the real thing, and they cannot break each other.</p>
+    <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">Your tests run against content TYPO3 itself saved, and they cannot break each other.</p>
     <ul class="grid-cards bare">
       <sc-for list="{{ values }}" as="v" hint-placeholder-count="8">
         <li style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:26px 24px; display:flex; flex-direction:column; gap:12px;">
@@ -259,13 +259,13 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
       </div>
     </div>
 
-    <p style="font-size:15.5px; line-height:1.7; color:#E6EBF2; margin:32px 0 0; max-width:70ch;">Your fixture manifest stays at what every test genuinely needs: a site root and a TypoScript template. <strong style="color:#fff; font-weight:700;">It stops growing with the suite</strong>, and the merge conflicts over IDs stop with it.</p>
+    <p style="font-size:15.5px; line-height:1.7; color:#E6EBF2; margin:32px 0 0; max-width:70ch;">Your fixture manifest holds only what every test needs: a site root and a TypoScript template. <strong style="color:#fff; font-weight:700;">It stops growing with the suite</strong>, and the merge conflicts over IDs stop with it.</p>
   </div>
 </section>
 
 <section id="packages" data-screen-label="Packages" class="pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
   <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px;">Three packages</h2>
-  <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">Two of them do the work. The DDEV add-on is the shortest way to the third piece &mdash; a second database server &mdash; and you can bring your own instead.</p>
+  <p style="color:var(--dim); font-size:16px; margin:0 0 40px;">Two of them do the work. Both need a second database server, and the DDEV add-on is the shortest way to one. You can bring your own instead.</p>
   <ul class="grid-3 bare">
     <sc-for list="{{ packages }}" as="p" hint-placeholder-count="3">
       <li style="border:{{ p.border }}; border-radius:10px; overflow:hidden;">
@@ -483,7 +483,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
       </sc-for>
     </dl>
     <div style="background:#fff; border:1px solid var(--line); border-radius:10px; padding:30px 32px; display:flex; flex-direction:column; gap:14px;">
-      <h3 style="font-weight:800; font-size:19px; margin:0;">There is a whole TYPO3 project in the repository, and CI reinstalls it on every push</h3>
+      <h3 style="font-weight:800; font-size:19px; margin:0;">A whole TYPO3 project in the repository, reinstalled by CI on every push</h3>
       <p style="margin:0; font-size:15px; line-height:1.7; color:var(--dim); max-width:88ch;">Site configuration, seed fixture, web-server binding, Playwright config: a working project rather than a snippet. On every push CI installs all three packages into it on TYPO3 13.4 and 14.3, builds a page through the backend and checks the frontend renders it. <strong style="color:var(--ink); font-weight:700;">The setup instructions cannot go stale, because CI executes them.</strong></p>
       <a href="https://github.com/plan2net/typo3-playwright-toolkit/tree/main/tests/e2e/consumer" style="font-size:15px; text-decoration:underline; text-underline-offset:2px;">Read the fixture ↗</a>
     </div>
@@ -510,7 +510,7 @@ test(<span style="color:#8FD48A;">'editor publishes a news page'</span>, <span s
 
 <footer data-screen-label="Footer" style="border-top:1px solid var(--line);">
   <div class="pad" style="max-width:1200px; margin:0 auto; padding:28px 40px; display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; font-size:13.5px; color:var(--dim);">
-    <div>Built by <a href="https://www.plan2.net/">plan2net</a> · Vienna, Austria<br>Built on <a href="https://playwright.dev">Playwright</a>, <a href="https://typo3.org">TYPO3</a> and <a href="https://ddev.com">DDEV</a></div>
+    <div>Made by <a href="https://www.plan2.net/">plan2net</a> · Vienna, Austria<br>Built on <a href="https://playwright.dev">Playwright</a>, <a href="https://typo3.org">TYPO3</a> and <a href="https://ddev.com">DDEV</a></div>
     <div style="display:flex; gap:24px;">
       <a href="https://github.com/plan2net/typo3-playwright-toolkit" style="color:var(--dim);" style-hover="color:var(--ink);">GitHub</a>
       <a href="https://packagist.org/packages/plan2net/playwright-toolkit" style="color:var(--dim);" style-hover="color:var(--ink);">Packagist</a>
@@ -592,9 +592,9 @@ class Component extends DCLogic {
       values: [
         { d: 'M3 8h14m0 0-3-3m3 3-3 3M21 16H7m0 0 3-3m-3 3 3 3', title: 'Real end-to-end', lead: 'Rename a field in TCA and the suite fails.', body: 'Pages and content elements are posted to /typo3/record/edit, the route the backend itself uses on save. When your data model changes, a test fails instead of passing against data that no longer matches it.' },
         { d: 'M12 3c-4.4 0-8 1.3-8 3s3.6 3 8 3 8-1.3 8-3-3.6-3-8-3Zm-8 3v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3', title: 'A database per test file', lead: 'Run order stops mattering.', body: 'The template is built once per run and cloned in 27 ms, so every spec file can afford its own database. With nothing shared, a test can never fail because another one ran first.' },
-        { d: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z', title: 'Its own files too', lead: 'Two tests never overwrite one image.', body: 'Each test has its own folder for processed images and its own temporary files. Both are deleted with its database.' },
+        { d: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z', title: 'Its own image folder', lead: 'Two tests never overwrite one image.', body: 'Each test has its own folder for processed images and its own temporary files. Both are deleted with its database.' },
         { d: 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 10a8 8 0 0 1 16 0', title: 'A real backend session', lead: 'No login form, no disabled checks.', body: 'Tests start with a pre-seeded session and a genuine request token, so saving a record goes through the real backend route with its CSRF checks intact.' },
-        { d: 'M3 10a2 2 0 0 1 2-2h3.5L10 5.5h4L15.5 8H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm9 .5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z', title: 'Screenshots that hold still', lead: 'The waiting is done for you.', body: 'Before a shot is compared, the toolkit loads the lazy images, waits for the fonts and for every image to decode, lets the animations finish, and hides the elements you named, such as a cookie banner. A diff then means the page changed.' },
+        { d: 'M3 10a2 2 0 0 1 2-2h3.5L10 5.5h4L15.5 8H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm9 .5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z', title: 'Screenshots that hold still', lead: 'The toolkit does the waiting.', body: 'Before a shot is compared, the toolkit loads the lazy images, waits for the fonts and for every image to decode, lets the animations finish, and hides the elements you named, such as a cookie banner. A diff then means the page changed.' },
         { d: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', title: 'Accessibility and CSP', lead: 'Two more checks, already wired.', body: 'One call runs axe over a page or a single element, with the WCAG 2.1 AA rules on by default. Turn it on for the whole suite and every page a test visits is scanned. Content Security Policy violations are collected the same way.' },
         { d: 'M12 3 4 6v5c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-3Zm-3.5 8.5 2.5 2.5 4.5-4.5', title: 'Cleans up after itself', lead: 'Two runs can happen at once.', body: 'Teardown drops only the databases this run recorded, and the image folder that went with each one. A run that leaves a database behind fails in CI, so you find out right away, not when the disk is full.' },
         { d: 'm12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5m-18 4 9 5 9-5', title: 'TYPO3 11.5–14.3', lead: 'Works on the version you run.', body: 'TYPO3 11.5, 12.4, 13.4 and 14.3, PHP 8.1 or newer. Moving between them does not change your tests.' },
