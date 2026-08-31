@@ -136,6 +136,18 @@ final class RecordedErrorsTest extends FunctionalTestCase
         self::assertFalse($result['truncated']);
     }
 
+    #[Test]
+    public function truncatedTurnsOnOnePastTheLimitAndNotAtIt(): void
+    {
+        for ($index = 1; $index <= 5; ++$index) {
+            $this->insertRow(['type' => 5, 'channel' => 'php', 'error' => 2, 'details' => 'failure ' . $index]);
+        }
+        $connection = $this->getConnectionPool()->getConnectionForTable('sys_log');
+
+        self::assertFalse((new RecordedErrors())->readFrom($connection, 5)['truncated']);
+        self::assertTrue((new RecordedErrors())->readFrom($connection, 4)['truncated']);
+    }
+
     /**
      * @param array<string, mixed> $row
      */
