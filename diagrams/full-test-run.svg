@@ -15,16 +15,12 @@
 <rect width="100%" height="100%" fill="#FFFFFF"/>
 
 <rect x="40" y="144" width="800" height="220" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
-<rect x="152" y="148" width="120" height="14" rx="2" fill="#FFFFFF"/>
-<text x="212" y="159" fill="rgba(26,30,36,0.62)" font-size="9" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">ONCE PER RUN</text>
+<text x="212" y="167" fill="rgba(26,30,36,0.62)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">ONCE PER RUN</text>
 
 <rect x="40" y="380" width="800" height="336" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
-<rect x="152" y="384" width="152" height="14" rx="2" fill="#FFFFFF"/>
-<text x="228" y="395" fill="rgba(26,30,36,0.62)" font-size="9" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">ONCE PER TEST FILE</text>
+<text x="240" y="403" fill="rgba(26,30,36,0.62)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">ONCE PER TEST FILE</text>
 
 <rect x="40" y="732" width="800" height="176" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
-<rect x="152" y="736" width="176" height="14" rx="2" fill="#FFFFFF"/>
-<text x="240" y="747" fill="rgba(26,30,36,0.62)" font-size="9" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">EVERY TEST, THEN TEARDOWN</text>
 
 <line x1="140" y1="128" x2="140" y2="924" stroke="rgba(26,30,36,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
 <line x1="340" y1="128" x2="340" y2="924" stroke="rgba(26,30,36,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
@@ -47,82 +43,86 @@
 <line x1="340" y1="840" x2="540" y2="840" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
 <line x1="540" y1="884" x2="740" y2="884" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
 
-<rect x="172" y="176" width="136" height="16" rx="2" fill="#FFFFFF"/>
+<rect x="163" y="176" width="154" height="16" rx="2" fill="#FFFFFF"/>
 <text x="240" y="188" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">playwright:prepare</text>
 
 <rect x="564" y="220" width="152" height="16" rx="2" fill="#FFFFFF"/>
 <text x="640" y="232" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">build if it changed</text>
 
-<rect x="168" y="264" width="144" height="16" rx="2" fill="#FFFFFF"/>
+<rect x="159" y="264" width="162" height="16" rx="2" fill="#FFFFFF"/>
 <text x="240" y="276" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">npx playwright test</text>
 
-<rect x="352" y="308" width="176" height="16" rx="2" fill="#FFFFFF"/>
+<rect x="344" y="308" width="192" height="16" rx="2" fill="#FFFFFF"/>
 <text x="440" y="320" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">preflight: version + DB</text>
 
-<rect x="380" y="444" width="152" height="16" rx="2" fill="#FFFFFF"/>
+<rect x="380" y="444" width="185" height="16" rx="2" fill="#FFFFFF"/>
 <text x="388" y="456" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">test ID, written first</text>
 
-<rect x="360" y="480" width="160" height="16" rx="2" fill="#FFFFFF"/>
+<rect x="351" y="480" width="177" height="16" rx="2" fill="#FFFFFF"/>
 <text x="440" y="492" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">POST test-api/session</text>
 
 <rect x="576" y="524" width="128" height="16" rx="2" fill="#FFFFFF"/>
 <text x="640" y="536" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">pre-boot copy</text>
 
-<rect x="360" y="568" width="160" height="16" rx="2" fill="#FFFFFF"/>
+<rect x="351" y="568" width="177" height="16" rx="2" fill="#FFFFFF"/>
 <text x="440" y="580" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">cookie + record token</text>
 
-<rect x="380" y="612" width="120" height="16" rx="2" fill="#FFFFFF"/>
+<rect x="371" y="612" width="139" height="16" rx="2" fill="#FFFFFF"/>
 <text x="440" y="624" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">POST record/edit</text>
 
-<rect x="360" y="656" width="160" height="16" rx="2" fill="#FFFFFF"/>
+<rect x="348" y="656" width="185" height="16" rx="2" fill="#FFFFFF"/>
 <text x="440" y="668" fill="#A05E00" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">302 + the saved record</text>
 
-<rect x="364" y="772" width="152" height="16" rx="2" fill="#FFFFFF"/>
+<rect x="355" y="772" width="170" height="16" rx="2" fill="#FFFFFF"/>
 <text x="440" y="784" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">page.goto(), same ID</text>
 
-<rect x="368" y="816" width="144" height="16" rx="2" fill="#FFFFFF"/>
+<rect x="359" y="816" width="162" height="16" rx="2" fill="#FFFFFF"/>
 <text x="440" y="828" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">POST databases/drop</text>
 
-<rect x="556" y="860" width="168" height="16" rx="2" fill="#FFFFFF"/>
+<rect x="548" y="860" width="184" height="16" rx="2" fill="#FFFFFF"/>
 <text x="640" y="872" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">DROP DATABASE + images</text>
 
 <rect x="48" y="48" width="184" height="80" rx="6" fill="#FFFFFF"/>
 <rect x="48" y="48" width="184" height="80" rx="6" fill="rgba(91,101,112,0.10)" stroke="#8A93A0" stroke-width="1"/>
-<rect x="60" y="58" width="40" height="16" rx="2" fill="transparent" stroke="rgba(138,147,160,0.60)" stroke-width="0.8"/>
-<text x="80" y="69" fill="#5B6570" font-size="8" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em">DDEV</text>
+<rect x="60" y="58" width="40" height="22" rx="3" fill="transparent" stroke="rgba(138,147,160,0.60)" stroke-width="0.8"/>
+<text x="80" y="69" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">DDEV</text>
 <text x="140" y="100" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">One command</text>
 <text x="140" y="118" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">ddev playwright</text>
 
 <rect x="248" y="48" width="184" height="80" rx="6" fill="#FFFFFF"/>
 <rect x="248" y="48" width="184" height="80" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
-<rect x="260" y="58" width="36" height="16" rx="2" fill="transparent" stroke="rgba(26,30,36,0.40)" stroke-width="0.8"/>
-<text x="278" y="69" fill="#1A1E24" font-size="8" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em">NPM</text>
+<rect x="260" y="58" width="36" height="22" rx="3" fill="transparent" stroke="rgba(26,30,36,0.40)" stroke-width="0.8"/>
+<text x="278" y="69" fill="#1A1E24" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">NPM</text>
 <text x="340" y="100" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Your test files</text>
 <text x="340" y="118" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">defineScenario</text>
 
 <rect x="448" y="48" width="184" height="80" rx="6" fill="#FFFFFF"/>
 <rect x="448" y="48" width="184" height="80" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
-<rect x="460" y="58" width="68" height="16" rx="2" fill="transparent" stroke="rgba(26,30,36,0.40)" stroke-width="0.8"/>
-<text x="494" y="69" fill="#1A1E24" font-size="8" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em">COMPOSER</text>
+<rect x="460" y="58" width="80" height="22" rx="3" fill="transparent" stroke="rgba(26,30,36,0.40)" stroke-width="0.8"/>
+<text x="500" y="69" fill="#1A1E24" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">COMPOSER</text>
 <text x="540" y="100" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Your TYPO3 site</text>
 <text x="540" y="118" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">in Testing context</text>
 
 <rect x="648" y="48" width="184" height="80" rx="6" fill="#FFFFFF"/>
 <rect x="648" y="48" width="184" height="80" rx="6" fill="rgba(26,30,36,0.05)" stroke="#5B6570" stroke-width="1" stroke-dasharray="6,5"/>
-<rect x="660" y="58" width="88" height="16" rx="2" fill="transparent" stroke="rgba(91,101,112,0.50)" stroke-width="0.8"/>
-<text x="704" y="69" fill="#5B6570" font-size="8" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em">SEPARATE</text>
+<rect x="660" y="58" width="160" height="22" rx="3" fill="transparent" stroke="rgba(91,101,112,0.50)" stroke-width="0.8"/>
+<text x="740" y="69" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">SEPARATE CONTAINER</text>
 <text x="740" y="100" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Database service</text>
 <text x="740" y="118" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">its own container</text>
 
 <line x1="40" y1="964" x2="840" y2="964" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
-<text x="40" y="992" fill="#5B6570" font-size="11" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">LEGEND</text>
+<text x="40" y="992" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">LEGEND</text>
 
 <line x1="140" y1="988" x2="180" y2="988" stroke="#5B6570" stroke-width="1.2"/>
-<text x="192" y="992" fill="#5B6570" font-size="11" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">CALL</text>
+<text x="192" y="992" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">CALL</text>
 
 <line x1="280" y1="988" x2="320" y2="988" stroke="#5B6570" stroke-width="1.2" stroke-dasharray="5,4"/>
-<text x="332" y="992" fill="#5B6570" font-size="11" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">ANSWER</text>
+<text x="332" y="992" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">ANSWER</text>
 
 <line x1="460" y1="988" x2="500" y2="988" stroke="#ED6D05" stroke-width="2" stroke-dasharray="5,4"/>
-<text x="512" y="992" fill="#5B6570" font-size="11" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">WHAT BUILDERS GET BACK</text>
+
+<!-- Last, so the chip masks the lifeline rather than the other way round. -->
+<rect x="152" y="744" width="238" height="14" rx="2" fill="#FFFFFF"/>
+<text x="271" y="755" fill="rgba(26,30,36,0.62)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">EVERY TEST, THEN TEARDOWN</text>
+<text x="512" y="992" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">WHAT BUILDERS GET BACK</text>
 </svg>

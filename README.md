@@ -200,6 +200,20 @@ And you gain little for the trouble. `/typo3/record/edit` is the route the backe
 own form posts to. The builders send the same fields and the same request token, so
 TYPO3 does the same work.
 
+### Permissions are real too
+
+The save runs as the user the session belongs to, so page permissions, table access and
+mounts all apply. A SQL fixture writes the row and asks none of them.
+
+You choose that user. `sessionUserId` names a row in `be_users`. Put your project's real
+editor in a fixture, give it that uid, and your tests can only save what that editor may
+save.
+
+Fixtures are applied before the session is seeded, and the seeded user is written with
+`INSERT IGNORE`. So your row wins if you supply one. If you do not, the toolkit writes an
+admin at that uid instead, which is what you want until access itself is the thing you
+are testing.
+
 ## Browsing everything the suite builds
 
 A run puts its content in one throwaway database per test file, then drops them all

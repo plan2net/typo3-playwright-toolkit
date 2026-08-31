@@ -25,7 +25,7 @@ svg { display:block; width:100%; height:auto; }
 /* Container query, not viewport: a wide window can still hand the diagram a narrow
    column, and a viewport query would answer "wide" and shrink the drawing to fit. */
 .figure { container-type:inline-size; }
-.narrow { display:none; margin:0 auto; max-width:384px; }
+.narrow { display:none; margin:0 auto; max-width:344px; }
 .wide { max-width:880px; margin:0 auto; }
 @container (max-width: 699px) {
     .wide { display:none; }
@@ -69,10 +69,10 @@ footer {
 <line x1="312" y1="408" x2="312" y2="480" stroke="#5B6570" stroke-width="1.2" marker-end="url(#fo-arrow)"/>
 
 <rect x="276" y="264" width="56" height="16" rx="2" fill="#FFFFFF"/>
-<text x="304" y="276" fill="#A05E00" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">BUILT</text>
+<text x="304" y="276" fill="#A05E00" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">BUILT</text>
 
 <rect x="544" y="264" width="64" height="16" rx="2" fill="#FFFFFF"/>
-<text x="576" y="276" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">FAILED</text>
+<text x="576" y="276" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">FAILED</text>
 
 <rect x="340" y="48" width="200" height="56" rx="6" fill="#FFFFFF"/>
 <rect x="340" y="48" width="200" height="56" rx="6" fill="rgba(91,101,112,0.10)" stroke="#8A93A0" stroke-width="1"/>
@@ -81,41 +81,41 @@ footer {
 <rect x="280" y="152" width="320" height="88" rx="6" fill="#FFFFFF"/>
 <rect x="280" y="152" width="320" height="88" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
 <text x="440" y="192" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">The setup runs once</text>
-<text x="440" y="214" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">builds content through the backend</text>
+<text x="440" y="214" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">builds content through the backend</text>
 
 <rect x="40" y="320" width="320" height="88" rx="6" fill="#FFFFFF"/>
 <rect x="40" y="320" width="320" height="88" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
 <text x="200" y="360" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">State + its own database</text>
-<text x="200" y="382" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">built once, read by all</text>
+<text x="200" y="382" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">built once, read by all</text>
 
 <rect x="520" y="320" width="320" height="88" rx="6" fill="#FFFFFF"/>
 <rect x="520" y="320" width="320" height="88" rx="6" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.30)" stroke-width="1" stroke-dasharray="5,4"/>
 <text x="680" y="360" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Tests skip, with the reason</text>
-<text x="680" y="382" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">one broken setup, no cascade</text>
+<text x="680" y="382" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">one broken setup, no cascade</text>
 
 <rect x="40" y="480" width="96" height="48" rx="6" fill="#FFFFFF"/>
 <rect x="40" y="480" width="96" height="48" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
-<text x="88" y="509" fill="#1A1E24" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">chromium</text>
+<text x="88" y="509" fill="#1A1E24" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">chromium</text>
 
 <rect x="152" y="480" width="96" height="48" rx="6" fill="#FFFFFF"/>
 <rect x="152" y="480" width="96" height="48" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
-<text x="200" y="509" fill="#1A1E24" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">firefox</text>
+<text x="200" y="509" fill="#1A1E24" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">firefox</text>
 
 <rect x="264" y="480" width="96" height="48" rx="6" fill="#FFFFFF"/>
 <rect x="264" y="480" width="96" height="48" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
-<text x="312" y="509" fill="#1A1E24" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">webkit</text>
+<text x="312" y="509" fill="#1A1E24" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">webkit</text>
 
 <line x1="40" y1="576" x2="840" y2="576" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
-<text x="40" y="604" fill="#5B6570" font-size="11" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">LEGEND</text>
+<text x="40" y="604" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">LEGEND</text>
 
 <rect x="140" y="592" width="20" height="16" rx="2" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
-<text x="172" y="604" fill="#5B6570" font-size="11" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">BUILT ONCE, READ BY EVERY PROJECT</text>
+<text x="172" y="604" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">BUILT ONCE, READ BY EVERY PROJECT</text>
 
 <line x1="520" y1="600" x2="560" y2="600" stroke="rgba(26,30,36,0.30)" stroke-width="1.2" stroke-dasharray="5,4"/>
-<text x="572" y="604" fill="#5B6570" font-size="11" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">THE PATH YOU HOPE NOT TO TAKE</text>
+<text x="572" y="604" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">THE PATH YOU HOPE NOT TO TAKE</text>
 </svg>
 
-<svg class="narrow" viewBox="0 0 384 800" role="img" aria-labelledby="fan-out-narrow-title fan-out-narrow-desc" xmlns="http://www.w3.org/2000/svg">
+<svg class="narrow" viewBox="20 0 344 800" role="img" aria-labelledby="fan-out-narrow-title fan-out-narrow-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="fan-out-narrow-title">One setup, every browser</title>
 <desc id="fan-out-narrow-desc">One test file runs its setup once. If the setup succeeds it produces state and a test database of its own, which every browser project then reuses. If the setup fails, the tests of that file are skipped with the reason rather than failing individually.</desc>
 
@@ -142,39 +142,39 @@ footer {
 <rect x="40" y="152" width="304" height="88" rx="6" fill="#FFFFFF"/>
 <rect x="40" y="152" width="304" height="88" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
 <text x="192" y="192" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">The setup runs once</text>
-<text x="192" y="214" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">through the real backend</text>
+<text x="192" y="214" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">through the real backend</text>
 
 <rect x="40" y="320" width="144" height="72" rx="6" fill="#FFFFFF"/>
 <rect x="40" y="320" width="144" height="72" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
-<rect x="52" y="332" width="48" height="16" rx="2" fill="transparent" stroke="rgba(237,109,5,0.50)" stroke-width="0.8"/>
-<text x="76" y="343" fill="#A05E00" font-size="8" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em">BUILT</text>
+<rect x="52" y="332" width="58" height="22" rx="3" fill="transparent" stroke="rgba(237,109,5,0.50)" stroke-width="0.8"/>
+<text x="81" y="343" fill="#A05E00" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">BUILT</text>
 <text x="112" y="371" fill="#1A1E24" font-size="14" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">state + database</text>
 
 <rect x="200" y="320" width="144" height="72" rx="6" fill="#FFFFFF"/>
 <rect x="200" y="320" width="144" height="72" rx="6" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.30)" stroke-width="1" stroke-dasharray="5,4"/>
-<rect x="212" y="332" width="56" height="16" rx="2" fill="transparent" stroke="rgba(26,30,36,0.35)" stroke-width="0.8"/>
-<text x="240" y="343" fill="#5B6570" font-size="8" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em">FAILED</text>
+<rect x="212" y="332" width="67" height="22" rx="3" fill="transparent" stroke="rgba(26,30,36,0.35)" stroke-width="0.8"/>
+<text x="246" y="343" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">FAILED</text>
 <text x="272" y="371" fill="#1A1E24" font-size="14" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">tests skip</text>
 
-<rect x="40" y="440" width="304" height="152" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
-<rect x="60" y="444" width="152" height="14" rx="2" fill="#FFFFFF"/>
-<text x="136" y="455" fill="rgba(26,30,36,0.62)" font-size="9" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">EVERY PROJECT READS IT</text>
+<rect x="40" y="440" width="304" height="168" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
+<!-- No masking chip: nothing crosses here, so one would only show as a pale band. -->
+<text x="64" y="464" fill="rgba(26,30,36,0.62)" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">EVERY PROJECT READS IT</text>
 
-<rect x="64" y="476" width="256" height="32" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
-<text x="192" y="497" fill="#1A1E24" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">chromium</text>
+<rect x="64" y="480" width="256" height="32" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="192" y="501" fill="#1A1E24" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">chromium</text>
 
-<rect x="64" y="516" width="256" height="32" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
-<text x="192" y="537" fill="#1A1E24" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">firefox</text>
+<rect x="64" y="520" width="256" height="32" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="192" y="541" fill="#1A1E24" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">firefox</text>
 
-<rect x="64" y="556" width="256" height="32" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
-<text x="192" y="577" fill="#1A1E24" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">webkit</text>
+<rect x="64" y="560" width="256" height="32" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="192" y="581" fill="#1A1E24" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">webkit</text>
 
 <line x1="40" y1="700" x2="344" y2="700" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
 <rect x="40" y="720" width="20" height="16" rx="2" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
-<text x="72" y="732" fill="#5B6570" font-size="11" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">BUILT ONCE</text>
+<text x="72" y="732" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">BUILT ONCE</text>
 
 <line x1="40" y1="764" x2="80" y2="764" stroke="rgba(26,30,36,0.30)" stroke-width="1.2" stroke-dasharray="5,4"/>
-<text x="92" y="768" fill="#5B6570" font-size="11" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">IF THE SETUP FAILS</text>
+<text x="92" y="768" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">IF THE SETUP FAILS</text>
 </svg>
 </div>
 

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1280" height="764" viewBox="0 0 1280 764" role="img" aria-labelledby="bsp-title bsp-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="bsp-title">A SQL fixture skips the backend; this toolkit posts through it</title>
+<desc id="bsp-desc">Two columns. On the left, a SQL fixture file inserts rows straight into the database, its arrow curving around a dashed box marked skipped entirely that holds FormEngine fields, permissions, DataHandler, TCA rules and file relations. A renamed field still inserts, so the test passes while the page is broken. On the right, a builder posts to the backend route /typo3/record/edit with a real record_edit token, straight through that same box, which is live. A renamed field is refused and the test fails, naming the record and the reason. Both routes end at the same database.</desc>
+
+<defs>
+    <marker id="bsp-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#8A93A0"/>
+    </marker>
+    <marker id="bsp-arrow-accent" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#ED6D05"/>
+    </marker>
+</defs>
+
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+
+<line x1="640" y1="40" x2="640" y2="684" stroke="rgba(26,30,36,0.16)" stroke-width="1" stroke-dasharray="6,6"/>
+
+<text x="316" y="28" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.18em">WHAT A SQL FIXTURE DOES</text>
+<text x="964" y="28" fill="#A05E00" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.18em">WHAT THIS TOOLKIT DOES</text>
+
+<rect x="100" y="52" width="432" height="80" rx="6" fill="#FFFFFF"/>
+<rect x="100" y="52" width="432" height="80" rx="6" fill="rgba(91,101,112,0.10)" stroke="#8A93A0" stroke-width="1"/>
+<rect x="112" y="62" width="84" height="22" rx="3" fill="transparent" stroke="rgba(138,147,160,0.60)" stroke-width="0.8"/>
+<text x="154" y="73" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">SQL FILE</text>
+<text x="316" y="114" fill="#1A1E24" font-size="14" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">tests/fixtures/pages.sql</text>
+
+<rect x="748" y="52" width="432" height="80" rx="6" fill="#FFFFFF"/>
+<rect x="748" y="52" width="432" height="80" rx="6" fill="rgba(237,109,5,0.07)" stroke="#ED6D05" stroke-width="1"/>
+<rect x="760" y="62" width="84" height="22" rx="3" fill="transparent" stroke="rgba(237,109,5,0.55)" stroke-width="0.8"/>
+<text x="802" y="73" fill="#A05E00" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">YOUR TEST</text>
+<text x="964" y="114" fill="#1A1E24" font-size="14" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">builders.page().create()</text>
+
+<!-- The insert goes around the box. Bypassing it is the whole point. -->
+<path d="M 316,140 V 156 Q 316,164 308,164 H 44 Q 36,164 36,172 V 508 Q 36,516 44,516 H 308 Q 316,516 316,524 V 540" fill="none" stroke="#8A93A0" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#bsp-arrow)"/>
+<rect x="106" y="156" width="148" height="16" rx="2" fill="#FFFFFF"/>
+<text x="180" y="168" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">INSERT INTO pages</text>
+
+<line x1="964" y1="140" x2="964" y2="236" stroke="#ED6D05" stroke-width="2" marker-end="url(#bsp-arrow-accent)"/>
+<text x="984" y="176" fill="#A05E00" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">POST /typo3/record/edit</text>
+<text x="984" y="200" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">with a real record_edit token</text>
+
+<rect x="60" y="244" width="512" height="244" rx="8" fill="rgba(91,101,112,0.05)" stroke="#8A93A0" stroke-width="1" stroke-dasharray="6,5"/>
+<rect x="80" y="237" width="156" height="14" rx="2" fill="#FFFFFF"/>
+<text x="158" y="248" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">SKIPPED ENTIRELY</text>
+
+<rect x="708" y="244" width="512" height="244" rx="8" fill="rgba(237,109,5,0.06)" stroke="#ED6D05" stroke-width="1"/>
+<rect x="728" y="237" width="220" height="14" rx="2" fill="#FFFFFF"/>
+<text x="838" y="248" fill="#A05E00" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">THE BACKEND'S SAVE PATH</text>
+
+<path d="M 96,280 L 104,288 M 104,280 L 96,288" stroke="#8A93A0" stroke-width="1.6" stroke-linecap="round"/>
+<text x="122" y="290" fill="#8A93A0" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">FormEngine fields</text>
+
+<path d="M 96,320 L 104,328 M 104,320 L 96,328" stroke="#8A93A0" stroke-width="1.6" stroke-linecap="round"/>
+<text x="122" y="330" fill="#8A93A0" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">Permissions</text>
+
+<path d="M 96,360 L 104,368 M 104,360 L 96,368" stroke="#8A93A0" stroke-width="1.6" stroke-linecap="round"/>
+<text x="122" y="370" fill="#8A93A0" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">DataHandler</text>
+
+<path d="M 96,400 L 104,408 M 104,400 L 96,408" stroke="#8A93A0" stroke-width="1.6" stroke-linecap="round"/>
+<text x="122" y="410" fill="#8A93A0" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">TCA rules</text>
+
+<path d="M 96,440 L 104,448 M 104,440 L 96,448" stroke="#8A93A0" stroke-width="1.6" stroke-linecap="round"/>
+<text x="122" y="450" fill="#8A93A0" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">File relations</text>
+
+<path d="M 744,284 L 748,288.5 L 756,279.5" fill="none" stroke="#ED6D05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="770" y="290" fill="#1A1E24" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">FormEngine fields</text>
+<text x="1196" y="289" fill="#5B6570" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="end">the names the form itself posts</text>
+
+<path d="M 744,324 L 748,328.5 L 756,319.5" fill="none" stroke="#ED6D05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="770" y="330" fill="#1A1E24" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">Permissions</text>
+<text x="1196" y="329" fill="#5B6570" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="end">what the test's backend user may do</text>
+
+<path d="M 744,364 L 748,368.5 L 756,359.5" fill="none" stroke="#ED6D05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="770" y="370" fill="#1A1E24" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">DataHandler</text>
+<text x="1196" y="369" fill="#5B6570" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="end">validation, defaults, the new uid</text>
+
+<path d="M 744,404 L 748,408.5 L 756,399.5" fill="none" stroke="#ED6D05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="770" y="410" fill="#1A1E24" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">TCA rules</text>
+<text x="1196" y="409" fill="#5B6570" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="end">field names, types, what may go where</text>
+
+<path d="M 744,444 L 748,448.5 L 756,439.5" fill="none" stroke="#ED6D05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="770" y="450" fill="#1A1E24" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">File relations</text>
+<text x="1196" y="449" fill="#5B6570" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="end">sys_file_reference rows, written for you</text>
+
+<line x1="964" y1="496" x2="964" y2="532" stroke="#ED6D05" stroke-width="2" marker-end="url(#bsp-arrow-accent)"/>
+<text x="984" y="518" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">writes the rows</text>
+
+<rect x="160" y="540" width="312" height="80" rx="6" fill="#FFFFFF"/>
+<rect x="160" y="540" width="312" height="80" rx="6" fill="rgba(26,30,36,0.03)" stroke="#8A93A0" stroke-width="1"/>
+<text x="316" y="574" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Database</text>
+<text x="316" y="598" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">pages, tt_content</text>
+
+<rect x="808" y="540" width="312" height="80" rx="6" fill="#FFFFFF"/>
+<rect x="808" y="540" width="312" height="80" rx="6" fill="rgba(26,30,36,0.03)" stroke="#8A93A0" stroke-width="1"/>
+<text x="964" y="574" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Database</text>
+<text x="964" y="598" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">pages, tt_content</text>
+
+<text x="316" y="656" fill="#5B6570" font-size="15" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Rename a field and the row still inserts.</text>
+<text x="316" y="680" fill="#1A1E24" font-size="15" font-weight="700" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">The test passes. The page is broken.</text>
+
+<text x="964" y="656" fill="#5B6570" font-size="15" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Rename a field and TYPO3 refuses the record.</text>
+<text x="964" y="680" fill="#1A1E24" font-size="15" font-weight="700" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">The test fails, naming the record and why.</text>
+
+<line x1="40" y1="716" x2="1240" y2="716" stroke="rgba(26,30,36,0.12)" stroke-width="1"/>
+<text x="640" y="742" fill="#5B6570" font-size="13" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">No browser fills in a backend form. The setup posts; the only browser in the run is the one your test uses to read the page.</text>
+</svg>
