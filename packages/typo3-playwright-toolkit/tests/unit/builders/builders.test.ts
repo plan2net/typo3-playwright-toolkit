@@ -7,6 +7,7 @@ import { registerContentTypes } from '#src/builders/content-factory.js'
 import { ContentBuilder } from '#src/builders/content-builder.js'
 import { PageBuilder } from '#src/builders/page-builder.js'
 import { flexForm, imageCrop } from '#src/builders/fields.js'
+import { CoreContent } from '#src/builders/core-content.js'
 import type { ContentBuilderInterface, ContentFields } from '#src/types/content-builder.js'
 import type { RecordDataMap } from '#src/http/record-edit.js'
 
@@ -104,31 +105,23 @@ function contentBuilder(page: ConstructorParameters<typeof ContentBuilder>[0]): 
     return new ContentBuilder(page, { routeToken: ROUTE_TOKEN })
 }
 
-class MediaContent implements ContentBuilderInterface {
+class MediaContent extends CoreContent {
     readonly type = 'media_demo'
 
-    getFields(): ContentFields {
-        return { CType: this.type, header: 'With media' }
-    }
-
-    getAdditionalRecords(contentIdentifier: string): RecordDataMap {
-        return {
-            sys_file_reference: {
-                NEWref: { uid_local: 12, uid_foreign: contentIdentifier, tablenames: 'tt_content' },
-            },
-        }
+    constructor() {
+        super()
+        this.withHeader('With media').withFileReference('assets', 12)
     }
 }
 
-class ContainerContent implements ContentBuilderInterface {
+class ContainerContent extends CoreContent {
     readonly type = 'container_demo'
 
-    getFields(): ContentFields {
-        return { CType: this.type, header: 'Container' }
-    }
-
-    getAdditionalRecords(): RecordDataMap {
-        return { tt_content: { NEWchild: { CType: 'header', header: 'Inside' } } }
+    constructor() {
+        super()
+        this.withHeader('Container').withChild('items', 'tt_content', (child) =>
+            child.withField('CType', 'header').withField('header', 'Inside'),
+        )
     }
 }
 
@@ -138,18 +131,6 @@ class AccordionContent implements ContentBuilderInterface {
 
     getFields(): ContentFields {
         return { CType: this.type, header: 'Accordion' }
-    }
-}
-
-class SelfOverwritingContent implements ContentBuilderInterface {
-    readonly type = 'collide_demo'
-
-    getFields(): ContentFields {
-        return { CType: this.type }
-    }
-
-    getAdditionalRecords(contentIdentifier: string): RecordDataMap {
-        return { tt_content: { [contentIdentifier]: { header: 'Oops' } } }
     }
 }
 
@@ -219,7 +200,7 @@ describe('PageBuilder', () => {
     it('attaches media by listing the reference on the page itself', async () => {
         const { posted, page } = fakePage(3)
 
-        await pageBuilder(page).withTitle('A page').withExistingImage(99).create()
+        await pageBuilder(page).withTitle('A page').withFileReference('media', 99).create()
 
         expect(only(posted[0].dataMap.pages).media).toBe(identifierOf(posted[0].dataMap.sys_file_reference))
         expect(only(posted[0].dataMap.sys_file_reference)).toMatchObject({
@@ -230,20 +211,30 @@ describe('PageBuilder', () => {
         expect(only(posted[0].dataMap.sys_file_reference).uid_foreign).toBeUndefined()
     })
 
+    it('attaches a file reference with fields of its own', async () => {
+        const { posted, page } = fakePage(3)
+
+        await pageBuilder(page)
+            .withTitle('A page')
+            .withFileReference('media', 99, { alternative: 'The logo' })
+            .create()
+
+        expect(only(posted[0].dataMap.pages).media).toBe(identifierOf(posted[0].dataMap.sys_file_reference))
+        expect(only(posted[0].dataMap.sys_file_reference)).toMatchObject({
+            uid_local: '99',
+            tablenames: 'pages',
+            fieldname: 'media',
+            alternative: 'The logo',
+        })
+    })
+
     // The crop column holds JSON text; a nested object would reach TYPO3 as one.
     it('serialises a crop configuration to a JSON string', async () => {
         const { posted, page } = fakePage(1)
 
         await pageBuilder(page)
             .withTitle('A page')
-            .withExistingImage(5)
-            .withImageCropFocus({
-                default: {
-                    cropArea: { x: 0, y: 0, width: 1, height: 1 },
-                    selectedRatio: 'NaN',
-                    focusArea: null,
-                },
-            })
+            .withFileReference('media', 5, { crop: imageCrop() })
             .create()
 
         const crop = only(posted[0].dataMap.sys_file_reference).crop
@@ -381,15 +372,16 @@ describe('ContentBuilder', () => {
         expect(() => contentBuilder(page).ofType('media_demo')).toThrow(/onPage/)
     })
 
-    it('writes the additional records a content type declares', async () => {
+    it('writes the relations a content type declares', async () => {
         registerContentTypes({ media_demo: MediaContent })
         const { posted, page } = fakePage(5)
 
         await contentBuilder(page).onPage('12').ofType('media_demo').create()
 
-        expect(posted[0].dataMap.sys_file_reference.NEWref).toMatchObject({
-            uid_foreign: identifierOf(posted[0].dataMap.tt_content),
-        })
+        const reference = identifierOf(posted[0].dataMap.sys_file_reference)
+
+        expect(only(posted[0].dataMap.tt_content).assets).toBe(reference)
+        expect(posted[0].dataMap.sys_file_reference[reference]).toMatchObject({ uid_local: '12' })
     })
 
     it('keeps a flexform value nested instead of writing JSON into the column', async () => {
@@ -453,17 +445,6 @@ describe('ContentBuilder', () => {
         const rows = posted[0].dataMap.tt_content
 
         expect(Object.values(rows).map((row) => row.header)).toEqual(['Container', 'Inside'])
-    })
-
-    // getAdditionalRecords is handed the element's identifier, which is how a
-    // builder ends up keying a row by it.
-    it('refuses a record that reuses an identifier another surface wrote', async () => {
-        registerContentTypes({ collide_demo: SelfOverwritingContent })
-        const { page } = fakePage(42)
-
-        await expect(
-            contentBuilder(page).onPage('12').ofType('collide_demo').create(),
-        ).rejects.toThrow(/tt_content/)
     })
 
     // For a CType whose builder has no convenience for the column.

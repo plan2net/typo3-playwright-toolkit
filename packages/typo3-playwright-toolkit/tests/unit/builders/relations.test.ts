@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { RelationSet } from '#src/builders/relations.js'
+import { mergeRecords, RelationSet } from '#src/builders/relations.js'
 
 function only(rows: Record<string, Record<string, unknown>>): Record<string, unknown> {
     return Object.values(rows)[0]
@@ -171,5 +171,15 @@ describe('one column, one relation', () => {
                 item.withField('image', 'something').withFileReference('image', 42),
             ),
         ).toThrow(/image/)
+    })
+})
+
+describe('merging two sets of records', () => {
+    it('refuses an identifier both sides claim', () => {
+        const into = { tt_content: { NEWsame: { header: 'First' } } }
+
+        expect(() => mergeRecords(into, { tt_content: { NEWsame: { header: 'Second' } } })).toThrow(
+            /tt_content/,
+        )
     })
 })

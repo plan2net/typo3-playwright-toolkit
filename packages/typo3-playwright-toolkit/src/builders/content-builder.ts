@@ -130,7 +130,6 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
 
         // Merged per table, not spread: a child table may be tt_content itself.
         const data: RecordDataMap = { tt_content: { [identifier]: record } }
-        mergeRecords(data, this.builder.getAdditionalRecords?.(identifier, pageId) ?? {})
         mergeRecords(data, inner.records)
         mergeRecords(data, outer.records)
 

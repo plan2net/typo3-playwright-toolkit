@@ -1,9 +1,11 @@
 import { Page } from '@playwright/test'
-import { CropConfig, NestedFields } from '../types/common.js'
+import { NestedFields } from '../types/common.js'
 import { saveRecord, type RecordDataMap } from '../http/record-edit.js'
 import { replayParentId, requireTestId, resolveRequestContext, type RequestContext } from './request-context.js'
-import { toColumnValues, imageCrop } from './fields.js'
+import { toColumnValues } from './fields.js'
 import { newRecordIdentifier } from './identifier.js'
+import { mergeRecords, RelationSet } from './relations.js'
+import type { ContentFields } from '../types/content-builder.js'
 import { getToolkitConfig } from '../config.js'
 
 interface Fields {
@@ -33,9 +35,7 @@ export class PageBuilder {
     }
 
     private page: Page
-    private imageFileId?: number
-    private imageCropConfig?: CropConfig
-    private mediaIdentifierValue?: string
+    private readonly relations = new RelationSet('pages', (column) => column in this.fields)
     private readonly requestContext?: Partial<RequestContext>
 
     constructor(page: Page, requestContext?: Partial<RequestContext>) {
@@ -68,13 +68,9 @@ export class PageBuilder {
         return this
     }
 
-    withExistingImage(fileId: number): this {
-        this.imageFileId = fileId
-        return this
-    }
-
-    withImageCropFocus(cropConfig: CropConfig): this {
-        this.imageCropConfig = cropConfig
+    /** A file reference on any column, with the reference's own fields. */
+    withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
+        this.relations.withFileReference(column, fileUid, fields)
         return this
     }
 
@@ -95,15 +91,18 @@ export class PageBuilder {
         this.claimSlug(context)
         const identifier = newRecordIdentifier()
         const parentId = replayParentId(context, String(Number(this.fields.pid)))
+        const { columns, records } = this.relations.materialise({ pid: identifier, sys_language_uid: 0 })
+
+        const data: RecordDataMap = {
+            pages: { [identifier]: { ...this.pageFields(), ...columns, pid: parentId } },
+        }
+        mergeRecords(data, records)
 
         const saved = await saveRecord(this.page.request, context, {
             table: 'pages',
             identifier,
             target: Number(parentId),
-            data: {
-                pages: { [identifier]: { ...this.pageFields(), pid: parentId } },
-                ...this.mediaRecords(identifier),
-            },
+            data,
         })
 
         // So its children keep it as their parent.
@@ -115,14 +114,15 @@ export class PageBuilder {
     async update(pageId: string): Promise<{ id: string; slug: string }> {
         const context = resolveRequestContext(this.page, this.requestContext)
 
+        const { columns, records } = this.relations.materialise({ pid: pageId, sys_language_uid: 0 })
+        const data: RecordDataMap = { pages: { [pageId]: { ...this.pageFields(), ...columns } } }
+        mergeRecords(data, records)
+
         const saved = await saveRecord(this.page.request, context, {
             table: 'pages',
             identifier: pageId,
             target: Number(pageId),
-            data: {
-                pages: { [pageId]: this.pageFields() },
-                ...this.mediaRecords(pageId),
-            },
+            data,
         })
 
         return { id: pageId, slug: saved.slug ?? ((this.fields.slug as string) || '') }
@@ -146,48 +146,7 @@ export class PageBuilder {
         context.usedSlugs.add(slug)
     }
 
-    /**
-     * A second record the page's own `media` field lists, which is what makes
-     * DataHandler link it once the page has a uid.
-     */
-    private mediaRecords(pageIdentifier: string): RecordDataMap {
-        if (!this.imageFileId) {
-            return {}
-        }
-
-        return {
-            sys_file_reference: {
-                [this.mediaIdentifier()]: {
-                    uid_local: this.imageFileId,
-                    pid: pageIdentifier,
-                    tablenames: 'pages',
-                    fieldname: 'media',
-                    hidden: 0,
-                    sys_language_uid: 0,
-                    alternative: '',
-                    description: '',
-                    title: '',
-                    crop: this.imageCropConfig ? JSON.stringify(this.imageCropConfig) : imageCrop(),
-                },
-            },
-        }
-    }
-
     private pageFields(): Record<string, unknown> {
-        const fields = toColumnValues(this.fields)
-
-        if (this.imageFileId) {
-            fields.media = this.mediaIdentifier()
-        }
-
-        return fields
-    }
-
-    // Minted once: pageFields() lists it in `media` and mediaRecords() keys the
-    // reference by it, and the two must agree.
-    private mediaIdentifier(): string {
-        this.mediaIdentifierValue ??= newRecordIdentifier()
-
-        return this.mediaIdentifierValue
+        return toColumnValues(this.fields)
     }
 }

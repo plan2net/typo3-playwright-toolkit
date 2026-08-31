@@ -10,6 +10,21 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Breaking
+
+- **@plan2net/typo3-playwright-toolkit** — pages attach files the way content already
+  did, and the three page-only methods for it are gone. `withExistingImage(5)` becomes
+  `withFileReference('media', 5)`, which also takes the reference's own fields, so
+  `withImageCropFocus(...)` becomes `withFileReference('media', 5, { crop: imageCrop() })`.
+  A page can now carry a reference on any column, several of them, and give each one an
+  `alternative` — none of which the old pair could do. The `CropConfig` type went with
+  them: `imageCrop()` and `imageCrops()` build that value.
+
+- **@plan2net/typo3-playwright-toolkit** — a content type declares its extra records
+  with `getRelations()` only; `getAdditionalRecords()` is gone. The two did the same
+  job, and the older one let a builder write `uid_foreign` by hand, which is the one
+  column that silently breaks the link.
+
 ### Fixed
 
 - **@plan2net/typo3-playwright-toolkit** — a content type can clear a field again.
