@@ -10,6 +10,13 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-09-01
+
+Nothing changes for a suite that already runs. This release is about adding the toolkit
+to a project that was there first: your Playwright version and its screenshot baselines
+stay, `SETUP.md` has a section on moving an existing suite over, and the setup steps that
+used to fail with a driver's or a framework's own error now say what to do about it.
+
 ### Added
 
 - **ddev-typo3-playwright-toolkit** — `ddev playwright show-report` serves the HTML
@@ -30,6 +37,26 @@ the package a change belongs to.
 - **@plan2net/typo3-playwright-toolkit** — the `@playwright/test` peer range now starts
   at 1.44 instead of 1.56. A project that already runs Playwright keeps its version, and
   its screenshot baselines with it. CI runs the typecheck and the suite against 1.44.
+
+- **@plan2net/typo3-playwright-toolkit** — a failed preflight says what to do about it. A
+  404 names the Testing hostname to check, a 401 says the two sides hold different
+  secrets and how to line them up, and a non-JSON answer shows the beginning of what the
+  site actually returned.
+
+### Documentation
+
+- `SETUP.md` has a section on moving an existing Playwright suite over: what your config
+  keeps, the four keys the toolkit sets itself, and why the old tests and the new ones
+  must not run together.
+
+- `SETUP.md` step 1 names what usually breaks first. A hostname missing from
+  `SYS/trustedHostsPattern` answers `500` with `#1396795884`, a `TYPO3_CONTEXT` already
+  in `web_environment` can stay, and the first run checks the context anyway.
+
+- The README says when the test-ID header does *not* reach PHP by itself: nginx with
+  `fastcgi_pass_request_headers off`, an Apache `RequestHeader unset` or mod_security
+  rule, or a proxy in front of the testing hostname. The site then answers from its own
+  database and the tests pass against the wrong content.
 
 ## [0.11.0] - 2026-08-31
 
@@ -526,6 +553,7 @@ the package a change belongs to.
   both packages depend on.
 
 [Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.11.0...main
+[0.12.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.8.0...v0.9.0
