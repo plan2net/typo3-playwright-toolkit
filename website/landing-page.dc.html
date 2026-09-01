@@ -89,6 +89,15 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 .figure .narrow { max-width:384px; }
 @container (max-width:1099px) { .figure .wide { display:none; } .figure .tablet { display:block; } }
 @container (max-width:699px) { .figure .tablet { display:none; } .figure .narrow { display:block; } }
+/* A note about the right-hand column sits under it, on the same breakpoints the
+   drawing keeps two columns. The tablet variant is centred at 720px, so its right
+   edge is inset by half the leftover. */
+.figure-note { container-type:inline-size; }
+.figure-note p { margin:28px 0 0; max-width:74ch; }
+@container (min-width:1100px) { .figure-note p { margin-left:auto; text-align:right; } }
+@container (min-width:700px) and (max-width:1099px) {
+  .figure-note p { margin-left:auto; margin-right:max(0px, calc((100% - 720px) / 2)); text-align:right; }
+}
 /* Both stack earlier than the card grids: the terminal and the code sample are the
    first things two columns stop fitting. */
 @media (max-width:1279px) {
@@ -265,6 +274,9 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
   <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px;">Where the content comes from</h2>
   <p style="color:var(--dim); font-size:16px; margin:0 0 40px; max-width:74ch;">A SQL fixture writes rows and nothing checks them. Your tests post to the route the <span style="white-space:nowrap;">Save button</span> uses, so TYPO3 does the same work it does for an editor. That includes permissions. Your tests run as <strong style="color:var(--ink); font-weight:700;">a backend user you choose</strong>, and they can only save what that user may save.</p>
   <div class="figure" data-diagram="backend-save-path" style="margin:0 0 8px;"></div>
+  <div class="figure-note">
+    <p style="color:var(--dim); font-size:16px; line-height:1.7;">The setup posts instead of clicking through the backend, because posting is faster. A test can still drive the backend UI when that is what you are testing: the browser and the logged-in session are there either way.</p>
+  </div>
 </section>
 
 <section id="packages" data-screen-label="Packages" style="background:var(--soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">

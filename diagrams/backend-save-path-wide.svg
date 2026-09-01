@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="1280" height="764" viewBox="0 0 1280 764" role="img" aria-labelledby="bsp-title bsp-desc" xmlns="http://www.w3.org/2000/svg">
+<svg width="1280" height="700" viewBox="0 0 1280 700" role="img" aria-labelledby="bsp-title bsp-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="bsp-title">A SQL fixture skips the backend; this toolkit posts through it</title>
 <desc id="bsp-desc">Two columns. On the left, a SQL fixture file inserts rows straight into the database, its arrow curving around a dashed box marked skipped entirely that holds FormEngine fields, permissions, DataHandler, TCA rules and file relations. A renamed field still inserts, so the test passes while the page is broken. On the right, a builder posts to the backend route /typo3/record/edit with a real record_edit token, straight through that same box, which is live. A renamed field is refused and the test fails, naming the record and the reason. Both routes end at the same database.</desc>
 
@@ -102,6 +102,4 @@
 <text x="964" y="656" fill="#5B6570" font-size="15" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Rename a field and TYPO3 refuses the record.</text>
 <text x="964" y="680" fill="#1A1E24" font-size="15" font-weight="700" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">The test fails, naming the record and why.</text>
 
-<line x1="40" y1="716" x2="1240" y2="716" stroke="rgba(26,30,36,0.12)" stroke-width="1"/>
-<text x="640" y="742" fill="#5B6570" font-size="13" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">No browser fills in a backend form. The setup posts; the only browser in the run is the one your test uses to read the page.</text>
 </svg>

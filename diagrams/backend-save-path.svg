@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="720" height="692" viewBox="0 0 720 692" role="img" aria-labelledby="bsp-t-title bsp-t-desc" xmlns="http://www.w3.org/2000/svg">
+<svg width="720" height="646" viewBox="0 0 720 646" role="img" aria-labelledby="bsp-t-title bsp-t-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="bsp-t-title">A SQL fixture skips the backend; this toolkit posts through it</title>
 <desc id="bsp-t-desc">Two columns. On the left a SQL fixture file inserts straight into the database, its arrow curving around a dashed box marked skipped that holds FormEngine fields, permissions, DataHandler, TCA rules and file relations, so a renamed field still inserts and the test passes while the page is broken. On the right a builder posts to the backend route, straight through that same box, which is live, so a renamed field is refused and the test fails. Both routes end at the same database.</desc>
 
@@ -76,6 +76,4 @@
 <text x="550" y="604" fill="#5B6570" font-size="13" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Rename a field, TYPO3 refuses it.</text>
 <text x="550" y="626" fill="#1A1E24" font-size="13" font-weight="700" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">The test fails, and says why.</text>
 
-<line x1="40" y1="656" x2="680" y2="656" stroke="rgba(26,30,36,0.12)" stroke-width="1"/>
-<text x="360" y="680" fill="#5B6570" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">No browser fills in a backend form. The setup posts; the test's browser only reads the page.</text>
 </svg>

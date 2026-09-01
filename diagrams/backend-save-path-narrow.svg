@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="344" height="1288" viewBox="14 0 344 1288" role="img" aria-labelledby="bsp-n-title bsp-n-desc" xmlns="http://www.w3.org/2000/svg">
+<svg width="344" height="1266" viewBox="14 0 344 1266" role="img" aria-labelledby="bsp-n-title bsp-n-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="bsp-n-title">A SQL fixture skips the backend; this toolkit posts through it</title>
 <desc id="bsp-n-desc">Two stacked halves. First, a SQL fixture file inserts straight into the database, its arrow curving around a dashed box marked skipped that holds FormEngine fields, permissions, DataHandler, TCA rules and file relations, so a renamed field still inserts and the test passes while the page is broken. Second, a builder posts to the backend route, straight through that same box, which is live, so a renamed field is refused and the test fails. Both routes end at the same database.</desc>
 
@@ -79,5 +79,4 @@
 <text x="192" y="1224" fill="#5B6570" font-size="13" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Rename a field, TYPO3 refuses it.</text>
 <text x="192" y="1246" fill="#1A1E24" font-size="13" font-weight="700" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">The test fails, and says why.</text>
 
-<line x1="40" y1="1270" x2="344" y2="1270" stroke="rgba(26,30,36,0.12)" stroke-width="1"/>
 </svg>
