@@ -46,7 +46,13 @@ A `.ddev/nginx/*.conf` file does not work: DDEV includes those after the PHP loc
 block, and nginx ignores the value. A complete file is checked in at
 [`tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf`](tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf).
 
-`ddev restart`, then open the new hostname and check the backend reports Testing.
+A `TYPO3_CONTEXT` in your `web_environment` can stay. The web server's value wins per
+request, and yours still applies to every other hostname.
+
+`ddev restart`, then open the new hostname. A `500` with `#1396795884` means the name is
+missing from `SYS/trustedHostsPattern`. Log in, and the backend's top bar says Testing.
+
+Step 6 checks this too, and stops if the site answers in another context.
 
 ## 2. The three packages
 
@@ -77,8 +83,10 @@ required.
 
 Keep all three packages on the same version. `tests/playwright` is only the default
 directory; `PW_TEST_DIR` in `web_environment` moves it. If your project already uses
-`Lullabot/ddev-playwright`, remove it first: it has a `ddev playwright` command too,
-and only one of them can win.
+`Lullabot/ddev-playwright`, remove it first with `ddev add-on remove ddev-playwright`:
+it has a `ddev playwright` command too, and only one of them can win. That deletes every
+file it installed, and most of them are checked into your repository, so commit what you
+have before you run it.
 
 ## 3. The browsers
 

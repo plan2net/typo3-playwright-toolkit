@@ -45,6 +45,11 @@ turns it into a database name.
 Nothing sits in between: no web server configuration, no environment variable. This
 chain is the whole idea, and `CONTRACT.md` describes it in detail.
 
+It only breaks if something strips the header on the way: `fastcgi_pass_request_headers
+off` in nginx, a `RequestHeader unset` or a mod_security rule in Apache, or a proxy in
+front of the testing hostname. TYPO3 then sees an ordinary request and answers it from
+the site's own database, so the tests pass against the wrong content.
+
 The template database is built from your schema and your fixture files, and rebuilt
 only when those change — an unchanged template is reused, so a run costs no build
 time. Copying it takes milliseconds, so each test can have its own database. At the
