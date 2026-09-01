@@ -50,16 +50,40 @@ final class TemplatePreparer
     }
 
     /**
+     * @param list<string> $connectionNames
+     */
+    public static function schemaFailureMessage(string $failure, array $connectionNames): string
+    {
+        $others = array_values(array_diff($connectionNames, ['Default']));
+        if ([] === $others) {
+            return 'Could not build the test database schema: ' . $failure;
+        }
+
+        return sprintf(
+            'Could not build the test database schema. TYPO3 builds it for every connection this'
+            . ' project configures, not only Default, and this one also configures %s: each has to'
+            . ' be reachable in the "Testing" context, or unset in it. %s',
+            implode(', ', $others),
+            $failure
+        );
+    }
+
+    /**
      * @param list<string> $schemaStatements
      */
     private function buildSchema(TestDatabaseDriver $driver, array $schemaStatements): void
     {
         $this->borrowedConnection->use($driver->templateConnectionOverrides(), function () use ($schemaStatements): void {
-            $errors = array_filter($this->schemaMigrator->install($schemaStatements));
+            $names = array_map(strval(...), array_keys($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections'] ?? []));
+
+            try {
+                $errors = array_filter($this->schemaMigrator->install($schemaStatements));
+            } catch (\Throwable $failure) {
+                throw new \RuntimeException(self::schemaFailureMessage($failure->getMessage(), $names), 0, $failure);
+            }
+
             if ([] !== $errors) {
-                throw new \RuntimeException(
-                    'Could not build the test database schema: ' . implode('; ', $errors)
-                );
+                throw new \RuntimeException(self::schemaFailureMessage(implode('; ', $errors), $names));
             }
         });
     }

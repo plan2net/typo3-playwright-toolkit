@@ -18,6 +18,11 @@ the package a change belongs to.
 
 ### Changed
 
+- **plan2net/playwright-toolkit** — `playwright:prepare` now says which of your database
+  connections it could not reach. TYPO3 builds the schema for every connection you
+  configure, not only Default, so a second one that is unreachable in the Testing context
+  stopped the run with nothing but its driver's own error.
+
 - **ddev-typo3-playwright-toolkit** — the install message names the image `db-test` runs.
   It used to name the project's own database version, which reads as if the test server
   matched it: only the engine does.
