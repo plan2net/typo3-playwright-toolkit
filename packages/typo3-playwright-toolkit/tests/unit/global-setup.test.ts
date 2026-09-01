@@ -77,6 +77,16 @@ describe('verifyApiVersion', () => {
         ).resolves.toBe(99)
     })
 
+    it('blames the secret, not the extension, when the endpoint refuses the request', async () => {
+        const refused = probeReporting({ success: false, error: 'Unauthorized' }, 401)
+
+        await expect(verifyApiVersion(config, { fetchImpl: refused })).rejects.toThrow(/secret/i)
+        await expect(verifyApiVersion(config, { fetchImpl: refused })).rejects.toThrow(
+            /PLAYWRIGHT_TOOLKIT_SECRET|api-secret/,
+        )
+        await expect(verifyApiVersion(config, { fetchImpl: refused })).rejects.not.toThrow(/too old/)
+    })
+
     // Outside a Testing context the endpoint does not exist and the body is an
     // error page, so a bare parse failure would read as a JSON syntax error.
     it('explains a non-JSON answer as the extension not being loaded', async () => {
@@ -85,6 +95,16 @@ describe('verifyApiVersion', () => {
 
         await expect(verifyApiVersion(config, { fetchImpl: notFound })).rejects.toThrow(/Testing context/)
         await expect(verifyApiVersion(config, { fetchImpl: notFound })).rejects.toThrow(/status 404/)
+    })
+
+    it('names the web server binding when the endpoint is absent', async () => {
+        const notFound = (async () =>
+            new Response('<html>Not Found</html>', { status: 404 })) as unknown as typeof fetch
+
+        await expect(verifyApiVersion(config, { fetchImpl: notFound })).rejects.toThrow(/TYPO3_CONTEXT/)
+        await expect(verifyApiVersion(config, { fetchImpl: notFound })).rejects.toThrow(
+            new RegExp(config.testingURL),
+        )
     })
 
     // A PHP fatal answers 200 with an error page, so only the body names the cause.
@@ -197,6 +217,24 @@ describe('preflightTestId', () => {
 })
 
 describe('runHealthCheck', () => {
+    function reporting(context: string): typeof fetch {
+        return async () =>
+            new Response(JSON.stringify({ ok: true, checks: { context: { ok: true, detail: context } } }), {
+                status: 200,
+            })
+    }
+
+    it('refuses a context that is not Testing', async () => {
+        const wrong = reporting('Development/Docker')
+
+        await expect(runHealthCheck('https://example-testing.test', { fetchImpl: wrong })).rejects.toThrow(
+            /Development\/Docker/,
+        )
+        await expect(runHealthCheck('https://example-testing.test', { fetchImpl: wrong })).rejects.toThrow(
+            /TYPO3_CONTEXT/,
+        )
+    })
+
     it('sends the test id header', async () => {
         const seen: Array<Record<string, string>> = []
         const fetchImpl = (async (_url: string, init?: RequestInit) => {
