@@ -170,3 +170,14 @@ setup() {
         }
     done
 }
+
+@test "serves the report on every interface" {
+    grep -q -- '--host 0.0.0.0' "${ADDON_DIR}/commands/web/playwright"
+}
+
+@test "serves the report on the port the add-on exposes" {
+    port="$(sed -n 's/.*PW_REPORT_PORT:-\([0-9]*\).*/\1/p' "${ADDON_DIR}/commands/web/playwright" | head -1)"
+
+    [ -n "${port}" ]
+    grep -q "container_port: ${port}" "${ADDON_DIR}/config.playwright-toolkit.yaml"
+}

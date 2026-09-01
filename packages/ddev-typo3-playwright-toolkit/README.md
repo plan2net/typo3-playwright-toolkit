@@ -174,11 +174,13 @@ you run one:
 | `PLAYWRIGHT_DB_TEST_USER` | `db` | User name |
 | `PLAYWRIGHT_DB_TEST_PASSWORD` | `db` | Password |
 
-### UI mode port
+### UI mode and report ports
 
-UI mode runs a web application inside the container, and the add-on opens port 3000
-for it in `config.playwright-toolkit.yaml`. `PW_UI_PORT` changes the port, but you
-then have to change it in that file as well.
+Both run a web application inside the container, so `config.playwright-toolkit.yaml`
+opens port 3000 for UI mode and 9323 for `ddev playwright show-report`. Each serves on
+every interface, so the printed link works from your own browser. `PW_UI_PORT` and
+`PW_REPORT_PORT` change the ports, but you then have to change them in that file as
+well.
 
 ## Using the package
 
@@ -273,6 +275,7 @@ does not work, because these are DDEV web commands.
 | `PW_TEST_DIR` | `tests/playwright` | Where your Playwright tests live, relative to the project root |
 | `PW_RUN_ID` | generated | Names the run, so cleanup can tell runs apart |
 | `PW_UI_PORT` | `3000` | Port for UI mode |
+| `PW_REPORT_PORT` | `9323` | Port for `show-report` |
 | `PW_SKIP_PREPARE` | unset | Same as `--skip-prepare`; use the flag instead |
 | `PW_TEST_CONNECT_WS_ENDPOINT` | unset | Browser server to drive instead of the local browsers — see [Browsers in a container of their own](#browsers-in-a-container-of-their-own) |
 | `PW_TEST_CONNECT_EXPOSE_NETWORK` | unset | Lets that browser reach your site through the web container; `*` covers everything |

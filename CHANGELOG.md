@@ -10,6 +10,12 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **ddev-typo3-playwright-toolkit** — `ddev playwright show-report` serves the HTML
+  report on port 9323 and prints the link. It used to bind to localhost inside the
+  container, where no browser of yours could reach it. `PW_REPORT_PORT` changes the port.
+
 ### Changed
 
 - **ddev-typo3-playwright-toolkit** — the install message names the image `db-test` runs.
