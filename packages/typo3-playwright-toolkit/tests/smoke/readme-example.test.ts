@@ -46,6 +46,33 @@ describe('the documented configuration example', () => {
         expect(config.testDir).toBe('./tests')
     })
 
+    it('keeps what a project that already runs Playwright had in its own config', () => {
+        const toolkitConfig = defineToolkitConfig({
+            testingURL: 'https://example-testing.test',
+            paths: { consumerRoot: '/srv/project' },
+        })
+
+        const config = defineBasePlaywrightConfig(toolkitConfig, {
+            testDir: './tests',
+            fullyParallel: true,
+            reporter: [['list'], ['junit', { outputFile: 'junit.xml' }]],
+            expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.01 } },
+            use: { ignoreHTTPSErrors: true, locale: 'de-DE' },
+            projects: [
+                { name: 'Desktop Chrome', use: { viewport: { width: 1280, height: 720 } } },
+                { name: 'Phone', use: { viewport: { width: 390, height: 844 } } },
+            ],
+        })
+
+        expect(config.projects?.map((project) => project.name)).toEqual(['Desktop Chrome', 'Phone'])
+        expect(config.reporter).toEqual([['list'], ['junit', { outputFile: 'junit.xml' }]])
+        expect(config.expect?.toHaveScreenshot?.maxDiffPixelRatio).toBe(0.01)
+        expect(config.fullyParallel).toBe(true)
+        expect(config.use?.ignoreHTTPSErrors).toBe(true)
+        expect(config.use?.locale).toBe('de-DE')
+        expect(config.use?.baseURL).toBe('https://example-testing.test')
+    })
+
     it('imports only names the package entry actually exports', () => {
         const pattern = /import \{([^}]+)\} from '@plan2net\/typo3-playwright-toolkit'/g
         const matches = [...README.matchAll(pattern)]

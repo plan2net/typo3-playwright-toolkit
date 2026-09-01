@@ -64,6 +64,10 @@ Do not skip the `npm init`. Without a `package.json` of its own, `npm i` walks u
 directories and installs into the project above. `type: module` is needed because the
 Playwright config in step 4 uses `import.meta.url`.
 
+If your project already runs Playwright, install `@plan2net/typo3-playwright-toolkit`
+alone and keep the `@playwright/test` you have: 1.44 and newer work, so your version
+stays, and your screenshot baselines with it.
+
 The add-on is the optional one. It gives you the `db-test` database service and the
 `ddev playwright*` commands; without it you point four environment variables at a
 database server of your own and run the underlying commands yourself, as

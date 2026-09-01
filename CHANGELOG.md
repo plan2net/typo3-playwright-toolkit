@@ -10,6 +10,12 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Changed
+
+- **@plan2net/typo3-playwright-toolkit** — the `@playwright/test` peer range now starts
+  at 1.44 instead of 1.56. A project that already runs Playwright keeps its version, and
+  its screenshot baselines with it. CI runs the typecheck and the suite against 1.44.
+
 ## [0.11.0] - 2026-08-31
 
 ### Breaking

@@ -7,7 +7,7 @@
 
 [![npm](https://img.shields.io/npm/v/@plan2net/typo3-playwright-toolkit)](https://www.npmjs.com/package/@plan2net/typo3-playwright-toolkit)
 [![Node](https://img.shields.io/badge/Node-22.12%2B-5fa04e)](https://nodejs.org)
-[![Playwright](https://img.shields.io/badge/Playwright-1.56%2B-2ead33)](https://playwright.dev)
+[![Playwright](https://img.shields.io/badge/Playwright-1.44%2B-2ead33)](https://playwright.dev)
 [![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
 
 An npm package. It provides the [Playwright](https://playwright.dev) fixtures, the
@@ -31,7 +31,8 @@ the database service and the commands.
 ## Requirements
 
 - Node 22.12 or newer
-- `@playwright/test` 1.56 or newer
+- `@playwright/test` 1.44 or newer, so a project that already runs Playwright keeps its
+  version and its screenshot baselines
 - The Composer extension, installed in the same project
 
 You do not need a database client. This package never talks to the database; it asks

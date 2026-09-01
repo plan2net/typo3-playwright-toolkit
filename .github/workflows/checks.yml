@@ -50,6 +50,36 @@ jobs:
       - name: Security advisories
         run: npm audit --omit=dev --audit-level=high
 
+  playwright-floor:
+    name: toolkit (oldest Playwright)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/typo3-playwright-toolkit
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: packages/typo3-playwright-toolkit/package-lock.json
+
+      - run: npm ci
+
+      # 1.44 asks apt for libasound2, which Ubuntu 24.04 renamed, so the system
+      # libraries come from the current Playwright and only the browser from 1.44.
+      - run: npx playwright install --with-deps chromium
+
+      # The floor of the peerDependency range.
+      - run: npm install --no-save @playwright/test@1.44.0
+
+      - run: npx playwright install chromium
+
+      - run: npm run typecheck
+
+      - run: npm test
+
   extension-qa:
     name: extension (qa)
     runs-on: ubuntu-latest

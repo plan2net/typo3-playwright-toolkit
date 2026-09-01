@@ -1,5 +1,23 @@
-import { expect, Locator, Page, PageAssertionsToHaveScreenshotOptions } from '@playwright/test'
+import { expect, Locator, Page } from '@playwright/test'
 import { getToolkitConfig } from '../config.js'
+
+/** Playwright only named this type in 1.56. */
+export interface ScreenshotComparisonOptions {
+    animations?: 'disabled' | 'allow'
+    caret?: 'hide' | 'initial'
+    clip?: { x: number; y: number; width: number; height: number }
+    fullPage?: boolean
+    mask?: Locator[]
+    maskColor?: string
+    maxDiffPixelRatio?: number
+    maxDiffPixels?: number
+    omitBackground?: boolean
+    scale?: 'css' | 'device'
+    signal?: AbortSignal
+    stylePath?: string | string[]
+    threshold?: number
+    timeout?: number
+}
 
 const FREEZE_STYLES = `* {
     animation-duration: 0s !important;
@@ -125,7 +143,7 @@ export function resolveScreenshotTarget(
     return { shot: target, wholePage: !('page' in target) }
 }
 
-export interface ScreenshotOptions extends PageAssertionsToHaveScreenshotOptions {
+export interface ScreenshotOptions extends ScreenshotComparisonOptions {
     /** Shoot only this element. */
     include?: string
     /** Replaces `hideBeforeScreenshot` for this shot; `[]` hides nothing. */
@@ -167,8 +185,8 @@ export async function expectScreenshot(
 
 export function comparisonOptions(
     wholePage: boolean,
-    perCall: PageAssertionsToHaveScreenshotOptions,
-): PageAssertionsToHaveScreenshotOptions {
+    perCall: ScreenshotComparisonOptions,
+): ScreenshotComparisonOptions {
     return {
         animations: 'disabled',
         timeout: 15000,
