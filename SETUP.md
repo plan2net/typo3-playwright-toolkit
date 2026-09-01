@@ -65,8 +65,9 @@ directories and installs into the project above. `type: module` is needed becaus
 Playwright config in step 4 uses `import.meta.url`.
 
 If your project already runs Playwright, install `@plan2net/typo3-playwright-toolkit`
-alone and keep the `@playwright/test` you have: 1.44 and newer work, so your version
-stays, and your screenshot baselines with it.
+alone and keep the `@playwright/test` you have: 1.44 and newer work. Then read
+[Migrating an existing Playwright suite](#migrating-an-existing-playwright-suite) —
+your configuration mostly carries over, your tests do not.
 
 The add-on is the optional one. It gives you the `db-test` database service and the
 `ddev playwright*` commands; without it you point four environment variables at a
@@ -224,3 +225,58 @@ ddev playwright test
 
 The first run builds the template database, so it takes longer than the ones after
 it. [Writing a test](README.md#writing-a-test) explains what the pieces do.
+
+## Migrating an existing Playwright suite
+
+The six steps assume an empty directory. A project that already runs Playwright keeps
+most of its configuration and none of its tests.
+
+Do not run the old tests and the new ones together. A file that does not come from
+`defineScenario` sends no test ID, and a request without one gets the site's ordinary
+database. Nothing fails: the test passes, against content the toolkit never built. Give
+the toolkit a `testDir` of its own, and move a test into it once you have rewritten it as
+a scenario.
+
+Your configuration mostly carries over. The second argument is an ordinary Playwright
+config, and what you write there wins over the toolkit's defaults, so `testDir`,
+`reporter`, `projects`, `retries`, `timeout` and the rest stay as they are:
+
+```ts
+export default defineBasePlaywrightConfig(toolkit, {
+    testDir: './tests',
+    reporter: [['list'], ['junit', { outputFile: 'junit.xml' }]],
+    expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.01 } },
+    use: { ignoreHTTPSErrors: true, locale: 'de-DE' },
+    projects: [{ name: 'Desktop Chrome', use: { ...devices['Desktop Chrome'] } }],
+})
+```
+
+`use` and `expect` are merged key by key instead of replaced, so a locale of your own
+keeps the tracing and the screenshot tolerances the toolkit sets.
+
+It refuses four keys. `globalSetup` and `globalTeardown` carry the preflight, the run
+bookkeeping and the cleanup that drops every database the run created. `use.baseURL` and
+`use.serviceWorkers` keep the test ID on one origin, and a project's own `use` is
+restricted the same way. TypeScript rejects all four, and a JavaScript config gets an
+error naming the key and the reason.
+
+Keep the `@playwright/test` you have, 1.44 or newer. Install
+`@plan2net/typo3-playwright-toolkit` on its own and your version stays.
+
+Your tests can stay where they are. The `ddev playwright*` commands look in
+`tests/playwright`; if yours live somewhere else, name that directory in `PW_TEST_DIR`.
+The commands run inside the web container and never see a variable you export in your
+shell, so it belongs in `.ddev/config.yaml`:
+
+```yaml
+web_environment:
+    - PW_TEST_DIR=test/playwright
+```
+
+Step 2 sets `type: module` in the `package.json` next to your tests, because the config
+in step 4 uses `import.meta.url`. If your existing tests cannot move to ESM, leave that
+`package.json` alone and name the config `playwright.config.mts` instead.
+
+Screenshot references are stored per test file and test title, so a rewritten test starts
+without one and Playwright writes it on the first run. Look at that first picture before
+you keep it: it matches the old one only if your scenario builds the same content.
