@@ -23,6 +23,10 @@ playwright_db_test_source() {
     esac
 }
 
+playwright_db_test_image() {
+    sed -n 's/^ *image: *//p' "$1" | head -1
+}
+
 playwright_install_db_test_service() {
     local database="${1:-}"
     local target='docker-compose.db-test.yaml'
@@ -42,7 +46,7 @@ playwright_install_db_test_service() {
     fi
 
     cp "${source}" "${target}"
-    echo "typo3-playwright: installed ${target} for ${database}."
+    echo "typo3-playwright: installed ${target}; db-test runs $(playwright_db_test_image "${target}") for your ${database} database."
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then

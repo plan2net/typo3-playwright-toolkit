@@ -12,6 +12,10 @@ the package a change belongs to.
 
 ### Changed
 
+- **ddev-typo3-playwright-toolkit** — the install message names the image `db-test` runs.
+  It used to name the project's own database version, which reads as if the test server
+  matched it: only the engine does.
+
 - **@plan2net/typo3-playwright-toolkit** — the `@playwright/test` peer range now starts
   at 1.44 instead of 1.56. A project that already runs Playwright keeps its version, and
   its screenshot baselines with it. CI runs the typecheck and the suite against 1.44.

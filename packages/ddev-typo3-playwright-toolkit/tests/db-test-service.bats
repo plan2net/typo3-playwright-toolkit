@@ -53,6 +53,13 @@ setup() {
     grep -q 'postgres:16-alpine' docker-compose.db-test.yaml
 }
 
+@test "names the image db-test actually runs, not the project's own version" {
+    run playwright_install_db_test_service 'mariadb:10.2'
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *'mariadb:11'* ]]
+}
+
 @test "replaces a previously installed service when the database changes" {
     playwright_install_db_test_service 'postgres:16'
     playwright_install_db_test_service 'mysql:8'
