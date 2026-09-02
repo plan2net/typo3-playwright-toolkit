@@ -84,6 +84,87 @@ different containers.
 hostname, the three packages, the browsers, the files your project needs, and a first
 test that proves it works.
 
+### Where things run
+
+TYPO3 always runs in the web container. The browsers do not have to, and neither does
+the test run. Which of the three layouts you need comes down to two questions.
+
+<picture>
+  <source media="(max-width: 700px)" srcset="diagrams/where-things-run-narrow.svg">
+  <img width="880" src="diagrams/where-things-run.svg"
+       alt="A decision tree with three outcomes. If the browsers can live in the web container, TYPO3, the test runner and the browsers all sit there and you only install the browsers. If they cannot but you want to keep the ddev playwright commands, the browsers move to a browser server container while TYPO3 and the test runner stay in the web container, connected by PW_TEST_CONNECT_WS_ENDPOINT. If you give the ddev commands up, the test runner moves with the browsers into a Playwright container of your own, leaving TYPO3 alone in the web container, and both sides share PLAYWRIGHT_TOOLKIT_SECRET.">
+</picture>
+
+#### Everything in the web container
+
+The default, and the one CI runs on every push. Decide where the browsers go **before**
+you install them — otherwise they land in the container's home directory, which DDEV
+drops on the next rebuild, and you download them again:
+
+```yaml
+# .ddev/config.yaml
+web_environment:
+    - PLAYWRIGHT_BROWSERS_PATH=/var/www/html/.cache/ms-playwright
+```
+
+```bash
+ddev restart
+cd tests/playwright && ddev npx playwright install --with-deps chromium
+```
+
+Gitignore `.cache/`. UI mode runs in the web container too, so `ddev playwright-ui`
+needs the browsers here.
+
+#### Browsers in a container of their own
+
+For a different image, or a different architecture. Start a Playwright server and point
+the run at it in `.ddev/config.yaml`:
+
+```yaml
+web_environment:
+    - PW_TEST_CONNECT_WS_ENDPOINT=ws://playwright-server:3000/
+    - PW_TEST_CONNECT_EXPOSE_NETWORK=*
+```
+
+Playwright reads both variables itself, so the `ddev playwright` commands need no flag
+and no change. Only the browser moves: the run stays in the web container with your
+`node_modules`, the API secret and the state directory.
+`PW_TEST_CONNECT_EXPOSE_NETWORK` tunnels the browser's requests back out through it, so
+the browser container needs no route to your site and no DDEV certificate.
+
+The server is one container of your own, in
+`.ddev/docker-compose.playwright-server.yaml`:
+
+```yaml
+services:
+    playwright-server:
+        image: mcr.microsoft.com/playwright:v1.61.1-noble
+        command:
+            ['npx', '-y', 'playwright@1.61.1', 'run-server', '--port', '3000', '--host', '0.0.0.0']
+```
+
+The version has to match the `@playwright/test` your project installed. Add
+`platform: linux/amd64` if you compare screenshots across machines: rasterisation
+happens where the browser runs, so an arm64 laptop and an amd64 runner disagree on the
+same page.
+
+#### The run in a container of its own
+
+Your `node_modules` and your browsers live in a Playwright image of your own. The web
+container is then left with TYPO3 alone.
+
+The `ddev playwright*` commands no longer apply. They are DDEV **web** commands, so they
+run where PHP is, and your tests do not. Run the underlying commands in your own
+container instead: [Without DDEV](#without-ddev) lists what each of the five does, and
+where it belongs.
+
+The two sides also stop sharing a filesystem, so they cannot share the API secret file
+`playwright:prepare` writes. Set `PLAYWRIGHT_TOOLKIT_SECRET` to the same value in both
+containers, and neither needs the other's disk.
+
+Nothing else changes. The npm package speaks only HTTP, so it needs no database client
+and no credentials, and the test ID travels in a request header either way.
+
 ### Without DDEV
 
 DDEV is a convenience, not a requirement. The extension and the npm package do not
@@ -116,9 +197,10 @@ tmpfs: test databases grow, and runners run out of memory.
 | `ddev playwright-replay` | `typo3 playwright:replay-prepare`, then `npx playwright test` with `PW_REPLAY=1` |
 | `ddev playwright-inspect` | `npx typo3-playwright-inspect` |
 
-Run the `typo3` commands where PHP is, the `npx` ones where Playwright is. They may
-be different containers: set `PLAYWRIGHT_TOOLKIT_SECRET` to the same value on both
-sides and neither needs the other's filesystem.
+Run the `typo3` commands where PHP is, the `npx` ones where Playwright is. They may be
+different containers — that is
+[the run in a container of its own](#the-run-in-a-container-of-its-own), and it works
+under DDEV as well.
 
 One thing stays yours either way, DDEV or not: binding the Testing context to a
 separate hostname in your web server. Processed images need no attention — every test

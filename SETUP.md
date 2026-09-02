@@ -90,9 +90,9 @@ have before you run it.
 
 ## 3. The browsers
 
-Choose where they go **before** you install them. Otherwise they land in the
-container's home directory, which DDEV drops on the next rebuild, and you download
-them again:
+They go in the web container, beside the tests. Choose where they go **before** you
+install them. Otherwise they land in the container's home directory, which DDEV drops
+on the next rebuild, and you download them again:
 
 ```yaml
 # .ddev/config.yaml
@@ -104,6 +104,9 @@ web_environment:
 ddev restart
 cd tests/playwright && ddev npx playwright install --with-deps chromium
 ```
+
+The browsers can also run elsewhere, and so can the whole test run.
+[Where things run](README.md#where-things-run) has the diagram and the settings.
 
 ## 4. Five files of your own
 

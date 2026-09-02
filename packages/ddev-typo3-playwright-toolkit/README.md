@@ -39,7 +39,10 @@ test helpers.
   the [extension README](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit#testing-host).
 - Playwright with browsers, in the container where `ddev playwright` runs — see
   [browsers](#browsers). Do not use another Playwright add-on for this; see
-  [other Playwright add-ons](#other-playwright-add-ons).
+  [other Playwright add-ons](#other-playwright-add-ons). The browsers can also run
+  elsewhere, and so can the whole test run:
+  [Where things run](https://github.com/plan2net/typo3-playwright-toolkit#where-things-run)
+  covers both.
 - A directory for your tests. The add-on does not create one — see
   [where your tests live](#where-your-tests-live).
 
@@ -86,7 +89,7 @@ web_environment:
 
 ### Browsers
 
-The add-on ships none. Install them where the tests run:
+The add-on ships none. Install them in the web container, where the tests run:
 
 ```bash
 cd tests/playwright && ddev npx playwright install --with-deps chromium
@@ -100,6 +103,12 @@ web_environment:
     - PLAYWRIGHT_BROWSERS_PATH=/var/www/html/.cache/ms-playwright
 ```
 
+This is one of three layouts. Put the browsers in a container of their own and these
+commands keep working unchanged. Move the test run there as well and they no longer
+apply at all, because they are DDEV *web* commands and run where PHP is.
+[Where things run](https://github.com/plan2net/typo3-playwright-toolkit#where-things-run)
+has both.
+
 ### Other Playwright add-ons
 
 Do not install one beside this. `lullabot/ddev-playwright` ships the same file,
@@ -109,42 +118,9 @@ If theirs wins, a run no longer rebuilds the database template first and looks i
 
 > [!NOTE]
 > What it offers beyond this add-on is browser installation and a KasmVNC desktop for
-> watching runs. You need neither: browsers are two lines above, and `ddev
+> watching runs. You need neither: browsers are one command, above, and `ddev
 > playwright-ui` serves Playwright's own UI mode on the exposed port 3000, which you
 > open in your **host** browser — same picking, watching and stepping, no VNC.
-
-### Browsers in a container of their own
-
-Browsers run in the web container by default. To run them somewhere else — another
-image, another architecture — start a Playwright server and point the test run at
-it in `.ddev/config.yaml`:
-
-```yaml
-web_environment:
-    - PW_TEST_CONNECT_WS_ENDPOINT=ws://playwright-server:3000/
-    - PW_TEST_CONNECT_EXPOSE_NETWORK=*
-```
-
-Playwright reads both variables itself, so the commands need no flag and no change.
-Only the browser moves: the test run stays in the web container with your
-`node_modules`, the API secret and the state directory, and
-`PW_TEST_CONNECT_EXPOSE_NETWORK` tunnels the browser's requests back out through
-it — so the browser container needs no route to your site and no DDEV certificate.
-
-The server is one container of your own, in `.ddev/docker-compose.playwright-server.yaml`:
-
-```yaml
-services:
-    playwright-server:
-        image: mcr.microsoft.com/playwright:v1.61.1-noble
-        command:
-            ['npx', '-y', 'playwright@1.61.1', 'run-server', '--port', '3000', '--host', '0.0.0.0']
-```
-
-The version has to match the `@playwright/test` your project installed. Add
-`platform: linux/amd64` if you compare screenshots across machines: rasterisation
-happens where the browser runs, so an arm64 laptop and an amd64 runner disagree on
-the same page.
 
 ### A different database system
 
@@ -232,14 +208,15 @@ It is the plain `db` on the `db-test` container, which exists for exactly this a
 holds nothing else. The database you develop against lives in DDEV's own `db`
 service and is never touched.
 
-UI mode runs in the web container, so the browsers must be installed there:
+## UI mode
 
 ```bash
 ddev playwright-ui              # all tests
 ddev playwright-ui accordion    # one test file
 ```
 
-Then open `https://<project>.ddev.site:3000`.
+Then open `https://<project>.ddev.site:3000`. It serves from the web container, so the
+browsers have to be installed there.
 
 ## Reference
 
@@ -277,7 +254,7 @@ does not work, because these are DDEV web commands.
 | `PW_UI_PORT` | `3000` | Port for UI mode |
 | `PW_REPORT_PORT` | `9323` | Port for `show-report` |
 | `PW_SKIP_PREPARE` | unset | Same as `--skip-prepare`; use the flag instead |
-| `PW_TEST_CONNECT_WS_ENDPOINT` | unset | Browser server to drive instead of the local browsers — see [Browsers in a container of their own](#browsers-in-a-container-of-their-own) |
+| `PW_TEST_CONNECT_WS_ENDPOINT` | unset | Browser server to drive instead of the local browsers — see [Where things run](https://github.com/plan2net/typo3-playwright-toolkit#where-things-run) |
 | `PW_TEST_CONNECT_EXPOSE_NETWORK` | unset | Lets that browser reach your site through the web container; `*` covers everything |
 
 The last two are Playwright's own, read by the test run rather than by this add-on,

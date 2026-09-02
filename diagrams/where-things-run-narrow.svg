@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="344" height="1136" viewBox="20 0 344 1136" role="img" aria-labelledby="where-things-run-narrow-title where-things-run-narrow-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="where-things-run-narrow-title">Where the browsers run</title>
+<desc id="where-things-run-narrow-desc">A decision tree with three outcomes. If the browsers can live in the web container, TYPO3, the test runner and the browsers all sit there and you only install the browsers. If they cannot but you want to keep the ddev playwright commands, the browsers move to a browser server container while TYPO3 and the test runner stay in the web container, connected by PW_TEST_CONNECT_WS_ENDPOINT. If you give the ddev commands up, the test runner moves with the browsers into a Playwright container of your own, leaving TYPO3 alone in the web container, and both sides share PLAYWRIGHT_TOOLKIT_SECRET.</desc>
+
+<defs>
+    <marker id="wtrn-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#5B6570"/>
+    </marker>
+    <marker id="wtrn-arrow-accent" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#ED6D05"/>
+    </marker>
+</defs>
+
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+
+<line x1="172" y1="168" x2="172" y2="208" stroke="#ED6D05" stroke-width="2" marker-end="url(#wtrn-arrow-accent)"/>
+<path d="M 304,112 H 316 Q 324,112 324,120 V 400 Q 324,408 316,408 H 180 Q 172,408 172,416 V 448" fill="none" stroke="#5B6570" stroke-width="1.2" marker-end="url(#wtrn-arrow)"/>
+<line x1="172" y1="560" x2="172" y2="600" stroke="#5B6570" stroke-width="1.2" marker-end="url(#wtrn-arrow)"/>
+<path d="M 304,504 H 316 Q 324,504 324,512 V 836 Q 324,844 316,844 H 180 Q 172,844 172,852 V 884" fill="none" stroke="#5B6570" stroke-width="1.2" marker-end="url(#wtrn-arrow)"/>
+
+<rect x="184" y="180" width="36" height="16" rx="2" fill="#FFFFFF"/>
+<text x="202" y="192" fill="#A05E00" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em">YES</text>
+
+<rect x="284" y="88" width="32" height="16" rx="2" fill="#FFFFFF"/>
+<text x="300" y="100" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em">NO</text>
+
+<rect x="184" y="572" width="36" height="16" rx="2" fill="#FFFFFF"/>
+<text x="202" y="584" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em">YES</text>
+
+<rect x="284" y="480" width="32" height="16" rx="2" fill="#FFFFFF"/>
+<text x="300" y="492" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em">NO</text>
+
+<polygon points="172,56 304,112 172,168 40,112" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="172" y="106" fill="#1A1E24" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Browsers in the</text>
+<text x="172" y="126" fill="#1A1E24" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">web container?</text>
+
+<polygon points="172,448 304,504 172,560 40,504" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="172" y="498" fill="#1A1E24" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Still use</text>
+<text x="172" y="518" fill="#5B6570" font-size="14" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">ddev playwright?</text>
+
+<rect x="40" y="208" width="264" height="168" rx="6" fill="#FFFFFF"/>
+<rect x="40" y="208" width="264" height="168" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<text x="64" y="236" fill="#1A1E24" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">All in the web container</text>
+<text x="64" y="256" fill="#A05E00" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace">ddev npx playwright install</text>
+<rect x="64" y="268" width="216" height="96" rx="8" fill="rgba(255,255,255,0.45)" stroke="rgba(237,109,5,0.45)" stroke-width="0.8" stroke-dasharray="4,4"/>
+<text x="80" y="286" fill="rgba(160,94,0,0.80)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">WEB CONTAINER</text>
+<rect x="80" y="296" width="86" height="24" rx="4" fill="#FFFFFF" stroke="rgba(237,109,5,0.40)" stroke-width="0.8"/>
+<text x="123" y="313" fill="#1A1E24" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">TYPO3</text>
+<rect x="178" y="296" width="86" height="24" rx="4" fill="#FFFFFF" stroke="rgba(237,109,5,0.40)" stroke-width="0.8"/>
+<text x="221" y="313" fill="#1A1E24" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">test runner</text>
+<rect x="80" y="328" width="184" height="24" rx="4" fill="#FFFFFF" stroke="rgba(237,109,5,0.40)" stroke-width="0.8"/>
+<text x="172" y="345" fill="#1A1E24" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">browsers</text>
+
+<rect x="40" y="600" width="264" height="212" rx="6" fill="#FFFFFF"/>
+<rect x="40" y="600" width="264" height="212" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="64" y="628" fill="#1A1E24" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">Browsers on their own</text>
+<text x="64" y="648" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace">PW_TEST_CONNECT_WS_ENDPOINT</text>
+<rect x="64" y="660" width="216" height="64" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.30)" stroke-width="0.8" stroke-dasharray="4,4"/>
+<text x="80" y="678" fill="rgba(26,30,36,0.45)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">WEB CONTAINER</text>
+<rect x="80" y="688" width="86" height="24" rx="4" fill="rgba(26,30,36,0.05)" stroke="#5B6570" stroke-width="0.8"/>
+<text x="123" y="705" fill="#1A1E24" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">TYPO3</text>
+<rect x="178" y="688" width="86" height="24" rx="4" fill="rgba(26,30,36,0.05)" stroke="#5B6570" stroke-width="0.8"/>
+<text x="221" y="705" fill="#1A1E24" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">test runner</text>
+<rect x="64" y="736" width="216" height="64" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.30)" stroke-width="0.8" stroke-dasharray="4,4"/>
+<text x="80" y="754" fill="rgba(26,30,36,0.45)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">BROWSER SERVER</text>
+<rect x="80" y="764" width="184" height="24" rx="4" fill="rgba(26,30,36,0.05)" stroke="#5B6570" stroke-width="0.8"/>
+<text x="172" y="781" fill="#1A1E24" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">browsers</text>
+
+<rect x="40" y="884" width="264" height="212" rx="6" fill="#FFFFFF"/>
+<rect x="40" y="884" width="264" height="212" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="64" y="912" fill="#1A1E24" font-size="15" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">Your own container</text>
+<text x="64" y="932" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace">own commands · shared secret</text>
+<rect x="64" y="944" width="216" height="64" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.30)" stroke-width="0.8" stroke-dasharray="4,4"/>
+<text x="80" y="962" fill="rgba(26,30,36,0.45)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">WEB CONTAINER</text>
+<rect x="80" y="972" width="184" height="24" rx="4" fill="rgba(26,30,36,0.05)" stroke="#5B6570" stroke-width="0.8"/>
+<text x="172" y="989" fill="#1A1E24" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">TYPO3</text>
+<rect x="64" y="1020" width="216" height="64" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.30)" stroke-width="0.8" stroke-dasharray="4,4"/>
+<text x="80" y="1038" fill="rgba(26,30,36,0.45)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">PLAYWRIGHT CONTAINER</text>
+<rect x="80" y="1048" width="86" height="24" rx="4" fill="rgba(26,30,36,0.05)" stroke="#5B6570" stroke-width="0.8"/>
+<text x="123" y="1065" fill="#1A1E24" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">test runner</text>
+<rect x="178" y="1048" width="86" height="24" rx="4" fill="rgba(26,30,36,0.05)" stroke="#5B6570" stroke-width="0.8"/>
+<text x="221" y="1065" fill="#1A1E24" font-size="12" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">browsers</text>
+</svg>

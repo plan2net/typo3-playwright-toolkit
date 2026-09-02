@@ -38,6 +38,8 @@ the database service and the commands.
 You do not need a database client. This package never talks to the database; it asks
 the extension to create and delete them. That is why PHP and Node may run in
 different containers.
+[Where things run](https://github.com/plan2net/typo3-playwright-toolkit#where-things-run)
+shows how.
 
 ## Install
 

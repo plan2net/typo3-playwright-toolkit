@@ -18,6 +18,7 @@ const EXPORTS = {
     'full-test-run': { '': 'tablet', '-wide': 'wide', '-narrow': 'narrow' },
     'scenario-fan-out': { '': 'wide', '-narrow': 'narrow' },
     'backend-save-path': { '': 'tablet', '-wide': 'wide', '-narrow': 'narrow' },
+    'where-things-run': { '': 'wide', '-narrow': 'narrow' },
 }
 
 function variant(source, name) {
@@ -33,7 +34,16 @@ function variant(source, name) {
 
 // Without width and height GitHub renders the image at its own default rather
 // than the drawing's aspect ratio.
+// XML knows five entities; an HTML one like &middot; parses inside the source page and
+// makes the exported file malformed, which GitHub renders as a missing image.
+const XML_ENTITIES = /&(?!(amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)[^;\s]*;/
+
 function standalone(markup) {
+    const stray = XML_ENTITIES.exec(markup)
+    if (stray) {
+        throw new Error(`${stray[0]} is not an XML entity — write the character itself`)
+    }
+
     const [, width, height] = /viewBox="[\d.-]+ [\d.-]+ ([\d.]+) ([\d.]+)"/.exec(markup)
 
     return `<?xml version="1.0" encoding="UTF-8"?>\n${markup.replace(
