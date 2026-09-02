@@ -49,7 +49,7 @@ if [ "${PW_ARGS[0]:-}" = "show-report" ]; then
     PORT="${PW_REPORT_PORT:-9323}"
 
     echo ""
-    echo "[playwright] Open https://${DDEV_HOSTNAME:-${DDEV_SITENAME}.ddev.site}:${PORT}"
+    echo "[playwright] Open $(playwright_serve_url "${PORT}")"
     echo "[playwright] Stop with Ctrl-C."
     echo ""
 

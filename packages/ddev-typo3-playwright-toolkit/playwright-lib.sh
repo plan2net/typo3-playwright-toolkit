@@ -11,6 +11,26 @@
 # colouring from a run a developer is watching.
 unset NO_COLOR
 
+# Not DDEV_HOSTNAME: DDEV redefines that as a comma-separated list of every hostname
+# once a project sets additional_hostnames or additional_fqdns. DDEV_PRIMARY_URL is
+# one URL, but carries the router's own port unless that is 443, so the host has to be
+# taken out rather than appended to.
+playwright_serve_url() {
+    local port="${1}"
+    local url="${DDEV_PRIMARY_URL:-https://${DDEV_SITENAME}.ddev.site}"
+    local scheme="https"
+
+    case "${url}" in
+        http://*) scheme="http" ;;
+    esac
+
+    url="${url#*://}"
+    url="${url%%/*}"
+    url="${url%%:*}"
+
+    printf '%s://%s:%s' "${scheme}" "${url}" "${port}"
+}
+
 # Where the project keeps its Playwright tests. An environment variable rather
 # than a flag: this one belongs to the project, not to a single run, so it is set
 # once in web_environment or .ddev/.env.web.

@@ -12,6 +12,13 @@ the package a change belongs to.
 
 ### Fixed
 
+- **ddev-typo3-playwright-toolkit** — `ddev playwright show-report` and `ddev
+  playwright-ui` print a link you can open. A project with `additional_hostnames` or
+  `additional_fqdns` got every hostname in one address with the port stuck on the last
+  one, because DDEV redefines `DDEV_HOSTNAME` as a comma-separated list. The link now
+  names the primary hostname and carries the served port, whatever port the router
+  itself uses.
+
 - **@plan2net/typo3-playwright-toolkit** — the scenario setup has a time budget of its
   own, so it no longer spends the first test's timeout. A test whose setup took most of
   the budget failed on whatever it was doing next, naming a step that was not slow.

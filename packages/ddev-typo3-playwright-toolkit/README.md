@@ -158,6 +158,9 @@ every interface, so the printed link works from your own browser. `PW_UI_PORT` a
 `PW_REPORT_PORT` change the ports, but you then have to change them in that file as
 well.
 
+The link names your project's primary hostname. A project with several hostnames can
+use any of them, since they all reach the same container.
+
 ## Using the package
 
 `ddev playwright` passes everything on to `npx playwright`, so every Playwright

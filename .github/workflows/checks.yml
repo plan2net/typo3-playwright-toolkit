@@ -290,7 +290,7 @@ jobs:
           bats tests/argument-forwarding.bats tests/prepare-template.bats
           tests/db-test-service.bats tests/install-manifest.bats
           tests/test-directory.bats tests/browser-server.bats
-          tests/replay.bats
+          tests/replay.bats tests/browser-url.bats
 
   shell:
     name: add-on (shellcheck)

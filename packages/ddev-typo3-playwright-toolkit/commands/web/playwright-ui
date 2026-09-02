@@ -39,7 +39,7 @@ fi
 playwright_prepare_template || exit 1
 
 PORT="${PW_UI_PORT:-3000}"
-URL="https://${DDEV_HOSTNAME:-${DDEV_SITENAME}.ddev.site}:${PORT}"
+URL="$(playwright_serve_url "${PORT}")"
 
 echo ""
 echo "[playwright-ui] Open ${URL}"
