@@ -27,6 +27,16 @@ export const SETUP_DEFAULTS = {
     pollMs: 100,
 }
 
+/**
+ * Playwright kills the fixture at this value, so it has to sit above the worst case
+ * ensureState allows itself, or a generic message replaces the one naming the lock.
+ */
+export function setupFixtureTimeout(config: ToolkitConfig): number {
+    const tuning = { ...SETUP_DEFAULTS, ...config.setup }
+
+    return tuning.waitTimeoutMs + tuning.attemptTimeoutMs
+}
+
 export interface SetupContext {
     testId: string
     attempt: number
@@ -45,7 +55,16 @@ export interface EnsureStateOptions<S> {
 }
 
 export type EnsureStateOutcome<S> =
-    | { status: 'ready'; testId: string; attempt: number; data: S; setupRan: boolean; waitedMs: number }
+    | {
+          status: 'ready'
+          testId: string
+          attempt: number
+          data: S
+          setupRan: boolean
+          waitedMs: number
+          /** What the setup cost, even when this call only found it committed. */
+          setupMs: number
+      }
     | { status: 'skip'; reason: string }
 
 /**
@@ -139,6 +158,7 @@ function settledOutcome<S>(
             data: committed.data,
             setupRan: false,
             waitedMs,
+            setupMs: committed.setupMs,
         }
     }
 
@@ -237,6 +257,7 @@ export async function ensureState<S>(
                 data: result.data,
                 setupRan: true,
                 waitedMs: 0,
+                setupMs: durationMs,
             }
         }
 

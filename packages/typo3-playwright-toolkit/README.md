@@ -165,6 +165,17 @@ result as `written`. It never fails a test.
 The setup runs once per file, even when the file runs in several browser projects.
 The other projects use the state and the test database that the first one created.
 
+The setup has its own time budget, so a test keeps the full timeout for its own work.
+Setup time is not part of a test's duration; the report carries it as an annotation:
+
+```
+setup: built in 12.9s
+```
+
+The tests that reuse the setup say `reused, built in 12.9s`. How long a stuck setup
+runs is `setup.attemptTimeoutMs` and `setup.waitTimeoutMs`, 90s per attempt and two
+attempts by default. Lower them to hear about a broken setup sooner.
+
 ### When something fails, TYPO3 says why
 
 A failing test now prints what TYPO3 wrote to its log while that test ran, under the

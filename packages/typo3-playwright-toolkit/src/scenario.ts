@@ -1,7 +1,7 @@
 import { test as base, type APIRequestContext, type Browser, type Page, type TestInfo } from '@playwright/test'
 import { toolkitHeaders } from './contract.js'
 import { getToolkitConfig, type ToolkitConfig } from './config.js'
-import { ensureState } from './state/ensure-state.js'
+import { ensureState, setupFixtureTimeout } from './state/ensure-state.js'
 import { applyScenarioOutcome, recordTestFailure } from './state/scenario-outcome.js'
 import { sanitizeScenarioKey } from './state/run-namespace.js'
 import {
@@ -185,6 +185,12 @@ export async function openAuthenticatedPage(
     }
 }
 
+export function setupAnnotation(setupMs: number, setupRan: boolean): string {
+    const seconds = (setupMs / 1000).toFixed(1)
+
+    return setupRan ? `built in ${seconds}s` : `reused, built in ${seconds}s`
+}
+
 const scenarioOwners = new Map<string, symbol>()
 
 /** Only a worker that runs tests from both scenarios can see the clash. */
@@ -215,7 +221,7 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
     return base.extend<
         ScenarioFixtures<S> & { resolvedScenario: ResolvedScenario<S>; automaticAccessibilityScan: void }
     >({
-        resolvedScenario: async ({ browser }, use, testInfo: TestInfo) => {
+        resolvedScenario: [async ({ browser }, use, testInfo: TestInfo) => {
             claimScenarioFile(testInfo.file, owner)
 
             const config = getToolkitConfig()
@@ -272,6 +278,15 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
                 config.replay,
             )
 
+            if (outcome.status === 'ready') {
+                // The fixture's own timeout keeps this out of the test's duration,
+                // so the report shows it nowhere else.
+                testInfo.annotations.push({
+                    type: 'setup',
+                    description: setupAnnotation(outcome.setupMs, outcome.setupRan),
+                })
+            }
+
             await use({ data, testId: outcome.status === 'ready' ? outcome.testId : '' })
 
             if (testInfo.status !== testInfo.expectedStatus) {
@@ -283,7 +298,7 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
                     testInfo,
                 )
             }
-        },
+        }, { timeout: setupFixtureTimeout(getToolkitConfig()) }],
 
         state: async ({ resolvedScenario }, use) => {
             await use(resolvedScenario.data)

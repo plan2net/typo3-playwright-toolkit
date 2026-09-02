@@ -26,7 +26,7 @@ describe('applyScenarioOutcome', () => {
         const skipped: string[] = []
 
         const data = applyScenarioOutcome(
-            { status: 'ready', testId: 'ABCD1234EFGH5678', attempt: 1, data: { a: 1 }, setupRan: true, waitedMs: 0 },
+            { status: 'ready', testId: 'ABCD1234EFGH5678', attempt: 1, data: { a: 1 }, setupRan: true, waitedMs: 0, setupMs: 0 },
             (reason) => skipped.push(reason),
         )
 
@@ -60,6 +60,7 @@ describe('applyScenarioOutcome', () => {
             data: { a: 1 },
             setupRan: true,
             waitedMs: 0,
+            setupMs: 0,
         } as const
 
         it('skips the test even though the setup succeeded', () => {

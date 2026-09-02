@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { claimScenarioFile } from '#src/scenario.js'
+import { claimScenarioFile, defineScenario } from '#src/scenario.js'
+import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
+
+// Playwright reads a fixture's options when the fixture is defined, so the setup
+// timeout means the config has to be set by then.
+describe('defineScenario', () => {
+    it('says what is missing when the config is not set yet', () => {
+        setToolkitConfig(undefined as unknown as ToolkitConfig)
+
+        expect(() => defineScenario(async () => ({}))).toThrow(/No toolkit config set/)
+    })
+})
 
 describe('one scenario per file', () => {
     it('refuses a second scenario in the same file', () => {

@@ -10,6 +10,15 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — the scenario setup has a time budget of its
+  own, so it no longer spends the first test's timeout. A test whose setup took most of
+  the budget failed on whatever it was doing next, naming a step that was not slow.
+  Setup time is reported as a `setup:` annotation, since it is no longer part of a
+  test's duration. `setup.attemptTimeoutMs` and `setup.waitTimeoutMs` now decide when a
+  stuck setup gives up; lower them for a quicker answer.
+
 ### Added
 
 - **@plan2net/typo3-playwright-toolkit**, **plan2net/playwright-toolkit** — a save now

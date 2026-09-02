@@ -4,7 +4,7 @@ import * as os from 'os'
 import * as path from 'path'
 import type { ToolkitConfig } from '#src/config.js'
 import { configForRun } from '../../helpers.js'
-import { deriveTestId, ensureState } from '#src/state/ensure-state.js'
+import { deriveTestId, ensureState, setupFixtureTimeout } from '#src/state/ensure-state.js'
 import { REPLAY_TEST_ID, TEST_ID_PATTERN } from '#src/contract.js'
 import { readAttempts } from '#src/state/attempt-registry.js'
 import { commitScenarioState, readScenarioState, readScenarioFailure, recordScenarioFailure } from '#src/state/scenario-state.js'
@@ -49,6 +49,17 @@ describe('deriveTestId', () => {
     })
 })
 
+describe('setupFixtureTimeout', () => {
+    it('covers a full wait plus one running attempt', () => {
+        const timeout = setupFixtureTimeout({
+            ...config,
+            setup: { waitTimeoutMs: 1_000, attemptTimeoutMs: 400 },
+        })
+
+        expect(timeout).toBe(1_400)
+    })
+})
+
 describe('ensureState', () => {
     it('runs the setup and returns its data', async () => {
         const outcome = await ensureState(config, {
@@ -60,6 +71,23 @@ describe('ensureState', () => {
 
         expect(outcome).toMatchObject({ status: 'ready', setupRan: true })
         expect(outcome.status === 'ready' && outcome.data).toEqual({ slug: '/accordion' })
+    })
+
+    it('says how long the setup took', async () => {
+        let clock = 1_000
+        const outcome = await ensureState(config, {
+            key: 'scenario',
+            triggerId: 't1',
+            setup: async () => {
+                clock += 250
+
+                return {}
+            },
+            now: () => clock,
+            ...noWait,
+        })
+
+        expect(outcome.status === 'ready' && outcome.setupMs).toBe(250)
     })
 
     it('runs the setup once for repeated calls', async () => {
