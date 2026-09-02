@@ -29,6 +29,8 @@ export interface EditContext {
 
 export interface SavedRecord {
     uid: number
+    /** Every uid the redirect named, in datamap order: one POST may carry a batch. */
+    uids: number[]
     /** Absent where the table has no slug column. */
     slug?: string
 }
@@ -93,15 +95,15 @@ export async function saveRecord(
 
     refuseWhatTypo3Rejected(headers, record.table)
 
-    const uid = uidFrom(location, record.table)
-    if (undefined === uid) {
+    const uids = uidsFrom(location, record.table)
+    if (0 === uids.length) {
         throw new Error(
             `[typo3-playwright-toolkit] The save of ${record.table} redirected to no uid — ` +
                 `a rejected request-token or session redirects to the login form. Location: ${location}`,
         )
     }
 
-    return { uid, ...savedRecord(headers) }
+    return { uid: uids[0], uids, ...savedRecord(headers) }
 }
 
 /**
@@ -206,13 +208,12 @@ function savedRecord(headers: Record<string, string>): { slug?: string } {
 }
 
 /** `edit[tt_content][42]=edit`, in whatever encoding the header carries. */
-function uidFrom(location: string, table: string): number | undefined {
-    const match = decodeURIComponent(location).match(new RegExp(`edit\\[${table}\\]\\[(\\d+)\\]`))
-    if (null === match) {
-        return undefined
-    }
+function uidsFrom(location: string, table: string): number[] {
+    const matches = decodeURIComponent(location).matchAll(
+        new RegExp(`edit\\[${table}\\]\\[(\\d+)\\]`, 'g'),
+    )
 
-    const uid = Number(match[1])
-
-    return Number.isInteger(uid) && uid > 0 ? uid : undefined
+    return [...matches]
+        .map((match) => Number(match[1]))
+        .filter((uid) => Number.isInteger(uid) && uid > 0)
 }

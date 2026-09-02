@@ -43,7 +43,21 @@ export class ContentBuilder {
     }
 }
 
-class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInterface> {
+/** What `batch()` needs of a queued element, whatever CType it builds. */
+export interface QueuedContent {
+    readonly identifier: string
+    readonly targetPageId: string
+    prepared(
+        context: RequestContext,
+        positionPid: string,
+    ): { row: Record<string, unknown>; records: RecordDataMap }
+}
+
+class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInterface>
+    implements QueuedContent
+{
+    readonly identifier = newRecordIdentifier()
+
     private builder: ContentBuilderInterface
     private readonly fields: ContentFields = {}
     private readonly relations = new RelationSet('tt_content', (column) => column in this.fields)
@@ -55,6 +69,10 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         private requestContext?: Partial<RequestContext>,
     ) {
         this.builder = createContent(type)
+    }
+
+    get targetPageId(): string {
+        return this.pageId
     }
 
     configure(fn: (builder: B) => void): this {
@@ -99,7 +117,28 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
 
     async create(): Promise<{ id: string }> {
         const context = resolveRequestContext(this.page, this.requestContext)
-        const identifier = newRecordIdentifier()
+        const pageId = replayParentId(context, this.pageId)
+        const { row, records } = this.prepared(context, insertPosition(this.page, pageId))
+
+        const data: RecordDataMap = { tt_content: { [this.identifier]: row } }
+        mergeRecords(data, records)
+
+        const saved = await saveRecord(this.page.request, context, {
+            table: 'tt_content',
+            identifier: this.identifier,
+            target: Number(pageId),
+            data,
+        })
+
+        lastElementOnPage.get(this.page)?.set(pageId, saved.uid)
+
+        return { id: String(saved.uid) }
+    }
+
+    prepared(
+        context: RequestContext,
+        positionPid: string,
+    ): { row: Record<string, unknown>; records: RecordDataMap } {
         const pageId = replayParentId(context, this.pageId)
         const fields = this.builder.getFields()
 
@@ -118,8 +157,8 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         const outer = this.relations.materialise(owner)
         refuseSharedColumns(inner.columns, outer.columns)
 
-        const record: Record<string, unknown> = {
-            pid: insertPosition(this.page, pageId),
+        const row: Record<string, unknown> = {
+            pid: positionPid,
             sys_language_uid: 0,
             CType: fields.CType || this.builder.type,
             colPos: fields.colPos ?? 0,
@@ -129,20 +168,78 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         }
 
         // Merged per table, not spread: a child table may be tt_content itself.
-        const data: RecordDataMap = { tt_content: { [identifier]: record } }
-        mergeRecords(data, inner.records)
-        mergeRecords(data, outer.records)
+        const records: RecordDataMap = {}
+        mergeRecords(records, inner.records)
+        mergeRecords(records, outer.records)
 
-        const saved = await saveRecord(this.page.request, context, {
-            table: 'tt_content',
-            identifier: identifier,
-            target: Number(pageId),
-            data,
-        })
+        return { row, records }
+    }
+}
 
-        lastElementOnPage.get(this.page)?.set(pageId, saved.uid)
+/**
+ * One request for many elements, which saves a backend bootstrap each. Their own
+ * rows go in first so the uids come back in the order they were queued, and each
+ * element is positioned after the one before it: a positive pid means "insert at
+ * the top", so an unchained batch lays the page out backwards.
+ */
+export async function saveBatch(
+    page: Page,
+    requestContext: Partial<RequestContext> | undefined,
+    queued: QueuedContent[],
+): Promise<Array<{ id: string }>> {
+    if (0 === queued.length) {
+        throw new Error('[typo3-playwright-toolkit] batch() was given nothing to build.')
+    }
 
-        return { id: String(saved.uid) }
+    const context = resolveRequestContext(page, requestContext)
+    refuseASecondPage(queued)
+    const pageId = replayParentId(context, queued[0].targetPageId)
+
+    const rows: Record<string, Record<string, unknown>> = {}
+    const children: RecordDataMap = {}
+    let position = insertPosition(page, pageId)
+
+    for (const element of queued) {
+        const prepared = element.prepared(context, position)
+        rows[element.identifier] = prepared.row
+        mergeRecords(children, prepared.records)
+        // Backwards only: DataHandler drops a position it cannot resolve yet, silently.
+        position = `-${element.identifier}`
+    }
+
+    const data: RecordDataMap = { tt_content: rows }
+    mergeRecords(data, children)
+
+    const saved = await saveRecord(page.request, context, {
+        table: 'tt_content',
+        identifier: queued[0].identifier,
+        target: Number(pageId),
+        data,
+    })
+
+    const uids = saved.uids.slice(0, queued.length)
+    if (uids.length < queued.length) {
+        throw new Error(
+            `[typo3-playwright-toolkit] The batch posted ${queued.length} elements and the ` +
+                `redirect named ${uids.length} uids, so which element got which is unknown. ` +
+                'Build them with create() instead.',
+        )
+    }
+
+    lastElementOnPage.get(page)?.set(pageId, uids[uids.length - 1])
+
+    return uids.map((uid) => ({ id: String(uid) }))
+}
+
+function refuseASecondPage(queued: QueuedContent[]): void {
+    const first = queued[0].targetPageId
+    const other = queued.find((element) => element.targetPageId !== first)
+    if (undefined !== other) {
+        throw new Error(
+            `[typo3-playwright-toolkit] A batch builds on one and the same page, and this one ` +
+                `mixes ${first} with ${other.targetPageId}. Elements are positioned after one ` +
+                'another, which means nothing across pages. Use one batch per page.',
+        )
     }
 }
 

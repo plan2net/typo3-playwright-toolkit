@@ -36,6 +36,39 @@ final class ContentDatamapTest extends FunctionalTestCase
             ->createFromUserPreferences($backendUser);
     }
 
+    // A positive pid means "insert at the top", so one datamap lays its elements out
+    // backwards. Batching without positioning would reorder a page and say nothing.
+    #[Test]
+    public function elementsSharingAPlainPidComeOutBackwards(): void
+    {
+        $ids = $this->substitutedIds([
+            'tt_content' => [
+                'NEWfirst' => $this->element('First'),
+                'NEWsecond' => $this->element('Second'),
+                'NEWthird' => $this->element('Third'),
+            ],
+        ]);
+
+        self::assertCount(3, $ids);
+        self::assertSame(['Third', 'Second', 'First'], $this->headersInPageOrder());
+    }
+
+    // The chain may only point backwards: for a placeholder it has not substituted
+    // yet, DataHandler skips the positioning silently.
+    #[Test]
+    public function chainingEachElementAfterTheLastKeepsTheDatamapOrder(): void
+    {
+        $this->substitutedIds([
+            'tt_content' => [
+                'NEWfirst' => $this->element('First'),
+                'NEWsecond' => ['pid' => '-NEWfirst'] + $this->element('Second'),
+                'NEWthird' => ['pid' => '-NEWsecond'] + $this->element('Third'),
+            ],
+        ]);
+
+        self::assertSame(['First', 'Second', 'Third'], $this->headersInPageOrder());
+    }
+
     #[Test]
     public function theParentFieldIsWhatLinksAFileReference(): void
     {
@@ -283,6 +316,34 @@ final class ContentDatamapTest extends FunctionalTestCase
         self::assertSame([], $dataHandler->errorLog);
 
         return array_map(static fn($uid): int => (int) $uid, $dataHandler->substNEWwithIDs);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function element(string $header): array
+    {
+        return ['pid' => 1, 'CType' => 'text', 'colPos' => 0, 'header' => $header];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function headersInPageOrder(): array
+    {
+        $queryBuilder = $this->getConnectionPool()->getQueryBuilderForTable('tt_content');
+        $queryBuilder->getRestrictions()->removeAll();
+
+        /** @var list<array{header: string}> $rows */
+        $rows = $queryBuilder
+            ->select('header')
+            ->from('tt_content')
+            ->where($queryBuilder->expr()->eq('pid', 1))
+            ->orderBy('sorting')
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        return array_map(static fn(array $row): string => (string) $row['header'], $rows);
     }
 
     /**

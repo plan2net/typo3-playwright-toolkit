@@ -10,6 +10,15 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **@plan2net/typo3-playwright-toolkit** — `builders.batch()` builds several content
+  elements of a page in one request instead of one each. Every save boots the backend,
+  so a scenario that builds six elements spends most of its setup doing that six times.
+  The elements keep the order they are queued in and each one gets its uid back. They
+  have to share a page, and anything another element points at still has to be created
+  on its own first.
+
 ### Changed
 
 - **Documentation** — [Where things run](README.md#where-things-run) is one section for

@@ -292,6 +292,48 @@ override getRelations(owner: RelationOwner): RelationOutput {
 }
 ```
 
+### One request for several elements
+
+Every `create()` is a POST, and every POST boots the backend, builds the form and runs
+DataHandler. A page with six elements pays for that six times, which is most of what
+its setup costs. `builders.batch()` puts them in one:
+
+```ts
+const [hero, intro, gallery] = await builders.batch(
+    builders.content().onPage(page.id).ofType('header')
+        .configure((element) => element.withHeader('Hero')),
+    builders.content().onPage(page.id).ofType('text')
+        .configure((element) => element.withBodytext('<p>Intro</p>')),
+    builders.content().onPage(page.id).ofType('textmedia')
+        .configure((element) => element.withHeader('Gallery'))
+        .withFileReferences('assets', [1, 2]),
+)
+```
+
+The queued builders get no `.create()` — `batch` saves them. They land on the page in
+the order you list them, you get a uid for each, and their files and child records come
+along in the same request.
+
+All the elements have to belong to one page, because a request positions them after one
+another and that means nothing across pages. They also cannot point at each other: a
+relation needs a uid, and only a save hands one back. Create what is pointed at first,
+then batch the rest:
+
+```ts
+const container = await builders.content().onPage(page.id).ofType('my_container').create()
+
+await builders.batch(
+    builders.content().onPage(page.id).ofType('text')
+        .configure((element) => element.inContainer(Number(container.id))),
+    builders.content().onPage(page.id).ofType('header')
+        .configure((element) => element.inContainer(Number(container.id))),
+)
+```
+
+A content type whose children hang off a column of its own needs none of this:
+`withChildren` already writes them in the same request as their parent. Batching is for
+elements that sit side by side on a page.
+
 ### Calling the site directly
 
 The `request` client — the one `defineScenario` hands your setup, and the `request`

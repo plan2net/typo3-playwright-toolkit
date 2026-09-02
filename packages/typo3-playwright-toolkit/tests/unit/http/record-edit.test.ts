@@ -256,6 +256,26 @@ describe('saveRecord', () => {
         expect(saved.uid).toBe(42)
     })
 
+    // The controller rewrites its edit configuration to name every record the datamap created.
+    it('reads every uid the redirect names, in the order the datamap listed them', async () => {
+        const { poster } = fakePoster({
+            status: 302,
+            location:
+                '/typo3/record/edit?edit%5Btt_content%5D%5B7%5D=edit' +
+                '&edit%5Btt_content%5D%5B8%5D=edit&edit%5Btt_content%5D%5B9%5D=edit&token=abc',
+        })
+
+        const saved = await saveRecord(poster, context, {
+            table: 'tt_content',
+            identifier: 'NEWfirst',
+            target: 1,
+            data: { tt_content: { NEWfirst: { header: 'First' } } },
+        })
+
+        expect(saved.uids).toEqual([7, 8, 9])
+        expect(saved.uid).toBe(7)
+    })
+
     it('follows no redirect, or the uid would be gone by the time we look', async () => {
         const { poster, posted } = fakePoster()
 

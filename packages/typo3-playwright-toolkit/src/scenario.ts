@@ -11,7 +11,7 @@ import {
     type RequestContext,
 } from './builders/request-context.js'
 import { recordSaver, type RecordToSave, type SavedRecord } from './http/record-edit.js'
-import { ContentBuilder } from './builders/content-builder.js'
+import { ContentBuilder, saveBatch, type QueuedContent } from './builders/content-builder.js'
 import { PageBuilder } from './builders/page-builder.js'
 import { ContextWithTestId, PageWithTestId } from './types/playwright-extensions.js'
 import { applyToolkitHeaders } from './http/off-site-headers.js'
@@ -45,6 +45,12 @@ export async function resolveSetupOutcome<T>(
 export interface ScenarioBuilders {
     page(): PageBuilder
     content(): ContentBuilder
+    /**
+     * Builds several elements of one page in a single request, in the order given.
+     * They may not reference one another — that needs a uid, which only a save
+     * hands back, so anything referenced has to be created before the batch.
+     */
+    batch(...queued: QueuedContent[]): Promise<Array<{ id: string }>>
 }
 
 export interface SetupTools {
@@ -246,6 +252,7 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
                             builders: {
                                 page: () => new PageBuilder(session.page, builderContext),
                                 content: () => new ContentBuilder(session.page, builderContext),
+                                batch: (...queued) => saveBatch(session.page, builderContext, queued),
                             },
                             saveRecord: recordSaver(
                                 session.page.request,

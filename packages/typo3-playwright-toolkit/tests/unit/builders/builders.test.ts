@@ -4,7 +4,7 @@ import * as path from 'path'
 import { fileURLToPath } from 'url'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
 import { registerContentTypes } from '#src/builders/content-factory.js'
-import { ContentBuilder } from '#src/builders/content-builder.js'
+import { ContentBuilder, saveBatch } from '#src/builders/content-builder.js'
 import { PageBuilder } from '#src/builders/page-builder.js'
 import { flexForm, imageCrop } from '#src/builders/fields.js'
 import { CoreContent } from '#src/builders/core-content.js'
@@ -83,7 +83,12 @@ function fakePage(uid: number | number[], refusalBody?: string, testId: string =
                 }
 
                 const table = decodeURIComponent(url).match(/edit\[(\w+)\]/)?.[1] ?? 'pages'
-                const location = `/typo3/record/edit?edit[${table}][${nextUid()}]=edit`
+                // One per new record of that table, which is what the controller names.
+                const created = Object.keys(toDataMap(options.multipart)[table] ?? {})
+                const uids = (created.length > 0 ? created : ['one']).map(() => nextUid())
+                const location =
+                    '/typo3/record/edit?' +
+                    uids.map((saved) => `edit[${table}][${saved}]=edit`).join('&')
 
                 return {
                     status: () => 302,
@@ -764,5 +769,64 @@ describe('duplicate slugs within one scenario', () => {
         await expect(
             new PageBuilder(page, context).withTitle('Renamed').withSlug('/same').update('10'),
         ).resolves.toMatchObject({ id: '10' })
+    })
+})
+
+describe('batch', () => {
+    const batch = (page: ConstructorParameters<typeof ContentBuilder>[0]) =>
+        (...queued: Parameters<typeof saveBatch>[2]) =>
+            saveBatch(page, { routeToken: ROUTE_TOKEN }, queued)
+
+    it('posts every element in one request and hands back a uid for each', async () => {
+        const { posted, page } = fakePage([21, 22, 23])
+
+        const created = await batch(page)(
+            contentBuilder(page).onPage('5').ofType('header').configure((c) => c.withHeader('First')),
+            contentBuilder(page).onPage('5').ofType('header').configure((c) => c.withHeader('Second')),
+            contentBuilder(page).onPage('5').ofType('header').configure((c) => c.withHeader('Third')),
+        )
+
+        expect(posted).toHaveLength(1)
+        expect(created.map((element) => element.id)).toEqual(['21', '22', '23'])
+    })
+
+    // A plain pid inserts at the top, so without the chain the page reads backwards.
+    it('positions each element after the one before it', async () => {
+        const { posted, page } = fakePage([21, 22, 23])
+
+        await batch(page)(
+            contentBuilder(page).onPage('5').ofType('header').configure((c) => c.withHeader('First')),
+            contentBuilder(page).onPage('5').ofType('header').configure((c) => c.withHeader('Second')),
+            contentBuilder(page).onPage('5').ofType('header').configure((c) => c.withHeader('Third')),
+        )
+
+        const rows = posted[0].dataMap.tt_content
+        const [first, second, third] = Object.keys(rows)
+        expect(rows[first].pid).toBe('5')
+        expect(rows[second].pid).toBe(`-${first}`)
+        expect(rows[third].pid).toBe(`-${second}`)
+    })
+
+    it('leaves a following create() after the batch, not above it', async () => {
+        const { posted, page } = fakePage([21, 22, 30])
+
+        await batch(page)(
+            contentBuilder(page).onPage('5').ofType('header').configure((c) => c.withHeader('First')),
+            contentBuilder(page).onPage('5').ofType('header').configure((c) => c.withHeader('Second')),
+        )
+        await contentBuilder(page).onPage('5').ofType('header').configure((c) => c.withHeader('Third')).create()
+
+        expect(only(posted[1].dataMap.tt_content).pid).toBe('-22')
+    })
+
+    it('refuses elements from different pages, which one request cannot position', async () => {
+        const { page } = fakePage([21, 22])
+
+        await expect(
+            batch(page)(
+                contentBuilder(page).onPage('5').ofType('header'),
+                contentBuilder(page).onPage('6').ofType('header'),
+            ),
+        ).rejects.toThrow(/same page/)
     })
 })

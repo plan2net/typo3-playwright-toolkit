@@ -16,7 +16,7 @@ export {
 } from './config.js'
 export { defineBasePlaywrightConfig, type BasePlaywrightOverrides } from './playwright/base-config.js'
 
-export { ContentBuilder } from './builders/content-builder.js'
+export { ContentBuilder, type QueuedContent } from './builders/content-builder.js'
 export { PageBuilder } from './builders/page-builder.js'
 // getRelations takes and returns these, so a builder that defers its relations
 // cannot be written without them.
