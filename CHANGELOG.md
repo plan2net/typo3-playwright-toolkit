@@ -10,6 +10,13 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-09-02
+
+A scenario that builds a page full of content elements spends most of its setup waiting
+for the backend to boot, once per element. `builders.batch()` puts them in one request.
+And where the browsers and the test run live is now one section with a diagram of the
+three layouts, instead of a paragraph in each of three files.
+
 ### Added
 
 - **@plan2net/typo3-playwright-toolkit** — `builders.batch()` builds several content
@@ -568,7 +575,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.11.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.13.0...main
+[0.13.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.9.0...v0.10.0
