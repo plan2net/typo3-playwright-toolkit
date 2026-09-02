@@ -10,6 +10,15 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **@plan2net/typo3-playwright-toolkit**, **plan2net/playwright-toolkit** — a save now
+  reports how many records TYPO3 wrote per table, and warns when that is more than was
+  asked for. Changing the slug of a page with descendants re-slugs every one of them and
+  writes a redirect for each, so one requested record can cost dozens of writes — and the
+  save still answers like an ordinary success. The counts are on the result as `written`.
+  It never fails a test.
+
 ## [0.13.0] - 2026-09-02
 
 A scenario that builds a page full of content elements spends most of its setup waiting

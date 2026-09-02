@@ -101,6 +101,36 @@ final class RecordedErrors
     }
 
     /**
+     * @return array<string, int> table => records DataHandler wrote
+     */
+    public function writesAfter(Connection $connection, int $afterUid): array
+    {
+        $queryBuilder = $connection->createQueryBuilder();
+
+        $rows = $queryBuilder
+            ->select('tablename')
+            ->addSelectLiteral($queryBuilder->expr()->count('uid', 'writes'))
+            ->from('sys_log')
+            ->where(
+                $queryBuilder->expr()->gt('uid', $queryBuilder->createNamedParameter($afterUid, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('error', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('type', $queryBuilder->createNamedParameter(SystemLogType::DB, Connection::PARAM_INT))
+            )
+            ->groupBy('tablename')
+            // GROUP BY leaves the order to the engine, and the caller compares the whole map.
+            ->orderBy('tablename', 'ASC')
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        $written = [];
+        foreach ($rows as $row) {
+            $written[(string) $row['tablename']] = (int) $row['writes'];
+        }
+
+        return $written;
+    }
+
+    /**
      * @param array<string, mixed> $row
      *
      * @return array<string, mixed>

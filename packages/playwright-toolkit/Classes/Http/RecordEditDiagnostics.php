@@ -46,12 +46,7 @@ final class RecordEditDiagnostics implements MiddlewareInterface
         $before = $this->lastLogUid();
         $response = $handler->handle($request);
 
-        $slug = $this->slugOf($response->getHeaderLine('location'));
-        if (null !== $slug) {
-            $response = $response->withHeader(SavedRecord::HEADER, (string) json_encode(['slug' => $slug]));
-        }
-
-        return $this->withDiagnostics($response, $before);
+        return $this->withDiagnostics($this->withSavedRecord($response, $before), $before);
     }
 
     private function lastLogUid(): int
@@ -65,6 +60,30 @@ final class RecordEditDiagnostics implements MiddlewareInterface
             ->setMaxResults(1)
             ->executeQuery()
             ->fetchOne();
+    }
+
+    private function withSavedRecord(ResponseInterface $response, int $before): ResponseInterface
+    {
+        $envelope = [];
+
+        $slug = $this->slugOf($response->getHeaderLine('location'));
+        if (null !== $slug) {
+            $envelope['slug'] = $slug;
+        }
+
+        $written = $this->recordedErrors->writesAfter(
+            $this->connectionPool->getConnectionForTable('sys_log'),
+            $before
+        );
+        if ([] !== $written) {
+            $envelope['written'] = $written;
+        }
+
+        if ([] === $envelope) {
+            return $response;
+        }
+
+        return $response->withHeader(SavedRecord::HEADER, (string) json_encode($envelope));
     }
 
     private function withDiagnostics(ResponseInterface $response, int $before): ResponseInterface

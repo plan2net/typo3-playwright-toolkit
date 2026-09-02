@@ -131,11 +131,22 @@ if TYPO3 changes that route or its fields, the tests must fail rather than pass 
 an endpoint of our own.
 
 The save answers with a redirect naming the new uid, and `RecordEditDiagnostics` adds
-`X-Playwright-Saved-Record` to it — JSON, today `{"slug": "…"}`. The site does not
-always keep the slug that was posted, so this is the only way the caller learns the
-page's URL without a second request. The middleware only reads; it takes the secret like
-every other entry point and, without it, hands back the backend's own answer
-untouched. A new field about the saved record belongs in that JSON.
+`X-Playwright-Saved-Record` to it — JSON, `contract/saved-record-header.json`:
+
+```
+X-Playwright-Saved-Record: {"slug":"/a-page-1","written":{"pages":2,"sys_redirect":1}}
+```
+
+Both keys are optional. `slug` is absent where the table has no slug column; the site
+does not always keep the slug that was posted, so this is the only way the caller
+learns the page's URL. `written` counts the records DataHandler wrote per table, which
+is not only the ones that were asked for: a slug change re-slugs every descendant page
+and writes a redirect for each. The builder compares it against its own datamap and
+warns. It is absent when DataHandler logged no write.
+
+The middleware only reads; it takes the secret like every other entry point and,
+without it, hands back the backend's own answer untouched. A new field about the saved
+record belongs in that JSON.
 
 The same middleware adds a second header when TYPO3 **refused** something while
 saving, so the builder can fail at the call that saved rather than leaving the test to

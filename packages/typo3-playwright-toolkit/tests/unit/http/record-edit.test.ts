@@ -1,4 +1,7 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import * as fs from 'fs'
+import * as path from 'path'
+import { fileURLToPath } from 'url'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
 import { recordSaver, saveRecord, type FormPoster } from '#src/http/record-edit.js'
 import { SAVED_RECORD_HEADER } from '#src/contract.js'
@@ -29,6 +32,7 @@ function fakePoster(
         location?: string
         body?: string
         storedSlug?: string
+        written?: Record<string, number>
         refused?: { errors: Array<{ message: string; table: string }>; count: number }
     } = {
         status: 302,
@@ -50,10 +54,11 @@ function fakePoster(
                 status: () => response.status,
                 headers: (): Record<string, string> => ({
                     ...(response.location ? { location: response.location } : {}),
-                    ...(response.storedSlug
+                    ...(response.storedSlug || response.written
                         ? {
                               [SAVED_RECORD_HEADER.toLowerCase()]: JSON.stringify({
-                                  slug: response.storedSlug,
+                                  ...(response.storedSlug ? { slug: response.storedSlug } : {}),
+                                  ...(response.written ? { written: response.written } : {}),
                               }),
                           }
                         : {}),
@@ -96,6 +101,107 @@ describe('saveRecord', () => {
         })
 
         expect(saved.slug).toBe('/a-page-1')
+    })
+
+    it('reports how many records TYPO3 wrote per table', async () => {
+        const { poster } = fakePoster({
+            status: 302,
+            location: '/typo3/record/edit?edit%5Bpages%5D%5B42%5D=edit&token=abc',
+            written: { pages: 1 },
+        })
+
+        const saved = await saveRecord(poster, context, {
+            table: 'pages',
+            identifier: 'NEWpage',
+            target: 1,
+            data: { pages: { NEWpage: { title: 'A page' } } },
+        })
+
+        expect(saved.written).toEqual({ pages: 1 })
+    })
+
+    it('warns naming the tables TYPO3 wrote into that nobody asked for', async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const { poster } = fakePoster({
+            status: 302,
+            location: '/typo3/record/edit?edit%5Bpages%5D%5B42%5D=edit&token=abc',
+            written: { pages: 17, sys_redirect: 10 },
+        })
+
+        await saveRecord(poster, context, {
+            table: 'pages',
+            identifier: 'NEWpage',
+            target: 1,
+            data: { pages: { NEWpage: { title: 'A page', slug: '/a-page' } } },
+        })
+
+        const said = warn.mock.calls.map((call) => String(call[0])).join('\n')
+        warn.mockRestore()
+
+        expect(said).toMatch(/pages 17 \(16 not requested\)/)
+        expect(said).toMatch(/sys_redirect 10 \(10 not requested\)/)
+    })
+
+    // A diagnostic that fires on every clean save gets tuned out.
+    it('says nothing when a batch wrote exactly the records it asked for', async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const { poster } = fakePoster({
+            status: 302,
+            location: '/typo3/record/edit?edit%5Btt_content%5D%5B42%5D=edit&token=abc',
+            written: { tt_content: 3 },
+        })
+
+        await saveRecord(poster, context, {
+            table: 'tt_content',
+            identifier: 'NEWfirst',
+            target: 1,
+            data: {
+                tt_content: {
+                    NEWfirst: { header: 'First' },
+                    NEWsecond: { header: 'Second' },
+                    NEWthird: { header: 'Third' },
+                },
+            },
+        })
+
+        const said = warn.mock.calls.map((call) => String(call[0]))
+        warn.mockRestore()
+
+        expect(said).toEqual([])
+    })
+
+    it('parses the saved-record envelope the extension proves it answers with', async () => {
+        const fixturePath = path.resolve(
+            path.dirname(fileURLToPath(import.meta.url)),
+            '../../../../../contract/saved-record-header.json',
+        )
+        const envelope = JSON.parse(fs.readFileSync(fixturePath, 'utf-8')) as Record<string, unknown>
+        delete envelope._comment
+
+        const poster: FormPoster = {
+            async post() {
+                return {
+                    status: () => 302,
+                    headers: () => ({
+                        location: '/typo3/record/edit?edit%5Bpages%5D%5B42%5D=edit&token=abc',
+                        [SAVED_RECORD_HEADER.toLowerCase()]: JSON.stringify(envelope),
+                    }),
+                    text: async () => '',
+                }
+            },
+        }
+
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const saved = await saveRecord(poster, context, {
+            table: 'pages',
+            identifier: 'NEWpage',
+            target: 1,
+            data: { pages: { NEWpage: { title: 'A page' } } },
+        })
+        warn.mockRestore()
+
+        expect(saved.slug).toBe('/a-page-1')
+        expect(saved.written).toEqual({ pages: 2, sys_redirect: 1 })
     })
 
     it('fails at the call that saved when TYPO3 refused something', async () => {

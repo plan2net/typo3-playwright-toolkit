@@ -1,0 +1,8 @@
+{
+    "_comment": "The exact X-Playwright-Saved-Record envelope a record/edit save answers with. The extension asserts its real header matches this; the toolkit asserts its client parses it. Neither side may change it alone. Both keys are optional.",
+    "slug": "/a-page-1",
+    "written": {
+        "pages": 2,
+        "sys_redirect": 1
+    }
+}

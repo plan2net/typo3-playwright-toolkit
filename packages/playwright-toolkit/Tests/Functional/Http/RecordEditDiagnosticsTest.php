@@ -9,6 +9,7 @@ use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
 use Plan2net\PlaywrightToolkit\Http\SavedRecord;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\TestContext;
+use Plan2net\PlaywrightToolkit\Tests\ContractFixture;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -93,6 +94,32 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
         );
     }
 
+    #[Test]
+    public function reportsHowManyRecordsWereWrittenPerTable(): void
+    {
+        $this->givenPage('/a-page-1');
+
+        $response = $this->saveWhileTypo3Writes(
+            '/typo3/record/edit?edit%5Bpages%5D%5B17%5D=edit',
+            ['pages', 'pages', 'sys_redirect'],
+        );
+
+        self::assertSame(['pages' => 2, 'sys_redirect' => 1], $this->savedRecord($response)['written']);
+    }
+
+    #[Test]
+    public function answersExactlyWhatTheContractFixtureHolds(): void
+    {
+        $this->givenPage('/a-page-1');
+
+        $response = $this->saveWhileTypo3Writes(
+            '/typo3/record/edit?edit%5Bpages%5D%5B17%5D=edit',
+            ['pages', 'pages', 'sys_redirect'],
+        );
+
+        self::assertSame(ContractFixture::read('saved-record-header'), $this->savedRecord($response));
+    }
+
     private function givenPage(string $slug): void
     {
         $this->getConnectionPool()->getConnectionForTable('pages')->insert('pages', [
@@ -158,6 +185,60 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
         };
 
         return $this->get(RecordEditDiagnostics::class)->process($request, $handler);
+    }
+
+    /**
+     * @param list<string> $tables one write log row per entry
+     */
+    private function saveWhileTypo3Writes(string $location, array $tables): ResponseInterface
+    {
+        $request = (new ServerRequest('https://testing.test/typo3/record/edit', 'POST'))
+            ->withHeader(TestApiSecret::HEADER, $this->secret);
+
+        $connection = $this->getConnectionPool()->getConnectionForTable('sys_log');
+        $handler = new class($location, $connection, $tables) implements RequestHandlerInterface {
+            /**
+             * @param list<string> $tables
+             */
+            public function __construct(
+                private readonly string $location,
+                private readonly Connection $connection,
+                private readonly array $tables,
+            ) {
+            }
+
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                foreach ($this->tables as $table) {
+                    $this->connection->insert('sys_log', [
+                        'type' => 1,
+                        'channel' => 'content',
+                        'level' => 'info',
+                        'error' => 0,
+                        'details' => 'Record was saved',
+                        'log_data' => '',
+                        'tablename' => $table,
+                        'recuid' => 0,
+                        'tstamp' => 1760954471,
+                        'component' => '',
+                        'message' => '',
+                        'data' => '',
+                    ]);
+                }
+
+                return new RedirectResponse($this->location, 302);
+            }
+        };
+
+        return $this->get(RecordEditDiagnostics::class)->process($request, $handler);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function savedRecord(ResponseInterface $response): array
+    {
+        return (array) json_decode($response->getHeaderLine(SavedRecord::HEADER), true);
     }
 
     /**

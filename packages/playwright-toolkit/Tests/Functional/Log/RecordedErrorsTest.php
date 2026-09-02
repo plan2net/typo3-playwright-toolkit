@@ -59,6 +59,35 @@ final class RecordedErrorsTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function countsWhatWasWrittenPerTableWithinTheWindow(): void
+    {
+        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'saved before the window', 'tablename' => 'pages']);
+        $before = (int) $this->getConnectionPool()->getConnectionForTable('sys_log')
+            ->executeQuery('SELECT MAX(uid) FROM sys_log')->fetchOne();
+
+        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'a page was saved', 'tablename' => 'pages']);
+        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'a page was saved', 'tablename' => 'pages']);
+        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'a redirect was saved', 'tablename' => 'sys_redirect']);
+
+        $written = (new RecordedErrors())->writesAfter($this->getConnectionPool()->getConnectionForTable('sys_log'), $before);
+
+        self::assertSame(['pages' => 2, 'sys_redirect' => 1], $written);
+    }
+
+    // A refusal writes a log row and no record, so counting it reports a write
+    // that never happened.
+    #[Test]
+    public function countsNeitherARefusalNorAnythingButDataHandler(): void
+    {
+        $this->insertRow(['type' => 1, 'error' => 1, 'details' => 'this table is not allowed', 'tablename' => 'tt_content']);
+        $this->insertRow(['type' => 5, 'channel' => 'php', 'error' => 0, 'details' => 'something else entirely', 'tablename' => 'pages']);
+
+        $written = (new RecordedErrors())->writesAfter($this->getConnectionPool()->getConnectionForTable('sys_log'), 0);
+
+        self::assertSame([], $written);
+    }
+
+    #[Test]
     public function answersExactlyWhatTheContractFixtureHolds(): void
     {
         $this->insertRow(['type' => 1, 'channel' => 'content', 'error' => 1, 'tstamp' => 1760954471, 'details' => "Attempt to insert a record on page '%s' (%s) where this table, %s, is not allowed", 'log_data' => '["\/gallery","127","sys_file_reference"]', 'tablename' => 'sys_file_reference']);

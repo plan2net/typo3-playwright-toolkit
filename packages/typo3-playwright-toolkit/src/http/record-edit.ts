@@ -33,6 +33,8 @@ export interface SavedRecord {
     uids: number[]
     /** Absent where the table has no slug column. */
     slug?: string
+    /** Per table, and not only the records that were asked for. */
+    written?: Record<string, number>
 }
 
 /** saveRecord with the poster and context already bound. */
@@ -103,7 +105,45 @@ export async function saveRecord(
         )
     }
 
-    return { uid: uids[0], uids, ...savedRecord(headers) }
+    const saved = { uid: uids[0], uids, ...savedRecord(headers) }
+    warnAboutUnrequestedWrites(record, saved.written)
+
+    return saved
+}
+
+/**
+ * A slug change re-slugs every descendant page and writes a redirect for each, and
+ * the save still answers like an ordinary success.
+ */
+function warnAboutUnrequestedWrites(record: RecordToSave, written?: Record<string, number>): void {
+    if (undefined === written) {
+        return
+    }
+
+    const requested = Object.fromEntries(
+        Object.entries(record.data).map(([table, rows]) => [table, Object.keys(rows).length]),
+    )
+    const unrequested = Object.entries(written)
+        .map(([table, count]) => ({ table, count, extra: count - (requested[table] ?? 0) }))
+        .filter(({ extra }) => extra > 0)
+
+    if (0 === unrequested.length) {
+        return
+    }
+
+    const wrote = Object.values(written).reduce((sum, count) => sum + count, 0)
+    const asked = Object.values(requested).reduce((sum: number, count: number) => sum + count, 0)
+    const tables = unrequested
+        .map(({ table, count, extra }) => `${table} ${count} (${extra} not requested)`)
+        .join(', ')
+    const hint = unrequested.some(({ table }) => 'sys_redirect' === table)
+        ? '\n  A slug change cascades to every descendant page and writes a redirect for each.'
+        : ''
+
+    console.warn(
+        `[typo3-playwright-toolkit] Saving ${record.table} wrote ${wrote} records for ${asked} requested.\n` +
+            `  ${tables}${hint}`,
+    )
 }
 
 /**
@@ -192,19 +232,31 @@ function header(headers: Record<string, string>, name: string): string | undefin
 }
 
 /** A malformed envelope is not worth failing a save over: the uid still stands. */
-function savedRecord(headers: Record<string, string>): { slug?: string } {
+function savedRecord(headers: Record<string, string>): { slug?: string; written?: Record<string, number> } {
     const value = header(headers, SAVED_RECORD_HEADER)
     if (undefined === value) {
         return {}
     }
 
     try {
-        const parsed = JSON.parse(value) as { slug?: unknown }
+        const parsed = JSON.parse(value) as { slug?: unknown; written?: unknown }
 
-        return 'string' === typeof parsed.slug ? { slug: parsed.slug } : {}
+        return {
+            ...('string' === typeof parsed.slug ? { slug: parsed.slug } : {}),
+            ...(isCountMap(parsed.written) ? { written: parsed.written } : {}),
+        }
     } catch {
         return {}
     }
+}
+
+function isCountMap(value: unknown): value is Record<string, number> {
+    return (
+        null !== value &&
+        'object' === typeof value &&
+        !Array.isArray(value) &&
+        Object.values(value).every((count) => 'number' === typeof count)
+    )
 }
 
 /** `edit[tt_content][42]=edit`, in whatever encoding the header carries. */

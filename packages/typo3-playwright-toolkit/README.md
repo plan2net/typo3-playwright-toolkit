@@ -149,6 +149,19 @@ The `slug` you get back is the one the site stored, which is not always the one 
 asked for — a translation and a name already in use are two cases, and an extension
 can add more. Navigate with the returned value, never with the string you passed in.
 
+A save also reports how many records TYPO3 actually wrote, and warns when that is more
+than you asked for:
+
+```
+[typo3-playwright-toolkit] Saving pages wrote 27 records for 1 requested.
+  pages 17 (16 not requested), sys_redirect 10 (10 not requested)
+  A slug change cascades to every descendant page and writes a redirect for each.
+```
+
+Nothing is wrong — the save succeeded. It is where a slow setup spends its time, and
+changing the slug of a page with descendants is the usual cause. The counts are on the
+result as `written`. It never fails a test.
+
 The setup runs once per file, even when the file runs in several browser projects.
 The other projects use the state and the test database that the first one created.
 
