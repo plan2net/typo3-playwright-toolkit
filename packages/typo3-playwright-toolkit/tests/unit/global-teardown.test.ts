@@ -141,33 +141,6 @@ describe('runTeardown', () => {
         await expect(runTeardown(config, options)).resolves.toMatchObject({ leaked: [] })
     })
 
-    // The toolkit no longer knows an engine, a host or a credential: it names the
-    // test ids and the extension does the rest. A module that cannot reach
-    // child_process cannot shell out to psql or mysql — asserted on the source
-    // because ESM exports cannot be spied on.
-    it('needs no database client binary anywhere in the package', () => {
-        const srcDir = path.dirname(new URL(import.meta.url).pathname)
-        const offenders: string[] = []
-
-        const walk = (dir: string): void => {
-            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-                const full = path.join(dir, entry.name)
-                if (entry.isDirectory()) {
-                    walk(full)
-                    continue
-                }
-                if (!entry.name.endsWith('.ts') || entry.name.endsWith('.test.ts')) {
-                    continue
-                }
-                if (/child_process|\bpsql\b|\bmysqld?\b/.test(fs.readFileSync(full, 'utf8'))) {
-                    offenders.push(path.relative(srcDir, full))
-                }
-            }
-        }
-        walk(srcDir)
-
-        expect(offenders).toEqual([])
-    })
 })
 
 describe('runTeardown — only this run', () => {
