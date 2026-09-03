@@ -10,6 +10,33 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-09-03
+
+Setting a project up meant following six steps by hand. `ddev playwright setup` runs nine
+checks over them, writes the files that are missing, prints the commands only your
+terminal can run, and builds the template database. On a project that is already set up,
+the same command answers whether it still is.
+
+### Added
+
+- **plan2net/playwright-toolkit**, **ddev-typo3-playwright-toolkit** — `ddev playwright
+  setup` (or `typo3 playwright:setup`) sets a project up, and checks one that already is.
+  It asks where your tests live and what the testing URL is, runs nine checks over the six
+  steps of the guide, then writes the files you are missing, prints the commands only your
+  terminal can run, and offers to build the template database. Afterwards it checks again,
+  so the run that fixed something ends on the new state. With `--no-interaction` it
+  changes nothing and answers with an exit code. Two of the checks compare the versions of
+  the three packages, so an add-on or npm package out of step with the extension is named.
+  It runs in the Testing context, because settings behind an `isTesting()` check read
+  empty anywhere else. It needs DDEV and stops without it.
+
+- **@plan2net/typo3-playwright-toolkit**, **plan2net/playwright-toolkit** — a save now
+  reports how many records TYPO3 wrote per table, and warns when that is more than was
+  asked for. Changing the slug of a page with descendants re-slugs every one of them and
+  writes a redirect for each, so one requested record can cost dozens of writes — and the
+  save still answers like an ordinary success. The counts are on the result as `written`.
+  It never fails a test.
+
 ### Fixed
 
 - **ddev-typo3-playwright-toolkit** — `ddev playwright show-report` and `ddev
@@ -25,29 +52,6 @@ the package a change belongs to.
   Setup time is reported as a `setup:` annotation, since it is no longer part of a
   test's duration. `setup.attemptTimeoutMs` and `setup.waitTimeoutMs` now decide when a
   stuck setup gives up; lower them for a quicker answer.
-
-### Added
-
-- **plan2net/playwright-toolkit**, **ddev-typo3-playwright-toolkit** — `ddev playwright
-  setup` (or `typo3 playwright:setup`) sets a project up and diagnoses one that is
-  already set up. It asks for the test directory and the testing URL, runs nine checks
-  covering the six steps of the setup guide, writes the files that are missing, prints
-  the commands only your terminal can run, and offers to build the template database.
-  It checks again afterwards, so the run that fixed something ends on the new state.
-  `ddev playwright setup` runs it in the Testing context, since settings behind an
-  `isTesting()` check read empty anywhere else; the report names the context it read.
-  Check 5 follows an `include` out of the additional-configuration file, so the call
-  counts wherever that file pulls it in from.
-  With `--no-interaction` it changes nothing and answers with an exit code. The files it
-  writes are the ones SETUP.md shows, and a test compares the two so they cannot drift.
-  It needs DDEV and stops without it.
-
-- **@plan2net/typo3-playwright-toolkit**, **plan2net/playwright-toolkit** — a save now
-  reports how many records TYPO3 wrote per table, and warns when that is more than was
-  asked for. Changing the slug of a page with descendants re-slugs every one of them and
-  writes a redirect for each, so one requested record can cost dozens of writes — and the
-  save still answers like an ordinary success. The counts are on the result as `written`.
-  It never fails a test.
 
 ## [0.13.0] - 2026-09-02
 
@@ -614,7 +618,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.13.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.14.0...main
+[0.14.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.10.0...v0.11.0
