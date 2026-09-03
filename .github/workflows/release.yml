@@ -108,6 +108,12 @@ jobs:
   npm:
     name: npm package
     runs-on: ubuntu-latest
+    # Trusted publishing signs the publish with a short-lived OIDC token instead
+    # of a registry token, so the job mints one. A job's permissions replace the
+    # workflow's rather than adding to them, so `contents` is repeated here.
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v7
 
@@ -117,6 +123,11 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: npm
           cache-dependency-path: packages/typo3-playwright-toolkit/package-lock.json
+
+      # Node 22 ships npm 10, which knows nothing about OIDC; trusted publishing
+      # needs 11.5.1 or newer, and answers "unable to authenticate" without it.
+      - name: Take an npm that can publish over OIDC
+        run: npm install --global npm@latest
 
       - name: Assert package.json matches the tag
         if: startsWith(github.ref, 'refs/tags/v')
@@ -137,9 +148,10 @@ jobs:
           npm run typecheck
           npm test
 
+      # No token: the registry accepts the job's OIDC identity, which npmjs.com
+      # matches against the trusted publisher configured for this package. The
+      # provenance attestation comes with it, so it needs no flag of its own.
       - name: Publish
         if: startsWith(github.ref, 'refs/tags/v')
         working-directory: packages/typo3-playwright-toolkit
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
