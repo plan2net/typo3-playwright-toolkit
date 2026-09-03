@@ -1,0 +1,4 @@
+{
+    "extends": "@plan2net/typo3-playwright-toolkit/tsconfig.base.json",
+    "include": ["**/*.ts"]
+}

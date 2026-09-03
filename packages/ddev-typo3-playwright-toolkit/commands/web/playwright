@@ -14,6 +14,9 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "when your schema, fixtures or session seed changed, so a TCA or"
     echo "ext_tables.sql change never runs against a stale schema."
     echo ""
+    echo "Subcommands this command handles itself:"
+    echo "  setup               Set up this project for Playwright, or check a setup you have"
+    echo ""
     echo "Options this command handles itself:"
     echo "  --build             Build frontend assets first (npm run build)"
     echo "  --no-cleanup        Keep test databases and state after the run"
@@ -32,6 +35,22 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  ddev playwright test -c playwright.local.config.ts     # another config"
     echo "  ddev playwright show-report"
     exit 0
+fi
+
+# Before the test directory: a project that is not set up yet has none.
+if [ "$1" = "setup" ]; then
+    cd "${DDEV_APPROOT:-/var/www/html}" || exit 1
+
+    if ! vendor/bin/typo3 list 2>/dev/null | grep -q 'playwright:setup'; then
+        echo "[playwright] The extension is not installed. Run:"
+        echo "  ddev composer require --dev plan2net/playwright-toolkit"
+        exit 1
+    fi
+
+    shift
+    # A project may apply the toolkit settings for the Testing context only, and the
+    # checks then read empty values in any other one.
+    exec env TYPO3_CONTEXT=Testing vendor/bin/typo3 playwright:setup "$@"
 fi
 
 . /mnt/ddev_config/playwright-lib.sh || exit 1

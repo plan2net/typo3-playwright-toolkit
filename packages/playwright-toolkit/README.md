@@ -52,6 +52,23 @@ Every part of the extension first checks whether TYPO3 runs in the Testing conte
 so it does nothing in Production and Development. Install it as a `--dev`
 dependency anyway: that check is not a reason to ship it to production.
 
+Then let the wizard do the rest of the setup:
+
+```bash
+ddev typo3 playwright:setup     # once the add-on is installed: ddev playwright setup
+```
+
+It runs every check of the [setup guide](../../SETUP.md), writes the files that are
+missing, prints the commands only your terminal can run, and builds the template
+database. With `--no-interaction` it answers no to every question, so it writes no file
+of yours and only reports, which is how you check a project that is already set up. It
+needs DDEV; without it, follow
+[Without DDEV](../../README.md#without-ddev).
+
+Run it in the **Testing** context, which `ddev playwright setup` does for you. Settings
+you apply behind an `isTesting()` check read empty anywhere else, and the fixtures and
+template checks then answer about nothing. The wizard names the context it read.
+
 ## Configure
 
 ### Testing host

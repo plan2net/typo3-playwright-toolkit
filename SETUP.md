@@ -3,6 +3,34 @@
 Six steps, in order. At the end you have a passing test. For what the toolkit is and
 why, read the [README](README.md) first.
 
+Once the extension is installed, one command does most of this for you:
+
+```bash
+ddev composer require --dev plan2net/playwright-toolkit
+ddev exec 'TYPO3_CONTEXT=Testing vendor/bin/typo3 playwright:setup'
+```
+
+The long spelling twice over, and both halves matter. `ddev playwright setup` is shorter
+and does the same thing, but it comes from the add-on, which you have not installed yet —
+the wizard prints the line that installs it, and from then on the short spelling works.
+
+And it has to run in the **Testing** context, because that is the context your test
+settings apply to — step 4 puts them behind an `isTesting()` check, so anywhere else they
+read empty and the fixtures and template checks answer about nothing. `ddev exec` is what
+carries the variable into the container: a host-side `TYPO3_CONTEXT=Testing ddev typo3 …`
+does **not**, because DDEV commands never see your shell's environment. The report names
+the context it read, so you can always tell.
+
+It runs every check below, writes the files that are missing, prints the commands only
+your terminal can run, and builds the template database. Run it again after those
+commands and it picks up where it stopped. The six steps stay here as the explanation
+of what it checks, and of what to do when a check will not pass.
+
+`ddev playwright setup --no-interaction` answers no to every question, so it writes no
+file of yours and only reports. That also answers "is this project still set up
+correctly". The one file it always writes is `var/playwright/api-secret`, which the
+test API needs and `ddev playwright-prepare` would write anyway.
+
 This guide takes the DDEV route, which is the shortest one and the one CI proves on
 every push. DDEV is not a requirement: see
 [Without DDEV](README.md#without-ddev) for what to provide instead.

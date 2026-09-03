@@ -228,6 +228,7 @@ browsers have to be installed there.
 | Command | Purpose |
 |---|---|
 | `ddev playwright` | Runs `npx playwright` with the arguments you pass |
+| `ddev playwright setup` | Sets this project up for Playwright, or checks a setup you have |
 | `ddev playwright-inspect` | Prints links that open a kept test database in the backend |
 | `ddev playwright-prepare` | Builds the template database on its own; `--force` rebuilds one that is still up to date |
 | `ddev playwright-replay` | Replays every scenario's content into one browsable database |

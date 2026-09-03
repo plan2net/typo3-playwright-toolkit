@@ -78,6 +78,9 @@ services:
   Plan2net\PlaywrightToolkit\Database\TemplatePreparer:
     public: true
 
+  Plan2net\PlaywrightToolkit\Database\TemplateReadiness:
+    public: true
+
   Plan2net\PlaywrightToolkit\Database\ReplayPreparer:
     public: true
 
@@ -87,6 +90,14 @@ services:
       - name: 'console.command'
         command: 'playwright:prepare'
         description: 'Builds the Playwright test database template.'
+        schedulable: false
+
+  Plan2net\PlaywrightToolkit\Command\SetupCommand:
+    public: true
+    tags:
+      - name: 'console.command'
+        command: 'playwright:setup'
+        description: 'Sets up this project for Playwright tests, or diagnoses a setup that already exists.'
         schedulable: false
 
   Plan2net\PlaywrightToolkit\Command\ReplayPrepareCommand:

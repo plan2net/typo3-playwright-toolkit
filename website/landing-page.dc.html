@@ -310,8 +310,87 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
     </sc-for>
   </ul>
   <div class="figure" data-diagram="packages-overview" style="margin:48px 0 8px;"></div>
-  <p style="margin:24px 0 0; font-size:15.5px;">These three commands only install the packages. For the whole setup, follow <a href="https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md">SETUP.md ↗</a>.</p>
+  <p style="margin:24px 0 0; font-size:15.5px;">These three commands only install the packages. The command below does the rest, and <a href="https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md">SETUP.md ↗</a> explains every step it checks.</p>
 </div>
+</section>
+
+<section id="setup" data-screen-label="Setup" style="background:#454C57;">
+  <div class="pad" style="max-width:1200px; margin:0 auto; padding:72px 40px;">
+    <h2 class="h2" style="font-weight:800; font-size:28px; margin:0 0 8px; color:#fff;">One command tells you what is missing</h2>
+    <p style="font-size:16px; line-height:1.7; color:#E6EBF2; margin:0 0 40px; max-width:64ch;">Setting up is six steps, and a program can check every one of them. <code style="font-family:'Source Code Pro',monospace; color:#fff;">ddev playwright setup</code> runs nine checks and says what each one found. Then it <strong style="color:#fff; font-weight:700;">writes the files you are missing</strong> and builds the template database. Commands that need your own terminal, like <code style="font-family:'Source Code Pro',monospace; color:#fff;">ddev config</code>, it prints for you to run. Afterwards it checks again, so the run that fixed something ends on the new state.</p>
+
+    <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 14px 34px rgba(26,30,36,0.22); margin:0 0 32px;">
+      <div style="display:flex; align-items:center; gap:8px; padding:8px 16px; border-bottom:1px solid #2C323C;">
+        <span style="width:11px; height:11px; border-radius:50%; background:#FF5F57;"></span>
+        <span style="width:11px; height:11px; border-radius:50%; background:#FEBC2E;"></span>
+        <span style="width:11px; height:11px; border-radius:50%; background:#28C840;"></span>
+        <span style="margin-left:10px; font-family:'Source Code Pro',monospace; font-size:13px; color:#949DAC;">a project that has not been set up yet</span>
+        <span data-copy-status role="status" class="offscreen"></span>
+        <button type="button" data-copy-text="ddev composer require --dev plan2net/playwright-toolkit&#10;ddev exec 'TYPO3_CONTEXT=Testing vendor/bin/typo3 playwright:setup'" title="Copy both commands" aria-label="Copy both setup commands" style="margin-left:auto; flex-shrink:0; background:none; border:1px solid #3C434F; border-radius:5px; color:#AEB7C4; padding:4px; cursor:pointer; display:grid; place-items:center; width:24px; height:24px;" style-hover="border-color:var(--org); color:var(--org);">
+          <span data-copy-state="done" hidden style="display:inline-flex; align-items:center;"><svg viewBox="0 0 16 16" width="13" height="13" fill="#2FBF71" style="display:block;" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg></span>
+          <span data-copy-state="idle" style="display:inline-flex; align-items:center;"><svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="display:block;" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg></span>
+        </button>
+      </div>
+      <div style="padding:18px 20px; font-family:'Source Code Pro',monospace; font-size:13px; line-height:1.9; color:#C9D2DE; overflow-x:auto;">
+        <div><span style="color:#949DAC;">$</span> <kbd>ddev composer require --dev plan2net/playwright-toolkit</kbd></div>
+        <div><span style="color:#949DAC;">$</span> <kbd>ddev exec 'TYPO3_CONTEXT=Testing vendor/bin/typo3 playwright:setup'</kbd></div>
+      </div>
+      <div style="padding:12px 18px; border-top:1px solid #2C323C; font-size:12.5px; line-height:1.6; color:#949DAC;">The long spelling, because the short one comes from the DDEV add-on and a fresh project has not installed it yet. The wizard prints the line that installs it. After that, <code style="color:#E6EBF2;">ddev playwright setup</code> does the same thing and sets the Testing context for you.</div>
+    </div>
+
+    <div>
+      <div style="background:var(--term); border-radius:10px; overflow:hidden; box-shadow:0 14px 34px rgba(26,30,36,0.22);">
+        <table style="width:100%; border-collapse:collapse; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.6; color:#C9D2DE; text-align:left;">
+          <caption class="offscreen">What ddev playwright setup reports on a project that has only installed the extension</caption>
+          <thead>
+            <tr>
+              <th scope="col" style="padding:12px 14px 12px 20px; font-weight:700; color:#E6EBF2; border-bottom:1px solid #3C434F; white-space:nowrap;">Step</th>
+              <th scope="col" style="padding:12px 14px; font-weight:700; color:#E6EBF2; border-bottom:1px solid #3C434F;">Checked</th>
+              <th scope="col" style="padding:12px 20px 12px 14px; font-weight:700; color:#E6EBF2; border-bottom:1px solid #3C434F;">Result</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:10px 14px 10px 20px; border-top:1px solid #2C323C; vertical-align:top; color:#949DAC;">1</td>
+              <td style="padding:10px 14px; border-top:1px solid #2C323C; vertical-align:top;">the testing hostname, in a Testing context</td>
+              <td style="padding:10px 20px 10px 14px; border-top:1px solid #2C323C; vertical-align:top;"><span style="color:#F0696D;">no</span>, https://example-testing.ddev.site answers, but not in a Testing context</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 14px 10px 20px; border-top:1px solid #2C323C; vertical-align:top; color:#949DAC;">2</td>
+              <td style="padding:10px 14px; border-top:1px solid #2C323C; vertical-align:top;">the DDEV add-on and its database service</td>
+              <td style="padding:10px 20px 10px 14px; border-top:1px solid #2C323C; vertical-align:top;"><span style="color:#F0696D;">no</span>, the DDEV add-on is not installed</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 14px 10px 20px; border-top:1px solid #2C323C; vertical-align:top; color:#949DAC;">…</td>
+              <td colspan="2" style="padding:10px 20px 10px 14px; border-top:1px solid #2C323C; vertical-align:top; color:#949DAC;">the npm package, the browsers, the additional configuration file, the fixtures, the Playwright configuration</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 14px 10px 20px; border-top:1px solid #2C323C; vertical-align:top; color:#949DAC;">8</td>
+              <td style="padding:10px 14px; border-top:1px solid #2C323C; vertical-align:top;">your first scenario</td>
+              <td style="padding:10px 20px 10px 14px; border-top:1px solid #2C323C; vertical-align:top;"><span style="color:#F0696D;">no</span>, no *.spec.ts under tests</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 14px 10px 20px; border-top:1px solid #2C323C; vertical-align:top; color:#949DAC;">9</td>
+              <td style="padding:10px 14px; border-top:1px solid #2C323C; vertical-align:top;">the test database template</td>
+              <td style="padding:10px 20px 10px 14px; border-top:1px solid #2C323C; vertical-align:top;"><span style="color:#F0696D;">no</span>, the template is missing. Run "ddev playwright-prepare" to build it.</td>
+            </tr>
+          </tbody>
+        </table>
+        <pre role="group" aria-label="What the wizard does about it" style="margin:0; padding:4px 20px 18px; font-family:'Source Code Pro',monospace; font-size:12.5px; line-height:1.75; color:#C9D2DE; overflow-x:auto; border-top:1px solid #2C323C;"><samp>0 of 9 checks pass, read in the Testing context.
+
+<span style="color:#E6EBF2;">Files to write</span>
+ * tests/playwright/playwright.config.ts
+ * tests/playwright/tsconfig.json
+ * tests/playwright/.gitignore
+ * tests/playwright/tests/first.spec.ts
+
+ <span style="color:#FFB151;">[WARNING]</span> Stopped here: those need your terminal. Then: ddev playwright setup</samp></pre>
+      </div>
+
+    </div>
+
+    <p style="font-size:15.5px; line-height:1.7; color:#E6EBF2; margin:28px 0 0; max-width:74ch;">With <code style="font-family:'Source Code Pro',monospace; color:#fff;">--no-interaction</code> it changes nothing and only reports, which makes the same command a <strong style="color:#fff; font-weight:700;">health check</strong>. Run it in CI, or after a TYPO3 upgrade, to see whether the setup still holds.</p>
+  </div>
 </section>
 
 <section id="example" data-screen-label="Example" style="border-top:1px solid var(--line);">

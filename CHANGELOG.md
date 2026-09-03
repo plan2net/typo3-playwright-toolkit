@@ -28,6 +28,20 @@ the package a change belongs to.
 
 ### Added
 
+- **plan2net/playwright-toolkit**, **ddev-typo3-playwright-toolkit** — `ddev playwright
+  setup` (or `typo3 playwright:setup`) sets a project up and diagnoses one that is
+  already set up. It asks for the test directory and the testing URL, runs nine checks
+  covering the six steps of the setup guide, writes the files that are missing, prints
+  the commands only your terminal can run, and offers to build the template database.
+  It checks again afterwards, so the run that fixed something ends on the new state.
+  `ddev playwright setup` runs it in the Testing context, since settings behind an
+  `isTesting()` check read empty anywhere else; the report names the context it read.
+  Check 5 follows an `include` out of the additional-configuration file, so the call
+  counts wherever that file pulls it in from.
+  With `--no-interaction` it changes nothing and answers with an exit code. The files it
+  writes are the ones SETUP.md shows, and a test compares the two so they cannot drift.
+  It needs DDEV and stops without it.
+
 - **@plan2net/typo3-playwright-toolkit**, **plan2net/playwright-toolkit** — a save now
   reports how many records TYPO3 wrote per table, and warns when that is more than was
   asked for. Changing the slug of a page with descendants re-slugs every one of them and
