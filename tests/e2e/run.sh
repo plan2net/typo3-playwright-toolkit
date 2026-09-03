@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Installs all three packages into a real TYPO3 project and drives definePair
+# Installs all three packages into a real TYPO3 project and drives defineScenario
 # against it. CI runs this same script, so a failure can be debugged where it
 # happened rather than by pushing commits at it.
 #

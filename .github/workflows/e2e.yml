@@ -98,7 +98,7 @@ jobs:
           path: tests/e2e/consumer/.cache/ms-playwright
           key: e2e-browsers-${{ hashFiles('packages/typo3-playwright-toolkit/package-lock.json') }}
 
-      - name: Install all three packages and drive definePair
+      - name: Install all three packages and drive defineScenario
         env:
           PW_E2E_TYPO3: ${{ matrix.typo3 }}
         run: tests/e2e/run.sh
