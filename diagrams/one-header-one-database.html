@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One test file, one database</title>
+<style>
+/* Self-hosted, like the landing page: a Google Fonts stylesheet would send every
+   visitor's IP address to Google before the page renders. */
+@font-face { font-family:'Open Sans'; font-style:normal; font-weight:400 800; font-display:swap; src:url(../website/fonts/open-sans.woff2) format('woff2'); }
+@font-face { font-family:'Source Code Pro'; font-style:normal; font-weight:400 600; font-display:swap; src:url(../website/fonts/source-code-pro.woff2) format('woff2'); }
+
+:root { --paper:#FFFFFF; --ink:#1A1E24; --muted:#5B6570; --rule:rgba(26,30,36,0.12); }
+* { box-sizing:border-box; }
+body {
+    margin:0; padding:48px 32px; background:var(--paper); color:var(--ink);
+    font-family:'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+main { max-width:1440px; margin:0 auto; }
+.eyebrow {
+    margin:0 0 8px; font-family:'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted);
+}
+h1 { margin:0 0 4px; font-size:28px; font-weight:800; letter-spacing:-0.01em; }
+.sub { margin:0 0 16px; font-size:15px; line-height:1.6; color:var(--muted); max-width:64ch; }
+svg { display:block; width:100%; height:auto; }
+/* Container query, not viewport: a wide window can still hand the diagram a narrow
+   column, and a viewport query would answer "wide" and shrink the drawing to fit. */
+.figure { container-type:inline-size; }
+.tablet, .narrow { display:none; margin:0 auto; }
+.tablet { max-width:880px; }
+.narrow { max-width:344px; }
+@container (max-width: 1099px) {
+    .wide { display:none; }
+    .tablet { display:block; }
+}
+@container (max-width: 699px) {
+    .tablet { display:none; }
+    .narrow { display:block; }
+}
+@media (max-width: 1099px) { body { padding:32px 20px; } }
+footer {
+    margin-top:16px; padding-top:12px; border-top:1px solid var(--rule);
+    font-family:'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted);
+}
+</style>
+</head>
+<body>
+<main>
+    <p class="eyebrow">TYPO3 Playwright Toolkit</p>
+    <h1>One test file, one database</h1>
+    <p class="sub">Every test file saves its own pages and content through the TYPO3 backend, and TYPO3 writes them into a database that belongs to that file alone. Each one is a copy of a template built once from your schema and a small fixture.</p>
+
+<div class="figure">
+<svg class="wide" viewBox="0 0 1280 776" role="img" aria-labelledby="ohod-wide-title ohod-wide-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="ohod-wide-title">One test file, one database</title>
+<desc id="ohod-wide-desc">Three test files each save their own pages and content through one TYPO3 site's record edit route. TYPO3 writes each file's content, by its test ID, into a database of its own. All three databases are copies of one template, built once from the schema and a small fixture on a separate database container, and are dropped when the run ends.</desc>
+
+<defs>
+    <marker id="ohod-w-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#5B6570"/>
+    </marker>
+    <marker id="ohod-w-arrow-ink" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#1A1E24"/>
+    </marker>
+</defs>
+
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+
+<rect x="48" y="392" width="1184" height="360" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.28)" stroke-width="1" stroke-dasharray="6,5"/>
+<text x="640" y="736" fill="rgba(26,30,36,0.62)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">SEPARATE DATABASE CONTAINER</text>
+
+<path d="M224,128 V180 Q224,188 232,188 H568 Q576,188 576,196 V232" fill="none" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-w-arrow-ink)"/>
+<line x1="640" y1="128" x2="640" y2="232" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-w-arrow-ink)"/>
+<path d="M1056,128 V180 Q1056,188 1048,188 H712 Q704,188 704,196 V232" fill="none" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-w-arrow-ink)"/>
+<rect x="652" y="148" width="110" height="16" rx="2" fill="#FFFFFF"/>
+<text x="656" y="160" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">SAVES CONTENT</text>
+
+<path d="M576,320 V348 Q576,356 568,356 H232 Q224,356 224,364 V424" fill="none" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-w-arrow-ink)"/>
+<line x1="640" y1="320" x2="640" y2="424" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-w-arrow-ink)"/>
+<path d="M704,320 V348 Q704,356 712,356 H1048 Q1056,356 1056,364 V424" fill="none" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-w-arrow-ink)"/>
+<rect x="652" y="328" width="88" height="16" rx="2" fill="#FFFFFF"/>
+<text x="656" y="340" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">BY TEST ID</text>
+
+<path d="M576,616 V540 Q576,532 568,532 H232 Q224,532 224,524 V512" fill="none" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ohod-w-arrow)"/>
+<line x1="640" y1="616" x2="640" y2="512" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ohod-w-arrow)"/>
+<path d="M704,616 V540 Q704,532 712,532 H1048 Q1056,532 1056,524 V512" fill="none" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ohod-w-arrow)"/>
+<rect x="652" y="556" width="104" height="16" rx="2" fill="#FFFFFF"/>
+<text x="656" y="568" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">COPY, ≈30 MS</text>
+
+<rect x="80" y="40" width="288" height="88" rx="6" fill="#FFFFFF" stroke="#1A1E24" stroke-width="1"/>
+<text x="224" y="80" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Test file A</text>
+<text x="224" y="102" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">creates its own pages</text>
+<rect x="496" y="40" width="288" height="88" rx="6" fill="#FFFFFF" stroke="#1A1E24" stroke-width="1"/>
+<text x="640" y="80" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Test file B</text>
+<text x="640" y="102" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">creates its own pages</text>
+<rect x="912" y="40" width="288" height="88" rx="6" fill="#FFFFFF" stroke="#1A1E24" stroke-width="1"/>
+<text x="1056" y="80" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Test file C</text>
+<text x="1056" y="102" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">creates its own pages</text>
+
+<rect x="496" y="232" width="288" height="88" rx="6" fill="#FFFFFF" stroke="#1A1E24" stroke-width="1"/>
+<rect x="508" y="244" width="104" height="22" rx="3" fill="transparent" stroke="rgba(26,30,36,0.40)" stroke-width="0.8"/>
+<text x="560" y="255" fill="#1A1E24" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">TESTING HOST</text>
+<text x="640" y="284" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Your TYPO3 site</text>
+<text x="640" y="306" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">/typo3/record/edit</text>
+
+<rect x="80" y="424" width="288" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="80" y="424" width="288" height="88" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<text x="224" y="464" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Database A</text>
+<text x="224" y="486" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">dropped when the run ends</text>
+<rect x="496" y="424" width="288" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="496" y="424" width="288" height="88" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<text x="640" y="464" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Database B</text>
+<text x="640" y="486" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">dropped when the run ends</text>
+<rect x="912" y="424" width="288" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="912" y="424" width="288" height="88" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<text x="1056" y="464" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Database C</text>
+<text x="1056" y="486" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">dropped when the run ends</text>
+
+<rect x="496" y="616" width="288" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="496" y="616" width="288" height="88" rx="6" fill="rgba(26,30,36,0.05)" stroke="#5B6570" stroke-width="1"/>
+<rect x="508" y="628" width="88" height="22" rx="3" fill="transparent" stroke="rgba(91,101,112,0.50)" stroke-width="0.8"/>
+<text x="552" y="639" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">BUILT ONCE</text>
+<text x="640" y="668" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Template</text>
+<text x="640" y="690" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">schema + small fixture</text>
+</svg>
+
+<svg class="tablet" viewBox="0 0 880 776" role="img" aria-labelledby="ohod-tablet-title ohod-tablet-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="ohod-tablet-title">One test file, one database</title>
+<desc id="ohod-tablet-desc">Three test files each save their own pages and content through one TYPO3 site's record edit route. TYPO3 writes each file's content, by its test ID, into a database of its own. All three databases are copies of one template, built once from the schema and a small fixture on a separate database container, and are dropped when the run ends.</desc>
+
+<defs>
+    <marker id="ohod-t-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#5B6570"/>
+    </marker>
+    <marker id="ohod-t-arrow-ink" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#1A1E24"/>
+    </marker>
+</defs>
+
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+
+<rect x="8" y="392" width="864" height="360" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.28)" stroke-width="1" stroke-dasharray="6,5"/>
+<text x="440" y="736" fill="rgba(26,30,36,0.62)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">SEPARATE DATABASE CONTAINER</text>
+
+<path d="M144,128 V180 Q144,188 152,188 H372 Q380,188 380,196 V232" fill="none" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-t-arrow-ink)"/>
+<line x1="440" y1="128" x2="440" y2="232" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-t-arrow-ink)"/>
+<path d="M736,128 V180 Q736,188 728,188 H508 Q500,188 500,196 V232" fill="none" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-t-arrow-ink)"/>
+<rect x="452" y="148" width="110" height="16" rx="2" fill="#FFFFFF"/>
+<text x="456" y="160" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">SAVES CONTENT</text>
+
+<path d="M380,320 V348 Q380,356 372,356 H152 Q144,356 144,364 V424" fill="none" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-t-arrow-ink)"/>
+<line x1="440" y1="320" x2="440" y2="424" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-t-arrow-ink)"/>
+<path d="M500,320 V348 Q500,356 508,356 H728 Q736,356 736,364 V424" fill="none" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-t-arrow-ink)"/>
+<rect x="452" y="328" width="88" height="16" rx="2" fill="#FFFFFF"/>
+<text x="456" y="340" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">BY TEST ID</text>
+
+<path d="M380,616 V540 Q380,532 372,532 H152 Q144,532 144,524 V512" fill="none" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ohod-t-arrow)"/>
+<line x1="440" y1="616" x2="440" y2="512" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ohod-t-arrow)"/>
+<path d="M500,616 V540 Q500,532 508,532 H728 Q736,532 736,524 V512" fill="none" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ohod-t-arrow)"/>
+<rect x="452" y="556" width="104" height="16" rx="2" fill="#FFFFFF"/>
+<text x="456" y="568" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">COPY, ≈30 MS</text>
+
+<rect x="24" y="40" width="240" height="88" rx="6" fill="#FFFFFF" stroke="#1A1E24" stroke-width="1"/>
+<text x="144" y="80" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Test file A</text>
+<text x="144" y="102" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">creates its own pages</text>
+<rect x="320" y="40" width="240" height="88" rx="6" fill="#FFFFFF" stroke="#1A1E24" stroke-width="1"/>
+<text x="440" y="80" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Test file B</text>
+<text x="440" y="102" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">creates its own pages</text>
+<rect x="616" y="40" width="240" height="88" rx="6" fill="#FFFFFF" stroke="#1A1E24" stroke-width="1"/>
+<text x="736" y="80" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Test file C</text>
+<text x="736" y="102" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">creates its own pages</text>
+
+<rect x="320" y="232" width="240" height="88" rx="6" fill="#FFFFFF" stroke="#1A1E24" stroke-width="1"/>
+<rect x="332" y="244" width="104" height="22" rx="3" fill="transparent" stroke="rgba(26,30,36,0.40)" stroke-width="0.8"/>
+<text x="384" y="255" fill="#1A1E24" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">TESTING HOST</text>
+<text x="440" y="284" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Your TYPO3 site</text>
+<text x="440" y="306" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">/typo3/record/edit</text>
+
+<rect x="24" y="424" width="240" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="24" y="424" width="240" height="88" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<text x="144" y="464" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Database A</text>
+<text x="144" y="486" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">dropped when the run ends</text>
+<rect x="320" y="424" width="240" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="320" y="424" width="240" height="88" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<text x="440" y="464" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Database B</text>
+<text x="440" y="486" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">dropped when the run ends</text>
+<rect x="616" y="424" width="240" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="616" y="424" width="240" height="88" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<text x="736" y="464" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Database C</text>
+<text x="736" y="486" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">dropped when the run ends</text>
+
+<rect x="320" y="616" width="240" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="320" y="616" width="240" height="88" rx="6" fill="rgba(26,30,36,0.05)" stroke="#5B6570" stroke-width="1"/>
+<rect x="332" y="628" width="88" height="22" rx="3" fill="transparent" stroke="rgba(91,101,112,0.50)" stroke-width="0.8"/>
+<text x="376" y="639" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">BUILT ONCE</text>
+<text x="440" y="668" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Template</text>
+<text x="440" y="690" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">schema + small fixture</text>
+</svg>
+
+<svg class="narrow" viewBox="20 120 344 784" role="img" aria-labelledby="ohod-narrow-title ohod-narrow-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="ohod-narrow-title">One test file, one database</title>
+<desc id="ohod-narrow-desc">Every test file saves its own pages and content through the TYPO3 site's record edit route, and TYPO3 writes them, by test ID, into a database that belongs to that file alone. Each database is a copy of one template, built once from the schema and a small fixture on a separate database container, and is dropped when the run ends.</desc>
+
+<defs>
+    <marker id="ohod-n-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#5B6570"/>
+    </marker>
+    <marker id="ohod-n-arrow-ink" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#1A1E24"/>
+    </marker>
+</defs>
+
+<rect x="20" width="344" height="100%" fill="#FFFFFF"/>
+
+<rect x="32" y="504" width="320" height="376" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.28)" stroke-width="1" stroke-dasharray="6,5"/>
+<text x="192" y="868" fill="rgba(26,30,36,0.62)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.10em">SEPARATE DB CONTAINER</text>
+
+<!-- The cards behind each stack, before the arrows, so an arrowhead reaching the front card stays visible. -->
+<rect x="40" y="192" width="272" height="88" rx="6" fill="#FFFFFF" stroke="rgba(26,30,36,0.28)" stroke-width="0.8"/>
+<rect x="48" y="200" width="272" height="88" rx="6" fill="#FFFFFF" stroke="rgba(26,30,36,0.28)" stroke-width="0.8"/>
+<rect x="40" y="544" width="272" height="88" rx="6" fill="#FFFFFF" stroke="rgba(237,109,5,0.40)" stroke-width="0.8"/>
+<rect x="48" y="552" width="272" height="88" rx="6" fill="#FFFFFF" stroke="rgba(237,109,5,0.40)" stroke-width="0.8"/>
+
+<line x1="192" y1="296" x2="192" y2="368" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-n-arrow-ink)"/>
+<rect x="204" y="324" width="110" height="16" rx="2" fill="#FFFFFF"/>
+<text x="208" y="336" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">SAVES CONTENT</text>
+
+<line x1="192" y1="456" x2="192" y2="560" stroke="#1A1E24" stroke-width="2" marker-end="url(#ohod-n-arrow-ink)"/>
+<rect x="204" y="476" width="88" height="16" rx="2" fill="#FFFFFF"/>
+<text x="208" y="488" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">BY TEST ID</text>
+
+<line x1="192" y1="744" x2="192" y2="648" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ohod-n-arrow)"/>
+<rect x="204" y="688" width="104" height="16" rx="2" fill="#FFFFFF"/>
+<text x="208" y="700" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">COPY, ≈30 MS</text>
+
+<rect x="56" y="208" width="272" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="56" y="208" width="272" height="88" rx="6" fill="#FFFFFF" stroke="#1A1E24" stroke-width="1"/>
+<text x="192" y="248" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Your test files</text>
+<text x="192" y="270" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">each creates its own pages</text>
+
+<rect x="56" y="368" width="272" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="56" y="368" width="272" height="88" rx="6" fill="#FFFFFF" stroke="#1A1E24" stroke-width="1"/>
+<rect x="68" y="380" width="104" height="22" rx="3" fill="transparent" stroke="rgba(26,30,36,0.40)" stroke-width="0.8"/>
+<text x="120" y="391" fill="#1A1E24" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">TESTING HOST</text>
+<text x="192" y="420" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Your TYPO3 site</text>
+<text x="192" y="442" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">/typo3/record/edit</text>
+
+<rect x="56" y="560" width="272" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="56" y="560" width="272" height="88" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<rect x="68" y="572" width="112" height="22" rx="3" fill="transparent" stroke="rgba(237,109,5,0.50)" stroke-width="0.8"/>
+<text x="124" y="583" fill="#A05E00" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">PER TEST FILE</text>
+<text x="192" y="612" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">A database of its own</text>
+<text x="192" y="634" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">dropped when the run ends</text>
+
+<rect x="56" y="744" width="272" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="56" y="744" width="272" height="88" rx="6" fill="rgba(26,30,36,0.05)" stroke="#5B6570" stroke-width="1"/>
+<rect x="68" y="756" width="88" height="22" rx="3" fill="transparent" stroke="rgba(91,101,112,0.50)" stroke-width="0.8"/>
+<text x="112" y="767" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.08em" dy="4">BUILT ONCE</text>
+<text x="192" y="796" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Template</text>
+<text x="192" y="818" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">schema + small fixture</text>
+</svg>
+</div>
+
+    <footer>plan2net · typo3-playwright-toolkit</footer>
+</main>
+</body>
+</html>

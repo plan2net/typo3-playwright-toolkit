@@ -71,7 +71,7 @@ three layouts, instead of a paragraph in each of three files.
 
 ### Changed
 
-- **Documentation** — [Where things run](README.md#where-things-run) is one section for
+- **Documentation** — [Where things run](SETUP.md#where-things-run) is one section for
   where the browsers and the test run live, with a diagram of the three layouts. It was
   spread over three files, and one layout was missing: the whole test run in a container
   of its own, sharing `PLAYWRIGHT_TOOLKIT_SECRET` with the web container.

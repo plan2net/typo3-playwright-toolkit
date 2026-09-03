@@ -39,7 +39,7 @@ can send a junk header, and the toolkit did not send it.
 `CREATE DATABASE` and `DROP DATABASE`. `DatabaseName::assertProvisionable()` is the
 gate and must stay in front of both.
 
-**Never assume the `db` database has test data.** Only a per-test database has it —
+**Never assume the `db` database has test data.** Only a per-test database has it,
 and the replay run below, which is the one exception and says so.
 
 ## The project's own file
@@ -62,7 +62,7 @@ switch the connection on an ordinary hostname.
 If a project needs its own merge, `resolveCurrentRequestSettings($defaultConnection)`
 returns the values instead. The two differ only in who writes `$GLOBALS`: both create
 the test database and both register the error capture, so either entry point leaves
-the connection naming a database that exists — or naming nothing at all.
+the connection naming a database that exists, or naming nothing at all.
 
 **`SYS/encryptionKey` must be in `$GLOBALS['TYPO3_CONF_VARS']` before either call.**
 Both hash the pre-seeded session id with it to tell an already-seeded database from a
@@ -102,14 +102,14 @@ secret and a browser never sends it.
 
 `ddev playwright-replay` runs every scenario's *setup* into a single database, so all
 the content the suite builds can be browsed and exported in one place. It carries an
-ordinary test ID on the wire — the fixed `REPLAY0000000000` (`DatabaseName::REPLAY_TEST_ID`,
-`REPLAY_TEST_ID` in `src/contract.ts`) — so every step above works unchanged: the
+ordinary test ID on the wire, the fixed `REPLAY0000000000` (`DatabaseName::REPLAY_TEST_ID`,
+`REPLAY_TEST_ID` in `src/contract.ts`), so every step above works unchanged: the
 connection is redirected to the test service, the session endpoint answers, and the
 inspect link is an ordinary `?id=…` one.
 
 **That one ID maps to the bare database name `db`, not `dbREPLAY0000000000`.** It is
 the throwaway database on the db-test container, and it is the only test ID that
-reaches a bare name — `forTestIdChecked()` allows it by name, so an empty or
+reaches a bare name: `forTestIdChecked()` allows it by name, so an empty or
 malformed ID still throws.
 
 The guards then split, deliberately:
@@ -117,7 +117,7 @@ The guards then split, deliberately:
 - `assertProvisionable('db')` passes, so `DatabaseInitializer` provisions it on the
   first secret-carrying request of a run and `isAlreadySeeded()` reuses it for the
   rest, which is how the content accumulates.
-- `isDroppable('db')` **fails**, so nothing reachable from the wire can drop it —
+- `isDroppable('db')` **fails**, so nothing reachable from the wire can drop it:
   neither cleanup route, nor the sweep. `typo3 playwright:replay-prepare` is the only
   thing that rebuilds it, and it is CLI-only and Testing-context-only.
 
@@ -131,7 +131,7 @@ if TYPO3 changes that route or its fields, the tests must fail rather than pass 
 an endpoint of our own.
 
 The save answers with a redirect naming the new uid, and `RecordEditDiagnostics` adds
-`X-Playwright-Saved-Record` to it — JSON, `contract/saved-record-header.json`:
+`X-Playwright-Saved-Record` to it as JSON (`contract/saved-record-header.json`):
 
 ```
 X-Playwright-Saved-Record: {"slug":"/a-page-1","written":{"pages":2,"sys_redirect":1}}
@@ -173,7 +173,7 @@ because one says what was written and the other says what was not.
 
 **The names are reported, never assumed.** `BE/cookieName` and `BE/entryPoint` are
 both a project's to change, so the extension reads them and the toolkit uses what
-it is told — `cookieName` for the cookie it sets, `backendPath` for the route it
+it is told: `cookieName` for the cookie it sets, `backendPath` for the route it
 posts to. `BE/entryPoint` exists only on TYPO3 13.4 and 14.3; on 11.5 and 12.4 the
 answer is always `/typo3`.
 
@@ -237,7 +237,7 @@ logged at error level or worse. The toolkit reads them back when a test fails.
 GET /typo3/test-api/errors?id=<testId>
 ```
 
-**Send the test ID as the `id` parameter, never as a header** — for the same reason
+**Send the test ID as the `id` parameter, never as a header**, for the same reason
 as cleanup. With the header, the database would be created on the way in, so asking
 about a test that never ran would bring its database into existence.
 
@@ -261,7 +261,7 @@ about a test that never ran would bring its database into existence.
 ```
 
 `source` says where the entry came from: `datahandler` for a refused record, `log`
-for something an extension logged, and otherwise the channel TYPO3 filed it under —
+for something an extension logged, and otherwise the channel TYPO3 filed it under;
 `php` is where uncaught exceptions land. Repeats of the same message collapse into
 one entry and are counted. At most 20 entries come back; `truncated` says there were
 more. A database that no longer exists answers with an empty list rather than an

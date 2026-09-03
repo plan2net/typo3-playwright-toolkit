@@ -2,21 +2,21 @@
 
 # Running browsers outside the web container. Playwright reads the connect
 # variables itself, so the add-on documents them and ships nothing. The recipe
-# lives in the monorepo README, which holds all three layouts in one place, and
+# lives in the monorepo's SETUP.md, which holds all three layouts in one place, and
 # the add-on names the variables and links there. Hermetic.
 
 ADDON_DIR="$(cd "$(dirname "${BATS_TEST_FILENAME}")/.." && pwd)"
-REPO_README="$(cd "${ADDON_DIR}/../.." && pwd)/README.md"
+REPO_SETUP="$(cd "${ADDON_DIR}/../.." && pwd)/SETUP.md"
 
 @test "documents both connect variables Playwright reads" {
     grep -q 'PW_TEST_CONNECT_WS_ENDPOINT' "${ADDON_DIR}/README.md"
     grep -q 'PW_TEST_CONNECT_EXPOSE_NETWORK' "${ADDON_DIR}/README.md"
-    grep -q 'ws://playwright-server:3000/' "${REPO_README}"
+    grep -q 'ws://playwright-server:3000/' "${REPO_SETUP}"
 }
 
 @test "sends the reader to the one place that has all three layouts" {
-    grep -q '#where-things-run' "${ADDON_DIR}/README.md"
-    grep -q '^### Where things run' "${REPO_README}"
+    grep -q 'SETUP.md#where-things-run' "${ADDON_DIR}/README.md"
+    grep -q '^## Where things run' "${REPO_SETUP}"
 }
 
 # An image of ours would decide the architecture for every consumer, and pinning
@@ -30,7 +30,7 @@ REPO_README="$(cd "${ADDON_DIR}/../.." && pwd)/README.md"
 }
 
 @test "names the pin as the consumer's decision, not a default" {
-    grep -q 'platform: linux/amd64' "${REPO_README}"
+    grep -q 'platform: linux/amd64' "${REPO_SETUP}"
 }
 
 # The runner holds the API secret and the state directory, so it stays put.

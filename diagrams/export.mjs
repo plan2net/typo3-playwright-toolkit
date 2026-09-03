@@ -14,6 +14,7 @@ import { fileURLToPath } from 'url'
 const here = path.dirname(fileURLToPath(import.meta.url))
 
 const EXPORTS = {
+    'one-header-one-database': { '': 'tablet', '-wide': 'wide', '-narrow': 'narrow' },
     'packages-overview': { '': 'tablet', '-wide': 'wide', '-narrow': 'narrow' },
     'full-test-run': { '': 'tablet', '-wide': 'wide', '-narrow': 'narrow' },
     'scenario-fan-out': { '': 'wide', '-narrow': 'narrow' },

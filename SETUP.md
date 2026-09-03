@@ -3,41 +3,40 @@
 Six steps, in order. At the end you have a passing test. For what the toolkit is and
 why, read the [README](README.md) first.
 
-Once the extension is installed, one command does most of this for you:
+Once the extension is installed, one command does most of the work:
 
 ```bash
 ddev composer require --dev plan2net/playwright-toolkit
 ddev exec 'TYPO3_CONTEXT=Testing vendor/bin/typo3 playwright:setup'
 ```
 
-The long spelling twice over, and both halves matter. `ddev playwright setup` is shorter
-and does the same thing, but it comes from the add-on, which you have not installed yet —
-the wizard prints the line that installs it, and from then on the short spelling works.
+It asks where your tests live and what the testing URL is, then runs every check
+below. It writes the files that are missing, prints the commands only your terminal
+can run, and builds the template database. Run it again after those commands and it
+continues where it stopped. The six steps explain what it checks, and what to do when
+a check does not pass.
 
-And it has to run in the **Testing** context, because that is the context your test
-settings apply to — step 4 puts them behind an `isTesting()` check, so anywhere else they
-read empty and the fixtures and template checks answer about nothing. `ddev exec` is what
-carries the variable into the container: a host-side `TYPO3_CONTEXT=Testing ddev typo3 …`
-does **not**, because DDEV commands never see your shell's environment. The report names
-the context it read, so you can always tell.
+`ddev playwright setup` is shorter and does the same, but it comes from the add-on,
+which is not installed yet. The wizard prints the line
+that installs it, and from then on the short form works. And it has to run in the
+Testing context: step 4 puts your test settings behind an `isTesting()` check, so in
+any other context they read empty and the fixture and template checks answer about
+nothing. `ddev exec` carries the variable into the container. A host-side
+`TYPO3_CONTEXT=Testing ddev typo3 …` does not, because DDEV commands never see your
+shell's environment. The report names the context it read.
 
-It runs every check below, writes the files that are missing, prints the commands only
-your terminal can run, and builds the template database. Run it again after those
-commands and it picks up where it stopped. The six steps stay here as the explanation
-of what it checks, and of what to do when a check will not pass.
-
-`ddev playwright setup --no-interaction` answers no to every question, so it writes no
-file of yours and only reports. That also answers "is this project still set up
-correctly". The one file it always writes is `var/playwright/api-secret`, which the
+`ddev playwright setup --no-interaction` answers no to every question. It writes none
+of your files and only reports, which also answers whether a project is still set up
+correctly. The one file it always writes is `var/playwright/api-secret`, which the
 test API needs and `ddev playwright-prepare` would write anyway.
 
-This guide takes the DDEV route, which is the shortest one and the one CI proves on
-every push. DDEV is not a requirement: see
-[Without DDEV](README.md#without-ddev) for what to provide instead.
+This guide takes the DDEV route, the shortest one and the one CI checks on every
+push. DDEV is not a requirement: [Without DDEV](#without-ddev) at the end lists what
+to provide instead.
 
 ## 1. A second hostname, in the Testing context
 
-The toolkit does not install a second site. It uses **your** site, reached through a
+The toolkit does not install a second site. It uses your site, reached through a
 second hostname. On that hostname TYPO3 runs in the Testing context, and there every
 test gets its own database. Your normal hostname stays in Development and keeps its
 own database.
@@ -50,14 +49,14 @@ ddev config --additional-hostnames=example-testing
 
 TYPO3 reads the context from an environment variable, which the web server sets.
 
-For **apache-fpm**, create `.ddev/apache/context.conf`:
+For apache-fpm, create `.ddev/apache/context.conf`:
 
 ```apache
 SetEnvIf Host "." TYPO3_CONTEXT=Development/Docker
 SetEnvIf Host "-testing\.ddev\.site$" TYPO3_CONTEXT=Testing
 ```
 
-For **nginx-fpm**, edit `.ddev/nginx_full/nginx-site.conf` and delete the
+For nginx-fpm, edit `.ddev/nginx_full/nginx-site.conf` and delete the
 `#ddev-generated` line at the top first, or DDEV overwrites your changes:
 
 ```nginx
@@ -77,8 +76,9 @@ block, and nginx ignores the value. A complete file is checked in at
 A `TYPO3_CONTEXT` in your `web_environment` can stay. The web server's value wins per
 request, and yours still applies to every other hostname.
 
-`ddev restart`, then open the new hostname. A `500` with `#1396795884` means the name is
-missing from `SYS/trustedHostsPattern`. Log in, and the backend's top bar says Testing.
+`ddev restart`, then open the new hostname. A `500` with `#1396795884` means the name
+is missing from `SYS/trustedHostsPattern`. Log in, and the backend's top bar says
+Testing.
 
 Step 6 checks this too, and stops if the site answers in another context.
 
@@ -100,25 +100,24 @@ Playwright config in step 4 uses `import.meta.url`.
 
 If your project already runs Playwright, install `@plan2net/typo3-playwright-toolkit`
 alone and keep the `@playwright/test` you have: 1.44 and newer work. Then read
-[Migrating an existing Playwright suite](#migrating-an-existing-playwright-suite) —
-your configuration mostly carries over, your tests do not.
+[Migrating an existing Playwright suite](#migrating-an-existing-playwright-suite).
+Your configuration mostly carries over, your tests do not.
 
 The add-on is the optional one. It gives you the `db-test` database service and the
-`ddev playwright*` commands; without it you point four environment variables at a
+`ddev playwright*` commands. Without it you point four environment variables at a
 database server of your own and run the underlying commands yourself, as
-[Without DDEV](README.md#without-ddev) describes. The other two packages are
-required.
+[Without DDEV](#without-ddev) describes. The other two packages are required.
 
 Keep all three packages on the same version. `tests/playwright` is only the default
 directory; `PW_TEST_DIR` in `web_environment` moves it. If your project already uses
 `Lullabot/ddev-playwright`, remove it first with `ddev add-on remove ddev-playwright`:
-it has a `ddev playwright` command too, and only one of them can win. That deletes every
-file it installed, and most of them are checked into your repository, so commit what you
-have before you run it.
+it has a `ddev playwright` command too, and only one of them can win. That deletes
+every file it installed, and most of them are checked into your repository, so commit
+what you have before you run it.
 
 ## 3. The browsers
 
-They go in the web container, beside the tests. Choose where they go **before** you
+They go in the web container, beside the tests. Choose where they go before you
 install them. Otherwise they land in the container's home directory, which DDEV drops
 on the next rebuild, and you download them again:
 
@@ -133,8 +132,10 @@ ddev restart
 cd tests/playwright && ddev npx playwright install --with-deps chromium
 ```
 
+Gitignore `.cache/`.
+
 The browsers can also run elsewhere, and so can the whole test run.
-[Where things run](README.md#where-things-run) has the diagram and the settings.
+[Where things run](#where-things-run) has the diagram and the settings.
 
 ## 4. Five files of your own
 
@@ -169,11 +170,11 @@ switch the database on your normal hostname too.
 > Two rules about where that call goes. Break either one and your tests run against
 > your real database and still pass.
 >
-> - Put it **after** everything else in the file that writes `DB/Connections/Default`.
+> - Put it after everything else in the file that writes `DB/Connections/Default`.
 >   Many projects collect their settings in an array and apply it at the end; those
 >   need the form shown in
 >   [Database selection](packages/playwright-toolkit#database-selection).
-> - Code in this file that **reads** the database runs before the switch, so it reads
+> - Code in this file that reads the database runs before the switch, so it reads
 >   the normal database. A `be_users` lookup that fills `SYS/systemMaintainers` is the
 >   common case. Skip it in the Testing context.
 
@@ -191,7 +192,7 @@ VALUES (1, 0, 'Root', '/', 1, 1, 0, 0);
 ```
 
 The `uid` has to be the `rootPageId` of your site configuration, and that
-configuration has to exist — it is a file, so the template already has it.
+configuration has to exist. It is a file, so the template already has it.
 
 Write the SQL by hand, against the current schema. A dump of your project database
 does not work: it still has columns that TYPO3 removed in an older upgrade, and the
@@ -263,7 +264,17 @@ ddev playwright test
 ```
 
 The first run builds the template database, so it takes longer than the ones after
-it. [Writing a test](README.md#writing-a-test) explains what the pieces do.
+it. [What a test looks like](README.md#what-a-test-looks-like) explains the pieces,
+and the [npm README](packages/typo3-playwright-toolkit#writing-a-test) documents the
+builders in full.
+
+What a run does, step by step:
+
+<picture>
+  <source media="(max-width: 700px)" srcset="diagrams/full-test-run-narrow.svg">
+  <img width="880" src="diagrams/full-test-run.svg"
+       alt="Once per run, the DDEV command has TYPO3 rebuild the database template if the schema or fixtures changed, then starts Playwright, whose preflight checks the API version. Once per test file, Playwright writes down that file's test ID, asks TYPO3 for a backend session, and TYPO3 copies the template into a database of its own before it boots; content is then posted to the backend's own record edit route, which answers with the record it saved. Every test in the file reuses that database, and teardown asks TYPO3 to drop every database the run created.">
+</picture>
 
 ## Migrating an existing Playwright suite
 
@@ -272,9 +283,9 @@ most of its configuration and none of its tests.
 
 Do not run the old tests and the new ones together. A file that does not come from
 `defineScenario` sends no test ID, and a request without one gets the site's ordinary
-database. Nothing fails: the test passes, against content the toolkit never built. Give
-the toolkit a `testDir` of its own, and move a test into it once you have rewritten it as
-a scenario.
+database. Nothing fails: the test passes, against content the toolkit never built.
+Give the toolkit a `testDir` of its own, and move a test into it once you have
+rewritten it as a scenario.
 
 Your configuration mostly carries over. The second argument is an ordinary Playwright
 config, and what you write there wins over the toolkit's defaults, so `testDir`,
@@ -294,8 +305,8 @@ export default defineBasePlaywrightConfig(toolkit, {
 keeps the tracing and the screenshot tolerances the toolkit sets.
 
 It refuses four keys. `globalSetup` and `globalTeardown` carry the preflight, the run
-bookkeeping and the cleanup that drops every database the run created. `use.baseURL` and
-`use.serviceWorkers` keep the test ID on one origin, and a project's own `use` is
+bookkeeping and the cleanup that drops every database the run created. `use.baseURL`
+and `use.serviceWorkers` keep the test ID on one origin, and a project's own `use` is
 restricted the same way. TypeScript rejects all four, and a JavaScript config gets an
 error naming the key and the reason.
 
@@ -312,10 +323,120 @@ web_environment:
     - PW_TEST_DIR=test/playwright
 ```
 
-Step 2 sets `type: module` in the `package.json` next to your tests, because the config
-in step 4 uses `import.meta.url`. If your existing tests cannot move to ESM, leave that
-`package.json` alone and name the config `playwright.config.mts` instead.
+Step 2 sets `type: module` in the `package.json` next to your tests, because the
+config in step 4 uses `import.meta.url`. If your existing tests cannot move to ESM,
+leave that `package.json` alone and name the config `playwright.config.mts` instead.
 
-Screenshot references are stored per test file and test title, so a rewritten test starts
-without one and Playwright writes it on the first run. Look at that first picture before
-you keep it: it matches the old one only if your scenario builds the same content.
+Screenshot references are stored per test file and test title, so a rewritten test
+starts without one and Playwright writes it on the first run. Look at that first
+picture before you keep it: it matches the old one only if your scenario builds the
+same content.
+
+## Where things run
+
+TYPO3 always runs in the web container. The browsers do not have to, and neither does
+the test run. Two questions decide which of the three layouts you need.
+
+<picture>
+  <source media="(max-width: 700px)" srcset="diagrams/where-things-run-narrow.svg">
+  <img width="880" src="diagrams/where-things-run.svg"
+       alt="A decision tree with three outcomes. If the browsers can live in the web container, TYPO3, the test runner and the browsers all sit there and you only install the browsers. If they cannot but you want to keep the ddev playwright commands, the browsers move to a browser server container while TYPO3 and the test runner stay in the web container, connected by PW_TEST_CONNECT_WS_ENDPOINT. If you give the ddev commands up, the test runner moves with the browsers into a Playwright container of your own, leaving TYPO3 alone in the web container, and both sides share PLAYWRIGHT_TOOLKIT_SECRET.">
+</picture>
+
+### Everything in the web container
+
+The default, and the one CI runs on every push. Step 3 above is all it takes. UI mode
+runs in the web container too, so `ddev playwright-ui` needs the browsers there.
+
+### Browsers in a container of their own
+
+For a different image, or a different architecture. Start a Playwright server and
+point the run at it in `.ddev/config.yaml`:
+
+```yaml
+web_environment:
+    - PW_TEST_CONNECT_WS_ENDPOINT=ws://playwright-server:3000/
+    - PW_TEST_CONNECT_EXPOSE_NETWORK=*
+```
+
+Playwright reads both variables itself, so the `ddev playwright` commands need no
+flag and no change. Only the browser moves. The run stays in the web container with
+your `node_modules`, the API secret and the state directory.
+`PW_TEST_CONNECT_EXPOSE_NETWORK` tunnels the browser's requests back out through it,
+so the browser container needs no route to your site and no DDEV certificate.
+
+The server is one container of your own, in
+`.ddev/docker-compose.playwright-server.yaml`:
+
+```yaml
+services:
+    playwright-server:
+        image: mcr.microsoft.com/playwright:v1.61.1-noble
+        command:
+            ['npx', '-y', 'playwright@1.61.1', 'run-server', '--port', '3000', '--host', '0.0.0.0']
+```
+
+The version has to match the `@playwright/test` your project installed. Add
+`platform: linux/amd64` if you compare screenshots across machines: rasterisation
+happens where the browser runs, so an arm64 laptop and an amd64 runner disagree on
+the same page.
+
+### The run in a container of its own
+
+Your `node_modules` and your browsers live in a Playwright image of your own, and the
+web container is left with TYPO3 alone.
+
+The `ddev playwright*` commands no longer apply. They are DDEV web commands, so they
+run where PHP is, and your tests do not. Run the underlying commands in your own
+container instead. [Without DDEV](#without-ddev) lists what each of the five does,
+and where it belongs.
+
+The two sides also stop sharing a filesystem, so they cannot share the API secret
+file `playwright:prepare` writes. Set `PLAYWRIGHT_TOOLKIT_SECRET` to the same value
+in both containers, and neither needs the other's disk.
+
+Nothing else changes. The npm package speaks only HTTP, so it needs no database
+client and no credentials, and the test ID travels in a request header either way.
+
+## Without DDEV
+
+DDEV is optional. The extension and the npm package read nothing DDEV-specific: the extension finds the test database server through four
+environment variables, and the npm package only speaks HTTP.
+
+| Variable | Default |
+|---|---|
+| `PLAYWRIGHT_DB_TEST_HOST` | `db-test` |
+| `PLAYWRIGHT_DB_TEST_PORT` | the engine's default port |
+| `PLAYWRIGHT_DB_TEST_USER` | `db` |
+| `PLAYWRIGHT_DB_TEST_PASSWORD` | `db` |
+
+So the add-on gives you two things you otherwise provide yourself.
+
+A second database server, reachable from the web container under those variables.
+Point them at a MariaDB, MySQL or PostgreSQL of your own. Copy the tuning from
+[`db-test/`](packages/ddev-typo3-playwright-toolkit/db-test), `fsync=off` and the
+rest, since it is what makes a clone take milliseconds. Give it a volume, not a
+tmpfs: test databases grow, and runners run out of memory.
+
+Five commands, each a wrapper you can run yourself:
+
+| Command | Runs |
+|---|---|
+| `ddev playwright test` | `typo3 cache:flush`, `typo3 playwright:prepare`, then `npx playwright test` |
+| `ddev playwright-prepare` | `typo3 playwright:prepare` |
+| `ddev playwright-ui` | `npx playwright test --ui` |
+| `ddev playwright-replay` | `typo3 playwright:replay-prepare`, then `npx playwright test` with `PW_REPLAY=1` |
+| `ddev playwright-inspect` | `npx typo3-playwright-inspect` |
+
+Run the `typo3` commands where PHP is, the `npx` ones where Playwright is. They may
+be different containers. That is
+[the run in a container of its own](#the-run-in-a-container-of-its-own), and it works
+under DDEV as well.
+
+One thing stays yours either way, DDEV or not: binding the Testing context to a
+separate hostname in your web server, as in step 1. Processed images need no
+attention. Every test database has its `processingfolder` pointed at
+`_processed_<testId>`, and cleanup removes that folder with the database.
+
+What you give up is coverage. CI exercises the DDEV path on every push; a setup of
+your own is not covered by it.

@@ -5,18 +5,21 @@
 <p align="center"><em>The test-database service and the ddev playwright commands.</em></p>
 <br>
 
-[![e2e](https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/e2e.yml/badge.svg)](https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/e2e.yml)
-[![DDEV](https://img.shields.io/badge/DDEV-1.25%2B-02c7e6)](https://ddev.com)
-[![databases](https://img.shields.io/badge/databases-PostgreSQL%20%7C%20MySQL%20%7C%20MariaDB-336791)](#requirements)
-[![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
+<p align="center">
+  <a href="https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/e2e.yml"><img src="https://img.shields.io/github/actions/workflow/status/plan2net/typo3-playwright-toolkit/e2e.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=e2e&labelColor=24273a" alt="e2e"></a>
+  <a href="https://ddev.com"><img src="https://img.shields.io/badge/DDEV-1.25%2B-a0c4ff?style=for-the-badge&labelColor=24273a&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIuMiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48cGF0aCBkPSJNMTIgMyAyIDhsMTAgNSAxMC01eiIvPjxwYXRoIGQ9Im0yIDEzIDEwIDUgMTAtNSIvPjxwYXRoIGQ9Im0yIDE4IDEwIDUgMTAtNSIvPjwvc3ZnPg%3D%3D" alt="DDEV 1.25 or newer"></a>
+  <a href="#requirements"><img src="https://img.shields.io/badge/databases-PostgreSQL%20%7C%20MySQL%20%7C%20MariaDB-c3b1e1?style=for-the-badge&logo=postgresql&logoColor=white&labelColor=24273a" alt="PostgreSQL, MySQL or MariaDB"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licence-GPL--2.0--or--later-ffc6d9?style=for-the-badge&logo=gnu&logoColor=white&labelColor=24273a" alt="GPL-2.0-or-later licence"></a>
+</p>
 
 A [DDEV](https://ddev.com) add-on. It installs the database service that holds the
 test databases, and the `ddev playwright` commands that run your
 [Playwright](https://playwright.dev) tests.
 
-It needs the [Composer extension](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit), which creates the test
-databases, and the [npm package](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit), which contains the
-test helpers.
+It needs the [Composer extension](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit),
+which creates the test databases, and the
+[npm package](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit),
+which contains the test helpers.
 
 > [!IMPORTANT]
 > Setting this up for the first time? Follow
@@ -37,13 +40,13 @@ test helpers.
 - The Composer extension, installed in the project
 - A host name that runs in the Testing context. The add-on does not set this up; see
   the [extension README](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit#testing-host).
-- Playwright with browsers, in the container where `ddev playwright` runs — see
+- Playwright with browsers, in the container where `ddev playwright` runs; see
   [browsers](#browsers). Do not use another Playwright add-on for this; see
   [other Playwright add-ons](#other-playwright-add-ons). The browsers can also run
   elsewhere, and so can the whole test run:
-  [Where things run](https://github.com/plan2net/typo3-playwright-toolkit#where-things-run)
+  [Where things run](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md#where-things-run)
   covers both.
-- A directory for your tests. The add-on does not create one — see
+- A directory for your tests. The add-on does not create one; see
   [where your tests live](#where-your-tests-live).
 
 The add-on does not change your web server configuration. Apache and nginx pass the
@@ -68,7 +71,7 @@ database itself before every test run.
 
 ### Where your tests live
 
-The commands run in `tests/playwright`. The add-on does not create it — it is your
+The commands run in `tests/playwright`. The add-on does not create it. It is your
 directory, with your own `package.json`:
 
 ```bash
@@ -105,8 +108,8 @@ web_environment:
 
 This is one of three layouts. Put the browsers in a container of their own and these
 commands keep working unchanged. Move the test run there as well and they no longer
-apply at all, because they are DDEV *web* commands and run where PHP is.
-[Where things run](https://github.com/plan2net/typo3-playwright-toolkit#where-things-run)
+apply, because they are DDEV web commands and run where PHP is.
+[Where things run](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md#where-things-run)
 has both.
 
 ### Other Playwright add-ons
@@ -118,9 +121,9 @@ If theirs wins, a run no longer rebuilds the database template first and looks i
 
 > [!NOTE]
 > What it offers beyond this add-on is browser installation and a KasmVNC desktop for
-> watching runs. You need neither: browsers are one command, above, and `ddev
-> playwright-ui` serves Playwright's own UI mode on the exposed port 3000, which you
-> open in your **host** browser — same picking, watching and stepping, no VNC.
+> watching runs. You need neither: browsers are one command, above, and
+> `ddev playwright-ui` serves Playwright's own UI mode on the exposed port 3000, which
+> you open in your host browser.
 
 ### A different database system
 
@@ -173,9 +176,9 @@ ddev playwright show-report
 ```
 
 Before `test`, the command clears the Testing caches and checks the template
-database: it is rebuilt when your schema, fixtures or session settings changed and
+database. It is rebuilt when your schema, fixtures or session settings changed and
 reused otherwise, so a change to TCA or `ext_tables.sql` never runs against an old
-schema and an unchanged template costs no build time.
+schema, and an unchanged template costs no build time.
 
 When a test fails its database is kept, and the run prints a link for it. To get a
 link later, or for a specific file:
@@ -188,30 +191,22 @@ ddev playwright-inspect accordion  # one test file
 Opening a link logs you into the TYPO3 backend of that database, and the frontend is
 reachable from there. Links are signed and expire after 15 minutes.
 
-## Looking at everything the suite builds
+### Replay
 
-A test run spreads its content over one throwaway database per test, and drops them
-when it passes. To see it all at once — to click through it, or to export a branch of
-it — replay every scenario into one database on the `db-test` service instead. Your
-project database is never touched:
+`ddev playwright-replay` runs every scenario's setup into one database on the
+`db-test` service, so you can browse everything the suite builds in one backend. The
+tests themselves are skipped, and the run ends by printing a link that logs you in.
+Your project database is never touched.
 
 ```bash
 ddev playwright-replay                   # every scenario
 ddev playwright-replay --grep accordion  # a subset
 ```
 
-Each scenario gets a folder named after it under the fixture root, holding the pages
-and records that scenario creates, images included. The tests themselves are skipped:
-their assertions and screenshot baselines belong to a per-test database.
+The [npm README](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit#replay-mode)
+describes what changes in replay mode.
 
-The run ends by printing a link that logs you into that database's backend. The
-database is rebuilt from the template on every replay, so nothing accumulates.
-
-It is the plain `db` on the `db-test` container, which exists for exactly this and
-holds nothing else. The database you develop against lives in DDEV's own `db`
-service and is never touched.
-
-## UI mode
+### UI mode
 
 ```bash
 ddev playwright-ui              # all tests
@@ -258,7 +253,7 @@ does not work, because these are DDEV web commands.
 | `PW_UI_PORT` | `3000` | Port for UI mode |
 | `PW_REPORT_PORT` | `9323` | Port for `show-report` |
 | `PW_SKIP_PREPARE` | unset | Same as `--skip-prepare`; use the flag instead |
-| `PW_TEST_CONNECT_WS_ENDPOINT` | unset | Browser server to drive instead of the local browsers — see [Where things run](https://github.com/plan2net/typo3-playwright-toolkit#where-things-run) |
+| `PW_TEST_CONNECT_WS_ENDPOINT` | unset | Browser server to drive instead of the local browsers; see [Where things run](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md#where-things-run) |
 | `PW_TEST_CONNECT_EXPOSE_NETWORK` | unset | Lets that browser reach your site through the web container; `*` covers everything |
 
 The last two are Playwright's own, read by the test run rather than by this add-on,
@@ -267,8 +262,8 @@ so they work the same way outside DDEV.
 ## Troubleshooting
 
 **Playwright reports a missing browser.** The browsers are not installed in the
-container that runs the command. Run `ddev npx playwright install --with-deps` from your
-Playwright directory.
+container that runs the command. Run `ddev npx playwright install --with-deps` from
+your Playwright directory.
 
 **The first test fails with `ERROR 1044 Access denied`.** The MySQL or MariaDB user
 cannot create databases. Reinstall the add-on, which grants the missing rights.
@@ -278,5 +273,5 @@ cannot create databases. Reinstall the add-on, which grants the missing rights.
 
 ## Related packages
 
-- [`plan2net/playwright-toolkit`](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit) — Composer extension
-- [`@plan2net/typo3-playwright-toolkit`](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit) — npm package
+- [`plan2net/playwright-toolkit`](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit), the Composer extension
+- [`@plan2net/typo3-playwright-toolkit`](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit), the npm package

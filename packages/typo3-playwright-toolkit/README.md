@@ -5,18 +5,22 @@
 <p align="center"><em>Playwright fixtures and content builders for TYPO3, one test database per test file.</em></p>
 <br>
 
-[![npm](https://img.shields.io/npm/v/@plan2net/typo3-playwright-toolkit)](https://www.npmjs.com/package/@plan2net/typo3-playwright-toolkit)
-[![Node](https://img.shields.io/badge/Node-22.12%2B-5fa04e)](https://nodejs.org)
-[![Playwright](https://img.shields.io/badge/Playwright-1.44%2B-2ead33)](https://playwright.dev)
-[![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
+<p align="center">
+  <a href="https://www.npmjs.com/package/@plan2net/typo3-playwright-toolkit"><img src="https://img.shields.io/npm/v/@plan2net/typo3-playwright-toolkit?style=for-the-badge&logo=npm&logoColor=white&labelColor=24273a&color=fff3b0" alt="npm version"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node-22.12%2B-a0c4ff?style=for-the-badge&logo=nodedotjs&logoColor=white&labelColor=24273a" alt="Node 22.12 or newer"></a>
+  <a href="https://playwright.dev"><img src="https://img.shields.io/badge/Playwright-1.44%2B-b5ead7?style=for-the-badge&labelColor=24273a&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTcgNHYxNmwxMy04eiIvPjwvc3ZnPg%3D%3D" alt="Playwright 1.44 or newer"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licence-GPL--2.0--or--later-ffc6d9?style=for-the-badge&logo=gnu&logoColor=white&labelColor=24273a" alt="GPL-2.0-or-later licence"></a>
+</p>
 
 An npm package. It provides the [Playwright](https://playwright.dev) fixtures, the
 content builders that create [TYPO3](https://typo3.org) records, and the
 accessibility ([axe](https://github.com/dequelabs/axe-core)) and CSP checks.
 
-It needs the [Composer extension](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit), which creates the test
-databases, and the [DDEV add-on](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/ddev-typo3-playwright-toolkit), which provides
-the database service and the commands.
+It needs the
+[Composer extension](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit),
+which creates the test databases, and the
+[DDEV add-on](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/ddev-typo3-playwright-toolkit),
+which provides the database service and the commands.
 
 > [!IMPORTANT]
 > Setting this up for the first time? Follow
@@ -38,7 +42,7 @@ the database service and the commands.
 You do not need a database client. This package never talks to the database; it asks
 the extension to create and delete them. That is why PHP and Node may run in
 different containers.
-[Where things run](https://github.com/plan2net/typo3-playwright-toolkit#where-things-run)
+[Where things run](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md#where-things-run)
 shows how.
 
 ## Install
@@ -86,9 +90,9 @@ this package uses, because the test database exists nowhere else.
 
 `consumerRoot` is the root of your TYPO3 project. The package derives the state and
 session folders from it, so it works from `node_modules` without knowing its own
-location. Count the `..` from where your config actually sits — the example assumes
+location. Count the `..` from where your config sits: the example assumes
 `<project>/tests/playwright/`, so it climbs two levels. Pointing it at the wrong
-directory is not an error: the run works and writes its state somewhere you did not
+directory is not an error; the run works and writes its state somewhere you did not
 expect. Use `fileURLToPath` rather than `new URL(...).pathname`, which
 percent-encodes a project path containing spaces or non-ASCII characters.
 
@@ -146,11 +150,11 @@ setup, and the other tests wait. If the setup fails, the tests are skipped with 
 reason instead of failing because content is missing.
 
 The `slug` you get back is the one the site stored, which is not always the one you
-asked for — a translation and a name already in use are two cases, and an extension
+asked for. A translation and a name already in use are two cases, and an extension
 can add more. Navigate with the returned value, never with the string you passed in.
 
-A save also reports how many records TYPO3 actually wrote, and warns when that is more
-than you asked for:
+A save also reports how many records TYPO3 wrote, and warns when that is more than
+you asked for:
 
 ```
 [typo3-playwright-toolkit] Saving pages wrote 27 records for 1 requested.
@@ -158,7 +162,7 @@ than you asked for:
   A slug change cascades to every descendant page and writes a redirect for each.
 ```
 
-Nothing is wrong — the save succeeded. It is where a slow setup spends its time, and
+Nothing is wrong; the save succeeded. It is where a slow setup spends its time, and
 changing the slug of a page with descendants is the usual cause. The counts are on the
 result as `written`. It never fails a test.
 
@@ -178,7 +182,7 @@ attempts by default. Lower them to hear about a broken setup sooner.
 
 ### When something fails, TYPO3 says why
 
-A failing test now prints what TYPO3 wrote to its log while that test ran, under the
+A failing test prints what TYPO3 wrote to its log while that test ran, under the
 failure itself:
 
 ```
@@ -199,8 +203,8 @@ The same list is attached to the test as `typo3-errors.json`. A message that rep
 is counted, not printed again. A failing setup shows the same list next to its own
 error.
 
-If TYPO3 refuses a record while a builder saves it, the builder stops at that line.
-Before, the save looked fine and the test failed later, somewhere unrelated.
+If TYPO3 refuses a record while a builder saves it, the builder stops at that line,
+so the failure points at the save and not at a later assertion.
 
 <picture>
   <source media="(max-width: 700px)" srcset="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/scenario-fan-out-narrow.svg">
@@ -211,9 +215,9 @@ Before, the save looked fine and the test failed later, somewhere unrelated.
 Besides `builders`, the setup receives `testId` (the database this attempt runs
 against), `attempt` (`1` on the first try), `signal` (aborted when the attempt times
 out, so pass it to your own long requests), and a `page` and `request` that already
-carry the toolkit headers. Your tests get `testId` beside `state`, which is the
-database name without its `db` prefix and what the backend shows in brackets behind
-the site name:
+carry the toolkit headers. Your tests get `testId` beside `state`. It is the database
+name without its `db` prefix, and what the backend shows in brackets behind the site
+name:
 
 ```ts
 test('reports which database it used', async ({ page, state, testId }) => {
@@ -334,14 +338,14 @@ const [hero, intro, gallery] = await builders.batch(
 )
 ```
 
-The queued builders get no `.create()` — `batch` saves them. They land on the page in
-the order you list them, you get a uid for each, and their files and child records come
-along in the same request.
+The queued builders get no `.create()`; `batch` saves them. They land on the page in
+the order you list them, you get a uid for each, and their files and child records
+come along in the same request.
 
-All the elements have to belong to one page, because a request positions them after one
-another and that means nothing across pages. They also cannot point at each other: a
-relation needs a uid, and only a save hands one back. Create what is pointed at first,
-then batch the rest:
+All the elements have to belong to one page, because a request positions them after
+one another and that means nothing across pages. They also cannot point at each
+other: a relation needs a uid, and only a save hands one back. Create what is pointed
+at first, then batch the rest:
 
 ```ts
 const container = await builders.content().onPage(page.id).ofType('my_container').create()
@@ -355,21 +359,21 @@ await builders.batch(
 ```
 
 A content type whose children hang off a column of its own needs none of this:
-`withChildren` already writes them in the same request as their parent. Batching is for
-elements that sit side by side on a page.
+`withChildren` already writes them in the same request as their parent. Batching is
+for elements that sit side by side on a page.
 
 ### Calling the site directly
 
-The `request` client — the one `defineScenario` hands your setup, and the `request`
-fixture in your tests — carries the test ID for `testingURL`, so it reads and
-writes the same throwaway database the browser does. Requests to any other host
-get neither toolkit header.
+The `request` client, the one `defineScenario` hands your setup and the `request`
+fixture in your tests, carries the test ID for `testingURL`, so it reads and writes
+the same throwaway database the browser does. Requests to any other host get neither
+toolkit header.
 
 ### Stubbing a third-party script
 
 A cookie banner or a tracking script can swallow the clicks your test makes.
-`prepareContext` runs on every context a test uses, after the toolkit's own
-routes are in place:
+`prepareContext` runs on every context a test uses, after the toolkit's own routes
+are in place:
 
 ```ts
 // playwright.config.ts
@@ -410,7 +414,7 @@ Every other option is passed on to `toHaveScreenshot`, and the tolerances come f
 > ```
 
 `expectScreenshot` waits for animations itself. When you interact and then assert
-without a screenshot — an accessibility scan after opening an accordion, say — wait
+without a screenshot, say an accessibility scan after opening an accordion, wait
 first:
 
 ```ts
@@ -534,7 +538,7 @@ Every CType of a normal TYPO3 installation has a builder, and you register nothi
 
 All builders share `withHeader`, `withSubheader`, `withHeaderLayout`,
 `withHeaderLink`, `withColPos`, `setHidden`, and `withField(column, value)` for any
-other TCA column. They also share the four relation setters above —
+other TCA column. They also share the four relation setters above:
 `withFileReference`, `withFileReferences`, `withChild` and `withChildren`. Types with
 images add `withFile` and `withFiles` for their own media column, plus `withColumns`,
 `withOrientation` and `withImageSize`.
@@ -588,7 +592,7 @@ export class EventListContent extends CoreContent {
 ```
 
 For a structure with named sheets, or a key outside `settings.`, write the column
-yourself with `flexForm()` — the form posts one field per value, not one for the
+yourself with `flexForm()`. The form posts one field per value, not one for the
 column:
 
 ```ts
@@ -611,7 +615,7 @@ It reads the API secret from `var/playwright/api-secret` or from
 log in as the pre-seeded backend user and live 15 minutes.
 
 `--replay` prints a link into the database a replay run built, instead of the kept
-test databases. Use it when the link that run printed has expired — it mints a new
+test databases. Use it when the link that run printed has expired; it mints a new
 one rather than rebuilding anything.
 
 ### Replay mode
@@ -622,9 +626,10 @@ browse and export. `ddev playwright-replay` sets it, rebuilds that database from
 template first, and prints a backend link when the run ends.
 
 What changes while it is set: every scenario uses the one fixed test ID
-`REPLAY0000000000`, its content goes into a sysfolder named after it under the
-fixture root, slugs keep no test-ID suffix, setups run once with no retry, the tests
-themselves are skipped, and teardown drops nothing.
+`REPLAY0000000000`, its content, images included, goes into a sysfolder named after
+it under the fixture root, slugs keep no test-ID suffix, setups run once with no
+retry, and teardown drops nothing. The tests themselves are skipped, because their
+assertions and screenshot baselines belong to a per-test database.
 
 ## Troubleshooting
 
@@ -639,9 +644,9 @@ first thing in `playwright.config.ts`.
 
 **"Timed out after 300000ms waiting for the setup".** A setup that builds a lot of
 content can outgrow the defaults on a slow machine. Raise `setup.attemptTimeoutMs`
-for the setup itself and `setup.waitTimeoutMs` for the tests waiting on it — the
-second has to stay comfortably above the first, since it covers every attempt plus
-the time spent waiting for the lock.
+for the setup itself and `setup.waitTimeoutMs` for the tests waiting on it. The
+second has to stay well above the first, since it covers every attempt plus the time
+spent waiting for the lock.
 
 **Test databases stay after a failed run.** That is intended: the databases of the
 failed test files are kept for debugging, and the run prints a link for each one
@@ -655,5 +660,5 @@ minutes.
 
 ## Related packages
 
-- [`plan2net/playwright-toolkit`](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit) — Composer extension
-- [DDEV add-on](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/ddev-typo3-playwright-toolkit) — database service and commands
+- [`plan2net/playwright-toolkit`](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit), the Composer extension
+- [DDEV add-on](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/ddev-typo3-playwright-toolkit), the database service and commands

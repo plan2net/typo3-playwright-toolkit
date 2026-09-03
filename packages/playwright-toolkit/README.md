@@ -1,26 +1,31 @@
 <p align="center">
-  <img src="Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
+  <img src="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/packages/playwright-toolkit/Resources/Public/Icons/Extension.svg" alt="" width="96" height="96">
 </p>
 <h1 align="center">plan2net/playwright-toolkit</h1>
 <p align="center"><em>One test database per test file, and a ready-made backend session, for TYPO3.</em></p>
 <br>
 
-[![Packagist](https://img.shields.io/packagist/v/plan2net/playwright-toolkit)](https://packagist.org/packages/plan2net/playwright-toolkit)
-[![TYPO3](https://img.shields.io/badge/TYPO3-11.5%20%7C%2012.4%20%7C%2013.4%20%7C%2014.3-orange)](https://get.typo3.org)
-[![PHP](https://img.shields.io/badge/PHP-8.1%2B-777bb4)](https://www.php.net)
-[![licence](https://img.shields.io/badge/licence-GPL--2.0--or--later-blue)](LICENSE)
+<p align="center">
+  <a href="https://packagist.org/packages/plan2net/playwright-toolkit"><img src="https://img.shields.io/packagist/v/plan2net/playwright-toolkit?style=for-the-badge&logo=packagist&logoColor=white&labelColor=24273a&color=fff3b0" alt="Packagist version"></a>
+  <a href="https://get.typo3.org"><img src="https://img.shields.io/badge/TYPO3-11.5%20%7C%2012.4%20%7C%2013.4%20%7C%2014.3-ffb997?style=for-the-badge&logo=typo3&logoColor=white&labelColor=24273a" alt="TYPO3 11.5, 12.4, 13.4 and 14.3"></a>
+  <a href="https://www.php.net"><img src="https://img.shields.io/badge/PHP-8.1%2B-c3b1e1?style=for-the-badge&logo=php&logoColor=white&labelColor=24273a" alt="PHP 8.1 or newer"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licence-GPL--2.0--or--later-ffc6d9?style=for-the-badge&logo=gnu&logoColor=white&labelColor=24273a" alt="GPL-2.0-or-later licence"></a>
+</p>
 
-A [TYPO3](https://typo3.org) extension. It creates one test database per test file and provides a ready-made
-backend session, so tests never fill in the login form.
+A [TYPO3](https://typo3.org) extension. It creates one test database per test file
+and provides a ready-made backend session, so tests never fill in the login form.
 
 Developed in the
 [typo3-playwright-toolkit monorepo](https://github.com/plan2net/typo3-playwright-toolkit);
-`plan2net/playwright-toolkit` is a read-only mirror that Packagist reads. Open issues and pull
-requests on the monorepo — a commit pushed to the mirror is overwritten by the next release.
+`plan2net/playwright-toolkit` is a read-only mirror that Packagist reads. Open issues
+and pull requests on the monorepo. A commit pushed to the mirror is overwritten by the
+next release.
 
-It needs the [npm package](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit), which runs the tests, and
-the [DDEV add-on](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/ddev-typo3-playwright-toolkit), which provides the database
-service.
+It needs the
+[npm package](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit),
+which runs the tests, and the
+[DDEV add-on](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/ddev-typo3-playwright-toolkit),
+which provides the database service.
 
 > [!IMPORTANT]
 > Setting this up for the first time? Follow
@@ -38,9 +43,9 @@ service.
 - PHP 8.1 or newer
 - PostgreSQL, MySQL, MariaDB or SQLite
 
-TYPO3 11.5 and 12.4 are both ELTS. CI verifies each against its last public
-release — 11.5.41 and 12.4.45 — because ELTS releases sit behind credentials and
-cannot be tested here.
+TYPO3 11.5 and 12.4 are both ELTS. CI verifies each against its last public release,
+11.5.41 and 12.4.45, because ELTS releases sit behind credentials and cannot be
+tested here.
 
 ## Install
 
@@ -49,25 +54,21 @@ composer require --dev plan2net/playwright-toolkit
 ```
 
 Every part of the extension first checks whether TYPO3 runs in the Testing context,
-so it does nothing in Production and Development. Install it as a `--dev`
-dependency anyway: that check is not a reason to ship it to production.
+so it does nothing in Production and Development. Install it as a `--dev` dependency
+anyway: that check is not a reason to ship it to production.
 
-Then let the wizard do the rest of the setup:
+Then let the wizard do the rest:
 
 ```bash
-ddev typo3 playwright:setup     # once the add-on is installed: ddev playwright setup
+ddev exec 'TYPO3_CONTEXT=Testing vendor/bin/typo3 playwright:setup'   # once the add-on is installed: ddev playwright setup
 ```
 
-It runs every check of the [setup guide](../../SETUP.md), writes the files that are
-missing, prints the commands only your terminal can run, and builds the template
-database. With `--no-interaction` it answers no to every question, so it writes no file
-of yours and only reports, which is how you check a project that is already set up. It
-needs DDEV; without it, follow
-[Without DDEV](../../README.md#without-ddev).
-
-Run it in the **Testing** context, which `ddev playwright setup` does for you. Settings
-you apply behind an `isTesting()` check read empty anywhere else, and the fixtures and
-template checks then answer about nothing. The wizard names the context it read.
+It runs every check of
+[SETUP.md](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md),
+writes the files that are missing and builds the template database. That guide
+explains the command, its `--no-interaction` mode, and why it has to run in the
+Testing context. It needs DDEV; without it, follow
+[Without DDEV](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md#without-ddev).
 
 ## Configure
 
@@ -107,8 +108,8 @@ fastcgi_param TYPO3_CONTEXT $typo3_context;
 > location block, and nginx then ignores the value.
 
 A complete file is checked in at
-[`tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf`](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf)
-— copy from there.
+[`tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf`](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/tests/e2e/consumer/.ddev/nginx_full/nginx-site.conf).
+Copy from there.
 
 Do not write that marker anywhere else in the file, not even in a comment: DDEV
 searches the whole file for it. Then run `ddev restart`.
@@ -128,14 +129,14 @@ if (\TYPO3\CMS\Core\Core\Environment::getContext()->isTesting()) {
 ```
 
 Without those lines the overrides never run and every test uses your ordinary
-database. Keep the context check: `configureCurrentRequest()` acts on the
-test ID alone, so outside the Testing context a request carrying that header would
-switch the connection on your ordinary hostname too.
+database. Keep the context check: `configureCurrentRequest()` acts on the test ID
+alone, so outside the Testing context a request carrying that header would switch the
+connection on your ordinary hostname too.
 
 > [!IMPORTANT]
 > Under DDEV this file already exists and carries `#ddev-generated`. Delete that line
 > first, as with the nginx file, or the next `ddev restart` writes the file again
-> without your call — and your tests then pass against your ordinary database.
+> without your call, and your tests then pass against your ordinary database.
 >
 > Put the call at the end of the file. It reads the `Default` connection, which DDEV
 > sets in the block above it.
@@ -145,14 +146,14 @@ Testing one and require that from `additional.php` behind the same check.
 
 > [!NOTE]
 > `config/system/additional.php` is the Composer-mode path, which is where TYPO3 12.4,
-> 13.4 and 14.3 look. Two older layouts differ, and only the file name changes — the
+> 13.4 and 14.3 look. Two older layouts differ, and only the file name changes; the
 > contents above are the same:
 >
-> - **TYPO3 11.5** loads `typo3conf/AdditionalConfiguration.php`, in Composer mode too.
-> - **Classic (non-Composer) 12.4 and 13.4** load `typo3conf/system/additional.php`.
+> - TYPO3 11.5 loads `typo3conf/AdditionalConfiguration.php`, in Composer mode too.
+> - Classic (non-Composer) 12.4 and 13.4 load `typo3conf/system/additional.php`.
 >
 > `ConfigurationManager::getAdditionalConfigurationFileLocation()` is the authority if
-> you need to check for a version not listed here.
+> you need to check a version not listed here.
 
 It reads your `Default` connection and writes the per-test one back. If a request
 carries no test ID, nothing changes and nothing is created: the site uses its normal
@@ -160,20 +161,19 @@ database.
 
 #### Which of the two calls
 
-There are two, and the only question they answer is **who writes `$GLOBALS`**:
+There are two, and the only question they answer is who writes `$GLOBALS`:
 
 | Your `additional.php` | Call |
 |---|---|
 | writes `$GLOBALS` itself | `configureCurrentRequest()`, as above |
-| collects settings in an array and applies them at the end | `resolveCurrentRequestSettings()`, merged in **last** |
+| collects settings in an array and applies them at the end | `resolveCurrentRequestSettings()`, merged in last |
 
 They do the same work otherwise. Both pick the test database, create it as part of
-answering, and switch on the error capture behind `typo3-errors.json`. Neither is a
-lesser version of the other.
+answering, and switch on the error capture behind `typo3-errors.json`.
 
 If your project collects its settings in an array that is applied afterwards, the
 one-line call above is overwritten again. Merge the settings into that array instead,
-**last**:
+last:
 
 ```php
 $configurationSettings = array_merge(
@@ -183,9 +183,9 @@ $configurationSettings = array_merge(
 ```
 
 > [!NOTE]
-> If that array also carries your **database credentials** — common when they come
-> from environment variables rather than `settings.php` — then `$GLOBALS` does not
-> name a driver yet at this point, and the call throws
+> If that array also carries your database credentials, which is common when they
+> come from environment variables rather than `settings.php`, then `$GLOBALS` does
+> not name a driver yet at this point, and the call throws
 > `The Default database connection names no driver`. Fold the pending values in
 > first:
 >
@@ -211,14 +211,14 @@ $configurationSettings = array_merge(
 
 Whichever call you use:
 
-1. **`SYS/encryptionKey` must already hold the key your test databases were prepared
-   with.**
-2. **The returned `DB/Connections/Default/*` values are paths, not array keys, and
-   have to land last.**
+1. `SYS/encryptionKey` must already hold the key your test databases were prepared
+   with.
+2. The returned `DB/Connections/Default/*` values are paths, not array keys, and have
+   to land last.
 
 On the first: the toolkit hashes the pre-seeded session id with that key to tell an
 already-seeded database from a new one, and it does so before TYPO3 boots. Two setups
-get it wrong — a Testing configuration using a different key than the rest of the
+get it wrong: a Testing configuration using a different key than the rest of the
 site, and one that collects its settings in an array and writes them to `$GLOBALS`
 only afterwards. In both, assign the key before the call:
 
@@ -258,7 +258,7 @@ Your fixtures may set their own uid values, as this one does. You do not have to
 reset any sequences afterwards; the extension does that for you, so the first record
 a test writes does not collide with uid 2.
 
-Keep the manifest to what every test needs — a site root, a TypoScript template, the
+Keep the manifest to what every test needs: a site root, a TypoScript template, the
 storages your content references. Everything else is faster and clearer built through
 the builders in the test that needs it.
 
@@ -279,10 +279,10 @@ whose fingerprint still matches skips the rebuild and answers in a moment;
 `ddev playwright` runs this step for you, so you rarely call it directly.
 
 Images are kept apart per test as well. Each test database gets its own folder for
-processed images, `fileadmin/_processed_<test id>`, and every conversion gets a scratch
-name of its own in `typo3temp/assets/images/`, where TYPO3 works before moving the
-result into that folder. Both carry the test ID, so nothing is shared between tests and
-both go when the test database does.
+processed images, `fileadmin/_processed_<test id>`, and every conversion gets a
+scratch name of its own in `typo3temp/assets/images/`, where TYPO3 works before
+moving the result into that folder. Both carry the test ID, so nothing is shared
+between tests and both go when the test database does.
 
 To check that a project is set up correctly, ask the health endpoint:
 
@@ -303,8 +303,8 @@ Testing context, a 401 means the secret does not match.
 
 | Name | Default | Purpose |
 |---|---|---|
-| `fixturesPath` | — | Folder with your SQL fixture files, relative to the project root |
-| `fixtureManifest` | — | Fixture file names, separated by commas, loaded in this order |
+| `fixturesPath` | none | Folder with your SQL fixture files, relative to the project root |
+| `fixtureManifest` | none | Fixture file names, separated by commas, loaded in this order |
 | `preseededSessionId` | `playwright_test_session` | Backend session ID stored in the template database |
 | `sessionUserId` | `1` | Backend user this session belongs to |
 | `cleanupMinimumAgeMs` | `3600000` | How old a test database must be before cleanup may delete it |
@@ -312,15 +312,21 @@ Testing context, a 401 means the secret does not match.
 If you change `fixturesPath`, `fixtureManifest` or the session settings, the next run
 rebuilds the template database.
 
+`sessionUserId` decides who saves the content your tests build, so page permissions,
+table access and mounts all apply to it. Fixtures are applied before the session is
+seeded, and the seeded user is written with `INSERT IGNORE`, so a `be_users` row of
+your own at that uid wins. Without one, the toolkit writes an admin there.
+
 ### Endpoints
 
 All endpoints start with `/typo3/test-api/`, need the
 `X-Playwright-Toolkit-Secret` header, and answer `404` outside the Testing context.
-[CONTRACT.md](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/CONTRACT.md) describes them.
+[CONTRACT.md](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/CONTRACT.md)
+describes them.
 
 The one exception is `inspect`, which a browser opens. It takes a signed link
-instead of the header, because a browser cannot send one. See Looking at a kept
-database below.
+instead of the header, because a browser cannot send one. See
+[Looking at a kept database](#looking-at-a-kept-database).
 
 ### Looking at a kept database
 
@@ -342,10 +348,11 @@ PlaywrightDemo [checkout · EF70E3DDD33D3571]
 ```
 
 The scenario is the spec file's name, without its directory or `.spec.ts` suffix.
-Nothing to configure; the marker appears whenever a request carries a test ID.
+There is nothing to configure; the marker appears whenever a request carries a test
+ID.
 
-The link is signed with the API secret and lives **15 minutes**. It sets two
-session cookies, so closing the browser ends the visit.
+The link is signed with the API secret and lives 15 minutes. It sets two session
+cookies, so closing the browser ends the visit.
 
 ### What TYPO3 recorded during a test
 
@@ -366,29 +373,30 @@ Some problems never reach the log, so they cannot show up here:
 - The few exceptions TYPO3 skips on purpose, like a wrong host header or a blocked
   login attempt.
 - Anything that goes wrong while the database itself is broken.
-- A relation that ended up empty. TYPO3 reports records it **rejected**, not records
-  it saved with a link pointing nowhere.
+- A relation that ended up empty. TYPO3 reports records it rejected, not records it
+  saved with a link pointing nowhere.
 
-### One database holding every scenario
+### Replay
 
-`ddev playwright-replay` runs every scenario's setup into a single database instead
-of one per test file, so everything the suite knows how to build ends up in one
-place. It calls `typo3 playwright:replay-prepare` first, which rebuilds that database
-from the template.
-
-The database is the plain `db` on the `db-test` container, reached through the fixed
-test ID `REPLAY0000000000`. Each scenario writes into a sysfolder named after its
-file, and the run prints a backend link when it finishes. Sample pages nobody had to
-build by hand.
+`typo3 playwright:replay-prepare` rebuilds the replay database from the template. It
+is the plain `db` on the `db-test` container, reached through the fixed test ID
+`REPLAY0000000000`, and `ddev playwright-replay` calls it before running every
+scenario's setup into that one database. The
+[npm README](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit#replay-mode)
+describes replay mode.
 
 ## Troubleshooting
 
 **Every endpoint answers 404.** The request did not reach the Testing context. Open
 the testing host name, not the normal one, and check your web server configuration.
 
-**Tests write to your normal database.** Your project merges the override paths as
-array keys, or DDEV rewrote the file because its `#ddev-generated` marker is still
-there. See Database selection.
+**Tests write to your normal database.** This has three causes. Your project merges
+the override paths as array keys; DDEV rewrote `additional.php` because its
+`#ddev-generated` marker is still there (see Database selection); or something strips
+the test ID header on the way to PHP: `fastcgi_pass_request_headers off` in nginx, a
+`RequestHeader unset` or a mod_security rule in Apache, or a proxy in front of the
+testing hostname. TYPO3 then sees an ordinary request and answers it from the site's
+own database, so the tests pass against the wrong content.
 
 **The run stops with "run ddev playwright-prepare".** The template database is
 missing or was built with different settings. Run `ddev playwright-prepare` again.
@@ -399,5 +407,5 @@ same value on both sides.
 
 ## Related packages
 
-- [`@plan2net/typo3-playwright-toolkit`](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit) — npm package
-- [DDEV add-on](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/ddev-typo3-playwright-toolkit) — database service and commands
+- [`@plan2net/typo3-playwright-toolkit`](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit), the npm package
+- [DDEV add-on](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/ddev-typo3-playwright-toolkit), the database service and commands
