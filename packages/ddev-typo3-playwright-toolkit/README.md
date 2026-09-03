@@ -237,9 +237,14 @@ container.
 
 | Name | Default | Purpose |
 |---|---|---|
-| `--build` | off | Runs `npm run build` before the tests |
 | `--no-cleanup` | off | Keeps the test databases and state files after the run |
+| `--skip-build` | off | Skips the asset build the toolkit runs before the tests |
 | `--skip-prepare` | off | Reuses the existing template database instead of rebuilding it |
+
+The build itself belongs to the npm package, which runs your `package.json` build
+script before every run. Set `build` in `defineToolkitConfig` to run something else;
+the [npm README](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit#building-your-assets)
+covers what it detects and how to turn it off completely.
 
 ### Environment variables
 
@@ -252,6 +257,7 @@ does not work, because these are DDEV web commands.
 | `PW_RUN_ID` | generated | Names the run, so cleanup can tell runs apart |
 | `PW_UI_PORT` | `3000` | Port for UI mode |
 | `PW_REPORT_PORT` | `9323` | Port for `show-report` |
+| `PW_SKIP_BUILD` | unset | Same as `--skip-build`; use the flag instead |
 | `PW_SKIP_PREPARE` | unset | Same as `--skip-prepare`; use the flag instead |
 | `PW_TEST_CONNECT_WS_ENDPOINT` | unset | Browser server to drive instead of the local browsers; see [Where things run](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md#where-things-run) |
 | `PW_TEST_CONNECT_EXPOSE_NETWORK` | unset | Lets that browser reach your site through the web container; `*` covers everything |
@@ -270,6 +276,10 @@ cannot create databases. Reinstall the add-on, which grants the missing rights.
 
 **Tests do not see your latest TCA change.** The template database was reused. Drop
 `--skip-prepare`, and check that `PW_SKIP_PREPARE` is not set in `web_environment`.
+
+**Tests do not see your latest CSS or JavaScript change.** Nothing built the assets.
+Check that your `package.json` has a `build` script, or name your build in
+`defineToolkitConfig`, and drop `--skip-build`.
 
 ## Related packages
 

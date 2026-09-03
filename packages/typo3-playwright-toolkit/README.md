@@ -382,6 +382,35 @@ prepareContext: async (context) => {
 },
 ```
 
+### Building your assets
+
+Every run builds your frontend assets before the first test. Tests against a stale
+bundle still pass, and the screenshots they write become the baseline for the next
+run, so no later run reports the problem either.
+
+If you set no `build`, the package runs the `build` script from your project's
+`package.json`, through the package manager your lockfile names: pnpm for
+`pnpm-lock.yaml`, yarn for `yarn.lock`, bun for a bun lockfile, npm otherwise. A
+project without that script builds nothing and starts right away, so a site with
+committed assets needs no setting at all.
+
+Name your own command when the default is wrong:
+
+```ts
+// playwright.config.ts
+build: 'pnpm build:test',           // one command
+build: 'npm run css && npm run js', // several, because it runs through a shell
+build: false,                       // this project never builds
+```
+
+The command runs in `consumerRoot` and writes its output to your terminal. A failing
+build stops the run before the first test, so it costs you no per-test database and
+no state to clean up. Under DDEV the template database is rebuilt earlier, by the
+`ddev playwright` command itself, so that step runs either way.
+
+To skip the build once, set `PW_SKIP_BUILD=1`, which is what
+`ddev playwright test --skip-build` does.
+
 ### Screenshots
 
 `expectScreenshot` waits for fonts, images and animations, hides the selectors from
@@ -503,6 +532,7 @@ Everything else:
 | `accessibility.disabledRules` | `[]` | axe rules turned off for the whole project |
 | `accessibility.projects` | all projects | Projects that run axe checks |
 | `accessibility.tags` | `DEFAULT_SCAN_TAGS` | Which axe rule sets to run |
+| `build` | your `build` script | Command that builds your assets before the run, or `false` for none |
 | `cleanup.failOnLeak` | true in CI | Fail the run if a test database could not be deleted |
 | `cleanup.orphanAgeMs` | 24 hours | How old a leftover database must be before cleanup deletes it |
 | `cleanup.preserveOnFailure` | `failed` | Which test databases to keep after a failure: `failed`, `all` or `none` |
@@ -641,6 +671,10 @@ first thing in `playwright.config.ts`.
 
 **Cleanup refuses a path.** `stateDir` and `sessionDir` must be absolute and inside
 `consumerRoot`, because cleanup deletes files in both.
+
+**The run builds nothing, or builds the wrong thing.** The default reads
+`consumerRoot/package.json`, not the `package.json` next to your Playwright config.
+Point `build` at your real command if the two differ.
 
 **"Timed out after 300000ms waiting for the setup".** A setup that builds a lot of
 content can outgrow the defaults on a slow machine. Raise `setup.attemptTimeoutMs`

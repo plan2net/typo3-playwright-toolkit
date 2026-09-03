@@ -7,7 +7,7 @@
 ADDON_DIR="$(cd "$(dirname "${BATS_TEST_FILENAME}")/.." && pwd)"
 
 setup() {
-    unset NO_DATABASE_CLEANUP PW_BUILD
+    unset NO_DATABASE_CLEANUP PW_SKIP_BUILD
     # shellcheck source=../playwright-lib.sh
     . "${ADDON_DIR}/playwright-lib.sh"
 }
@@ -70,18 +70,37 @@ setup() {
     [ "${#PW_ARGS[@]}" -eq 0 ]
 }
 
-@test "takes --build for itself instead of passing it on" {
+# The toolkit runs the build; the flag only has to reach it.
+@test "--skip-build becomes PW_SKIP_BUILD for the toolkit" {
+    playwright_collect_args test --skip-build
+
+    [ "${#PW_ARGS[@]}" -eq 1 ]
+    [ "${PW_ARGS[0]}" = "test" ]
+    [ "${PW_SKIP_BUILD}" = "1" ]
+}
+
+@test "leaves --skip-build off by default" {
+    playwright_collect_args test
+
+    [ "${PW_SKIP_BUILD:-0}" = "0" ]
+}
+
+# npx would refuse it as an unknown option.
+@test "swallows --build without passing it on" {
     playwright_collect_args test --build
 
     [ "${#PW_ARGS[@]}" -eq 1 ]
     [ "${PW_ARGS[0]}" = "test" ]
-    [ "${PW_BUILD}" = "1" ]
 }
 
-@test "leaves --build off by default" {
-    playwright_collect_args test
-
-    [ "${PW_BUILD}" = "0" ]
+@test "no command runs a build of its own" {
+    for command in "${ADDON_DIR}"/commands/web/*; do
+        run grep -nE '^[^#]*(npm|yarn|pnpm|bun) run build' "${command}"
+        [ "$status" -ne 0 ] || {
+            echo "$(basename "${command}") builds assets itself: ${output}"
+            false
+        }
+    done
 }
 
 # These are web commands, so PW_SKIP_PREPARE=1 typed on the host never arrives.

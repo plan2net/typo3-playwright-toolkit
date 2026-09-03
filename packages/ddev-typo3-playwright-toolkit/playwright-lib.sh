@@ -54,19 +54,19 @@ playwright_enter_test_dir() {
 #
 # Flags rather than environment variables: these are *web* commands, so a
 # host-side `PW_X=1 ddev playwright …` never reaches them.
-#
-# shellcheck disable=SC2034  # PW_BUILD is read by the sourcing command
 playwright_collect_args() {
     PW_ARGS=()
-    PW_BUILD=0
 
     while [ $# -gt 0 ]; do
         case "$1" in
             --no-cleanup)
                 export NO_DATABASE_CLEANUP=1
                 ;;
+            --skip-build)
+                export PW_SKIP_BUILD=1
+                ;;
+            # The default now. Swallowed, not forwarded: npx has no such flag.
             --build)
-                PW_BUILD=1
                 ;;
             --skip-prepare)
                 export PW_SKIP_PREPARE=1
@@ -77,13 +77,6 @@ playwright_collect_args() {
         esac
         shift
     done
-}
-
-playwright_build_assets() {
-    build_root="${1:-/var/www/html}"
-
-    echo "[playwright] Building frontend assets…"
-    (cd "${build_root}" && npm run build) || return 1
 }
 
 # The compose file only takes effect after `ddev restart`. Before that "db-test"

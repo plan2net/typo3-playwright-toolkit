@@ -1,0 +1,8 @@
+{
+    "name": "playwright-toolkit-e2e-consumer",
+    "private": true,
+    "description": "Stands in for a project that builds its frontend assets. The toolkit runs this build script before the suite and run.sh checks the marker it writes, so the build path is executed rather than skipped. No lockfile here on purpose: npm is the fallback the resolver picks when nothing names a manager.",
+    "scripts": {
+        "build": "mkdir -p var && printf built > var/e2e-build-ran.txt"
+    }
+}

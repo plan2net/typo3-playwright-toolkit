@@ -180,6 +180,23 @@ describe('globalSetup', () => {
     })
 })
 
+// Order, not just the call: a build after the preflight has already cost a database.
+describe('globalSetup builds assets', () => {
+    it('builds before it talks to the site, and stops there when the build fails', async () => {
+        const seen: string[] = []
+        vi.stubGlobal('fetch', async (url: string) => {
+            seen.push(url)
+            return new Response(JSON.stringify({ ok: true, api: 1, checks: {} }), { status: 200 })
+        })
+        setToolkitConfig({ ...config, build: `printf ran > ${path.join(tmpRoot, 'built.txt')} && exit 3` })
+
+        await expect(globalSetup()).rejects.toThrow(/asset build failed/)
+
+        expect(fs.existsSync(path.join(tmpRoot, 'built.txt'))).toBe(true)
+        expect(seen).toEqual([])
+    })
+})
+
 // A random preflight id would leave a database replay's teardown never drops.
 describe('globalSetup in replay mode', () => {
     it('preflights the replay database and registers no attempt of its own', async () => {

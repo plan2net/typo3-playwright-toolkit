@@ -22,7 +22,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "of every content element your builders know how to make."
     echo ""
     echo "Options this command handles itself:"
-    echo "  --build             Build frontend assets first (npm run build)"
+    echo "  --skip-build        Do not build frontend assets first"
     echo "  --skip-prepare      Reuse the existing test database template"
     echo ""
     echo "Everything else is forwarded to 'npx playwright test', so --grep and a path"
@@ -41,10 +41,6 @@ playwright_enter_test_dir || exit 1
 playwright_collect_args "$@"
 
 playwright_refuse_worker_override "${PW_ARGS[@]}" || exit 1
-
-if [ "${PW_BUILD}" = "1" ]; then
-    playwright_build_assets || exit 1
-fi
 
 playwright_prepare_template || exit 1
 playwright_replay_prepare || exit 1

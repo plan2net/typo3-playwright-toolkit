@@ -1,4 +1,5 @@
 import { getToolkitConfig, type ToolkitConfig } from './config.js'
+import { runBuild } from './build.js'
 import { prepareRun } from './state/run-namespace.js'
 import { REPLAY_TEST_ID, TEST_ID_HEADER, generateTestId } from './contract.js'
 import { SECRET_HEADER, resolveApiSecret } from './http/api-secret.js'
@@ -184,6 +185,10 @@ export async function runHealthCheck(
 
 async function globalSetup(): Promise<void> {
     const config = getToolkitConfig()
+
+    // First, so a failed build costs no state and no test database.
+    runBuild(config)
+
     prepareRun(config)
 
     if (process.env.PW_SKIP_HEALTH === '1') {

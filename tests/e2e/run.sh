@@ -104,8 +104,19 @@ say 'installing the Playwright side'
     ddev npx playwright install --with-deps chromium
 )
 
+# Removed first, so the check below cannot pass on a marker an earlier run left.
+rm -f var/e2e-build-ran.txt
+
 say 'running the suite'
 ddev playwright test --reporter=list
+
+# Without a package.json at the project root the toolkit takes its "nothing to
+# build" path, which passes while executing no build at all.
+say 'checking that the asset build ran'
+if [ ! -f var/e2e-build-ran.txt ]; then
+    echo "[e2e] the toolkit never ran the project's build script" >&2
+    exit 1
+fi
 
 # The only check anywhere that globalTeardown drops what it reports dropping.
 say 'checking that no test database survived'

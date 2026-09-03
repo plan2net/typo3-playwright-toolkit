@@ -3,24 +3,29 @@
 
 ## Description: Run Playwright against fresh per-test databases
 ## Usage: playwright [subcommand] [options]
-## Example: "ddev playwright test" or "ddev playwright test accordion --build"
+## Example: "ddev playwright test" or "ddev playwright test accordion --skip-build"
 ## ExecRaw: true
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "Usage: ddev playwright [subcommand] [options]"
     echo ""
     echo "Everything is forwarded to 'npx playwright', so any subcommand and flag"
-    echo "works. Before 'test' the test database template is checked and rebuilt"
-    echo "when your schema, fixtures or session seed changed, so a TCA or"
-    echo "ext_tables.sql change never runs against a stale schema."
+    echo "works. Before 'test' your frontend assets are built and the test database"
+    echo "template is checked and rebuilt when your schema, fixtures or session seed"
+    echo "changed, so a TCA or ext_tables.sql change never runs against a stale"
+    echo "schema and the tests never shoot yesterday's CSS."
     echo ""
     echo "Subcommands this command handles itself:"
     echo "  setup               Set up this project for Playwright, or check a setup you have"
     echo ""
     echo "Options this command handles itself:"
-    echo "  --build             Build frontend assets first (npm run build)"
+    echo "  --skip-build        Do not build frontend assets first"
     echo "  --no-cleanup        Keep test databases and state after the run"
     echo "  --skip-prepare      Reuse the existing test database template"
+    echo ""
+    echo "The asset build is the toolkit's: it runs your package.json 'build' script"
+    echo "through the package manager your lockfile names. Set 'build' in"
+    echo "defineToolkitConfig to run something else, or false to never build."
     echo ""
     echo "Env (set these in web_environment or .ddev/.env.web to reach this command):"
     echo "  PW_TEST_DIR         Where your Playwright tests live, default tests/playwright"
@@ -58,10 +63,6 @@ fi
 playwright_enter_test_dir || exit 1
 
 playwright_collect_args "$@"
-
-if [ "${PW_BUILD}" = "1" ]; then
-    playwright_build_assets || exit 1
-fi
 
 # show-report binds to 127.0.0.1, which is unreachable from outside the container.
 if [ "${PW_ARGS[0]:-}" = "show-report" ]; then

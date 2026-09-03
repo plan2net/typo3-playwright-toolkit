@@ -10,6 +10,17 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Changed
+
+- **@plan2net/typo3-playwright-toolkit**, **ddev-typo3-playwright-toolkit** — every run
+  builds your frontend assets before the first test, so no suite runs against a stale
+  bundle. The build is the `build` script of your project's `package.json`, run through
+  the package manager your lockfile names (pnpm, yarn, bun or npm); a project without
+  that script builds nothing. Set `build` in `defineToolkitConfig` for your own command,
+  or `false` to never build. `PW_SKIP_BUILD=1` skips it for one run, and so does `ddev
+  playwright test --skip-build`. It runs in the toolkit's setup, so `npx playwright test`
+  builds as well.
+
 ## [0.14.0] - 2026-09-03
 
 Setting a project up meant following six steps by hand. `ddev playwright setup` runs nine

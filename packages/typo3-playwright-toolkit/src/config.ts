@@ -89,6 +89,12 @@ export interface ToolkitConfig {
     /** Selectors hidden before each screenshot. Defaults to []. */
     hideBeforeScreenshot?: string[]
     /**
+     * Command that builds the frontend assets before the run. Left out, the `build`
+     * script of the project's package.json runs, through the package manager its
+     * lockfile names; `false` never builds. PW_SKIP_BUILD=1 skips it for one run.
+     */
+    build?: string | false
+    /**
      * Runs on every context a scenario test uses, after the toolkit's own headers are
      * in place. Where a consumer stubs a third-party script or adds its own routes.
      */
