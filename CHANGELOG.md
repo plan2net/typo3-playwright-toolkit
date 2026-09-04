@@ -10,6 +10,14 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-09-04
+
+A test can only be as current as the assets it renders, and one rendering an older
+build passes: the screenshots it writes become the baseline the next run compares
+against, so nothing later reports it either. Every run now builds your frontend
+assets first, through your project's own build script, and a project that has none
+is left alone.
+
 ### Changed
 
 - **@plan2net/typo3-playwright-toolkit**, **ddev-typo3-playwright-toolkit** — every run
@@ -20,6 +28,13 @@ the package a change belongs to.
   or `false` to never build. `PW_SKIP_BUILD=1` skips it for one run, and so does `ddev
   playwright test --skip-build`. It runs in the toolkit's setup, so `npx playwright test`
   builds as well.
+
+### Documentation
+
+- Each README now answers one question and hands the rest to
+  [SETUP.md](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md),
+  which carries the setup in one place instead of three partial copies. A diagram of
+  the one-header-one-database chain comes with it.
 
 ## [0.14.0] - 2026-09-03
 
@@ -629,7 +644,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.14.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.15.0...main
+[0.15.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.11.0...v0.12.0
