@@ -651,6 +651,10 @@ results nor a kept test database. The one database it creates is its own, and it
 drops that again even after a failed check. On DDEV, `ddev playwright doctor` wraps
 it.
 
+It also checks nothing about your installation. The TYPO3 extension has a wizard for
+that, `playwright:setup`, which reads your files, versions and settings and writes
+what is missing.
+
 ### The inspect command
 
 The package installs `typo3-playwright-inspect`. Run it from your project root

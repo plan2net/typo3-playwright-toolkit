@@ -16,7 +16,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "schema and the tests never shoot yesterday's CSS."
     echo ""
     echo "Subcommands this command handles itself:"
-    echo "  doctor              Check whether this project can run tests"
+    echo "  doctor              Start a browser and a test database to prove a run works"
     echo "  approve [filter]    Approve and update snapshots for failed tests or a filter"
     echo "  ui [filter]         Open Playwright's UI mode"
     echo "  replay [filter]     Build scenarios in the replay database"

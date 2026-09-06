@@ -7,6 +7,8 @@ if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
     echo "Checks the browsers, the testing URL, API access and a temporary test"
     echo "database. Runs no tests, builds or repairs, and drops the database it made."
     echo ""
+    echo "For files, versions and services, run 'ddev playwright setup' instead."
+    echo ""
     echo "  --project name      Check one project; wildcards work, repeat for more"
     echo "  --config file       Use another Playwright config"
     echo ""

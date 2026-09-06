@@ -70,6 +70,11 @@ explains the command, its `--no-interaction` mode, and why it has to run in the
 Testing context. It needs DDEV; without it, follow
 [Without DDEV](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md#without-ddev).
 
+The wizard reads your files, versions and settings. Once the project runs, use
+`ddev playwright doctor` to see whether a test run still works: it starts a browser,
+has this extension build a test database, uses the backend session in it and drops
+the database again.
+
 ## Configure
 
 ### Testing host

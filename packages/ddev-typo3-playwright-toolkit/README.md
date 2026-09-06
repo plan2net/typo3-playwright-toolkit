@@ -213,6 +213,11 @@ The command runs no tests, setup hooks, frontend build or repairs, and leaves yo
 test results and kept databases alone. It drops its own diagnostic database even
 after a failed check, and names that database in the report when the drop fails.
 
+`ddev playwright setup` is the one to run while you set the project up: it checks
+that the files, versions and services are there and writes what is missing. The
+doctor takes all that as done and tries the real thing, which is what you want when
+tests stop working.
+
 The checks live in the npm package, so update it along with this add-on.
 
 ### Approve snapshots
@@ -286,8 +291,8 @@ Viewing a trace runs no tests or builds. Stop the viewer with Ctrl-C.
 | `ddev playwright` | Runs `npx playwright` with the arguments you pass |
 | `ddev playwright approve [filter]` | Re-runs selected tests and updates their snapshots; defaults to previous failures |
 | `ddev playwright trace [file]` | Serves a saved trace in Playwright's viewer; defaults to the newest trace |
-| `ddev playwright setup` | Sets this project up for Playwright, or checks a setup you have |
-| `ddev playwright doctor` | Checks whether this project can run tests, and runs none |
+| `ddev playwright setup` | Sets this project up for Playwright, or checks that a setup is complete |
+| `ddev playwright doctor` | Starts a browser and builds a test database to prove a run would work |
 | `ddev playwright inspect` | Prints links that open a kept test database in the backend |
 | `ddev playwright prepare` | Builds the template database on its own; `--force` rebuilds one that is still up to date |
 | `ddev playwright replay` | Replays every scenario's content into one browsable database |

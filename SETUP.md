@@ -30,6 +30,11 @@ of your files and only reports, which also answers whether a project is still se
 correctly. The one file it always writes is `var/playwright/api-secret`, which the
 test API needs and `ddev playwright prepare` would write anyway.
 
+That report covers your files, versions and settings. `ddev playwright doctor` covers
+the other half, whether a run works: it starts your browsers, has TYPO3 build a test
+database from the template, uses the backend session in it and drops it again. Use
+the wizard while you set the project up, and the doctor when tests stop working.
+
 This guide takes the DDEV route, the shortest one and the one CI checks on every
 push. DDEV is not a requirement: [Without DDEV](#without-ddev) at the end lists what
 to provide instead.
