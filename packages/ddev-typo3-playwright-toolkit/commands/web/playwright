@@ -50,6 +50,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  ddev playwright test --project=chromium-desktop        # one browser"
     echo "  ddev playwright test -c playwright.local.config.ts     # another config"
     echo "  ddev playwright show-report"
+    echo "  ddev playwright install chromium                      # any Playwright command"
     exit 0
 fi
 

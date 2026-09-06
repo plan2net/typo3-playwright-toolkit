@@ -137,6 +137,10 @@ ddev restart
 cd tests/playwright && ddev npx playwright install --with-deps chromium
 ```
 
+With the add-on installed, `ddev playwright install --with-deps chromium` does the
+same from anywhere in the project: anything that is not a command of its own goes
+straight to `npx playwright`, in your test directory.
+
 Gitignore `.cache/`.
 
 The browsers can also run elsewhere, and so can the whole test run.

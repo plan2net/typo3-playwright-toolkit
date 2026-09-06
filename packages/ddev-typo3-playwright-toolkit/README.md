@@ -174,6 +174,7 @@ use any of them, since they all reach the same container.
 ddev playwright test                 # all tests
 ddev playwright test accordion       # one file
 ddev playwright show-report
+ddev playwright install chromium     # any other Playwright command works too
 ```
 
 Before `test`, the command clears the Testing caches and checks the template
