@@ -23,6 +23,13 @@ the package a change belongs to.
 ### Added
 
 - **@plan2net/typo3-playwright-toolkit**, **ddev-typo3-playwright-toolkit** —
+  `ddev playwright clean` drops the test databases and run state a stopped run left
+  behind, which teardown otherwise reclaims only after a day. A run that is still
+  going keeps its databases, and the template and replay database are never dropped.
+  Databases kept for `inspect` go as well. Outside DDEV the same command is
+  `npx typo3-playwright-clean`.
+
+- **@plan2net/typo3-playwright-toolkit**, **ddev-typo3-playwright-toolkit** —
   `ddev playwright doctor` answers whether a project can run tests. It checks the
   browsers, access to the testing site, API authentication and version compatibility,
   then a temporary database and its backend session, and a check that cannot run says

@@ -22,6 +22,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  replay [filter]     Build scenarios in the replay database"
     echo "  inspect [filter]    Print backend links for kept test databases"
     echo "  prepare [--force]   Build the test database template"
+    echo "  clean               Drop what a stopped run left behind"
     echo "  trace [file]        View a saved trace in your browser"
     echo "  setup               Set up this project for Playwright, or check a setup you have"
     echo ""
@@ -57,7 +58,8 @@ if [ "$1" = "ui" ]; then
     exec bash "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/commands/web/playwright-ui" "$@"
 fi
 
-if [ "$1" = "inspect" ] || [ "$1" = "replay" ] || [ "$1" = "prepare" ] || [ "$1" = "doctor" ]; then
+if [ "$1" = "inspect" ] || [ "$1" = "replay" ] || [ "$1" = "prepare" ] || [ "$1" = "doctor" ] \
+    || [ "$1" = "clean" ]; then
     subcommand="$1"
     shift
     exec bash "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-commands/${subcommand}.sh" "$@"

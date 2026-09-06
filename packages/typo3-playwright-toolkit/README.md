@@ -674,6 +674,24 @@ log in as the pre-seeded backend user and live 15 minutes.
 test databases. Use it when the link that run printed has expired; it mints a new
 one rather than rebuilding anything.
 
+### The clean command
+
+The package installs `typo3-playwright-clean`. Run it from your project root after a
+run you stopped, to drop the test databases and run state it left behind:
+
+```bash
+npx typo3-playwright-clean
+```
+
+Teardown reclaims those by itself, but only once they are `cleanup.orphanAgeMs` old,
+a day by default. This does it now. A run whose state was touched in the last 30
+seconds counts as still going: its databases go into the sweep's keep list and its
+run directory stays, so a suite running in another terminal is safe. The template and
+the replay database are never dropped. On DDEV, `ddev playwright clean` wraps it.
+
+Databases kept for `typo3-playwright-inspect` are dropped too, since nothing marks
+them as worth keeping. Read what you need from them first.
+
 ### Replay mode
 
 `PW_REPLAY=1` runs every scenario's setup into one shared database rather than a

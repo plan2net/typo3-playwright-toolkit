@@ -16,6 +16,7 @@ project_files:
   - commands/web/playwright
   - playwright-commands/inspect.sh
   - playwright-commands/doctor.sh
+  - playwright-commands/clean.sh
   - playwright-commands/prepare.sh
   - playwright-commands/replay.sh
   - commands/web/playwright-ui

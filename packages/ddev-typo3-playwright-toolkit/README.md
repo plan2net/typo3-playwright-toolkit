@@ -220,6 +220,22 @@ tests stop working.
 
 The checks live in the npm package, so update it along with this add-on.
 
+### Clean up after a stopped run
+
+A run you stop with Ctrl-C leaves its test databases and run state behind. The next
+run reclaims them, but only once they are a day old:
+
+```bash
+ddev playwright clean
+```
+
+This drops them now. A run that is still going keeps its databases, so a suite in
+another terminal is safe. The template and the replay database stay either way, and
+`ddev playwright prepare --force` is what rebuilds the template.
+
+Databases kept for `ddev playwright inspect` go as well, since nothing tells them
+apart from the rest. Look at what you need first.
+
 ### Approve snapshots
 
 After reviewing a visual change, re-run the affected tests to update their snapshots:
@@ -296,6 +312,7 @@ Viewing a trace runs no tests or builds. Stop the viewer with Ctrl-C.
 | `ddev playwright inspect` | Prints links that open a kept test database in the backend |
 | `ddev playwright prepare` | Builds the template database on its own; `--force` rebuilds one that is still up to date |
 | `ddev playwright replay` | Replays every scenario's content into one browsable database |
+| `ddev playwright clean` | Drops the test databases and state a stopped run left behind |
 | `ddev playwright ui` | Serves Playwright UI mode from the web container |
 
 ### Flags

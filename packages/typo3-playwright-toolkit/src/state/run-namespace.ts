@@ -44,7 +44,7 @@ export function ensureRunNamespace(config: ToolkitConfig): RunPaths {
 }
 
 /** How long after its last sign of life a run still counts as running. */
-const OWNER_ACTIVE_MS = 30_000
+export const OWNER_ACTIVE_MS = 30_000
 
 export function prepareRun(config: ToolkitConfig): RunPaths {
     const paths = ensureRunNamespace(config)

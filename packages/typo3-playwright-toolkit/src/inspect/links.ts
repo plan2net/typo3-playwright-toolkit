@@ -54,6 +54,15 @@ export function inspectLinks(stateDir: string, secret: string, now: number = Dat
     })
 }
 
+/** Every run of a project records the same URL, so the newest one that has it wins. */
+export function recordedTestingUrl(stateDir: string): string | undefined {
+    return listRunIds(stateDir)
+        .map((runId) => path.join(runsRoot(stateDir), runId))
+        .sort((a, b) => runLastActiveMs(b) - runLastActiveMs(a))
+        .map((runDir) => readTestingUrl(path.join(runDir, 'meta.json')))
+        .find((url) => undefined !== url)
+}
+
 function readTestingUrl(metaFile: string): string | undefined {
     try {
         const meta = JSON.parse(fs.readFileSync(metaFile, 'utf-8')) as { testingURL?: unknown }
