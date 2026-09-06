@@ -166,8 +166,7 @@ use any of them, since they all reach the same container.
 
 ## Using the package
 
-`ddev playwright` passes everything on to `npx playwright`, so every Playwright
-argument works:
+`ddev playwright` forwards Playwright commands and their arguments:
 
 ```bash
 ddev playwright test                 # all tests
@@ -190,6 +189,26 @@ ddev playwright-inspect accordion  # one test file
 
 Opening a link logs you into the TYPO3 backend of that database, and the frontend is
 reachable from there. Links are signed and expire after 15 minutes.
+
+### Approve snapshots
+
+After reviewing a visual change, re-run the affected tests to update their snapshots:
+
+```bash
+ddev playwright approve
+ddev playwright approve accordion
+ddev playwright approve --grep "teaser"
+ddev playwright approve --all
+```
+
+With no filter, `approve` updates only tests that failed in the previous run. It
+stops if that run's state is missing, invalid, or has no failed tests. Use a file
+filter or `--grep` to select tests, or `--all` to update the whole suite.
+
+`--project`, `--config`, and `--output` work here too. Approval uses the same
+database preparation and frontend build as `test`; `--skip-prepare` and
+`--skip-build` skip those steps. Playwright reports the results and updated
+snapshots, and the command returns its exit status.
 
 ### Replay
 
@@ -223,6 +242,7 @@ browsers have to be installed there.
 | Command | Purpose |
 |---|---|
 | `ddev playwright` | Runs `npx playwright` with the arguments you pass |
+| `ddev playwright approve [filter]` | Re-runs selected tests and updates their snapshots; defaults to previous failures |
 | `ddev playwright setup` | Sets this project up for Playwright, or checks a setup you have |
 | `ddev playwright-inspect` | Prints links that open a kept test database in the backend |
 | `ddev playwright-prepare` | Builds the template database on its own; `--force` rebuilds one that is still up to date |

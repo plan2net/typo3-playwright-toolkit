@@ -16,6 +16,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "schema and the tests never shoot yesterday's CSS."
     echo ""
     echo "Subcommands this command handles itself:"
+    echo "  approve [filter]    Approve and update snapshots for failed tests or a filter"
     echo "  setup               Set up this project for Playwright, or check a setup you have"
     echo ""
     echo "Options this command handles itself:"
@@ -36,6 +37,9 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  ddev playwright test                                  # everything"
     echo "  ddev playwright test accordion                        # one file, by path"
     echo "  ddev playwright test --grep 'three facts'              # by test title"
+    echo "  ddev playwright approve                               # update snapshots for failed tests"
+    echo "  ddev playwright approve accordion                     # update snapshots for one file"
+    echo "  ddev playwright approve --all                         # update snapshots for all tests"
     echo "  ddev playwright test --project=chromium-desktop        # one browser"
     echo "  ddev playwright test -c playwright.local.config.ts     # another config"
     echo "  ddev playwright show-report"
@@ -58,7 +62,25 @@ if [ "$1" = "setup" ]; then
     exec env TYPO3_CONTEXT=Testing vendor/bin/typo3 playwright:setup "$@"
 fi
 
-. /mnt/ddev_config/playwright-lib.sh || exit 1
+if [ "$1" = "approve" ]; then
+    for arg in "${@:2}"; do
+        if [ "${arg}" = "--help" ] || [ "${arg}" = "-h" ]; then
+            echo "Usage: ddev playwright approve [filter] [options]"
+            echo ""
+            echo "Without a filter, updates snapshots only for the last failed tests."
+            echo "It never falls back to the whole suite when no failures were recorded."
+            echo "  --all           Update snapshots across the whole suite"
+            echo "  --grep PATTERN  Select tests by title"
+            echo "  --skip-build    Skip the frontend asset build"
+            echo "  --skip-prepare  Reuse the existing database template"
+            echo ""
+            echo "File filters and Playwright test options are supported."
+            exit 0
+        fi
+    done
+fi
+
+. "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-lib.sh" || exit 1
 
 playwright_enter_test_dir || exit 1
 
@@ -76,12 +98,19 @@ if [ "${PW_ARGS[0]:-}" = "show-report" ]; then
     exec npx playwright show-report --host 0.0.0.0 --port "${PORT}" "${PW_ARGS[@]:1}"
 fi
 
-# Only `test` prepares: subcommands like show-report and codegen do not need a
-# database, and even the up-to-date check would boot TYPO3 for nothing.
-if [ "${PW_ARGS[0]:-}" != "test" ]; then
+# Other subcommands must not boot TYPO3.
+if [ "${PW_ARGS[0]:-}" != "test" ] && [ "${PW_ARGS[0]:-}" != "approve" ]; then
     exec npx playwright "${PW_ARGS[@]}"
 fi
 
-playwright_prepare_template || exit 1
+if [ "${PW_ARGS[0]:-}" = "approve" ]; then
+    playwright_resolve_approve_args "${PW_ARGS[@]:1}" || exit 1
+fi
+
+playwright_prepare_template "${DDEV_APPROOT:-/var/www/html}" || exit 1
+
+if [ "${PW_ARGS[0]:-}" = "approve" ]; then
+    exec node "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-approve.mjs" "${PW_APPROVE_ARGS[@]}"
+fi
 
 exec npx playwright "${PW_ARGS[@]}"

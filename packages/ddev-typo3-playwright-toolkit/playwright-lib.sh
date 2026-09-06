@@ -79,6 +79,79 @@ playwright_collect_args() {
     done
 }
 
+# shellcheck disable=SC2034
+playwright_resolve_approve_args() {
+    PW_APPROVE_ARGS=("test")
+    local raw_args=()
+    local has_all=0
+    local has_target=0
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --all)
+                has_all=1
+                ;;
+            --update-snapshots|-u)
+                ;;
+            --grep=*)
+                has_target=1
+                raw_args+=("$1")
+                ;;
+            --grep|-g)
+                has_target=1
+                raw_args+=("$1")
+                if [ $# -gt 1 ]; then
+                    shift
+                    raw_args+=("$1")
+                fi
+                ;;
+            --project|--project=*)
+                raw_args+=("$1")
+                while [ $# -gt 1 ] && [[ "$2" != -* ]]; do
+                    shift
+                    raw_args+=("$1")
+                done
+                ;;
+            --config|-c|--output|--workers|-j|--grep-invert|-G|\
+            --reporter|--add-reporter|--retries|--timeout|--global-timeout|\
+            --max-failures|--repeat-each|--shard|--trace|--tsconfig|\
+            --ui-host|--ui-port|--update-source-method|--last-failed-file|\
+            --test-list|--test-list-invert)
+                raw_args+=("$1")
+                if [ $# -gt 1 ]; then
+                    shift
+                    raw_args+=("$1")
+                fi
+                ;;
+            --*=*|--debug|--fail-on-flaky-tests|--forbid-only|--fully-parallel|\
+            --headed|--last-failed|--list|--no-deps|--pass-with-no-tests|\
+            --quiet|--ui|-x|-j[0-9]*|-c?*|-G?*)
+                raw_args+=("$1")
+                ;;
+            -g?*)
+                has_target=1
+                raw_args+=("$1")
+                ;;
+            -*)
+                echo "[playwright] Unsupported approve option: $1" >&2
+                return 1
+                ;;
+            *)
+                has_target=1
+                raw_args+=("$1")
+                ;;
+        esac
+        shift
+    done
+
+    if [ "${has_target}" -eq 0 ] && [ "${has_all}" -eq 0 ]; then
+        PW_APPROVE_ARGS+=("--last-failed")
+    fi
+
+    PW_APPROVE_ARGS+=("${raw_args[@]}")
+    PW_APPROVE_ARGS+=("--update-snapshots")
+}
+
 # The compose file only takes effect after `ddev restart`. Before that "db-test"
 # does not resolve, or resolves to another project's service on the shared ddev
 # network — and prepare would write into that project's template.

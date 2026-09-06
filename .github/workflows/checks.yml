@@ -284,6 +284,8 @@ jobs:
       - name: Install bats
         run: sudo apt-get update && sudo apt-get install -y bats
 
+      - run: npm ci --prefix ../typo3-playwright-toolkit
+
       # Every hermetic suite: they source the shared lib, stub the typo3 binary and
       # need no Docker. tests/test.bats drives DDEV itself and runs in e2e.yml.
       - run: >-
@@ -291,6 +293,8 @@ jobs:
           tests/db-test-service.bats tests/install-manifest.bats
           tests/test-directory.bats tests/browser-server.bats
           tests/replay.bats tests/browser-url.bats tests/setup-subcommand.bats
+          tests/approve-subcommand.bats tests/approve-command.bats
+          tests/approve-integration.bats
 
   shell:
     name: add-on (shellcheck)

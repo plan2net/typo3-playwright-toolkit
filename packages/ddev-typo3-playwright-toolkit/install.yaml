@@ -12,6 +12,7 @@ project_files:
   - postgres/db-test-init.sql
   - mysql/db-test-init.sql
   - playwright-lib.sh
+  - playwright-approve.mjs
   - commands/web/playwright
   - commands/web/playwright-inspect
   - commands/web/playwright-prepare

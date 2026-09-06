@@ -10,6 +10,13 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **ddev-typo3-playwright-toolkit** — `ddev playwright approve` re-runs previously
+  failed tests and updates their snapshots. A file filter or `--grep` selects
+  specific tests; `--all` selects the whole suite. Missing or invalid run state
+  stops approval instead of updating every test.
+
 ## [0.15.0] - 2026-09-04
 
 A test can only be as current as the assets it renders, and one rendering an older
