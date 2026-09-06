@@ -153,13 +153,15 @@ you run one:
 | `PLAYWRIGHT_DB_TEST_USER` | `db` | User name |
 | `PLAYWRIGHT_DB_TEST_PASSWORD` | `db` | Password |
 
-### UI mode and report ports
+### Browser tools and ports
 
-Both run a web application inside the container, so `config.playwright-toolkit.yaml`
-opens port 3000 for UI mode and 9323 for `ddev playwright show-report`. Each serves on
+`config.playwright-toolkit.yaml` opens HTTPS port 3000 for UI mode, 9323 for
+`ddev playwright show-report`, and 9325 for `ddev playwright trace`. Each serves on
 every interface, so the printed link works from your own browser. `PW_UI_PORT` and
 `PW_REPORT_PORT` change the ports, but you then have to change them in that file as
 well.
+
+Run `ddev restart` after updating the add-on to enable the trace port.
 
 The link names your project's primary hostname. A project with several hostnames can
 use any of them, since they all reach the same container.
@@ -235,6 +237,21 @@ ddev playwright-ui accordion    # one test file
 Then open `https://<project>.ddev.site:3000`. It serves from the web container, so the
 browsers have to be installed there.
 
+### Traces
+
+```bash
+ddev playwright test accordion --trace retain-on-failure
+ddev playwright trace
+ddev playwright trace downloads/trace.zip
+ddev playwright trace --output custom-results
+```
+
+Open the printed URL to inspect the recorded run in Playwright's Trace Viewer.
+With no file, the command selects the newest `trace.zip` under
+`PW_TEST_DIR/test-results`. `--output` selects another folder relative to
+`PW_TEST_DIR`. File paths are checked from the project root, then `PW_TEST_DIR`.
+Viewing a trace runs no tests or builds. Stop the viewer with Ctrl-C.
+
 ## Reference
 
 ### Commands
@@ -243,6 +260,7 @@ browsers have to be installed there.
 |---|---|
 | `ddev playwright` | Runs `npx playwright` with the arguments you pass |
 | `ddev playwright approve [filter]` | Re-runs selected tests and updates their snapshots; defaults to previous failures |
+| `ddev playwright trace [file]` | Serves a saved trace in Playwright's viewer; defaults to the newest trace |
 | `ddev playwright setup` | Sets this project up for Playwright, or checks a setup you have |
 | `ddev playwright-inspect` | Prints links that open a kept test database in the backend |
 | `ddev playwright-prepare` | Builds the template database on its own; `--force` rebuilds one that is still up to date |

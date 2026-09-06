@@ -17,6 +17,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo ""
     echo "Subcommands this command handles itself:"
     echo "  approve [filter]    Approve and update snapshots for failed tests or a filter"
+    echo "  trace [file]        View a saved trace in your browser"
     echo "  setup               Set up this project for Playwright, or check a setup you have"
     echo ""
     echo "Options this command handles itself:"
@@ -80,11 +81,82 @@ if [ "$1" = "approve" ]; then
     done
 fi
 
+if [ "$1" = "trace" ] && { [ "${2:-}" = "--help" ] || [ "${2:-}" = "-h" ]; }; then
+    echo "Usage: ddev playwright trace [file.zip] [--output directory]"
+    echo ""
+    echo "Serves Playwright's Trace Viewer and prints its browser URL."
+    echo "Without a file, selects the newest trace.zip in test-results."
+    echo "--output selects a different results directory under PW_TEST_DIR."
+    echo "Stop the viewer with Ctrl-C."
+    exit 0
+fi
+
 . "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-lib.sh" || exit 1
 
+command_directory="${PWD}"
 playwright_enter_test_dir || exit 1
 
 playwright_collect_args "$@"
+
+if [ "${PW_ARGS[0]:-}" = "trace" ]; then
+    set -- "${PW_ARGS[@]:1}"
+    trace_file=""
+    trace_output="test-results"
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --output)
+                if [ $# -lt 2 ] || [ -z "$2" ] || [[ "$2" == -* ]]; then
+                    echo "[playwright] --output needs a directory." >&2
+                    exit 1
+                fi
+                shift
+                trace_output="$1"
+                ;;
+            --output=*)
+                trace_output="${1#*=}"
+                ;;
+            -*)
+                echo "[playwright] Unknown trace option: $1. See 'ddev playwright trace --help'." >&2
+                exit 1
+                ;;
+            *)
+                if [ -n "${trace_file}" ]; then
+                    echo "[playwright] Choose one trace file." >&2
+                    exit 1
+                fi
+                trace_file="$1"
+                ;;
+        esac
+        shift
+    done
+    if [[ "${trace_file}" != /* ]] && [ -f "${command_directory}/${trace_file}" ]; then
+        trace_file="${command_directory}/${trace_file}"
+    fi
+    if [ -z "${trace_file}" ] && [ -d "${trace_output}" ]; then
+        while IFS= read -r -d '' candidate; do
+            if [ -z "${trace_file}" ] || [ "${candidate}" -nt "${trace_file}" ]; then
+                trace_file="${candidate}"
+            fi
+        done < <(find "${trace_output}" -type f -name trace.zip -print0)
+    fi
+    if [ -z "${trace_file}" ]; then
+        echo "[playwright] No trace.zip found in ${trace_output}. Record a trace with:" >&2
+        echo "[playwright]   ddev playwright test --trace retain-on-failure" >&2
+        exit 1
+    fi
+    if [ ! -f "${trace_file}" ] || [ ! -r "${trace_file}" ]; then
+        echo "[playwright] Cannot read trace: ${trace_file}" >&2
+        exit 1
+    fi
+    echo "[playwright] Trace: ${trace_file}"
+    trace_url="$(playwright_serve_url 9325)"
+    if [[ "${trace_url}" == http://* ]]; then
+        trace_url="$(playwright_serve_url 9326)"
+    fi
+    echo "[playwright] Open ${trace_url}"
+    echo "[playwright] Stop with Ctrl-C."
+    exec npx playwright show-trace --host 0.0.0.0 --port 9325 -- "${trace_file}"
+fi
 
 # show-report binds to 127.0.0.1, which is unreachable from outside the container.
 if [ "${PW_ARGS[0]:-}" = "show-report" ]; then

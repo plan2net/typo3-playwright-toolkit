@@ -12,6 +12,11 @@ the package a change belongs to.
 
 ### Added
 
+- **ddev-typo3-playwright-toolkit** — `ddev playwright trace` opens a saved trace
+  in Playwright's viewer through DDEV. Pass a file or use the newest trace from
+  `test-results`; `--output` selects another results folder. Run `ddev restart`
+  after updating the add-on to enable the new port.
+
 - **ddev-typo3-playwright-toolkit** — `ddev playwright approve` re-runs previously
   failed tests and updates their snapshots. A file filter or `--grep` selects
   specific tests; `--all` selects the whole suite. Missing or invalid run state

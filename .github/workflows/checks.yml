@@ -295,6 +295,9 @@ jobs:
           tests/replay.bats tests/browser-url.bats tests/setup-subcommand.bats
           tests/approve-subcommand.bats tests/approve-command.bats
           tests/approve-integration.bats
+          tests/trace-command.bats
+
+      - run: node --test tests/trace-viewer.test.mjs
 
   shell:
     name: add-on (shellcheck)
