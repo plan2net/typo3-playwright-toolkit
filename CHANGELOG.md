@@ -22,6 +22,14 @@ the package a change belongs to.
 
 ### Added
 
+- **@plan2net/typo3-playwright-toolkit**, **ddev-typo3-playwright-toolkit** —
+  `ddev playwright doctor` answers whether a project can run tests. It checks the
+  browsers, access to the testing site, API authentication and version compatibility,
+  then a temporary database and its backend session, and a check that cannot run says
+  why it was skipped. `--project` and `--config` narrow what is checked. The
+  diagnostic database is dropped even when a check failed, and no tests, builds or
+  repairs run. Outside DDEV the same command is `npx typo3-playwright-doctor`.
+
 - **ddev-typo3-playwright-toolkit** — `ddev playwright trace` opens a saved trace
   in Playwright's viewer through DDEV. Pass a file or use the newest trace from
   `test-results`; `--output` selects another results folder. Run `ddev restart`

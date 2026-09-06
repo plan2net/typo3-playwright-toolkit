@@ -112,6 +112,14 @@ describe('package resolved from node_modules', () => {
         )
     })
 
+    it('installs the doctor command with help that needs no project config', () => {
+        const command = path.join(consumerDir, 'node_modules/.bin/typo3-playwright-doctor')
+
+        const output = execFileSync(command, ['--help'], { cwd: consumerDir }).toString()
+
+        expect(output).toContain('Usage: typo3-playwright-doctor')
+    })
+
     // Without NodeNext resolution the exports map is invisible to TypeScript and
     // every fixture types as `any`, which is what a consumer sees with no tsconfig.
     it('type-checks a consumer test that extends the shipped tsconfig', () => {

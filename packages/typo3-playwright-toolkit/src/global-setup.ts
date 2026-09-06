@@ -25,7 +25,7 @@ interface HealthResponse {
  * The body is read whatever the status: an unhealthy site still reports its
  * version, and "too old" is a different problem from "unhealthy".
  */
-async function readHealth(
+export async function readHealth(
     healthUrl: string,
     headers: Record<string, string>,
     doFetch: typeof fetch,
@@ -125,9 +125,13 @@ export async function verifyApiVersion(
     return reported
 }
 
+export function isTestingContext(reported: string): boolean {
+    return /^Testing(\/|$)/.test(reported)
+}
+
 /** Cannot fail while the endpoint itself is gated: here so a moved gate stops the run. */
 function assertTestingContext(healthUrl: string, reported: string | undefined): void {
-    if (undefined === reported || /^Testing(\/|$)/.test(reported)) {
+    if (undefined === reported || isTestingContext(reported)) {
         return
     }
 

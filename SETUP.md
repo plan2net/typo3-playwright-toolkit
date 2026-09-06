@@ -418,7 +418,7 @@ Point them at a MariaDB, MySQL or PostgreSQL of your own. Copy the tuning from
 rest, since it is what makes a clone take milliseconds. Give it a volume, not a
 tmpfs: test databases grow, and runners run out of memory.
 
-Five commands, each a wrapper you can run yourself:
+Six commands, each a wrapper you can run yourself:
 
 | Command | Runs |
 |---|---|
@@ -427,6 +427,7 @@ Five commands, each a wrapper you can run yourself:
 | `ddev playwright ui` | `npx playwright test --ui` |
 | `ddev playwright replay` | `typo3 playwright:replay-prepare`, then `npx playwright test` with `PW_REPLAY=1` |
 | `ddev playwright inspect` | `npx typo3-playwright-inspect` |
+| `ddev playwright doctor` | `npx typo3-playwright-doctor` |
 
 Run the `typo3` commands where PHP is, the `npx` ones where Playwright is. They may
 be different containers. That is

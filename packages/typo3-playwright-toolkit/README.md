@@ -629,6 +629,28 @@ column:
 element.withField('pi_flexform', flexForm({ sDEF: {…}, sFilter: {…} }))
 ```
 
+### The doctor command
+
+The package installs `typo3-playwright-doctor`. Run it from the directory holding
+your Playwright config to see whether the project can run tests: browser launch or
+remote connection, access to `testingURL`, API credentials and version
+compatibility, then a throwaway database and its backend session:
+
+```bash
+npx typo3-playwright-doctor
+npx typo3-playwright-doctor --project chromium
+npx typo3-playwright-doctor --config playwright.local.config.ts
+```
+
+Every check prints success, failure or the reason it was skipped. Exit code `0` means
+ready, `1` means a check failed. `--project` accepts wildcards and can be repeated;
+omit it to check every project.
+
+It runs no tests, setup hooks, builds or repairs, and touches neither your existing
+results nor a kept test database. The one database it creates is its own, and it
+drops that again even after a failed check. On DDEV, `ddev playwright doctor` wraps
+it.
+
 ### The inspect command
 
 The package installs `typo3-playwright-inspect`. Run it from your project root

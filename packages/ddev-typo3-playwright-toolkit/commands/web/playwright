@@ -16,6 +16,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "schema and the tests never shoot yesterday's CSS."
     echo ""
     echo "Subcommands this command handles itself:"
+    echo "  doctor              Check whether this project can run tests"
     echo "  approve [filter]    Approve and update snapshots for failed tests or a filter"
     echo "  ui [filter]         Open Playwright's UI mode"
     echo "  replay [filter]     Build scenarios in the replay database"
@@ -56,7 +57,7 @@ if [ "$1" = "ui" ]; then
     exec bash "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/commands/web/playwright-ui" "$@"
 fi
 
-if [ "$1" = "inspect" ] || [ "$1" = "replay" ] || [ "$1" = "prepare" ]; then
+if [ "$1" = "inspect" ] || [ "$1" = "replay" ] || [ "$1" = "prepare" ] || [ "$1" = "doctor" ]; then
     subcommand="$1"
     shift
     exec bash "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-commands/${subcommand}.sh" "$@"

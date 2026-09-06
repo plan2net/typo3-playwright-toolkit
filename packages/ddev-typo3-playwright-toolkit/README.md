@@ -192,6 +192,29 @@ ddev playwright inspect accordion  # one test file
 Opening a link logs you into the TYPO3 backend of that database, and the frontend is
 reachable from there. Links are signed and expire after 15 minutes.
 
+### Check readiness
+
+`ddev playwright doctor` answers whether this project can run tests. It checks the
+browsers your config selects, access to the testing URL, API authentication and
+version compatibility, then a temporary test database and its backend session:
+
+```bash
+ddev playwright doctor
+ddev playwright doctor --project chromium
+ddev playwright doctor --config playwright.local.config.ts
+```
+
+Every check prints success, failure or the reason it was skipped, and exit code `0`
+means ready. Browsers start the way your config starts them, locally or through a
+browser server. `--project` accepts wildcards and can be repeated; without it, every
+configured project is checked.
+
+The command runs no tests, setup hooks, frontend build or repairs, and leaves your
+test results and kept databases alone. It drops its own diagnostic database even
+after a failed check, and names that database in the report when the drop fails.
+
+The checks live in the npm package, so update it along with this add-on.
+
 ### Approve snapshots
 
 After reviewing a visual change, re-run the affected tests to update their snapshots:
@@ -264,6 +287,7 @@ Viewing a trace runs no tests or builds. Stop the viewer with Ctrl-C.
 | `ddev playwright approve [filter]` | Re-runs selected tests and updates their snapshots; defaults to previous failures |
 | `ddev playwright trace [file]` | Serves a saved trace in Playwright's viewer; defaults to the newest trace |
 | `ddev playwright setup` | Sets this project up for Playwright, or checks a setup you have |
+| `ddev playwright doctor` | Checks whether this project can run tests, and runs none |
 | `ddev playwright inspect` | Prints links that open a kept test database in the backend |
 | `ddev playwright prepare` | Builds the template database on its own; `--force` rebuilds one that is still up to date |
 | `ddev playwright replay` | Replays every scenario's content into one browsable database |

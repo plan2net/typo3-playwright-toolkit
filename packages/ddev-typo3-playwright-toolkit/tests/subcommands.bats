@@ -36,6 +36,16 @@ setup() {
     [ "$output" = $'typo3-playwright-inspect\ntwo words' ]
 }
 
+@test "doctor forwards project selection without preparing the database" {
+    unset PW_SKIP_PREPARE
+    run "${COMMAND}" doctor --project 'mobile chrome'
+
+    [ "$status" -eq 0 ]
+    [ ! -e "${APPROVE_PREPARE_CALLS}" ]
+    run cat "${TRACE_CALLS}"
+    [ "$output" = $'typo3-playwright-doctor\n--project\nmobile chrome' ]
+}
+
 @test "playwright-ui remains an alias for UI mode" {
     run "${ADDON_DIR}/commands/web/playwright-ui" --grep 'two words'
 
@@ -66,7 +76,7 @@ setup() {
 @test "subcommand help uses the spaced names without requiring a project" {
     export PW_TEST_DIR="${BATS_TEST_TMPDIR}/missing"
     export DDEV_APPROOT="${BATS_TEST_TMPDIR}/missing"
-    for subcommand in ui replay inspect prepare; do
+    for subcommand in ui replay inspect prepare doctor; do
         run "${COMMAND}" "${subcommand}" --help
         [ "$status" -eq 0 ]
         [[ "$output" == *"Usage: ddev playwright ${subcommand}"* ]] || return 1
