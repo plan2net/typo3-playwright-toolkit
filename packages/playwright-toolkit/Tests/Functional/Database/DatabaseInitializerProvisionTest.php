@@ -175,7 +175,7 @@ final class DatabaseInitializerProvisionTest extends FunctionalTestCase
     #[Test]
     public function demandsPreparationWhenNoTemplateWasEverBuilt(): void
     {
-        $this->expectExceptionMessageMatches('/playwright-prepare/');
+        $this->expectExceptionMessageMatches('/playwright prepare/');
 
         $this->initializer()->provision($this->driver(), self::TEST_ID);
     }

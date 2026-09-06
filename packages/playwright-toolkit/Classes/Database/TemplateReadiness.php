@@ -26,7 +26,7 @@ final class TemplateReadiness
             // templateExists() asks the server, so an unreachable service or a wrong
             // password surfaces as itself instead of as "not prepared".
             throw new \RuntimeException(sprintf(
-                'The Playwright test database template is %s. Run "ddev playwright-prepare" to build it.',
+                'The Playwright test database template is %s. Run "ddev playwright prepare" to build it.',
                 $driver->templateExists() ? 'unfinished' : 'missing'
             ));
         }
@@ -38,7 +38,7 @@ final class TemplateReadiness
     {
         if (self::assertFinalised($driver) !== $this->expectedFingerprint($driver, $configuration)) {
             throw new \RuntimeException(
-                'The Playwright test database template is out of date. Run "ddev playwright-prepare" to build it.'
+                'The Playwright test database template is out of date. Run "ddev playwright prepare" to build it.'
             );
         }
     }

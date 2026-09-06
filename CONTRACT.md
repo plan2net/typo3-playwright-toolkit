@@ -100,7 +100,7 @@ secret and a browser never sends it.
 
 ## Replay: one test ID, one database
 
-`ddev playwright-replay` runs every scenario's *setup* into a single database, so all
+`ddev playwright replay` runs every scenario's *setup* into a single database, so all
 the content the suite builds can be browsed and exported in one place. It carries an
 ordinary test ID on the wire, the fixed `REPLAY0000000000` (`DatabaseName::REPLAY_TEST_ID`,
 `REPLAY_TEST_ID` in `src/contract.ts`), so every step above works unchanged: the

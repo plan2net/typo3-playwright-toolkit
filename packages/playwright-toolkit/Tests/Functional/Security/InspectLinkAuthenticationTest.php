@@ -78,7 +78,7 @@ final class InspectLinkAuthenticationTest extends FunctionalTestCase
         self::assertSame(401, $response->getStatusCode());
         self::assertSame([], $response->getHeader('Set-Cookie'));
         self::assertStringContainsString('expired', (string) $response->getBody());
-        self::assertStringContainsString('playwright-inspect', (string) $response->getBody());
+        self::assertStringContainsString('playwright inspect', (string) $response->getBody());
     }
 
     #[Test]

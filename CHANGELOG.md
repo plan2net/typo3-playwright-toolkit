@@ -10,6 +10,16 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Changed
+
+- **ddev-typo3-playwright-toolkit** — commands now use spaces: `ddev playwright ui`,
+  `ddev playwright replay`, `ddev playwright inspect`, and `ddev playwright prepare`.
+  **Breaking:** the old `playwright-replay`, `playwright-inspect` and
+  `playwright-prepare` commands are gone. Updating the add-on leaves their files
+  behind, so delete them yourself:
+  `rm .ddev/commands/web/playwright-{replay,inspect,prepare}`. `ddev playwright-ui`
+  stays as an alias for `ddev playwright ui`.
+
 ### Added
 
 - **ddev-typo3-playwright-toolkit** — `ddev playwright trace` opens a saved trace

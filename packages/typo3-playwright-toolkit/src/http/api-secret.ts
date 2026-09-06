@@ -27,7 +27,7 @@ export function resolveApiSecret(config: ToolkitConfig): string {
     }
 
     throw new Error(
-        `[typo3-playwright-toolkit] No test API secret. Run \`ddev playwright-prepare\` ` +
+        `[typo3-playwright-toolkit] No test API secret. Run \`ddev playwright prepare\` ` +
             `(or \`typo3 playwright:prepare\`) to create ${file}, or set ${SECRET_ENV} ` +
             'to the same value when PHP and Node do not share a filesystem.',
     )

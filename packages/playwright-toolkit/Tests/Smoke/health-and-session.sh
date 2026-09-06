@@ -5,8 +5,7 @@
 # Usage (run inside the host TYPO3 project's DDEV web container):
 #   BASE_URL=https://<project>-testing.ddev.site ./health-and-session.sh
 #
-# Requires a prepared test database template (`ddev playwright-prepare`), which
-# also writes the API secret every endpoint needs.
+# Run `ddev playwright prepare` first to create the template and API secret.
 set -euo pipefail
 
 BASE_URL="${BASE_URL:?set BASE_URL to the Testing site, e.g. https://example-testing.ddev.site}"
@@ -15,7 +14,7 @@ TEST_ID="${TEST_ID:-SMOKE00000000AAA}"
 # Every endpoint requires the secret; playwright:prepare wrote it here.
 SECRET="${PLAYWRIGHT_TOOLKIT_SECRET:-$(cat /var/www/html/var/playwright/api-secret 2>/dev/null || true)}"
 if [ -z "${SECRET}" ]; then
-    echo "FAIL: no API secret. Run 'ddev playwright-prepare', or set PLAYWRIGHT_TOOLKIT_SECRET." >&2
+    echo "FAIL: no API secret. Run 'ddev playwright prepare', or set PLAYWRIGHT_TOOLKIT_SECRET." >&2
     exit 1
 fi
 AUTH=(-H "X-Playwright-Toolkit-Secret: ${SECRET}" -H "X-Playwright-Test-Id: ${TEST_ID}")

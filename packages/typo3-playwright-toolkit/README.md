@@ -641,7 +641,7 @@ npx typo3-playwright-inspect accordion  # only matching test files
 ```
 
 It reads the API secret from `var/playwright/api-secret` or from
-`PLAYWRIGHT_TOOLKIT_SECRET`. On DDEV, `ddev playwright-inspect` wraps it. The links
+`PLAYWRIGHT_TOOLKIT_SECRET`. On DDEV, `ddev playwright inspect` wraps it. The links
 log in as the pre-seeded backend user and live 15 minutes.
 
 `--replay` prints a link into the database a replay run built, instead of the kept
@@ -652,7 +652,7 @@ one rather than rebuilding anything.
 
 `PW_REPLAY=1` runs every scenario's setup into one shared database rather than a
 per-test one, so all the content the suite builds ends up in a single place you can
-browse and export. `ddev playwright-replay` sets it, rebuilds that database from the
+browse and export. `ddev playwright replay` sets it, rebuilds that database from the
 template first, and prints a backend link when the run ends.
 
 What changes while it is set: every scenario uses the one fixed test ID

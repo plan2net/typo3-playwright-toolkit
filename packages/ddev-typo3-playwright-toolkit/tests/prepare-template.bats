@@ -90,8 +90,8 @@ STUB
 # The bare flush was what these commands used to do; leaving one behind would
 # mean a command that flushes but never rebuilds.
 @test "no command still calls cache:flush directly" {
-    for command in playwright playwright-ui playwright-prepare; do
-        run grep -c 'typo3 cache:flush' "${ADDON_DIR}/commands/web/${command}"
+    for command in commands/web/playwright commands/web/playwright-ui playwright-commands/prepare.sh; do
+        run grep -c 'typo3 cache:flush' "${ADDON_DIR}/${command}"
         [ "$output" -eq 0 ]
     done
 }
@@ -110,10 +110,10 @@ STUB
 # PW_SKIP_PREPARE is there to make a test run reuse the template; asking for a
 # build by hand and silently getting nothing would be the opposite.
 @test "the standalone prepare command uses the ungated helper" {
-    run grep -c 'playwright_run_prepare' "${ADDON_DIR}/commands/web/playwright-prepare"
+    run grep -c 'playwright_run_prepare' "${ADDON_DIR}/playwright-commands/prepare.sh"
     [ "$output" -eq 1 ]
 
-    run grep -c 'playwright_prepare_template' "${ADDON_DIR}/commands/web/playwright-prepare"
+    run grep -c 'playwright_prepare_template' "${ADDON_DIR}/playwright-commands/prepare.sh"
     [ "$output" -eq 0 ]
 }
 
@@ -168,10 +168,6 @@ STUB
     [ "$output" = 'Testing playwright:prepare --force' ]
 }
 
-@test "the standalone prepare command forwards its arguments" {
-    grep -q 'playwright_run_prepare "" "$@"' "${ADDON_DIR}/commands/web/playwright-prepare"
-}
-
 @test "the ungated helper prepares even when PW_SKIP_PREPARE is set" {
     PW_SKIP_PREPARE=1
     export PW_SKIP_PREPARE
@@ -185,8 +181,8 @@ STUB
 
 # The standalone command duplicated the two typo3 calls before the split.
 @test "no command spells out the typo3 prepare call itself" {
-    for command in playwright playwright-ui playwright-prepare; do
-        run grep -c 'playwright:prepare' "${ADDON_DIR}/commands/web/${command}"
+    for command in commands/web/playwright commands/web/playwright-ui playwright-commands/prepare.sh; do
+        run grep -c 'playwright:prepare' "${ADDON_DIR}/${command}"
         [ "$output" -eq 0 ]
     done
 }

@@ -14,9 +14,9 @@ project_files:
   - playwright-lib.sh
   - playwright-approve.mjs
   - commands/web/playwright
-  - commands/web/playwright-inspect
-  - commands/web/playwright-prepare
-  - commands/web/playwright-replay
+  - playwright-commands/inspect.sh
+  - playwright-commands/prepare.sh
+  - playwright-commands/replay.sh
   - commands/web/playwright-ui
   - config.playwright-toolkit.yaml
   # DDEV records no version for a tarball install, so the extension reads this one.
@@ -26,7 +26,6 @@ global_files: []
 
 pre_install_actions: []
 
-# Only the matching database service is copied to the top level
 post_install_actions:
   - bash db-test/select-service.sh
 

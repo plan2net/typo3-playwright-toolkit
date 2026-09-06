@@ -26,7 +26,7 @@ if (undefined === stateDir) {
 
 const secret = readSecret(stateDir)
 if ('' === secret) {
-    console.error('No API secret found. Run "ddev playwright-prepare" first.')
+    console.error('No API secret found. Run "ddev playwright prepare" first.')
     process.exit(1)
 }
 
@@ -34,7 +34,7 @@ if ('' === secret) {
 if (process.argv.includes('--replay')) {
     const testingURL = replayTestingUrl(stateDir)
     if (undefined === testingURL) {
-        console.error('No replay recorded. Run "ddev playwright-replay" first.')
+        console.error('No replay recorded. Run "ddev playwright replay" first.')
         process.exit(1)
     }
 

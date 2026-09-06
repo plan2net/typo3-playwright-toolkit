@@ -1,18 +1,13 @@
 #!/bin/bash
 #ddev-generated
 
-## Description: Print links that open a kept test database in the backend
-## Usage: playwright-inspect [test-file-pattern]
-## Example: "ddev playwright-inspect" or "ddev playwright-inspect accordion"
-## ExecRaw: true
-
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-    echo "Usage: ddev playwright-inspect [test-file-pattern|--replay]"
+    echo "Usage: ddev playwright inspect [test-file-pattern|--replay]"
     echo ""
     echo "Prints one link per kept test database. Opening a link logs you into the"
     echo "TYPO3 backend of that test's database; the frontend is reachable from there."
     echo ""
-    echo "  --replay            A link into the database 'ddev playwright-replay' built"
+    echo "  --replay            A link into the database 'ddev playwright replay' built"
     echo ""
     echo "Databases are kept when a test fails. A run that passes removes them, so"
     echo "there is normally nothing to list."
@@ -24,7 +19,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     exit 0
 fi
 
-. /mnt/ddev_config/playwright-lib.sh || exit 1
+. "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-lib.sh" || exit 1
 
 playwright_enter_test_dir || exit 1
 

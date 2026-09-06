@@ -73,7 +73,7 @@ final class TemplateDriftGuardTest extends FunctionalTestCase
         $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
         $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
 
-        $this->expectExceptionMessageMatches('/playwright-prepare/');
+        $this->expectExceptionMessageMatches('/playwright prepare/');
 
         $this->get(TemplateDriftGuard::class)->__invoke(new BootCompletedEvent(true));
     }
@@ -96,7 +96,7 @@ final class TemplateDriftGuardTest extends FunctionalTestCase
         DatabaseInitializer::forgetProvisioning();
         $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
 
-        $this->expectExceptionMessageMatches('/playwright-prepare/');
+        $this->expectExceptionMessageMatches('/playwright prepare/');
 
         $this->get(TemplateDriftGuard::class)->__invoke(new BootCompletedEvent(true));
     }
@@ -115,7 +115,7 @@ final class TemplateDriftGuardTest extends FunctionalTestCase
         DatabaseInitializer::forgetProvisioning();
         $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
 
-        $this->expectExceptionMessageMatches('/playwright-prepare/');
+        $this->expectExceptionMessageMatches('/playwright prepare/');
 
         $this->get(TemplateDriftGuard::class)->__invoke(new BootCompletedEvent(true));
     }
@@ -154,7 +154,7 @@ final class TemplateDriftGuardTest extends FunctionalTestCase
         DatabaseInitializer::forgetProvisioning();
         $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
 
-        $this->expectExceptionMessageMatches('/playwright-prepare/');
+        $this->expectExceptionMessageMatches('/playwright prepare/');
 
         $this->get(TemplateDriftGuard::class)->__invoke(new BootCompletedEvent(true));
     }

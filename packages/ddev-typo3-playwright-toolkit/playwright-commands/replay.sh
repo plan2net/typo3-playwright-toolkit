@@ -1,13 +1,8 @@
 #!/bin/bash
 #ddev-generated
 
-## Description: Replay every scenario setup into one database on the db-test service
-## Usage: playwright-replay [options]
-## Example: "ddev playwright-replay" or "ddev playwright-replay --grep accordion"
-## ExecRaw: true
-
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-    echo "Usage: ddev playwright-replay [options]"
+    echo "Usage: ddev playwright replay [options]"
     echo ""
     echo "Rebuilds the replay database on the db-test service from the template, then"
     echo "runs every scenario's setup into it. Your project database is never touched."
@@ -34,7 +29,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     exit 0
 fi
 
-. /mnt/ddev_config/playwright-lib.sh || exit 1
+. "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-lib.sh" || exit 1
 
 playwright_enter_test_dir || exit 1
 
@@ -42,8 +37,8 @@ playwright_collect_args "$@"
 
 playwright_refuse_worker_override "${PW_ARGS[@]}" || exit 1
 
-playwright_prepare_template || exit 1
-playwright_replay_prepare || exit 1
+playwright_prepare_template "${DDEV_APPROOT:-/var/www/html}" || exit 1
+playwright_replay_prepare "${DDEV_APPROOT:-/var/www/html}" || exit 1
 
 export PW_REPLAY=1
 

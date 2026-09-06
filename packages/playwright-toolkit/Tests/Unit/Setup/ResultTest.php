@@ -15,12 +15,12 @@ final class ResultTest extends TestCase
     {
         $result = Result::of(static function (): string {
             throw new \RuntimeException(
-                'The Playwright test database template is missing. Run "ddev playwright-prepare" to build it.'
+                'The Playwright test database template is missing. Run "ddev playwright prepare" to build it.'
             );
         });
 
         self::assertFalse($result->passed);
-        self::assertStringContainsString('ddev playwright-prepare', $result->detail);
+        self::assertStringContainsString('ddev playwright prepare', $result->detail);
     }
 
     #[Test]

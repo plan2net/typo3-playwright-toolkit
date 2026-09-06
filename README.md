@@ -77,7 +77,7 @@ test('renders what the builders wrote', async ({ page, state }) => {
 ```bash
 ddev playwright test                # all tests
 ddev playwright test my-feature     # one file
-ddev playwright-ui                  # Playwright UI mode
+ddev playwright ui                  # Playwright UI mode
 ```
 
 The [npm README](packages/typo3-playwright-toolkit#writing-a-test) documents the
@@ -156,7 +156,7 @@ that uid, which is what you want until access itself is the thing you are testin
   ([kept databases](packages/playwright-toolkit#looking-at-a-kept-database)).
 - A failing test prints the errors TYPO3 logged while it ran, under the failure itself
   ([TYPO3 errors](packages/typo3-playwright-toolkit#when-something-fails-typo3-says-why)).
-- `ddev playwright-replay` runs every scenario's setup into one database, so you can
+- `ddev playwright replay` runs every scenario's setup into one database, so you can
   browse everything the suite builds in one backend
   ([replay mode](packages/typo3-playwright-toolkit#replay-mode)).
 - Screenshot comparison, accessibility checks with axe, and CSP violation checks

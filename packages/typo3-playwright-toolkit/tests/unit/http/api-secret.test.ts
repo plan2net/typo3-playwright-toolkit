@@ -74,7 +74,7 @@ describe('resolveApiSecret', () => {
     // The message has to name the command that creates it: nothing else in the
     // toolkit can, and every endpoint refuses until it exists.
     it('explains how to create the secret when there is none', () => {
-        expect(() => resolveApiSecret(configFor(root))).toThrow(/playwright-prepare/)
+        expect(() => resolveApiSecret(configFor(root))).toThrow(/playwright prepare/)
     })
 
     it('names the environment variable as the other way in', () => {
@@ -86,7 +86,7 @@ describe('resolveApiSecret', () => {
         fs.mkdirSync(path.dirname(file), { recursive: true })
         fs.writeFileSync(file, '\n')
 
-        expect(() => resolveApiSecret(configFor(root))).toThrow(/playwright-prepare/)
+        expect(() => resolveApiSecret(configFor(root))).toThrow(/playwright prepare/)
     })
 })
 

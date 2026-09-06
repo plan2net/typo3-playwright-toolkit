@@ -100,7 +100,7 @@ export async function verifyApiVersion(
                 'The toolkit secret does not match the one the extension expects.',
                 '',
                 'Under DDEV both sides read var/playwright/api-secret, which',
-                '`ddev playwright-prepare` writes. Run it, or set PLAYWRIGHT_TOOLKIT_SECRET',
+                '`ddev playwright prepare` writes. Run it, or set PLAYWRIGHT_TOOLKIT_SECRET',
                 'to the same value on both sides when PHP and Node run in separate containers.',
             ].join('\n'),
         )

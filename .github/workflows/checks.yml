@@ -296,6 +296,7 @@ jobs:
           tests/approve-subcommand.bats tests/approve-command.bats
           tests/approve-integration.bats
           tests/trace-command.bats
+          tests/subcommands.bats
 
       - run: node --test tests/trace-viewer.test.mjs
 
@@ -312,7 +313,7 @@ jobs:
       # sh and bash. Forcing one dialect reports fictional problems.
       - name: Check the shared library and commands
         working-directory: packages/ddev-typo3-playwright-toolkit
-        run: shellcheck -S warning playwright-lib.sh commands/web/*
+        run: shellcheck -S warning playwright-lib.sh commands/web/* playwright-commands/*.sh
 
   # The drivers skip themselves when no server answers, so without this job the
   # postgres and mysql ones are only ever verified by hand. --fail-on-skipped is

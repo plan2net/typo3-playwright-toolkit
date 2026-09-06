@@ -267,7 +267,7 @@ the builders in the test that needs it.
 Build the template database once, before the tests run:
 
 ```bash
-ddev playwright-prepare
+ddev playwright prepare
 ```
 
 This loads the schema through TYPO3's schema migrator, applies your fixtures, writes
@@ -380,7 +380,7 @@ Some problems never reach the log, so they cannot show up here:
 
 `typo3 playwright:replay-prepare` rebuilds the replay database from the template. It
 is the plain `db` on the `db-test` container, reached through the fixed test ID
-`REPLAY0000000000`, and `ddev playwright-replay` calls it before running every
+`REPLAY0000000000`, and `ddev playwright replay` calls it before running every
 scenario's setup into that one database. The
 [npm README](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit#replay-mode)
 describes replay mode.
@@ -398,8 +398,8 @@ the test ID header on the way to PHP: `fastcgi_pass_request_headers off` in ngin
 testing hostname. TYPO3 then sees an ordinary request and answers it from the site's
 own database, so the tests pass against the wrong content.
 
-**The run stops with "run ddev playwright-prepare".** The template database is
-missing or was built with different settings. Run `ddev playwright-prepare` again.
+**The run stops with "run ddev playwright prepare".** The template database is
+missing or was built with different settings. Run `ddev playwright prepare` again.
 
 **Every endpoint answers 401.** The npm package and PHP do not share the secret
 file. If they run in different containers, set `PLAYWRIGHT_TOOLKIT_SECRET` to the

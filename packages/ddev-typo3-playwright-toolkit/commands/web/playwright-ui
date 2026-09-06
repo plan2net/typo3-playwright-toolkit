@@ -3,13 +3,13 @@
 
 ## Description: Open Playwright's UI mode in the browser
 ## Usage: playwright-ui [test-file-pattern] [options]
-## Example: "ddev playwright-ui" or "ddev playwright-ui accordion"
+## Example: "ddev playwright ui" or "ddev playwright ui accordion"
 ## ExecRaw: true
 
 set -e
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-    echo "Usage: ddev playwright-ui [test-file-pattern] [options]"
+    echo "Usage: ddev playwright ui [test-file-pattern] [options]"
     echo ""
     echo "Serves Playwright's UI mode at https://<project>.ddev.site:3000"
     echo ""
@@ -29,7 +29,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     exit 0
 fi
 
-. /mnt/ddev_config/playwright-lib.sh
+. "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-lib.sh"
 
 playwright_enter_test_dir || exit 1
 

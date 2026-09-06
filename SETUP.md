@@ -28,7 +28,7 @@ shell's environment. The report names the context it read.
 `ddev playwright setup --no-interaction` answers no to every question. It writes none
 of your files and only reports, which also answers whether a project is still set up
 correctly. The one file it always writes is `var/playwright/api-secret`, which the
-test API needs and `ddev playwright-prepare` would write anyway.
+test API needs and `ddev playwright prepare` would write anyway.
 
 This guide takes the DDEV route, the shortest one and the one CI checks on every
 push. DDEV is not a requirement: [Without DDEV](#without-ddev) at the end lists what
@@ -346,7 +346,7 @@ the test run. Two questions decide which of the three layouts you need.
 ### Everything in the web container
 
 The default, and the one CI runs on every push. Step 3 above is all it takes. UI mode
-runs in the web container too, so `ddev playwright-ui` needs the browsers there.
+runs in the web container too, so `ddev playwright ui` needs the browsers there.
 
 ### Browsers in a container of their own
 
@@ -423,10 +423,10 @@ Five commands, each a wrapper you can run yourself:
 | Command | Runs |
 |---|---|
 | `ddev playwright test` | `typo3 cache:flush`, `typo3 playwright:prepare`, then `npx playwright test` |
-| `ddev playwright-prepare` | `typo3 playwright:prepare` |
-| `ddev playwright-ui` | `npx playwright test --ui` |
-| `ddev playwright-replay` | `typo3 playwright:replay-prepare`, then `npx playwright test` with `PW_REPLAY=1` |
-| `ddev playwright-inspect` | `npx typo3-playwright-inspect` |
+| `ddev playwright prepare` | `typo3 playwright:prepare` |
+| `ddev playwright ui` | `npx playwright test --ui` |
+| `ddev playwright replay` | `typo3 playwright:replay-prepare`, then `npx playwright test` with `PW_REPLAY=1` |
+| `ddev playwright inspect` | `npx typo3-playwright-inspect` |
 
 Run the `typo3` commands where PHP is, the `npx` ones where Playwright is. They may
 be different containers. That is

@@ -122,7 +122,7 @@ If theirs wins, a run no longer rebuilds the database template first and looks i
 > [!NOTE]
 > What it offers beyond this add-on is browser installation and a KasmVNC desktop for
 > watching runs. You need neither: browsers are one command, above, and
-> `ddev playwright-ui` serves Playwright's own UI mode on the exposed port 3000, which
+> `ddev playwright ui` serves Playwright's own UI mode on the exposed port 3000, which
 > you open in your host browser.
 
 ### A different database system
@@ -185,8 +185,8 @@ When a test fails its database is kept, and the run prints a link for it. To get
 link later, or for a specific file:
 
 ```bash
-ddev playwright-inspect            # every kept database
-ddev playwright-inspect accordion  # one test file
+ddev playwright inspect            # every kept database
+ddev playwright inspect accordion  # one test file
 ```
 
 Opening a link logs you into the TYPO3 backend of that database, and the frontend is
@@ -214,14 +214,14 @@ snapshots, and the command returns its exit status.
 
 ### Replay
 
-`ddev playwright-replay` runs every scenario's setup into one database on the
+`ddev playwright replay` runs every scenario's setup into one database on the
 `db-test` service, so you can browse everything the suite builds in one backend. The
 tests themselves are skipped, and the run ends by printing a link that logs you in.
 Your project database is never touched.
 
 ```bash
-ddev playwright-replay                   # every scenario
-ddev playwright-replay --grep accordion  # a subset
+ddev playwright replay                   # every scenario
+ddev playwright replay --grep accordion  # a subset
 ```
 
 The [npm README](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/typo3-playwright-toolkit#replay-mode)
@@ -230,12 +230,14 @@ describes what changes in replay mode.
 ### UI mode
 
 ```bash
-ddev playwright-ui              # all tests
-ddev playwright-ui accordion    # one test file
+ddev playwright ui              # all tests
+ddev playwright ui accordion    # one test file
 ```
 
 Then open `https://<project>.ddev.site:3000`. It serves from the web container, so the
 browsers have to be installed there.
+
+`ddev playwright-ui` is also available as an alias.
 
 ### Traces
 
@@ -262,10 +264,10 @@ Viewing a trace runs no tests or builds. Stop the viewer with Ctrl-C.
 | `ddev playwright approve [filter]` | Re-runs selected tests and updates their snapshots; defaults to previous failures |
 | `ddev playwright trace [file]` | Serves a saved trace in Playwright's viewer; defaults to the newest trace |
 | `ddev playwright setup` | Sets this project up for Playwright, or checks a setup you have |
-| `ddev playwright-inspect` | Prints links that open a kept test database in the backend |
-| `ddev playwright-prepare` | Builds the template database on its own; `--force` rebuilds one that is still up to date |
-| `ddev playwright-replay` | Replays every scenario's content into one browsable database |
-| `ddev playwright-ui` | Serves Playwright UI mode from the web container |
+| `ddev playwright inspect` | Prints links that open a kept test database in the backend |
+| `ddev playwright prepare` | Builds the template database on its own; `--force` rebuilds one that is still up to date |
+| `ddev playwright replay` | Replays every scenario's content into one browsable database |
+| `ddev playwright ui` | Serves Playwright UI mode from the web container |
 
 ### Flags
 

@@ -54,17 +54,17 @@ STUB
 }
 
 @test "the command declares ExecRaw so DDEV does not re-split its arguments" {
-    grep -q '^## ExecRaw: true' "${ADDON_DIR}/commands/web/playwright-replay"
+    grep -q '^## ExecRaw: true' "${ADDON_DIR}/commands/web/playwright"
 }
 
 @test "the command pins a single worker" {
-    grep -q -- '--workers=1' "${ADDON_DIR}/commands/web/playwright-replay"
+    grep -q -- '--workers=1' "${ADDON_DIR}/playwright-commands/replay.sh"
 }
 
 @test "the lib is sourced before anything it provides is called" {
     local source_line first_call
-    source_line=$(grep -n 'playwright-lib.sh' "${ADDON_DIR}/commands/web/playwright-replay" | head -1 | cut -d: -f1)
-    first_call=$(grep -n 'playwright_' "${ADDON_DIR}/commands/web/playwright-replay" \
+    source_line=$(grep -n 'playwright-lib.sh' "${ADDON_DIR}/playwright-commands/replay.sh" | head -1 | cut -d: -f1)
+    first_call=$(grep -n 'playwright_' "${ADDON_DIR}/playwright-commands/replay.sh" \
         | grep -v 'playwright-lib.sh' | head -1 | cut -d: -f1)
     [ -n "${source_line}" ]
     [ "${source_line}" -lt "${first_call}" ]
@@ -72,8 +72,8 @@ STUB
 
 @test "the template is prepared before the site database is rebuilt" {
     local template_line replay_line
-    template_line=$(grep -n 'playwright_prepare_template' "${ADDON_DIR}/commands/web/playwright-replay" | head -1 | cut -d: -f1)
-    replay_line=$(grep -n 'playwright_replay_prepare' "${ADDON_DIR}/commands/web/playwright-replay" | head -1 | cut -d: -f1)
+    template_line=$(grep -n 'playwright_prepare_template' "${ADDON_DIR}/playwright-commands/replay.sh" | head -1 | cut -d: -f1)
+    replay_line=$(grep -n 'playwright_replay_prepare' "${ADDON_DIR}/playwright-commands/replay.sh" | head -1 | cut -d: -f1)
     [ -n "${template_line}" ]
     [ "${template_line}" -lt "${replay_line}" ]
 }
@@ -81,17 +81,17 @@ STUB
 # It has to work in a project that has no Playwright directory yet.
 @test "--help answers before the directory change" {
     local help_line enter_line
-    help_line=$(grep -n '\-\-help' "${ADDON_DIR}/commands/web/playwright-replay" | head -1 | cut -d: -f1)
-    enter_line=$(grep -n 'playwright_enter_test_dir' "${ADDON_DIR}/commands/web/playwright-replay" | head -1 | cut -d: -f1)
+    help_line=$(grep -n '\-\-help' "${ADDON_DIR}/playwright-commands/replay.sh" | head -1 | cut -d: -f1)
+    enter_line=$(grep -n 'playwright_enter_test_dir' "${ADDON_DIR}/playwright-commands/replay.sh" | head -1 | cut -d: -f1)
     [ "${help_line}" -lt "${enter_line}" ]
 }
 
 @test "it exports PW_REPLAY for the toolkit" {
-    grep -q 'PW_REPLAY=1' "${ADDON_DIR}/commands/web/playwright-replay"
+    grep -q 'PW_REPLAY=1' "${ADDON_DIR}/playwright-commands/replay.sh"
 }
 
 @test "arguments reach npx as an array, never as a re-split string" {
-    grep -q 'PW_ARGS\[@\]' "${ADDON_DIR}/commands/web/playwright-replay"
-    run grep -c 'eval' "${ADDON_DIR}/commands/web/playwright-replay"
+    grep -q 'PW_ARGS\[@\]' "${ADDON_DIR}/playwright-commands/replay.sh"
+    run grep -c 'eval' "${ADDON_DIR}/playwright-commands/replay.sh"
     [ "$output" -eq 0 ]
 }

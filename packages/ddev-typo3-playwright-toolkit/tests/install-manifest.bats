@@ -71,8 +71,6 @@ project_files() {
     }
 }
 
-# UI mode serves a web app from inside the container, so an unexposed port makes
-# `ddev playwright-ui` print a URL nothing answers on.
 @test "the ui port the command serves on is the one the config exposes" {
     local served exposed
     served=$(grep -oE 'PW_UI_PORT:-[0-9]+' "${ADDON_DIR}/commands/web/playwright-ui" | grep -oE '[0-9]+')

@@ -143,13 +143,11 @@ abstract class DatabaseInitializerServerProvisionTestCase extends FunctionalTest
         $this->driver()->dropTemplate();
         $this->applyTestConnectionOverrides();
 
-        $this->expectExceptionMessageMatches('/playwright-prepare/');
+        $this->expectExceptionMessageMatches('/playwright prepare/');
 
         $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
     }
 
-    // "Run ddev playwright-prepare" sends a developer to rebuild a template that
-    // was never the problem, and the real cause never reaches them.
     #[Test]
     public function saysTheServerIsUnreachableRatherThanBlamingTheTemplate(): void
     {
@@ -160,7 +158,7 @@ abstract class DatabaseInitializerServerProvisionTestCase extends FunctionalTest
             $this->get(DatabaseInitializer::class)->provision($this->driver(), self::TEST_ID);
             self::fail('Expected provisioning to fail with an unusable connection.');
         } catch (\Throwable $failure) {
-            self::assertStringNotContainsString('playwright-prepare', $failure->getMessage());
+            self::assertStringNotContainsString('playwright prepare', $failure->getMessage());
         } finally {
             // Restored here: tearDown drops this run's databases and needs to connect.
             putenv(TestDatabaseService::PASSWORD_VARIABLE . '=' . static::password());
