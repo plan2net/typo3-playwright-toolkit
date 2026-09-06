@@ -273,7 +273,7 @@ What a run does, step by step:
 <picture>
   <source media="(max-width: 700px)" srcset="diagrams/full-test-run-narrow.svg">
   <img width="880" src="diagrams/full-test-run.svg"
-       alt="Once per run, the DDEV command has TYPO3 rebuild the database template if the schema or fixtures changed, then starts Playwright, whose preflight checks the API version. Once per test file, Playwright writes down that file's test ID, asks TYPO3 for a backend session, and TYPO3 copies the template into a database of its own before it boots; content is then posted to the backend's own record edit route, which answers with the record it saved. Every test in the file reuses that database, and teardown asks TYPO3 to drop every database the run created.">
+       alt="Once per run, the DDEV command has TYPO3 rebuild the database template if the schema or fixtures changed, then starts Playwright, which builds your frontend assets before it touches the site and then checks the API version. Once per test file, Playwright writes down that file's test ID, asks TYPO3 for a backend session, and TYPO3 copies the template into a database of its own before it boots; content is then posted to the backend's own record edit route, which answers with the record it saved. Every test in the file reuses that database, and teardown asks TYPO3 to drop every database the run created.">
 </picture>
 
 ## Migrating an existing Playwright suite

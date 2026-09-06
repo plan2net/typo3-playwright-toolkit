@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="880" height="1044" viewBox="0 0 880 1044" role="img" aria-labelledby="ftr-tablet-title ftr-tablet-desc" xmlns="http://www.w3.org/2000/svg">
+<svg width="880" height="1104" viewBox="0 0 880 1104" role="img" aria-labelledby="ftr-tablet-title ftr-tablet-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="ftr-tablet-title">A full test run</title>
-<desc id="ftr-tablet-desc">Once per run, the DDEV command has TYPO3 rebuild the database template if the schema or fixtures changed, then starts Playwright, whose preflight checks the API version and provisions a first database. Once per test file, Playwright writes down that file's test ID, asks TYPO3 for a backend session, and TYPO3 copies the template into a database of its own before it boots; content is then posted to the backend's own record edit route, which answers with the record it saved. Every test in the file reuses that database, and teardown asks TYPO3 to drop every database the run created. Both the session and the record posts carry the API secret as well as the test ID.</desc>
+<desc id="ftr-tablet-desc">Once per run, the DDEV command has TYPO3 rebuild the database template if the schema or fixtures changed, then starts Playwright, which builds your frontend assets before it touches the site and then checks the API version and provisions a first database. Once per test file, Playwright writes down that file's test ID, asks TYPO3 for a backend session, and TYPO3 copies the template into a database of its own before it boots; content is then posted to the backend's own record edit route, which answers with the record it saved. Every test in the file reuses that database, and teardown asks TYPO3 to drop every database the run created. Both the session and the record posts carry the API secret as well as the test ID.</desc>
 
 <defs>
     <marker id="ftt-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
@@ -14,34 +14,35 @@
 
 <rect width="100%" height="100%" fill="#FFFFFF"/>
 
-<rect x="40" y="144" width="800" height="220" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
+<rect x="40" y="144" width="800" height="280" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
 <text x="212" y="167" fill="rgba(26,30,36,0.62)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">ONCE PER RUN</text>
 
-<rect x="40" y="380" width="800" height="336" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
-<text x="240" y="403" fill="rgba(26,30,36,0.62)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">ONCE PER TEST FILE</text>
+<rect x="40" y="440" width="800" height="336" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
+<text x="240" y="463" fill="rgba(26,30,36,0.62)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">ONCE PER TEST FILE</text>
 
-<rect x="40" y="732" width="800" height="176" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
+<rect x="40" y="792" width="800" height="176" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
 
-<line x1="140" y1="128" x2="140" y2="924" stroke="rgba(26,30,36,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
-<line x1="340" y1="128" x2="340" y2="924" stroke="rgba(26,30,36,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
-<line x1="540" y1="128" x2="540" y2="924" stroke="rgba(26,30,36,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
-<line x1="740" y1="128" x2="740" y2="924" stroke="rgba(26,30,36,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+<line x1="140" y1="128" x2="140" y2="984" stroke="rgba(26,30,36,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+<line x1="340" y1="128" x2="340" y2="984" stroke="rgba(26,30,36,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+<line x1="540" y1="128" x2="540" y2="984" stroke="rgba(26,30,36,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+<line x1="740" y1="128" x2="740" y2="984" stroke="rgba(26,30,36,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
 
 <line x1="140" y1="200" x2="540" y2="200" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
 <line x1="540" y1="244" x2="740" y2="244" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
 <line x1="140" y1="288" x2="340" y2="288" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
-<line x1="340" y1="332" x2="540" y2="332" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
+<path d="M 340,316 H 364 Q 372,316 372,324 V 340 Q 372,348 364,348 H 340" fill="none" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
+<line x1="340" y1="392" x2="540" y2="392" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
 
-<path d="M 340,436 H 364 Q 372,436 372,444 V 460 Q 372,468 364,468 H 340" fill="none" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
-<line x1="340" y1="504" x2="540" y2="504" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
-<line x1="540" y1="548" x2="740" y2="548" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
-<line x1="540" y1="592" x2="340" y2="592" stroke="#5B6570" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#ftt-arrow)"/>
-<line x1="340" y1="636" x2="540" y2="636" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
-<line x1="540" y1="680" x2="340" y2="680" stroke="#ED6D05" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#ftt-arrow-accent)"/>
+<path d="M 340,496 H 364 Q 372,496 372,504 V 520 Q 372,528 364,528 H 340" fill="none" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
+<line x1="340" y1="564" x2="540" y2="564" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
+<line x1="540" y1="608" x2="740" y2="608" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
+<line x1="540" y1="652" x2="340" y2="652" stroke="#5B6570" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#ftt-arrow)"/>
+<line x1="340" y1="696" x2="540" y2="696" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
+<line x1="540" y1="740" x2="340" y2="740" stroke="#ED6D05" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#ftt-arrow-accent)"/>
 
-<line x1="340" y1="796" x2="540" y2="796" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
-<line x1="340" y1="840" x2="540" y2="840" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
-<line x1="540" y1="884" x2="740" y2="884" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
+<line x1="340" y1="856" x2="540" y2="856" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
+<line x1="340" y1="900" x2="540" y2="900" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
+<line x1="540" y1="944" x2="740" y2="944" stroke="#5B6570" stroke-width="1.2" marker-end="url(#ftt-arrow)"/>
 
 <rect x="163" y="176" width="154" height="16" rx="2" fill="#FFFFFF"/>
 <text x="240" y="188" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">playwright:prepare</text>
@@ -52,35 +53,38 @@
 <rect x="159" y="264" width="162" height="16" rx="2" fill="#FFFFFF"/>
 <text x="240" y="276" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">npx playwright test</text>
 
-<rect x="344" y="308" width="192" height="16" rx="2" fill="#FFFFFF"/>
-<text x="440" y="320" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">preflight: version + DB</text>
+<rect x="380" y="324" width="144" height="16" rx="2" fill="#FFFFFF"/>
+<text x="388" y="336" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">build your assets</text>
 
-<rect x="380" y="444" width="185" height="16" rx="2" fill="#FFFFFF"/>
-<text x="388" y="456" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">test ID, written first</text>
+<rect x="344" y="368" width="192" height="16" rx="2" fill="#FFFFFF"/>
+<text x="440" y="380" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">preflight: version + DB</text>
 
-<rect x="351" y="480" width="177" height="16" rx="2" fill="#FFFFFF"/>
-<text x="440" y="492" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">POST test-api/session</text>
+<rect x="380" y="504" width="185" height="16" rx="2" fill="#FFFFFF"/>
+<text x="388" y="516" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">test ID, written first</text>
 
-<rect x="576" y="524" width="128" height="16" rx="2" fill="#FFFFFF"/>
-<text x="640" y="536" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">pre-boot copy</text>
+<rect x="351" y="540" width="177" height="16" rx="2" fill="#FFFFFF"/>
+<text x="440" y="552" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">POST test-api/session</text>
 
-<rect x="351" y="568" width="177" height="16" rx="2" fill="#FFFFFF"/>
-<text x="440" y="580" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">cookie + record token</text>
+<rect x="576" y="584" width="128" height="16" rx="2" fill="#FFFFFF"/>
+<text x="640" y="596" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">pre-boot copy</text>
 
-<rect x="371" y="612" width="139" height="16" rx="2" fill="#FFFFFF"/>
-<text x="440" y="624" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">POST record/edit</text>
+<rect x="351" y="628" width="177" height="16" rx="2" fill="#FFFFFF"/>
+<text x="440" y="640" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">cookie + record token</text>
 
-<rect x="348" y="656" width="185" height="16" rx="2" fill="#FFFFFF"/>
-<text x="440" y="668" fill="#A05E00" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">302 + the saved record</text>
+<rect x="371" y="672" width="139" height="16" rx="2" fill="#FFFFFF"/>
+<text x="440" y="684" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">POST record/edit</text>
 
-<rect x="355" y="772" width="170" height="16" rx="2" fill="#FFFFFF"/>
-<text x="440" y="784" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">page.goto(), same ID</text>
+<rect x="348" y="716" width="185" height="16" rx="2" fill="#FFFFFF"/>
+<text x="440" y="728" fill="#A05E00" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">302 + the saved record</text>
 
-<rect x="359" y="816" width="162" height="16" rx="2" fill="#FFFFFF"/>
-<text x="440" y="828" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">POST databases/drop</text>
+<rect x="355" y="832" width="170" height="16" rx="2" fill="#FFFFFF"/>
+<text x="440" y="844" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">page.goto(), same ID</text>
 
-<rect x="548" y="860" width="184" height="16" rx="2" fill="#FFFFFF"/>
-<text x="640" y="872" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">DROP DATABASE + images</text>
+<rect x="359" y="876" width="162" height="16" rx="2" fill="#FFFFFF"/>
+<text x="440" y="888" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">POST databases/drop</text>
+
+<rect x="548" y="920" width="184" height="16" rx="2" fill="#FFFFFF"/>
+<text x="640" y="932" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.04em">DROP DATABASE + images</text>
 
 <rect x="48" y="48" width="184" height="80" rx="6" fill="#FFFFFF"/>
 <rect x="48" y="48" width="184" height="80" rx="6" fill="rgba(91,101,112,0.10)" stroke="#8A93A0" stroke-width="1"/>
@@ -110,19 +114,19 @@
 <text x="740" y="100" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Database service</text>
 <text x="740" y="118" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">its own container</text>
 
-<line x1="40" y1="964" x2="840" y2="964" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
-<text x="40" y="992" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">LEGEND</text>
+<line x1="40" y1="1024" x2="840" y2="1024" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
+<text x="40" y="1052" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">LEGEND</text>
 
-<line x1="140" y1="988" x2="180" y2="988" stroke="#5B6570" stroke-width="1.2"/>
-<text x="192" y="992" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">CALL</text>
+<line x1="140" y1="1048" x2="180" y2="1048" stroke="#5B6570" stroke-width="1.2"/>
+<text x="192" y="1052" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">CALL</text>
 
-<line x1="280" y1="988" x2="320" y2="988" stroke="#5B6570" stroke-width="1.2" stroke-dasharray="5,4"/>
-<text x="332" y="992" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">ANSWER</text>
+<line x1="280" y1="1048" x2="320" y2="1048" stroke="#5B6570" stroke-width="1.2" stroke-dasharray="5,4"/>
+<text x="332" y="1052" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">ANSWER</text>
 
-<line x1="460" y1="988" x2="500" y2="988" stroke="#ED6D05" stroke-width="2" stroke-dasharray="5,4"/>
+<line x1="460" y1="1048" x2="500" y2="1048" stroke="#ED6D05" stroke-width="2" stroke-dasharray="5,4"/>
 
 <!-- Last, so the chip masks the lifeline rather than the other way round. -->
-<rect x="152" y="744" width="238" height="14" rx="2" fill="#FFFFFF"/>
-<text x="271" y="755" fill="rgba(26,30,36,0.62)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">EVERY TEST, THEN TEARDOWN</text>
-<text x="512" y="992" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">WHAT BUILDERS GET BACK</text>
+<rect x="152" y="804" width="238" height="14" rx="2" fill="#FFFFFF"/>
+<text x="271" y="815" fill="rgba(26,30,36,0.62)" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">EVERY TEST, THEN TEARDOWN</text>
+<text x="512" y="1052" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">WHAT BUILDERS GET BACK</text>
 </svg>
