@@ -65,13 +65,26 @@ final class RecordedErrorsTest extends FunctionalTestCase
         $before = (int) $this->getConnectionPool()->getConnectionForTable('sys_log')
             ->executeQuery('SELECT MAX(uid) FROM sys_log')->fetchOne();
 
-        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'a page was saved', 'tablename' => 'pages']);
-        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'a page was saved', 'tablename' => 'pages']);
-        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'a redirect was saved', 'tablename' => 'sys_redirect']);
+        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'a page was saved', 'tablename' => 'pages', 'recuid' => 13]);
+        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'a page was saved', 'tablename' => 'pages', 'recuid' => 14]);
+        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'a redirect was saved', 'tablename' => 'sys_redirect', 'recuid' => 5]);
 
         $written = (new RecordedErrors())->writesAfter($this->getConnectionPool()->getConnectionForTable('sys_log'), $before);
 
         self::assertSame(['pages' => 2, 'sys_redirect' => 1], $written);
+    }
+
+    // Counting log rows instead reports a page nobody asked for.
+    #[Test]
+    public function countsARecordWrittenTwiceInOneSaveOnce(): void
+    {
+        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'Record pages:13 was inserted', 'tablename' => 'pages', 'recuid' => 13]);
+        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'Record sys_file_reference:4 was inserted', 'tablename' => 'sys_file_reference', 'recuid' => 4]);
+        $this->insertRow(['type' => 1, 'error' => 0, 'details' => 'Record pages:13 was updated', 'tablename' => 'pages', 'recuid' => 13]);
+
+        $written = (new RecordedErrors())->writesAfter($this->getConnectionPool()->getConnectionForTable('sys_log'), 0);
+
+        self::assertSame(['pages' => 1, 'sys_file_reference' => 1], $written);
     }
 
     // A refusal writes a log row and no record, so counting it reports a write

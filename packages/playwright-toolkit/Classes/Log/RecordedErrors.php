@@ -107,9 +107,15 @@ final class RecordedErrors
     {
         $queryBuilder = $connection->createQueryBuilder();
 
+        // One save logs the insert and then an update of the same record as soon as
+        // a relation is remapped onto it.
         $rows = $queryBuilder
             ->select('tablename')
-            ->addSelectLiteral($queryBuilder->expr()->count('uid', 'writes'))
+            ->addSelectLiteral(sprintf(
+                'COUNT(DISTINCT %s) AS %s',
+                $connection->quoteIdentifier('recuid'),
+                $connection->quoteIdentifier('writes')
+            ))
             ->from('sys_log')
             ->where(
                 $queryBuilder->expr()->gt('uid', $queryBuilder->createNamedParameter($afterUid, Connection::PARAM_INT)),

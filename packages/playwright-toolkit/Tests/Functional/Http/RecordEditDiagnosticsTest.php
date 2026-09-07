@@ -102,7 +102,7 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
 
         $response = $this->saveWhileTypo3Writes(
             '/typo3/record/edit?edit%5Bpages%5D%5B17%5D=edit',
-            ['pages', 'pages', 'sys_redirect'],
+            [['pages', 17], ['pages', 18], ['sys_redirect', 5]],
         );
 
         self::assertSame(['pages' => 2, 'sys_redirect' => 1], $this->savedRecord($response)['written']);
@@ -115,7 +115,7 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
 
         $response = $this->saveWhileTypo3Writes(
             '/typo3/record/edit?edit%5Bpages%5D%5B17%5D=edit',
-            ['pages', 'pages', 'sys_redirect'],
+            [['pages', 17], ['pages', 18], ['sys_redirect', 5]],
         );
 
         self::assertSame(ContractFixture::read('saved-record-header'), $this->savedRecord($response));
@@ -138,7 +138,7 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
     {
         $this->saveWhileTypo3Writes(
             '/typo3/record/edit?edit%5Btt_content%5D%5BNEW1%5D=new',
-            ['tt_content'],
+            [['tt_content', 1]],
             ['tt_content' => ['NEW1' => ['bodytxt' => 'a value']]]
         );
 
@@ -301,10 +301,10 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
     }
 
     /**
-     * @param list<string>                                            $tables one write log row per entry
+     * @param list<array{0: string, 1: int}>                          $writes one write log row per entry
      * @param array<string, array<string, array<string, mixed>>>|null $data
      */
-    private function saveWhileTypo3Writes(string $location, array $tables, ?array $data = null): ResponseInterface
+    private function saveWhileTypo3Writes(string $location, array $writes, ?array $data = null): ResponseInterface
     {
         $request = (new ServerRequest('https://testing.test/typo3/record/edit', 'POST'))
             ->withHeader(TestApiSecret::HEADER, $this->secret);
@@ -314,20 +314,20 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
         }
 
         $connection = $this->getConnectionPool()->getConnectionForTable('sys_log');
-        $handler = new class($location, $connection, $tables) implements RequestHandlerInterface {
+        $handler = new class($location, $connection, $writes) implements RequestHandlerInterface {
             /**
-             * @param list<string> $tables
+             * @param list<array{0: string, 1: int}> $writes
              */
             public function __construct(
                 private readonly string $location,
                 private readonly Connection $connection,
-                private readonly array $tables,
+                private readonly array $writes,
             ) {
             }
 
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
-                foreach ($this->tables as $table) {
+                foreach ($this->writes as [$table, $recuid]) {
                     $this->connection->insert('sys_log', [
                         'type' => 1,
                         'channel' => 'content',
@@ -336,7 +336,7 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
                         'details' => 'Record was saved',
                         'log_data' => '',
                         'tablename' => $table,
-                        'recuid' => 0,
+                        'recuid' => $recuid,
                         'tstamp' => 1760954471,
                         'component' => '',
                         'message' => '',

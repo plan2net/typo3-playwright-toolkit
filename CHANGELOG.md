@@ -12,6 +12,11 @@ the package a change belongs to.
 
 ### Fixed
 
+- **plan2net/playwright-toolkit** — the write count a save reports is per record again, not per
+  log row. DataHandler logs an insert and then an update of the same record as soon as a relation
+  is remapped onto it, so saving one page with a file reference reported two pages and the toolkit
+  warned about a page nobody had asked for.
+
 - **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer shoots a blank where an
   art-directed image should be. A capture that reaches past the viewport, which is any full-page
   shot of a page that scrolls and any shot of an element taller than the viewport, collapses the
