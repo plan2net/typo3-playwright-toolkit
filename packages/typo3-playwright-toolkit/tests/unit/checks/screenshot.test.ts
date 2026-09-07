@@ -1,10 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { setToolkitConfig } from '#src/config.js'
 import {
     buildHideStyles,
     resolveScreenshotTarget,
     hiddenSelectors,
     comparisonOptions,
+    warnAboutUndecodedImages,
 } from '#src/checks/screenshot.js'
 
 describe('resolveScreenshotTarget', () => {
@@ -84,5 +85,19 @@ describe('comparisonOptions', () => {
         })
 
         expect(comparisonOptions(false, {})).not.toHaveProperty('threshold')
+    })
+})
+
+describe('warnAboutUndecodedImages', () => {
+    it('names every image that did not decode, and how long it waited', () => {
+        const said: string[] = []
+        const warn = vi.spyOn(console, 'warn').mockImplementation((message) => said.push(String(message)))
+
+        warnAboutUndecodedImages(['https://example.test/a.avif', 'https://example.test/b.avif'], 15000)
+        warn.mockRestore()
+
+        expect(said.join('\n')).toContain('https://example.test/a.avif')
+        expect(said.join('\n')).toContain('https://example.test/b.avif')
+        expect(said.join('\n')).toContain('15000')
     })
 })

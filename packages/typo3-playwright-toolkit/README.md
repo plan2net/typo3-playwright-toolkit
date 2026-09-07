@@ -416,7 +416,16 @@ To skip the build once, set `PW_SKIP_BUILD=1`, which is what
 ### Screenshots
 
 `expectScreenshot` waits for fonts, images and animations, hides the selectors from
-`hideBeforeScreenshot`, and then compares against the stored image.
+`hideBeforeScreenshot`, and then compares against the stored image. An image that has
+still not decoded when that wait runs out is named in a warning, because it would
+otherwise be blank in the picture and, on a first run, blank in the new baseline.
+
+For the duration of the shot each image is pinned to the file it resolved to, and released
+again afterwards. Chromium collapses the viewport to 1×1 while it captures anything taller
+than the viewport, and a `<source media="(max-width: …)">` flips while it is collapsed, which
+drops the decoded image and leaves a blank. Pinning it is invisible to a test, including one
+that narrows the viewport between two shots. A `background-image` behind a width query is
+not covered.
 
 ```ts
 import { expectScreenshot } from '@plan2net/typo3-playwright-toolkit'

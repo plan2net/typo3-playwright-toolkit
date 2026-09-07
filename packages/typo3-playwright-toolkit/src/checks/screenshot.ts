@@ -73,13 +73,110 @@ export async function loadLazyElements(page: Page): Promise<void> {
     )
 }
 
-async function waitForImagesDecoded(page: Page, timeout = 15000): Promise<void> {
-    await page.evaluate(async (timeout) => {
+// A capture reaching past the viewport collapses it to 1x1 first, and a width-based
+// `media` on a `<source>` flips while it is collapsed, dropping the decoded image.
+export async function freezeResponsiveImages(page: Page): Promise<void> {
+    await page.evaluate(() => {
+        document.querySelectorAll('img').forEach((image) => {
+            const resolved = image.currentSrc
+            if (!resolved) {
+                return
+            }
+
+            image.dataset.toolkitFrozen = JSON.stringify({
+                src: image.getAttribute('src'),
+                srcset: image.getAttribute('srcset'),
+                sizes: image.getAttribute('sizes'),
+                width: image.getAttribute('width'),
+                height: image.getAttribute('height'),
+            })
+            const sources = Array.from(image.closest('picture')?.querySelectorAll('source') ?? [])
+            // width and height on the chosen source lay the img out, and disabling it
+            // would drop them.
+            const chosen = sources.find((source) => !source.media || matchMedia(source.media).matches)
+            for (const dimension of ['width', 'height']) {
+                const value = chosen?.getAttribute(dimension)
+                if (null != value) {
+                    image.setAttribute(dimension, value)
+                }
+            }
+
+            sources.forEach((source) => {
+                source.dataset.toolkitFrozen = JSON.stringify({ media: source.getAttribute('media') })
+                // Never matches, so selection falls through to the img below.
+                source.media = 'not all'
+            })
+
+            image.removeAttribute('srcset')
+            image.removeAttribute('sizes')
+            if (image.src !== resolved) {
+                image.src = resolved
+            }
+        })
+    })
+}
+
+// Settle first, or a loading image has no currentSrc to pin it to; settle again,
+// because pinning a <picture> starts a load of its own.
+export async function prepareImagesForCapture(page: Page): Promise<string[]> {
+    const stalled = await waitForImagesDecoded(page)
+    await freezeResponsiveImages(page)
+    await waitForImagesDecoded(page)
+
+    return stalled
+}
+
+export async function restoreResponsiveImages(page: Page): Promise<void> {
+    await page.evaluate(() => {
+        const put = (element: Element, name: string, value: string | null) =>
+            null === value ? element.removeAttribute(name) : element.setAttribute(name, value)
+
+        document.querySelectorAll<HTMLImageElement>('img[data-toolkit-frozen]').forEach((image) => {
+            image
+                .closest('picture')
+                ?.querySelectorAll<HTMLSourceElement>('source[data-toolkit-frozen]')
+                .forEach((source) => {
+                    const { media } = JSON.parse(source.dataset.toolkitFrozen ?? '{}') as {
+                        media: string | null
+                    }
+                    put(source, 'media', media)
+                    delete source.dataset.toolkitFrozen
+                })
+
+            const frozen = JSON.parse(image.dataset.toolkitFrozen ?? '{}') as Record<string, string | null>
+            Object.entries(frozen).forEach(([name, value]) => put(image, name, value))
+            delete image.dataset.toolkitFrozen
+        })
+    })
+}
+
+const DECODE_TIMEOUT = 15000
+
+/** @returns the sources of the images that never decoded, empty when all did */
+export async function waitForImagesDecoded(page: Page, timeout = DECODE_TIMEOUT): Promise<string[]> {
+    const deadline = Date.now() + timeout
+
+    const stalled = await settleImages(page, timeout)
+    const left = deadline - Date.now()
+    // Out of budget, so a second round would settle nothing and report every image.
+    if (left <= 0) {
+        return stalled
+    }
+
+    // A load that starts during a round is not waited for by it, which is how
+    // applyDeferredStylesheets re-selects a source after the image read as complete.
+    return settleImages(page, left)
+}
+
+function settleImages(page: Page, timeout: number): Promise<string[]> {
+    return page.evaluate(async (timeout) => {
         const images = Array.from(document.querySelectorAll('img'))
+        const stalled = new Set(images)
         const settle = (image: HTMLImageElement) =>
             new Promise<void>((resolve) => {
                 const finish = async () => {
                     await image.decode().catch(() => {})
+                    stalled.delete(image)
                     resolve()
                 }
                 if (image.complete) {
@@ -87,12 +184,37 @@ async function waitForImagesDecoded(page: Page, timeout = 15000): Promise<void> 
                     return
                 }
                 image.addEventListener('load', () => void finish(), { once: true })
-                image.addEventListener('error', () => resolve(), { once: true })
+                image.addEventListener(
+                    'error',
+                    () => {
+                        stalled.delete(image)
+                        resolve()
+                    },
+                    { once: true },
+                )
             })
         const timeoutPromise = new Promise<void>((resolve) => setTimeout(resolve, timeout))
         await Promise.race([Promise.all(images.map(settle)), timeoutPromise])
         await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+
+        // The snapshot above predates anything that started loading since.
+        document.querySelectorAll('img').forEach((image) => {
+            if (!image.complete) {
+                stalled.add(image)
+            }
+        })
+
+        return Array.from(stalled, (image) => image.currentSrc || image.src)
     }, timeout)
+}
+
+/** An undecoded image is blank, and a first run writes that blank as the baseline. */
+export function warnAboutUndecodedImages(stalled: string[], timeout: number): void {
+    console.warn(
+        `[typo3-playwright-toolkit] ${stalled.length} ${1 === stalled.length ? 'image' : 'images'} ` +
+            `did not decode within ${timeout}ms and will be blank in the screenshot:\n  ` +
+            stalled.join('\n  '),
+    )
 }
 
 /**
@@ -175,12 +297,19 @@ export async function expectScreenshot(
     await page.evaluate(() => document.fonts.ready)
     await waitForAnimations(page, undefined, 3000)
     await loadLazyElements(page)
-    await waitForImagesDecoded(page)
+    const stalled = await prepareImagesForCapture(page)
+    if (stalled.length > 0) {
+        warnAboutUndecodedImages(stalled, DECODE_TIMEOUT)
+    }
 
-    // Playwright creates a missing reference itself and has --update-snapshots
-    // for the rest; hand-building the snapshot path got the platform suffix
-    // wrong off Linux.
-    await expect(shot).toHaveScreenshot(`${name}.png`, comparisonOptions(wholePage, screenshotOptions))
+    try {
+        // Playwright creates a missing reference itself and has --update-snapshots
+        // for the rest; hand-building the snapshot path got the platform suffix
+        // wrong off Linux.
+        await expect(shot).toHaveScreenshot(`${name}.png`, comparisonOptions(wholePage, screenshotOptions))
+    } finally {
+        await restoreResponsiveImages(page)
+    }
 }
 
 export function comparisonOptions(

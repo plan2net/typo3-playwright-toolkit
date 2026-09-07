@@ -10,6 +10,27 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer shoots a blank where an
+  art-directed image should be. A capture that reaches past the viewport, which is any full-page
+  shot of a page that scrolls and any shot of an element taller than the viewport, collapses the
+  viewport to 1×1 and back first. A width-based `media` on a `<source>` flips while it is
+  collapsed, so the picture re-selects and drops the image that was already decoded. Each image is
+  now pinned to the file it resolved to at the real viewport for the duration of the shot, keeping
+  the box that file's `<source>` gave it, and released again afterwards, so a test that narrows the
+  viewport between two shots still gets the right file at the right size in each. Images still
+  loading are settled first, since one of those has no resolved file to be pinned to. A
+  `background-image` behind a width query is not covered.
+
+- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer shoots an image it
+  never waited for. Its decode wait raced every image against 15 seconds and, when the
+  timeout won, said nothing, so a slow format such as AVIF produced a blank image in the
+  picture and, on a first run, a blank baseline that nothing later reported. The images
+  that lost the race are now named in a warning. The wait also runs a second round, since
+  an image that read as complete can have its source re-selected while the first round is
+  still waiting, by the deferred stylesheet the same helper applies a few lines earlier.
+
 ### Changed
 
 - **@plan2net/typo3-playwright-toolkit** — `defineBasePlaywrightConfig` writes an HTML
