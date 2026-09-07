@@ -35,6 +35,9 @@ export function defineBasePlaywrightConfig(
         fullyParallel: true,
         forbidOnly: !!process.env.CI,
         workers: 2,
+        // Playwright's own default writes no report, leaving the add-on's report port
+        // and `show-report` nothing to serve. Never opened: the container has no browser.
+        reporter: [['list'], ['html', { open: 'never' }]],
         ...rest,
         globalSetup: GLOBAL_SETUP,
         globalTeardown: GLOBAL_TEARDOWN,

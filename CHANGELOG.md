@@ -12,6 +12,12 @@ the package a change belongs to.
 
 ### Changed
 
+- **@plan2net/typo3-playwright-toolkit** — `defineBasePlaywrightConfig` writes an HTML
+  report by default, `[['list'], ['html', { open: 'never' }]]`, so the report port and
+  `ddev playwright show-report` have something to serve. Playwright's own default
+  writes none. A project that sets `reporter` itself keeps what it sets, and nothing
+  opens a browser, since the run happens in a container.
+
 - **ddev-typo3-playwright-toolkit** — every URL on screen is now one your browser can
   open. Playwright announces the address it bound to, which is `0.0.0.0` inside the
   container, so `ddev playwright ui`, `show-report` and `trace` rewrite that line to

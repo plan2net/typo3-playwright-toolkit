@@ -38,6 +38,18 @@ describe('defineBasePlaywrightConfig', () => {
         expect(config.globalTeardown).toBe('@plan2net/typo3-playwright-toolkit/global-teardown')
     })
 
+    it('writes an HTML report by default, without opening a browser for it', () => {
+        const config = defineBasePlaywrightConfig(toolkitConfig(), { testDir: './tests' })
+
+        expect(config.reporter).toEqual([['list'], ['html', { open: 'never' }]])
+    })
+
+    it('lets a project choose its own reporter', () => {
+        const config = defineBasePlaywrightConfig(toolkitConfig(), { reporter: 'dot' })
+
+        expect(config.reporter).toBe('dot')
+    })
+
     it('refuses a globalSetup override', () => {
         const overrides = { globalSetup: './my-setup.ts' } as BasePlaywrightOverrides
 
