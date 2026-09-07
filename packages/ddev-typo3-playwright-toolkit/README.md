@@ -315,6 +315,7 @@ Viewing a trace runs no tests or builds. Stop the viewer with Ctrl-C.
 | `ddev playwright replay` | Replays every scenario's content into one browsable database |
 | `ddev playwright clean` | Drops the test databases and state a stopped run left behind |
 | `ddev playwright ui` | Serves Playwright UI mode from the web container |
+| `ddev playwright show-report` | Playwright's own report, served on a port your browser can reach |
 
 ### Flags
 

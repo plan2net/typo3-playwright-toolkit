@@ -25,6 +25,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  clean               Drop what a stopped run left behind"
     echo "  trace [file]        View a saved trace in your browser"
     echo "  setup               Set up this project for Playwright, or check a setup you have"
+    echo "  show-report         Playwright's own, served where your browser can reach it"
     echo ""
     echo "Options this command handles itself:"
     echo "  --skip-build        Do not build frontend assets first"
