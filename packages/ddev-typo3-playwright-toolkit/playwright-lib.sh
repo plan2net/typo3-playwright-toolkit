@@ -31,6 +31,20 @@ playwright_serve_url() {
     printf '%s://%s:%s' "${scheme}" "${url}" "${port}"
 }
 
+# Playwright's viewers announce their bind address, 0.0.0.0 in the container. That
+# line is the server's own and the last on screen, so the stream has to be rewritten.
+# Read and print rather than `sed -u`: the line must appear while the server runs,
+# and -u is GNU, which the hermetic tests would lose on macOS.
+playwright_reachable_url() {
+    local bind="http://0.0.0.0:${1}"
+    local url="${2}"
+    local line
+
+    while IFS= read -r line || [ -n "${line}" ]; do
+        printf '%s\n' "${line//${bind}/${url}}"
+    done
+}
+
 # Where the project keeps its Playwright tests. An environment variable rather
 # than a flag: this one belongs to the project, not to a single run, so it is set
 # once in web_environment or .ddev/.env.web.

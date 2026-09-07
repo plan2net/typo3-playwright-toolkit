@@ -56,6 +56,46 @@ setup() {
     [ "$output" = "typo3-playwright-clean" ]
 }
 
+@test "a test run points at the report command that works from the host" {
+    mkdir -p "${PW_TEST_DIR}/playwright-report"
+
+    run "${COMMAND}" test
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"ddev playwright show-report"* ]] || return 1
+}
+
+@test "a failing test run keeps its exit status, hint or no hint" {
+    mkdir -p "${PW_TEST_DIR}/playwright-report"
+    export TRACE_EXIT=3
+
+    run "${COMMAND}" test
+
+    [ "$status" -eq 3 ]
+}
+
+@test "UI mode names a URL a browser can open, not the bind address" {
+    cp "${ADDON_DIR}/tests/fixtures/serve-npx.sh" "${BATS_TEST_TMPDIR}/bin/npx"
+    chmod +x "${BATS_TEST_TMPDIR}/bin/npx"
+
+    run "${ADDON_DIR}/commands/web/playwright-ui"
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"https://example.ddev.site:3000"* ]] || return 1
+    [[ "$output" != *"0.0.0.0"* ]] || return 1
+}
+
+@test "the served report names a URL a browser can open, not the bind address" {
+    cp "${ADDON_DIR}/tests/fixtures/serve-npx.sh" "${BATS_TEST_TMPDIR}/bin/npx"
+    chmod +x "${BATS_TEST_TMPDIR}/bin/npx"
+
+    run "${COMMAND}" show-report
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"https://example.ddev.site:9323"* ]] || return 1
+    [[ "$output" != *"0.0.0.0:9323"* ]] || return 1
+}
+
 @test "playwright-ui remains an alias for UI mode" {
     run "${ADDON_DIR}/commands/web/playwright-ui" --grep 'two words'
 

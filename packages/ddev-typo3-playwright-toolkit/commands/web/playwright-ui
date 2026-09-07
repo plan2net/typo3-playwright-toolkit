@@ -46,4 +46,5 @@ echo "[playwright-ui] Stop with Ctrl-C."
 echo ""
 
 # --ui-host=0.0.0.0 so the host browser can reach it
+exec > >(playwright_reachable_url "${PORT}" "${URL}") 2>&1
 exec npx playwright test --ui-port="${PORT}" --ui-host=0.0.0.0 "${PW_ARGS[@]}"

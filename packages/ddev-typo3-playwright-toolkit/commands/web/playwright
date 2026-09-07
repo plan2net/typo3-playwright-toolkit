@@ -175,18 +175,23 @@ if [ "${PW_ARGS[0]:-}" = "trace" ]; then
     fi
     echo "[playwright] Open ${trace_url}"
     echo "[playwright] Stop with Ctrl-C."
+    # Redirected before the exec, not piped after it: a shell left waiting in front
+    # of the viewer swallows the SIGTERM meant for it.
+    exec > >(playwright_reachable_url 9325 "${trace_url}") 2>&1
     exec npx playwright show-trace --host 0.0.0.0 --port 9325 -- "${trace_file}"
 fi
 
 # show-report binds to 127.0.0.1, which is unreachable from outside the container.
 if [ "${PW_ARGS[0]:-}" = "show-report" ]; then
     PORT="${PW_REPORT_PORT:-9323}"
+    report_url="$(playwright_serve_url "${PORT}")"
 
     echo ""
-    echo "[playwright] Open $(playwright_serve_url "${PORT}")"
+    echo "[playwright] Open ${report_url}"
     echo "[playwright] Stop with Ctrl-C."
     echo ""
 
+    exec > >(playwright_reachable_url "${PORT}" "${report_url}") 2>&1
     exec npx playwright show-report --host 0.0.0.0 --port "${PORT}" "${PW_ARGS[@]:1}"
 fi
 
@@ -201,8 +206,25 @@ fi
 
 playwright_prepare_template "${DDEV_APPROOT:-/var/www/html}" || exit 1
 
+# Not exec'd, because our closing hint has to come after Playwright's own, which
+# names `npx playwright show-report` and binds to container loopback. Outliving the
+# run costs signal forwarding by hand, and a stdin an async command would lose.
 if [ "${PW_ARGS[0]:-}" = "approve" ]; then
-    exec node "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-approve.mjs" "${PW_APPROVE_ARGS[@]}"
+    node "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-approve.mjs" "${PW_APPROVE_ARGS[@]}" <&0 &
+else
+    npx playwright "${PW_ARGS[@]}" <&0 &
+fi
+run=$!
+trap 'kill -TERM "${run}" 2>/dev/null' INT TERM
+wait "${run}"
+status=$?
+
+if [ -d playwright-report ]; then
+    echo ""
+    echo "[playwright] Open the report with:"
+    echo ""
+    echo "  ddev playwright show-report"
+    echo ""
 fi
 
-exec npx playwright "${PW_ARGS[@]}"
+exit "${status}"

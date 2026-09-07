@@ -16,6 +16,18 @@ setup() {
     cd "${BATS_TEST_TMPDIR}/project" || exit 1
 }
 
+@test "the trace viewer names a URL a browser can open, not the bind address" {
+    touch "${PW_TEST_DIR}/trace.zip"
+    cp "${ADDON_DIR}/tests/fixtures/serve-npx.sh" "${BATS_TEST_TMPDIR}/bin/npx"
+    chmod +x "${BATS_TEST_TMPDIR}/bin/npx"
+
+    run "${COMMAND}" trace trace.zip
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *'https://example.ddev.site:9325'* ]] || return 1
+    [[ "$output" != *'0.0.0.0:9325'* ]] || return 1
+}
+
 @test "trace serves a selected file without preparing the database" {
     touch "${PW_TEST_DIR}/downloaded trace.zip"
 

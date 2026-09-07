@@ -12,6 +12,13 @@ the package a change belongs to.
 
 ### Changed
 
+- **ddev-typo3-playwright-toolkit** — every URL on screen is now one your browser can
+  open. Playwright announces the address it bound to, which is `0.0.0.0` inside the
+  container, so `ddev playwright ui`, `show-report` and `trace` rewrite that line to
+  your project's hostname. A test run also ends by naming `ddev playwright
+  show-report`, since Playwright's own closing hint names `npx playwright
+  show-report`, which serves on container loopback and answers nothing.
+
 - **ddev-typo3-playwright-toolkit** — commands now use spaces: `ddev playwright ui`,
   `ddev playwright replay`, `ddev playwright inspect`, and `ddev playwright prepare`.
   **Breaking:** the old `playwright-replay`, `playwright-inspect` and
