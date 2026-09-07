@@ -14,7 +14,77 @@ const TITLE = 'TYPO3 Playwright Toolkit'
 const DESCRIPTION =
     'End-to-end tests for TYPO3 CMS: every test file gets its own throwaway database, content is built through the real backend, and every failure keeps a signed link into its backend.'
 
-const source = fs.readFileSync(path.join(here, 'landing-page.dc.html'), 'utf-8')
+const rawSource = fs.readFileSync(path.join(here, 'landing-page.dc.html'), 'utf-8')
+
+/**
+ * Applied in one pass, so a German replacement is never rescanned. Every key must be
+ * found: a wording change on the English page fails the build rather than leaving an
+ * English sentence in the German one.
+ */
+const GERMAN = JSON.parse(fs.readFileSync(path.join(here, 'de.json'), 'utf-8'))
+
+const LOCALES = [
+    {
+        code: 'en',
+        directory: '',
+        assetPrefix: '',
+        diagramSuffix: '',
+        dictionary: undefined,
+        titleSuffix: 'end-to-end tests for TYPO3 CMS',
+        description: DESCRIPTION,
+        imageAlt: `${TITLE}: end-to-end tests for TYPO3 CMS`,
+        copied: 'Copied to the clipboard',
+        copyFailed: 'Copying failed. Select the text and copy it yourself.',
+    },
+    {
+        code: 'de',
+        directory: 'de',
+        assetPrefix: '../',
+        diagramSuffix: '.de',
+        dictionary: GERMAN,
+        titleSuffix: 'End-to-End-Tests für TYPO3 CMS',
+        description:
+            'End-to-End-Tests für TYPO3 CMS: Jede Testdatei bekommt ihre eigene Wegwerf-Datenbank, die Inhalte entstehen im echten Backend, und jeder fehlgeschlagene Test hinterlässt einen signierten Link in sein Backend.',
+        imageAlt: `${TITLE}: End-to-End-Tests für TYPO3 CMS`,
+        copied: 'In die Zwischenablage kopiert',
+        copyFailed: 'Kopieren hat nicht geklappt. Markieren Sie den Text und kopieren Sie ihn selbst.',
+    },
+]
+
+function escapeRegExp(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function translate(text, dictionary) {
+    if (!dictionary) {
+        return text
+    }
+
+    const entries = new Map(dictionary)
+    // So a short key cannot claim part of a longer one.
+    const keys = [...entries.keys()].sort((a, b) => b.length - a.length)
+    const seen = new Set()
+    // Any whitespace matches any other, so a key need not reproduce the page's
+    // non-breaking spaces and line breaks.
+    const pattern = keys.map((key) => `(${escapeRegExp(key).replace(/\s+/g, '\\s+')})`).join('|')
+    const out = text.replace(new RegExp(pattern, 'g'), (...match) => {
+        const index = match.slice(1, 1 + keys.length).findIndex((group) => undefined !== group)
+        seen.add(keys[index])
+
+        return entries.get(keys[index])
+    })
+
+    const missing = keys.filter((key) => !seen.has(key))
+    if (missing.length > 0) {
+        console.error('build-docs: de.json has entries the page does not contain:')
+        for (const key of missing) {
+            console.error(`  ${JSON.stringify(key.slice(0, 90))}`)
+        }
+        process.exit(1)
+    }
+
+    return out
+}
 
 function between(text, open, close) {
     const start = text.indexOf(open)
@@ -25,19 +95,6 @@ function between(text, open, close) {
 
     return text.slice(start + open.length, end)
 }
-
-const helmet = between(source, '<helmet>', '</helmet>')
-const bodySource = between(source, '</helmet>', '</x-dc>')
-const componentSource = between(source, '">\nclass Component extends DCLogic {', '\n}\n</script>')
-
-// Only its own fields are read, so the base class is not needed.
-const Component = new Function(`class Component {${componentSource}}; return Component`)()
-const component = new Component()
-component.props = { accent: '#FF8700', reducedMotion: false }
-component.systemStill = false
-// A finished run, rather than one mid-animation.
-component.state = { ...component.state, shown: component.runs.length + 2 }
-const values = component.renderVals()
 
 function escapeText(value) {
     return String(value).replace(/&(?![a-zA-Z#][a-zA-Z0-9]*;)/g, '&amp;').replace(/</g, '&lt;')
@@ -125,49 +182,8 @@ function render(markup, scope) {
     return fillHoles(out, scope)
 }
 
-let body = render(bodySource, values)
-
-body = body.replace(/onClick="\{\{ p\.onCopy \}\}"/g, 'data-copy')
-const commands = values.packages.map((entry) => entry.cmd)
-let copyIndex = 0
-body = body.replace(/data-copy(?=[\s>])/g, () => {
-    const command = commands[copyIndex++]
-    if (!command) {
-        console.error('build-docs: more package copy buttons than package commands')
-        process.exit(1)
-    }
-
-    return `data-copy="${escapeAttribute(command)}"`
-})
-
-// Only the package buttons are positional; the hand-written ones name their own command.
-body = body.replace(/data-copy-text=/g, 'data-copy=')
-
-body = body.replace(/onClick="\{\{ toggleRotation \}\}"/g, '')
-
-// A code block that scrolls has to be reachable by keyboard.
-body = body.replace(/<pre /g, '<pre tabindex="0" ')
-
-// Both states become classes: an inline style would outrank the :hover rule.
-const hoverRules = []
-body = body.replace(/<(\w+)((?:[^>"]|"[^"]*")*?\sstyle-hover="[^"]*"(?:[^>"]|"[^"]*")*)>/g, (whole, tag, attributes) => {
-    const hover = /\sstyle-hover="([^"]*)"/.exec(attributes)?.[1] ?? ''
-    const base = /\sstyle="([^"]*)"/.exec(attributes)?.[1] ?? ''
-    const name = `hv-${hoverRules.length}`
-
-    if (base) {
-        hoverRules.push(`.${name}{${base}}`)
-    }
-    hoverRules.push(`.${name}:hover{${hover}}`)
-
-    const rest = attributes.replace(/\sstyle-hover="[^"]*"/, '').replace(/\sstyle="[^"]*"/, '')
-
-    return rest.includes('class="')
-        ? `<${tag}${rest.replace('class="', `class="${name} `)}>`
-        : `<${tag}${rest} class="${name}">`
-})
-
-const RUNTIME = `
+function runtime(locale, claimMs) {
+    return `
 const stillMedia = window.matchMedia('(prefers-reduced-motion: reduce)')
 
 const claims = [...document.querySelectorAll('[data-claim]')]
@@ -199,7 +215,7 @@ function startRotating() {
     if (stillMedia.matches || !rotating) {
         return
     }
-    timer = setInterval(rotate, ${component.CLAIM_MS})
+    timer = setInterval(rotate, ${claimMs})
 }
 
 function applyMotionPreference() {
@@ -283,10 +299,10 @@ document.querySelectorAll('[data-copy], [data-copy-target]').forEach((button) =>
         try {
             await navigator.clipboard.writeText(copyText(button))
         } catch {
-            announce(button, 'Copying failed. Select the text and copy it yourself.')
+            announce(button, ${JSON.stringify(locale.copyFailed)})
             return
         }
-        announce(button, 'Copied to the clipboard')
+        announce(button, ${JSON.stringify(locale.copied)})
         setBranch(button, 'done')
         clearTimeout(button.resetTimer)
         button.resetTimer = setTimeout(() => {
@@ -299,6 +315,7 @@ document.querySelectorAll('[data-copy-state]').forEach((part) => {
     part.dataset.rot = part.dataset.copyState
 })
 `
+}
 
 function squeezeCss(css) {
     return css
@@ -319,16 +336,19 @@ function squeezeJs(source) {
 }
 
 // Newlines become a space, not nothing: between inline elements it separates words.
+// NUL as the placeholder delimiter, written as an escape rather than as the byte: any
+// delimiter markup can contain also matches what the page really says, and a space
+// matched the 0 in `margin:0 0 14px`.
 function squeezeHtml(markup) {
     const kept = []
     return markup
-        .replace(/<pre[\s\S]*?<\/pre>/g, (block) => ` ${kept.push(block) - 1} `)
+        .replace(/<pre[\s\S]*?<\/pre>/g, (block) => `\0${kept.push(block) - 1}\0`)
         .replace(/<!--[\s\S]*?-->/g, '')
         .replace(/<style>([\s\S]*?)<\/style>/g, (whole, css) => `<style>${squeezeCss(css)}</style>`)
         .replace(/\s*\n\s*/g, ' ')
         .replace(/ {2,}/g, ' ')
         .replace(/style="([^"]*)"/g, (whole, rules) => `style="${rules.replace(/\s*([:;])\s*/g, '$1')}"`)
-        .replace(/ (\d+) /g, (whole, index) => kept[Number(index)])
+        .replace(/\0(\d+)\0/g, (whole, index) => kept[Number(index)])
         .trim()
 }
 
@@ -336,90 +356,178 @@ const version = JSON.parse(
     fs.readFileSync(path.join(repoRoot, 'packages/typo3-playwright-toolkit/package.json'), 'utf-8'),
 ).version
 
-// What an answer engine reads instead of the prose.
-const structuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: TITLE,
-    alternateName: 'plan2net/playwright-toolkit',
-    description: DESCRIPTION,
-    applicationCategory: 'DeveloperApplication',
-    applicationSubCategory: 'Testing framework',
-    operatingSystem: 'Linux, macOS, Windows',
-    url: SITE_URL,
-    softwareVersion: version,
-    codeRepository: REPO_URL,
-    license: 'https://spdx.org/licenses/GPL-2.0-or-later.html',
-    programmingLanguage: ['TypeScript', 'PHP'],
-    softwareRequirements: 'TYPO3 CMS 11.5, 12.4, 13.4 or 14.3; PHP 8.1 or newer; DDEV',
-    isAccessibleForFree: true,
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
-    author: { '@type': 'Organization', name: 'plan2net', url: 'https://www.plan2.net/' },
-    keywords: 'TYPO3, Playwright, end-to-end testing, DDEV, test database, visual regression',
+function pageUrl(locale) {
+    return locale.directory ? `${SITE_URL}${locale.directory}/` : SITE_URL
 }
 
-const head =
-    squeezeHtml(`<meta charset="utf-8">
-<title>${TITLE} — end-to-end tests for TYPO3 CMS</title>
-<meta name="description" content="${escapeAttribute(DESCRIPTION)}">
-<link rel="canonical" href="${SITE_URL}">
+/** What an answer engine reads instead of the prose. */
+function structuredData(locale) {
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: TITLE,
+        alternateName: 'plan2net/playwright-toolkit',
+        description: locale.description,
+        applicationCategory: 'DeveloperApplication',
+        applicationSubCategory: 'Testing framework',
+        operatingSystem: 'Linux, macOS, Windows',
+        url: pageUrl(locale),
+        softwareVersion: version,
+        codeRepository: REPO_URL,
+        license: 'https://spdx.org/licenses/GPL-2.0-or-later.html',
+        programmingLanguage: ['TypeScript', 'PHP'],
+        softwareRequirements: 'TYPO3 CMS 11.5, 12.4, 13.4 or 14.3; PHP 8.1 or newer; DDEV',
+        isAccessibleForFree: true,
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+        author: { '@type': 'Organization', name: 'plan2net', url: 'https://www.plan2.net/' },
+        keywords: 'TYPO3, Playwright, end-to-end testing, DDEV, test database, visual regression',
+    }
+}
+
+function buildPage(locale) {
+    const source = translate(rawSource, locale.dictionary)
+
+    const helmet = between(source, '<helmet>', '</helmet>')
+    const bodySource = between(source, '</helmet>', '</x-dc>')
+    const componentSource = between(source, '">\nclass Component extends DCLogic {', '\n}\n</script>')
+
+    // Only its own fields are read, so the base class is not needed.
+    const Component = new Function(`class Component {${componentSource}}; return Component`)()
+    const component = new Component()
+    component.props = { accent: '#FF8700', reducedMotion: false }
+    component.systemStill = false
+    // A finished run, rather than one mid-animation.
+    component.state = { ...component.state, shown: component.runs.length + 2 }
+    const values = component.renderVals()
+
+    let body = render(bodySource, values)
+
+    body = body.replace(/onClick="\{\{ p\.onCopy \}\}"/g, 'data-copy')
+    const commands = values.packages.map((entry) => entry.cmd)
+    let copyIndex = 0
+    body = body.replace(/data-copy(?=[\s>])/g, () => {
+        const command = commands[copyIndex++]
+        if (!command) {
+            console.error('build-docs: more package copy buttons than package commands')
+            process.exit(1)
+        }
+
+        return `data-copy="${escapeAttribute(command)}"`
+    })
+
+    // Only the package buttons are positional; the hand-written ones name their own command.
+    body = body.replace(/data-copy-text=/g, 'data-copy=')
+
+    body = body.replace(/onClick="\{\{ toggleRotation \}\}"/g, '')
+
+    // A code block that scrolls has to be reachable by keyboard.
+    body = body.replace(/<pre /g, '<pre tabindex="0" ')
+
+    // Both states become classes: an inline style would outrank the :hover rule.
+    const hoverRules = []
+    body = body.replace(/<(\w+)((?:[^>"]|"[^"]*")*?\sstyle-hover="[^"]*"(?:[^>"]|"[^"]*")*)>/g, (whole, tag, attributes) => {
+        const hover = /\sstyle-hover="([^"]*)"/.exec(attributes)?.[1] ?? ''
+        const base = /\sstyle="([^"]*)"/.exec(attributes)?.[1] ?? ''
+        const name = `hv-${hoverRules.length}`
+
+        if (base) {
+            hoverRules.push(`.${name}{${base}}`)
+        }
+        hoverRules.push(`.${name}:hover{${hover}}`)
+
+        const rest = attributes.replace(/\sstyle-hover="[^"]*"/, '').replace(/\sstyle="[^"]*"/, '')
+
+        return rest.includes('class="')
+            ? `<${tag}${rest.replace('class="', `class="${name} `)}>`
+            : `<${tag}${rest} class="${name}">`
+    })
+
+    const alternates = LOCALES.map(
+        (other) => `<link rel="alternate" hreflang="${other.code}" href="${pageUrl(other)}">`,
+    ).join('')
+
+    const head =
+        squeezeHtml(`<meta charset="utf-8">
+<title>${TITLE} — ${locale.titleSuffix}</title>
+<meta name="description" content="${escapeAttribute(locale.description)}">
+<link rel="canonical" href="${pageUrl(locale)}">
+${alternates}<link rel="alternate" hreflang="x-default" href="${SITE_URL}">
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <meta name="theme-color" content="#FF8700">
 <meta name="author" content="plan2net">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="${TITLE}">
-<meta property="og:locale" content="en">
-<meta property="og:url" content="${SITE_URL}">
+<meta property="og:locale" content="${locale.code}">
+<meta property="og:url" content="${pageUrl(locale)}">
 <meta property="og:title" content="${TITLE}">
-<meta property="og:description" content="${escapeAttribute(DESCRIPTION)}">
-<meta property="og:image" content="${SITE_URL}og-image.png">
+<meta property="og:description" content="${escapeAttribute(locale.description)}">
+<meta property="og:image" content="${pageUrl(locale)}og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="${escapeAttribute(TITLE)}: end-to-end tests for TYPO3 CMS">
+<meta property="og:image:alt" content="${escapeAttribute(locale.imageAlt)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${TITLE}">
-<meta name="twitter:description" content="${escapeAttribute(DESCRIPTION)}">
-<meta name="twitter:image" content="${SITE_URL}og-image.png">
+<meta name="twitter:description" content="${escapeAttribute(locale.description)}">
+<meta name="twitter:image" content="${pageUrl(locale)}og-image.png">
 ${helmet}
 <style>[hidden]{display:none !important}${squeezeCss(hoverRules.join(''))}</style>`) +
-    `<script type="application/ld+json">${JSON.stringify(structuredData)}</script>`
+        `<script type="application/ld+json">${JSON.stringify(structuredData(locale))}</script>`
 
-let page = `<!DOCTYPE html><html lang="en"><head>${head}</head><body>${squeezeHtml(
-    body,
-)}<script>${squeezeJs(RUNTIME)}</script></body></html>`
+    let page = `<!DOCTYPE html><html lang="${locale.code}"><head>${head}</head><body>${squeezeHtml(
+        body,
+    )}<script>${squeezeJs(runtime(locale, component.CLAIM_MS))}</script></body></html>`
 
-/**
- * Inlined, not linked: an SVG loaded through <img> never fetches the self-hosted
- * fonts. Injected after squeezeHtml, whose <pre> placeholder pass rewrites any
- * " 123 " it finds and would corrupt path data — so squeeze the markup here.
- */
-page = page.replace(/<div class="figure"([^>]*) data-diagram="([\w-]+)"([^>]*)><\/div>/g, (whole, before, name, after) => {
-    const source = fs.readFileSync(path.join(repoRoot, `diagrams/${name}.html`), 'utf-8')
-    const variants = source.match(/<svg[\s\S]*?<\/svg>/g) ?? []
-    if (variants.length === 0) {
-        console.error(`build-docs: no <svg> in diagrams/${name}.html`)
+    /**
+     * Inlined, not linked: an SVG loaded through <img> never fetches the self-hosted
+     * fonts. Injected after squeezeHtml, whose <pre> placeholder pass rewrites any
+     * " 123 " it finds and would corrupt path data — so squeeze the markup here.
+     */
+    page = page.replace(/<div class="figure"([^>]*) data-diagram="([\w-]+)"([^>]*)><\/div>/g, (whole, before, name, after) => {
+        const file = path.join(repoRoot, `diagrams/${name}${locale.diagramSuffix}.html`)
+        const variants = fs.readFileSync(file, 'utf-8').match(/<svg[\s\S]*?<\/svg>/g) ?? []
+        if (variants.length === 0) {
+            console.error(`build-docs: no <svg> in ${path.relative(repoRoot, file)}`)
+            process.exit(1)
+        }
+
+        const markup = variants
+            .join('')
+            .replace(/<!--[\s\S]*?-->/g, '')
+            .replace(/>\s+</g, '><')
+
+        return `<div class="figure"${before}${after}>${markup}</div>`
+    })
+
+    // Shared from the root rather than copied into each locale.
+    if (locale.assetPrefix) {
+        page = page
+            .replace(/url\(fonts\//g, `url(${locale.assetPrefix}fonts/`)
+            .replace(/(src|href)="logo\.svg"/g, `$1="${locale.assetPrefix}logo.svg"`)
+    }
+
+    const leftovers = page.match(/\{\{[^}]*\}\}|<sc-(for|if)\b|style-hover=/g)
+    if (leftovers) {
+        console.error(`build-docs: unresolved template syntax: ${[...new Set(leftovers)].join(', ')}`)
         process.exit(1)
     }
 
-    const markup = variants
-        .join('')
-        .replace(/<!--[\s\S]*?-->/g, '')
-        .replace(/>\s+</g, '><')
+    for (const [, id] of page.matchAll(/data-copy-target="([^"]+)"/g)) {
+        if (!page.includes(`id="${id}"`)) {
+            console.error(`build-docs: a copy button reads #${id}, which the page does not have`)
+            process.exit(1)
+        }
+    }
 
-    return `<div class="figure"${before}${after}>${markup}</div>`
-})
-
-const leftovers = page.match(/\{\{[^}]*\}\}|<sc-(for|if)\b|style-hover=/g)
-if (leftovers) {
-    console.error(`build-docs: unresolved template syntax: ${[...new Set(leftovers)].join(', ')}`)
-    process.exit(1)
-}
-
-for (const [, id] of page.matchAll(/data-copy-target="([^"]+)"/g)) {
-    if (!page.includes(`id="${id}"`)) {
-        console.error(`build-docs: a copy button reads #${id}, which the page does not have`)
+    // The page must fetch nothing from anywhere else: a stylesheet, a font or an image
+    // from a third party sends every visitor's IP address there before it renders.
+    const offSite = page.match(/(?:src|href)="https?:\/\/[^"]*"|url\(\s*['"]?https?:/g) ?? []
+    const requests = offSite.filter((reference) => !/^href=/.test(reference))
+    if (requests.length > 0) {
+        console.error(`build-docs: the page would request ${requests.join(', ')}`)
         process.exit(1)
     }
+
+    return page
 }
 
 // llmstxt.org
@@ -461,31 +569,39 @@ Sitemap: ${SITE_URL}sitemap.xml
 `
 
 const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>${SITE_URL}</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${LOCALES.map(
+    (locale) => `  <url><loc>${pageUrl(locale)}</loc>${LOCALES.map(
+        (other) => `<xhtml:link rel="alternate" hreflang="${other.code}" href="${pageUrl(other)}"/>`,
+    ).join('')}<changefreq>weekly</changefreq><priority>1.0</priority></url>`,
+).join('\n')}
 </urlset>
 `
 
 fs.mkdirSync(outDir, { recursive: true })
-fs.writeFileSync(path.join(outDir, 'index.html'), page)
+const built = []
+for (const locale of LOCALES) {
+    const directory = path.join(outDir, locale.directory)
+    fs.mkdirSync(directory, { recursive: true })
+    const page = buildPage(locale)
+    fs.writeFileSync(path.join(directory, 'index.html'), page)
+    built.push(`${locale.directory ? `${locale.directory}/` : ''}index.html — ${Math.round(page.length / 1024)} KB`)
+}
+
 fs.writeFileSync(path.join(outDir, 'llms.txt'), llmsTxt)
 fs.writeFileSync(path.join(outDir, 'robots.txt'), robotsTxt)
 fs.writeFileSync(path.join(outDir, 'sitemap.xml'), sitemapXml)
 fs.copyFileSync(path.join(here, 'logo.svg'), path.join(outDir, 'logo.svg'))
-fs.copyFileSync(path.join(here, 'og-image.png'), path.join(outDir, 'og-image.png'))
+for (const locale of LOCALES) {
+    fs.copyFileSync(
+        path.join(here, `og-image${locale.directory ? `.${locale.code}` : ''}.png`),
+        path.join(outDir, locale.directory, 'og-image.png'),
+    )
+}
 // The licence ships beside them: the OFL asks for it wherever the fonts go.
 fs.mkdirSync(path.join(outDir, 'fonts'), { recursive: true })
 for (const file of ['caveat.woff2', 'open-sans.woff2', 'source-code-pro.woff2', 'OFL.txt']) {
     fs.copyFileSync(path.join(here, 'fonts', file), path.join(outDir, 'fonts', file))
 }
 
-// The page must fetch nothing from anywhere else: a stylesheet, a font or an image
-// from a third party sends every visitor's IP address there before it renders.
-const offSite = page.match(/(?:src|href)="https?:\/\/[^"]*"|url\(\s*['"]?https?:/g) ?? []
-const requests = offSite.filter((reference) => !/^href=/.test(reference))
-if (requests.length > 0) {
-    console.error(`build-docs: the page would request ${requests.join(', ')}`)
-    process.exit(1)
-}
-
-console.log(`site/index.html — ${Math.round(page.length / 1024)} KB, plus llms.txt, robots.txt, sitemap.xml`)
+console.log(`site/ — ${built.join(', ')}, plus llms.txt, robots.txt, sitemap.xml`)

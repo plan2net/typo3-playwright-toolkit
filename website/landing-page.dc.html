@@ -61,7 +61,11 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 /* The links keep to the right beside the call to action rather than being spread
    from it, and nav's 24px gap plus this 4px is the 28px they had as one list. */
 .nav-list { margin-left:auto; }
-.nav-cta { flex-shrink:0; margin-left:4px; }
+/* The rule sets it off from the section links, which sit at the same size and weight
+   and would otherwise read as four more of them. */
+.lang-switch { flex-shrink:0; display:flex; align-items:center; gap:8px; list-style:none; font-size:13.5px; font-weight:700; margin:0 4px 0 20px; padding-left:20px; border-left:1px solid var(--line); }
+.lang-switch li + li::before { content:"|"; content:"|" / ""; color:#C3CAD3; margin-right:8px; }
+.nav-cta { flex-shrink:0; }
 /* The second content value gives the diamond empty alternative text, so a screen
    reader reads the links without "black diamond" between them. */
 .nav-list li + li::before { content:"◆"; content:"◆" / ""; color:var(--dim); font-size:8px; margin-right:14px; }
@@ -106,14 +110,15 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
 }
 /* Brand and call to action keep the first row; the links take the next one and
    wrap within it, rather than being cropped off the side. */
-@media (max-width:900px) {
+@media (max-width:1023px) {
   nav { gap:14px !important; }
   /* Flex wraps before it shrinks, so the brand needs a small basis to stay on the
      call to action's row; it then grows back and the title breaks if it must. */
   nav > div:first-child { flex:1 1 120px; min-width:0; }
   nav > div:first-child div { min-width:0; }
   .nav-list { order:3; width:100%; margin-left:0; gap:12px; }
-  .nav-cta { margin-left:auto; }
+  /* The links have moved to their own row, so there is nothing left to separate. */
+  .lang-switch { margin-left:auto; padding-left:0; border-left:none; }
 }
 @media (max-width:620px) {
   .grid-4, .grid-cards { grid-template-columns:minmax(0,1fr); }
@@ -142,6 +147,10 @@ pre::-webkit-scrollbar-thumb { background:#3C434F; border-radius:4px; }
     <li><a href="#content" style="color:var(--dim);" style-hover="color:var(--ink);">Content</a></li>
     <li><a href="#packages" style="color:var(--dim);" style-hover="color:var(--ink);">Packages</a></li>
     <li><a href="#example" style="color:var(--dim);" style-hover="color:var(--ink);">Example</a></li>
+  </ul>
+  <ul class="lang-switch">
+    <li><a href="./" hreflang="en" aria-current="page" style="color:var(--ink);">English</a></li>
+    <li><a href="de/" lang="de" hreflang="de" aria-label="Zu Deutsch wechseln" style="color:var(--dim);" style-hover="color:var(--ink);">Deutsch</a></li>
   </ul>
   <a class="nav-cta" href="https://github.com/plan2net/typo3-playwright-toolkit" style="color:var(--ink); background:var(--org); padding:9px 18px; border-radius:6px; font-weight:700; font-size:13.5px;" style-hover="background:var(--org-lg); color:var(--ink);">GitHub</a>
 </nav>
