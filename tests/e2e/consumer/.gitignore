@@ -21,6 +21,7 @@
 /var/
 /.test-state/
 /tests/playwright/node_modules/
+/package-lock.json
 /tests/playwright/package-lock.json
 /tests/playwright/test-results/
 /tests/playwright/playwright-report/
