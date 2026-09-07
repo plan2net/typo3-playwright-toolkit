@@ -10,59 +10,19 @@ the package a change belongs to.
 
 ## [Unreleased]
 
-### Fixed
+## [0.16.0] - 2026-09-07
 
-- **plan2net/playwright-toolkit** — the write count a save reports is per record again, not per
-  log row. DataHandler logs an insert and then an update of the same record as soon as a relation
-  is remapped onto it, so saving one page with a file reference reported two pages and the toolkit
-  warned about a page nobody had asked for.
+Everything you do around a test run is a subcommand of `ddev playwright` now. `trace`
+opens a saved trace, `approve` updates the snapshots of the tests that failed, `doctor`
+answers whether the project can run tests at all, and `clean` drops what a stopped run
+left behind. The three commands that had a name of their own are gone.
 
-- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer shoots a blank where an
-  art-directed image should be. A capture that reaches past the viewport, which is any full-page
-  shot of a page that scrolls and any shot of an element taller than the viewport, collapses the
-  viewport to 1×1 and back first. A width-based `media` on a `<source>` flips while it is
-  collapsed, so the picture re-selects and drops the image that was already decoded. Each image is
-  now pinned to the file it resolved to at the real viewport for the duration of the shot, keeping
-  the box that file's `<source>` gave it, and released again afterwards, so a test that narrows the
-  viewport between two shots still gets the right file at the right size in each. Images still
-  loading are settled first, since one of those has no resolved file to be pinned to. A
-  `background-image` behind a width query is not covered.
+### Breaking
 
-- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer shoots an image it
-  never waited for. Its decode wait raced every image against 15 seconds and, when the
-  timeout won, said nothing, so a slow format such as AVIF produced a blank image in the
-  picture and, on a first run, a blank baseline that nothing later reported. The images
-  that lost the race are now named in a warning. The wait also runs a second round, since
-  an image that read as complete can have its source re-selected while the first round is
-  still waiting, by the deferred stylesheet the same helper applies a few lines earlier.
-
-### Changed
-
-- **@plan2net/typo3-playwright-toolkit** — `defineBasePlaywrightConfig` writes an HTML
-  report by default, `[['list'], ['html', { open: 'never' }]]`, so the report port and
-  `ddev playwright show-report` have something to serve. Playwright's own default
-  writes none. A project that sets `reporter` itself keeps what it sets, and nothing
-  opens a browser, since the run happens in a container.
-
-- **ddev-typo3-playwright-toolkit** — a test run shows one closing hint, not two.
-  Playwright's own names `npx playwright show-report`, which reaches nothing from
-  your host, and it prints only when stdin is a terminal, so the run no longer gets
-  one. `ddev playwright show-report` answers a taken port with the port number and
-  `PW_REPORT_PORT` instead of a node stack trace, and explains the html reporter
-  only when the report is what is missing.
-
-- **ddev-typo3-playwright-toolkit** — every URL on screen is now one your browser can
-  open. Playwright announces the address it bound to, which is `0.0.0.0` inside the
-  container, so `ddev playwright ui`, `show-report` and `trace` rewrite that line to
-  your project's hostname. A test run also ends by naming `ddev playwright
-  show-report`, since Playwright's own closing hint names `npx playwright
-  show-report`, which serves on container loopback and answers nothing.
-
-- **ddev-typo3-playwright-toolkit** — commands now use spaces: `ddev playwright ui`,
-  `ddev playwright replay`, `ddev playwright inspect`, and `ddev playwright prepare`.
-  **Breaking:** the old `playwright-replay`, `playwright-inspect` and
-  `playwright-prepare` commands are gone. Updating the add-on leaves their files
-  behind, so delete them yourself:
+- **ddev-typo3-playwright-toolkit** — the commands use spaces: `ddev playwright ui`,
+  `ddev playwright replay`, `ddev playwright inspect` and `ddev playwright prepare`.
+  The old `playwright-replay`, `playwright-inspect` and `playwright-prepare` are gone.
+  Updating the add-on leaves their files behind, so delete them yourself:
   `rm .ddev/commands/web/playwright-{replay,inspect,prepare}`. `ddev playwright-ui`
   stays as an alias for `ddev playwright ui`.
 
@@ -99,6 +59,54 @@ the package a change belongs to.
   failed tests and updates their snapshots. A file filter or `--grep` selects
   specific tests; `--all` selects the whole suite. Missing or invalid run state
   stops approval instead of updating every test.
+
+### Changed
+
+- **@plan2net/typo3-playwright-toolkit** — `defineBasePlaywrightConfig` writes an HTML
+  report by default, `[['list'], ['html', { open: 'never' }]]`, so the report port and
+  `ddev playwright show-report` have something to serve. Playwright's own default
+  writes none. A project that sets `reporter` itself keeps what it sets, and nothing
+  opens a browser, since the run happens in a container.
+
+- **ddev-typo3-playwright-toolkit** — a test run shows one closing hint, not two.
+  Playwright's own names `npx playwright show-report`, which reaches nothing from
+  your host, and it prints only when stdin is a terminal, so the run no longer gets
+  one. `ddev playwright show-report` answers a taken port with the port number and
+  `PW_REPORT_PORT` instead of a node stack trace, and explains the html reporter
+  only when the report is what is missing.
+
+- **ddev-typo3-playwright-toolkit** — every URL on screen is now one your browser can
+  open. Playwright announces the address it bound to, which is `0.0.0.0` inside the
+  container, so `ddev playwright ui`, `show-report` and `trace` rewrite that line to
+  your project's hostname. A test run also ends by naming `ddev playwright
+  show-report`, since Playwright's own closing hint names `npx playwright
+  show-report`, which serves on container loopback and answers nothing.
+
+### Fixed
+
+- **plan2net/playwright-toolkit** — the write count a save reports is per record again, not per
+  log row. DataHandler logs an insert and then an update of the same record as soon as a relation
+  is remapped onto it, so saving one page with a file reference reported two pages and the toolkit
+  warned about a page nobody had asked for.
+
+- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer shoots a blank where an
+  art-directed image should be. A capture that reaches past the viewport, which is any full-page
+  shot of a page that scrolls and any shot of an element taller than the viewport, collapses the
+  viewport to 1×1 and back first. A width-based `media` on a `<source>` flips while it is
+  collapsed, so the picture re-selects and drops the image that was already decoded. Each image is
+  now pinned to the file it resolved to at the real viewport for the duration of the shot, keeping
+  the box that file's `<source>` gave it, and released again afterwards, so a test that narrows the
+  viewport between two shots still gets the right file at the right size in each. Images still
+  loading are settled first, since one of those has no resolved file to be pinned to. A
+  `background-image` behind a width query is not covered.
+
+- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer shoots an image it
+  never waited for. Its decode wait raced every image against 15 seconds and, when the
+  timeout won, said nothing, so a slow format such as AVIF produced a blank image in the
+  picture and, on a first run, a blank baseline that nothing later reported. The images
+  that lost the race are now named in a warning. The wait also runs a second round, since
+  an image that read as complete can have its source re-selected while the first round is
+  still waiting, by the deferred stylesheet the same helper applies a few lines earlier.
 
 ## [0.15.0] - 2026-09-04
 
@@ -734,7 +742,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.15.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.16.0...main
+[0.16.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.12.0...v0.13.0
