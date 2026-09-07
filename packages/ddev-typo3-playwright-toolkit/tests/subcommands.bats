@@ -65,6 +65,17 @@ setup() {
     [[ "$output" == *"ddev playwright show-report"* ]] || return 1
 }
 
+@test "a test run gets no terminal on stdin, so Playwright prints no npx hint" {
+    cp "${ADDON_DIR}/tests/fixtures/stdin-npx.sh" "${BATS_TEST_TMPDIR}/bin/npx"
+    chmod +x "${BATS_TEST_TMPDIR}/bin/npx"
+
+    run script -q -c "${COMMAND} test" /dev/null
+
+    [ "$status" -eq 0 ]
+    run cat "${TRACE_CALLS}"
+    [ "$output" = "not a terminal" ]
+}
+
 @test "a failing test run keeps its exit status, hint or no hint" {
     mkdir -p "${PW_TEST_DIR}/playwright-report"
     export TRACE_EXIT=3
@@ -83,6 +94,40 @@ setup() {
     [ "$status" -eq 0 ]
     [[ "$output" == *"https://example.ddev.site:3000"* ]] || return 1
     [[ "$output" != *"0.0.0.0"* ]] || return 1
+}
+
+@test "show-report says how to produce a report when there is none" {
+    cp "${ADDON_DIR}/tests/fixtures/no-report-npx.sh" "${BATS_TEST_TMPDIR}/bin/npx"
+    chmod +x "${BATS_TEST_TMPDIR}/bin/npx"
+
+    run "${COMMAND}" show-report
+
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"--reporter=html"* ]] || return 1
+}
+
+@test "show-report blames the reporter only when the report is the thing missing" {
+    mkdir -p "${PW_TEST_DIR}/playwright-report"
+    cp "${ADDON_DIR}/tests/fixtures/no-report-npx.sh" "${BATS_TEST_TMPDIR}/bin/npx"
+    chmod +x "${BATS_TEST_TMPDIR}/bin/npx"
+
+    run "${COMMAND}" show-report
+
+    [ "$status" -eq 1 ]
+    [[ "$output" != *"--reporter=html"* ]] || return 1
+}
+
+@test "show-report names the port and its variable when something else holds it" {
+    node -e 'require("net").createServer().listen(9323, "0.0.0.0")' &
+    listener=$!
+    sleep 1
+
+    run "${COMMAND}" show-report
+    kill "${listener}" 2>/dev/null
+
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"9323"* ]] || return 1
+    [[ "$output" == *"PW_REPORT_PORT"* ]] || return 1
 }
 
 @test "the served report names a URL a browser can open, not the bind address" {

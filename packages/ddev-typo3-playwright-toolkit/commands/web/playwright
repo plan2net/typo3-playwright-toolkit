@@ -186,13 +186,37 @@ if [ "${PW_ARGS[0]:-}" = "show-report" ]; then
     PORT="${PW_REPORT_PORT:-9323}"
     report_url="$(playwright_serve_url "${PORT}")"
 
-    echo ""
-    echo "[playwright] Open ${report_url}"
-    echo "[playwright] Stop with Ctrl-C."
-    echo ""
+    # Checked here because Playwright answers a taken port with a node stack trace.
+    if (exec 3<>"/dev/tcp/127.0.0.1/${PORT}") 2>/dev/null; then
+        exec 3>&- 3<&-
+        echo "[playwright] Port ${PORT} is already taken, so the report cannot be served."
+        echo "[playwright] Stop what is holding it, or set PW_REPORT_PORT in"
+        echo "[playwright] web_environment to a port your config.*.yaml exposes."
+        exit 1
+    fi
 
-    exec > >(playwright_reachable_url "${PORT}" "${report_url}") 2>&1
-    exec npx playwright show-report --host 0.0.0.0 --port "${PORT}" "${PW_ARGS[@]:1}"
+    # Playwright's own line is the announcement, because it appears only when the
+    # server is serving, which nothing here can know before starting it.
+    echo ""
+    npx playwright show-report --host 0.0.0.0 --port "${PORT}" "${PW_ARGS[@]:1}" \
+        > >(playwright_reachable_url "${PORT}" "${report_url}") 2>&1 <&0 &
+    report=$!
+    trap 'kill -TERM "${report}" 2>/dev/null' INT TERM
+    wait "${report}"
+    status=$?
+
+    # Only when the report is what is missing: another failure has nothing to do
+    # with the reporter.
+    if [ "${status}" -ne 0 ] && [ ! -d playwright-report ]; then
+        echo ""
+        echo "[playwright] Reports come from Playwright's html reporter. Either run:"
+        echo "[playwright]   ddev playwright test --reporter=html"
+        echo "[playwright] or set one in playwright.config.ts, which the toolkit does"
+        echo "[playwright] by default:"
+        echo "[playwright]   reporter: [['list'], ['html', { open: 'never' }]]"
+    fi
+
+    exit "${status}"
 fi
 
 # Other subcommands must not boot TYPO3.
@@ -206,13 +230,13 @@ fi
 
 playwright_prepare_template "${DDEV_APPROOT:-/var/www/html}" || exit 1
 
-# Not exec'd, because our closing hint has to come after Playwright's own, which
-# names `npx playwright show-report` and binds to container loopback. Outliving the
-# run costs signal forwarding by hand, and a stdin an async command would lose.
+# Not exec'd: our closing hint has to come after the run, which also costs signal
+# forwarding by hand. Stdin is left off the terminal on purpose — Playwright's own
+# hint names `npx playwright show-report` and prints only for a TTY.
 if [ "${PW_ARGS[0]:-}" = "approve" ]; then
-    node "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-approve.mjs" "${PW_APPROVE_ARGS[@]}" <&0 &
+    node "${PW_ADDON_CONFIG_DIR:-/mnt/ddev_config}/playwright-approve.mjs" "${PW_APPROVE_ARGS[@]}" &
 else
-    npx playwright "${PW_ARGS[@]}" <&0 &
+    npx playwright "${PW_ARGS[@]}" &
 fi
 run=$!
 trap 'kill -TERM "${run}" 2>/dev/null' INT TERM
@@ -220,7 +244,9 @@ wait "${run}"
 status=$?
 
 if [ -d playwright-report ]; then
-    echo ""
+    # The list reporter's last spinner tick can land after its summary, leaving the
+    # cursor on that line. Terminal only: in a log the escape would be the mess.
+    [ -t 1 ] && printf '\r\033[K'
     echo "[playwright] Open the report with:"
     echo ""
     echo "  ddev playwright show-report"

@@ -31,8 +31,8 @@ playwright_serve_url() {
     printf '%s://%s:%s' "${scheme}" "${url}" "${port}"
 }
 
-# Playwright's viewers announce their bind address, 0.0.0.0 in the container. That
-# line is the server's own and the last on screen, so the stream has to be rewritten.
+# Playwright's viewers announce the 0.0.0.0 they bound to, which no browser on the
+# host can open. The text is the server's own, so the stream is where it changes.
 # Read and print rather than `sed -u`: the line must appear while the server runs,
 # and -u is GNU, which the hermetic tests would lose on macOS.
 playwright_reachable_url() {

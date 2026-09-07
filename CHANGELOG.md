@@ -18,6 +18,13 @@ the package a change belongs to.
   writes none. A project that sets `reporter` itself keeps what it sets, and nothing
   opens a browser, since the run happens in a container.
 
+- **ddev-typo3-playwright-toolkit** — a test run shows one closing hint, not two.
+  Playwright's own names `npx playwright show-report`, which reaches nothing from
+  your host, and it prints only when stdin is a terminal, so the run no longer gets
+  one. `ddev playwright show-report` answers a taken port with the port number and
+  `PW_REPORT_PORT` instead of a node stack trace, and explains the html reporter
+  only when the report is what is missing.
+
 - **ddev-typo3-playwright-toolkit** — every URL on screen is now one your browser can
   open. Playwright announces the address it bound to, which is `0.0.0.0` inside the
   container, so `ddev playwright ui`, `show-report` and `trace` rewrite that line to
