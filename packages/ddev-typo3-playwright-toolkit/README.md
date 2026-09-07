@@ -307,15 +307,15 @@ Viewing a trace runs no tests or builds. Stop the viewer with Ctrl-C.
 |---|---|
 | `ddev playwright` | Runs `npx playwright` with the arguments you pass |
 | `ddev playwright approve [filter]` | Re-runs selected tests and updates their snapshots; defaults to previous failures |
-| `ddev playwright trace [file]` | Serves a saved trace in Playwright's viewer; defaults to the newest trace |
-| `ddev playwright setup` | Sets this project up for Playwright, or checks that a setup is complete |
+| `ddev playwright clean` | Drops the test databases and state a stopped run left behind |
 | `ddev playwright doctor` | Starts a browser and builds a test database to prove a run would work |
 | `ddev playwright inspect` | Prints links that open a kept test database in the backend |
 | `ddev playwright prepare` | Builds the template database on its own; `--force` rebuilds one that is still up to date |
 | `ddev playwright replay` | Replays every scenario's content into one browsable database |
-| `ddev playwright clean` | Drops the test databases and state a stopped run left behind |
-| `ddev playwright ui` | Serves Playwright UI mode from the web container |
+| `ddev playwright setup` | Sets this project up for Playwright, or checks that a setup is complete |
 | `ddev playwright show-report` | Playwright's own report, served on a port your browser can reach |
+| `ddev playwright trace [file]` | Serves a saved trace in Playwright's viewer; defaults to the newest trace |
+| `ddev playwright ui` | Serves Playwright UI mode from the web container |
 
 ### Flags
 
