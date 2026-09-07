@@ -20,6 +20,11 @@ final class RecordEditDiagnostics implements MiddlewareInterface
      */
     private const EDIT_PATH = '/record/edit';
 
+    /**
+     * @var int
+     */
+    private const HEADER_BUDGET = 2000;
+
     public function __construct(
         private readonly TestApiSecret $secret,
         private readonly ConnectionPool $connectionPool,
@@ -43,10 +48,67 @@ final class RecordEditDiagnostics implements MiddlewareInterface
             return $handler->handle($request);
         }
 
+        // Refusing after the save would leave a record to clean up, with a batch on it.
+        $refused = UnknownColumns::check($this->datamap($request), $GLOBALS['TCA'] ?? []);
+        if ([] !== $refused) {
+            // The body carries all of them, the header only what fits.
+            return TestApi::error(implode(' ', array_column($refused, 'message')), 422)
+                ->withHeader(RecordDiagnostics::HEADER, $this->envelope($refused));
+        }
+
         $before = $this->lastLogUid();
         $response = $handler->handle($request);
 
         return $this->withDiagnostics($this->withSavedRecord($response, $before), $before);
+    }
+
+    /**
+     * @return array<string, array<string, array<string, mixed>>>
+     */
+    private function datamap(ServerRequestInterface $request): array
+    {
+        $body = $request->getParsedBody();
+        if (!is_array($body) || !is_array($body['data'] ?? null)) {
+            return [];
+        }
+
+        $datamap = [];
+        foreach ($body['data'] as $table => $records) {
+            if (!is_string($table) || !is_array($records)) {
+                continue;
+            }
+
+            foreach ($records as $identifier => $record) {
+                if (!is_array($record)) {
+                    continue;
+                }
+
+                foreach ($record as $column => $value) {
+                    $datamap[$table][(string) $identifier][(string) $column] = $value;
+                }
+            }
+        }
+
+        return $datamap;
+    }
+
+    /**
+     * @param list<array{table: string, message: string}> $entries
+     */
+    private function envelope(array $entries): string
+    {
+        $count = \count($entries);
+
+        while (\count($entries) > 1) {
+            $encoded = (string) json_encode(['errors' => $entries, 'count' => $count]);
+            if (\strlen($encoded) <= self::HEADER_BUDGET) {
+                return $encoded;
+            }
+
+            array_pop($entries);
+        }
+
+        return (string) json_encode(['errors' => $entries, 'count' => $count]);
     }
 
     private function lastLogUid(): int

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Http;
 
 use PHPUnit\Framework\Attributes\Test;
+use Plan2net\PlaywrightToolkit\Http\RecordDiagnostics;
 use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
 use Plan2net\PlaywrightToolkit\Http\SavedRecord;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
@@ -120,6 +121,111 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
         self::assertSame(ContractFixture::read('saved-record-header'), $this->savedRecord($response));
     }
 
+    #[Test]
+    public function refusesASaveWhoseColumnTcaDoesNotKnow(): void
+    {
+        $response = $this->save(
+            '/typo3/record/edit?edit%5Btt_content%5D%5BNEW1%5D=new',
+            null,
+            ['tt_content' => ['NEW1' => ['bodytxt' => 'a value']]]
+        );
+
+        self::assertSame(422, $response->getStatusCode());
+    }
+
+    #[Test]
+    public function refusesBeforeTheHandlerRuns(): void
+    {
+        $this->saveWhileTypo3Writes(
+            '/typo3/record/edit?edit%5Btt_content%5D%5BNEW1%5D=new',
+            ['tt_content'],
+            ['tt_content' => ['NEW1' => ['bodytxt' => 'a value']]]
+        );
+
+        self::assertSame(0, $this->countLogRows());
+    }
+
+    #[Test]
+    public function putsTheRefusalIntoTheSameHeaderADataHandlerRefusalUses(): void
+    {
+        $response = $this->save(
+            '/typo3/record/edit?edit%5Btt_content%5D%5BNEW1%5D=new',
+            null,
+            ['tt_content' => ['NEW1' => ['bodytxt' => 'a value']]]
+        );
+
+        self::assertSame(
+            ['errors' => [[
+                'table' => 'tt_content',
+                'message' => 'Unknown column "bodytxt" on tt_content. TCA has no such column, '
+                    . 'so DataHandler would drop it and save the record without it. '
+                    . 'Did you mean "bodytext"?',
+            ]], 'count' => 1],
+            $this->diagnostics($response)
+        );
+    }
+
+    #[Test]
+    public function answersExactlyWhatTheUnknownColumnFixtureHolds(): void
+    {
+        $response = $this->save(
+            '/typo3/record/edit?edit%5Btt_content%5D%5BNEW1%5D=new',
+            null,
+            ['tt_content' => ['NEW1' => ['bodytxt' => 'a value']]]
+        );
+
+        self::assertSame(
+            ContractFixture::read('record-diagnostics-unknown-column'),
+            $this->diagnostics($response)
+        );
+    }
+
+    // A header past the webserver's buffer answers 502 instead of the 422.
+    #[Test]
+    public function keepsTheHeaderSmallEnoughForAWebserverToPassOn(): void
+    {
+        $record = [];
+        foreach (range(1, 40) as $index) {
+            $record['no_such_column_' . $index] = 'a value';
+        }
+
+        $response = $this->save(
+            '/typo3/record/edit?edit%5Btt_content%5D%5BNEW1%5D=new',
+            null,
+            ['tt_content' => ['NEW1' => $record]]
+        );
+
+        $diagnostics = $this->diagnostics($response);
+        self::assertLessThanOrEqual(2000, strlen($response->getHeaderLine(RecordDiagnostics::HEADER)));
+        self::assertSame(40, $diagnostics['count']);
+        self::assertLessThan(40, count((array) $diagnostics['errors']));
+    }
+
+    #[Test]
+    public function letsASaveWithKnownColumnsThrough(): void
+    {
+        $response = $this->save(
+            '/typo3/record/edit?edit%5Btt_content%5D%5B1%5D=edit',
+            null,
+            ['tt_content' => ['NEW1' => ['header' => 'A headline', 'bodytext' => '<p>Text</p>']]]
+        );
+
+        self::assertSame(302, $response->getStatusCode());
+        self::assertFalse($response->hasHeader(RecordDiagnostics::HEADER));
+    }
+
+    #[Test]
+    public function checksNothingWithoutTheSecret(): void
+    {
+        $response = $this->save(
+            '/typo3/record/edit?edit%5Btt_content%5D%5BNEW1%5D=new',
+            'wrong-secret',
+            ['tt_content' => ['NEW1' => ['bodytxt' => 'a value']]]
+        );
+
+        self::assertSame(302, $response->getStatusCode());
+    }
+
     private function givenPage(string $slug): void
     {
         $this->getConnectionPool()->getConnectionForTable('pages')->insert('pages', [
@@ -130,10 +236,17 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
         ]);
     }
 
-    private function save(string $location, ?string $secret = null): ResponseInterface
+    /**
+     * @param array<string, array<string, array<string, mixed>>>|null $data
+     */
+    private function save(string $location, ?string $secret = null, ?array $data = null): ResponseInterface
     {
         $request = (new ServerRequest('https://testing.test/typo3/record/edit', 'POST'))
             ->withHeader(TestApiSecret::HEADER, $secret ?? $this->secret);
+
+        if (null !== $data) {
+            $request = $request->withParsedBody(['data' => $data]);
+        }
 
         $handler = new class($location) implements RequestHandlerInterface {
             public function __construct(private readonly string $location)
@@ -188,12 +301,17 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
     }
 
     /**
-     * @param list<string> $tables one write log row per entry
+     * @param list<string>                                            $tables one write log row per entry
+     * @param array<string, array<string, array<string, mixed>>>|null $data
      */
-    private function saveWhileTypo3Writes(string $location, array $tables): ResponseInterface
+    private function saveWhileTypo3Writes(string $location, array $tables, ?array $data = null): ResponseInterface
     {
         $request = (new ServerRequest('https://testing.test/typo3/record/edit', 'POST'))
             ->withHeader(TestApiSecret::HEADER, $this->secret);
+
+        if (null !== $data) {
+            $request = $request->withParsedBody(['data' => $data]);
+        }
 
         $connection = $this->getConnectionPool()->getConnectionForTable('sys_log');
         $handler = new class($location, $connection, $tables) implements RequestHandlerInterface {
@@ -231,6 +349,13 @@ final class RecordEditDiagnosticsTest extends FunctionalTestCase
         };
 
         return $this->get(RecordEditDiagnostics::class)->process($request, $handler);
+    }
+
+    private function countLogRows(): int
+    {
+        return (int) $this->getConnectionPool()
+            ->getConnectionForTable('sys_log')
+            ->count('uid', 'sys_log', []);
     }
 
     /**

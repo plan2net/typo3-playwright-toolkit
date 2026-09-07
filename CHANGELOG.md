@@ -42,6 +42,13 @@ the package a change belongs to.
 
 ### Added
 
+- **plan2net/playwright-toolkit**, **@plan2net/typo3-playwright-toolkit** — a save whose
+  column TCA does not know now fails at the builder line that saved it, naming the column
+  and the closest column that exists. DataHandler drops such a field and logs nothing, so
+  a typo in `withField()` cost a test its content and, on a first run, wrote a screenshot
+  baseline without it. The check runs before the record is written, and only for a request
+  carrying the toolkit secret, so an editor saving a form is unaffected.
+
 - **@plan2net/typo3-playwright-toolkit**, **ddev-typo3-playwright-toolkit** —
   `ddev playwright clean` drops the test databases and run state a stopped run left
   behind, which teardown otherwise reclaims only after a day. A run that is still

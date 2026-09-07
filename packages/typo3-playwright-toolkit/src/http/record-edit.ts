@@ -86,6 +86,10 @@ export async function saveRecord(
     })
 
     const headers = response.headers()
+
+    // A refusal carries no Location, so the redirect check would win over it.
+    refuseWhatTypo3Rejected(headers, record.table)
+
     const location = redirectTarget(response.status(), headers)
     if (undefined === location) {
         throw new Error(
@@ -94,8 +98,6 @@ export async function saveRecord(
                 `${(await response.text()).slice(0, 300)}`,
         )
     }
-
-    refuseWhatTypo3Rejected(headers, record.table)
 
     const uids = uidsFrom(location, record.table)
     if (0 === uids.length) {
@@ -160,13 +162,13 @@ function refuseWhatTypo3Rejected(headers: Record<string, string>, table: string)
         errors: Array<{ message: string; table: string }>
         count: number
     }
-    const first = errors[0]
-    const more = count > 1 ? `\n(and ${count - 1} more, see /typo3/test-api/errors)` : ''
+    const listed = errors
+        .map((error) => `  table:   ${error.table}\n  message: ${error.message}`)
+        .join('\n')
+    const more = count > errors.length ? `\n(and ${count - errors.length} more)` : ''
 
     throw new Error(
-        `[typo3-playwright-toolkit] TYPO3 refused a record while saving ${table}.\n` +
-            `  table:   ${first.table}\n` +
-            `  message: ${first.message}${more}`,
+        `[typo3-playwright-toolkit] TYPO3 refused a record while saving ${table}.\n${listed}${more}`,
     )
 }
 

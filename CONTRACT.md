@@ -156,9 +156,15 @@ find out later:
 X-Playwright-Record-Diagnostics: {"errors":[{"message":"…","table":"tt_content"}],"count":1}
 ```
 
-It carries the first refusal only, plus how many there were; the rest are in the errors
-endpoint below. It is absent when the save was clean, and the two headers are separate
-because one says what was written and the other says what was not.
+It is absent when the save was clean, and the two headers are separate because one says
+what was written and the other says what was not.
+
+The same header carries a refusal the middleware makes **before** DataHandler runs: a
+posted column that TCA has no column for would be dropped in silence, so the request is
+answered `422` with no `Location`, and the body holds every message. `count` is the
+number of refusals; `errors` holds as many as fit in a header a webserver will pass on,
+so it can hold fewer. A caller with a `count` larger than that reads the rest from the
+body, or from the errors endpoint below for a DataHandler refusal, which is logged.
 
 `POST /typo3/test-api/session` returns the session cookie and the tokens:
 

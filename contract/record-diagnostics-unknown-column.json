@@ -1,0 +1,10 @@
+{
+    "_comment": "The exact X-Playwright-Record-Diagnostics envelope a record/edit save answers with when a posted column is not in TCA, alongside status 422 and no Location. The extension asserts its real header matches this; the toolkit asserts its client turns it into the thrown message. Neither side may change it alone. Entries are dropped to keep the header inside a webserver's buffer, so count can exceed the number listed.",
+    "errors": [
+        {
+            "table": "tt_content",
+            "message": "Unknown column \"bodytxt\" on tt_content. TCA has no such column, so DataHandler would drop it and save the record without it. Did you mean \"bodytext\"?"
+        }
+    ],
+    "count": 1
+}

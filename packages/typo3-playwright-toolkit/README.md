@@ -204,7 +204,9 @@ is counted, not printed again. A failing setup shows the same list next to its o
 error.
 
 If TYPO3 refuses a record while a builder saves it, the builder stops at that line,
-so the failure points at the save and not at a later assertion.
+so the failure points at the save and not at a later assertion. A `withField()` column
+that TCA does not have fails there too, naming the closest column that exists: TYPO3
+would drop such a field without saying so, leaving the test without its content.
 
 <picture>
   <source media="(max-width: 700px)" srcset="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/scenario-fan-out-narrow.svg">

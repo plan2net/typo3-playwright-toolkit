@@ -229,6 +229,78 @@ describe('saveRecord', () => {
         ).rejects.toThrow(/sys_file_reference[\s\S]*not allowed[\s\S]*1 more/)
     })
 
+    it('fails with what the site refused when it answered 422 and no redirect', async () => {
+        const { poster } = fakePoster({
+            status: 422,
+            refused: {
+                errors: [
+                    {
+                        message: 'Unknown column "bodytxt" on tt_content. TCA has no such column.',
+                        table: 'tt_content',
+                    },
+                ],
+                count: 1,
+            },
+        })
+
+        await expect(
+            saveRecord(poster, context, {
+                table: 'tt_content',
+                identifier: 'NEW1',
+                target: 1,
+                data: { tt_content: { NEW1: { bodytxt: 'a value' } } },
+            }),
+        ).rejects.toThrow(/bodytxt/)
+    })
+
+    it('names the column and the suggestion out of the envelope the extension answers with', async () => {
+        const fixturePath = path.resolve(
+            path.dirname(fileURLToPath(import.meta.url)),
+            '../../../../../contract/record-diagnostics-unknown-column.json',
+        )
+        const envelope = JSON.parse(fs.readFileSync(fixturePath, 'utf-8')) as Record<string, unknown>
+        delete envelope._comment
+
+        const { poster } = fakePoster({
+            status: 422,
+            refused: envelope as unknown as {
+                errors: Array<{ message: string; table: string }>
+                count: number
+            },
+        })
+
+        await expect(
+            saveRecord(poster, context, {
+                table: 'tt_content',
+                identifier: 'NEW1',
+                target: 1,
+                data: { tt_content: { NEW1: { bodytxt: 'a value' } } },
+            }),
+        ).rejects.toThrow(/bodytxt[\s\S]*bodytext/)
+    })
+
+    it('prints every refusal the site listed, not only the first', async () => {
+        const { poster } = fakePoster({
+            status: 422,
+            refused: {
+                errors: [
+                    { message: 'Unknown column "bodytxt" on tt_content.', table: 'tt_content' },
+                    { message: 'Unknown column "headr" on tt_content.', table: 'tt_content' },
+                ],
+                count: 2,
+            },
+        })
+
+        await expect(
+            saveRecord(poster, context, {
+                table: 'tt_content',
+                identifier: 'NEW1',
+                target: 1,
+                data: { tt_content: { NEW1: { bodytxt: 'a', headr: 'b' } } },
+            }),
+        ).rejects.toThrow(/bodytxt[\s\S]*headr/)
+    })
+
     it('posts to the backend edit route the browser posts to', async () => {
         const { poster, posted } = fakePoster()
 
