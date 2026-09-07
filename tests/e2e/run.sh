@@ -24,6 +24,16 @@ cleanup_project() {
     ddev delete -Oy "${PROJECT}" >/dev/null 2>&1 || true
 }
 
+# `psql | grep -q` cannot be used under pipefail: grep exits on the first match, psql
+# dies of SIGPIPE, and the pipeline reports 141 — so a check that found databases
+# reads as one that found none.
+test_databases() {
+    local list
+    list="$(ddev exec --service db-test psql -U db -lqt)"
+
+    grep -oE 'db[A-Z0-9]{16}' <<<"${list}" || true
+}
+
 # A killed run leaves the project registered and its containers up.
 cleanup_project
 # Everything below is generated. `ddev delete` does not touch the project
@@ -120,9 +130,32 @@ fi
 
 # The only check anywhere that globalTeardown drops what it reports dropping.
 say 'checking that no test database survived'
-if ddev exec --service db-test psql -U db -lqt | grep -qE 'db[A-Z0-9]{16}'; then
+if [ -n "$(test_databases)" ]; then
     echo "[e2e] teardown left test databases behind:" >&2
-    ddev exec --service db-test psql -U db -lqt | grep -oE 'db[A-Z0-9]{16}' >&2
+    test_databases >&2
+    exit 1
+fi
+
+say 'checking that the doctor passes against the real site'
+ddev playwright doctor
+
+# clean has nothing to do after a run that cleaned up, so one scenario is kept. Its
+# state is seconds old and clean spares a run that recent, hence the backdating, in
+# the container because touch there understands "1 hour ago".
+say 'keeping one scenario, then cleaning up after it'
+ddev playwright test renders-content --no-cleanup --reporter=list
+ddev exec 'find .test-state/runs -mindepth 1 -maxdepth 2 -exec touch -d "1 hour ago" {} +'
+
+if [ -z "$(test_databases)" ]; then
+    echo "[e2e] nothing was kept, so the check below would pass without cleaning anything" >&2
+    exit 1
+fi
+
+ddev playwright clean
+
+if [ -n "$(test_databases)" ]; then
+    echo "[e2e] clean left test databases behind:" >&2
+    test_databases >&2
     exit 1
 fi
 
