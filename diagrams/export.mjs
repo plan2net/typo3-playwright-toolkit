@@ -20,6 +20,7 @@ const EXPORTS = {
     'scenario-fan-out': { '': 'wide', '-narrow': 'narrow' },
     'backend-save-path': { '': 'tablet', '-wide': 'wide', '-narrow': 'narrow' },
     'where-things-run': { '': 'wide', '-narrow': 'narrow' },
+    'media-fixtures': { '': 'wide', '-narrow': 'narrow' },
 }
 
 function variant(source, name) {

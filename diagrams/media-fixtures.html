@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where a media fixture lives</title>
+<style>
+@font-face { font-family:'Open Sans'; font-style:normal; font-weight:400 800; font-display:swap; src:url(../website/fonts/open-sans.woff2) format('woff2'); }
+@font-face { font-family:'Source Code Pro'; font-style:normal; font-weight:400 600; font-display:swap; src:url(../website/fonts/source-code-pro.woff2) format('woff2'); }
+
+:root { --paper:#FFFFFF; --ink:#1A1E24; --muted:#5B6570; --rule:rgba(26,30,36,0.12); }
+* { box-sizing:border-box; }
+body {
+    margin:0; padding:48px 32px; background:var(--paper); color:var(--ink);
+    font-family:'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+main { max-width:960px; margin:0 auto; }
+.eyebrow {
+    margin:0 0 8px; font-family:'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted);
+}
+h1 { margin:0 0 4px; font-size:28px; font-weight:800; letter-spacing:-0.01em; }
+.sub { margin:0 0 16px; font-size:15px; line-height:1.6; color:var(--muted); max-width:64ch; }
+svg { display:block; width:100%; height:auto; }
+/* Container query, not viewport: a wide window can still hand the diagram a narrow
+   column, and a viewport query would answer "wide" and shrink the drawing to fit. */
+.figure { container-type:inline-size; }
+.narrow { display:none; margin:0 auto; max-width:344px; }
+.wide { max-width:880px; margin:0 auto; }
+@container (max-width: 699px) {
+    .wide { display:none; }
+    .narrow { display:block; }
+}
+@media (max-width: 699px) { body { padding:32px 20px; } }
+footer {
+    margin-top:16px; padding-top:12px; border-top:1px solid var(--rule);
+    font-family:'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted);
+}
+</style>
+</head>
+<body>
+<main>
+    <p class="eyebrow">TYPO3 Playwright Toolkit</p>
+    <h1>Where a media fixture lives</h1>
+    <p class="sub">One folder you commit becomes three things, and they do not have the same lifetime. The rows travel with each test's database, the manifest turns a name back into a uid, and the files themselves are written once and read by every test.</p>
+
+<div class="figure">
+<svg class="wide" viewBox="0 0 880 504" role="img" aria-labelledby="mf-title mf-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="mf-title">Where a media fixture lives</title>
+<desc id="mf-desc">A folder of committed media files becomes three separate things when the test database template is prepared. The files are copied into a FAL storage and shared read-only by every test, which is where the browser loads them from. The sys_file and sys_file_metadata rows go into the template and are copied along with each test's own database. A name-to-uid manifest is written for the npm package, which reads it to turn a fixture name into a uid.</desc>
+
+<defs>
+    <marker id="mf-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#5B6570"/>
+    </marker>
+</defs>
+
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+
+<text x="40" y="48" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">COMMITTED</text>
+<text x="312" y="48" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">WRITTEN BY PREPARE</text>
+<text x="640" y="48" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">READ DURING THE RUN</text>
+
+<path d="M 248,216 H 276 Q 284,216 284,208 V 116 Q 284,108 292,108 H 304" fill="none" stroke="#5B6570" stroke-width="1.2" marker-end="url(#mf-arrow)"/>
+<line x1="248" y1="236" x2="304" y2="236" stroke="#5B6570" stroke-width="1.2" marker-end="url(#mf-arrow)"/>
+<path d="M 248,256 H 276 Q 284,256 284,264 V 356 Q 284,364 292,364 H 304" fill="none" stroke="#5B6570" stroke-width="1.2" marker-end="url(#mf-arrow)"/>
+
+<line x1="592" y1="108" x2="632" y2="108" stroke="#5B6570" stroke-width="1.2" marker-end="url(#mf-arrow)"/>
+<line x1="592" y1="236" x2="632" y2="236" stroke="#5B6570" stroke-width="1.2" marker-end="url(#mf-arrow)"/>
+<line x1="592" y1="364" x2="632" y2="364" stroke="#5B6570" stroke-width="1.2" marker-end="url(#mf-arrow)"/>
+
+<rect x="40" y="192" width="208" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="40" y="192" width="208" height="88" rx="6" fill="rgba(91,101,112,0.10)" stroke="#8A93A0" stroke-width="1"/>
+<text x="144" y="232" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">The folder you commit</text>
+<text x="144" y="254" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">files + media.json</text>
+
+<rect x="312" y="64" width="280" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="312" y="64" width="280" height="88" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<text x="452" y="104" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Files in a FAL storage</text>
+<text x="452" y="126" fill="#A05E00" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">fileadmin/playwright-media/</text>
+
+<rect x="312" y="192" width="280" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="312" y="192" width="280" height="88" rx="6" fill="rgba(26,30,36,0.05)" stroke="#8A93A0" stroke-width="1"/>
+<text x="452" y="232" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Rows in the template</text>
+<text x="452" y="254" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">sys_file, sys_file_metadata</text>
+
+<rect x="312" y="320" width="280" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="312" y="320" width="280" height="88" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="452" y="360" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">A name-to-uid map</text>
+<text x="452" y="382" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">var/playwright/media.json</text>
+
+<rect x="640" y="64" width="200" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="640" y="64" width="200" height="88" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="740" y="104" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">The browser</text>
+<text x="740" y="126" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">img src</text>
+
+<rect x="640" y="192" width="200" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="640" y="192" width="200" height="88" rx="6" fill="rgba(26,30,36,0.05)" stroke="#8A93A0" stroke-width="1"/>
+<text x="740" y="232" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Its own database</text>
+<text x="740" y="254" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">one per test file</text>
+
+<rect x="640" y="320" width="200" height="88" rx="6" fill="#FFFFFF"/>
+<rect x="640" y="320" width="200" height="88" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="740" y="360" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">The npm package</text>
+<text x="740" y="382" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">withFile('hero.png')</text>
+
+<line x1="40" y1="448" x2="840" y2="448" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
+<text x="40" y="476" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">LEGEND</text>
+
+<rect x="140" y="464" width="20" height="16" rx="2" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<text x="172" y="476" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">WRITTEN ONCE, READ BY EVERY TEST</text>
+
+<rect x="520" y="464" width="20" height="16" rx="2" fill="rgba(26,30,36,0.05)" stroke="#8A93A0" stroke-width="1"/>
+<text x="552" y="476" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">COPIED PER TEST FILE</text>
+</svg>
+
+<svg class="narrow" viewBox="20 0 344 696" role="img" aria-labelledby="mf-narrow-title mf-narrow-desc" xmlns="http://www.w3.org/2000/svg">
+<title id="mf-narrow-title">Where a media fixture lives</title>
+<desc id="mf-narrow-desc">A folder of committed media files becomes three separate things when the test database template is prepared. The files are copied into a FAL storage and shared read-only by every test, which is where the browser loads them from. The sys_file and sys_file_metadata rows go into the template and are copied along with each test's own database. A name-to-uid manifest is written for the npm package, which reads it to turn a fixture name into a uid.</desc>
+
+<defs>
+    <marker id="mfn-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+        <polygon points="0 0, 10 4, 0 8" fill="#5B6570"/>
+    </marker>
+</defs>
+
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+
+<line x1="192" y1="104" x2="192" y2="136" stroke="#5B6570" stroke-width="1.2" marker-end="url(#mfn-arrow)"/>
+<line x1="192" y1="240" x2="192" y2="256" stroke="#5B6570" stroke-width="1.2" marker-end="url(#mfn-arrow)"/>
+<line x1="192" y1="368" x2="192" y2="384" stroke="#5B6570" stroke-width="1.2" marker-end="url(#mfn-arrow)"/>
+<line x1="192" y1="496" x2="192" y2="512" stroke="#5B6570" stroke-width="1.2" marker-end="url(#mfn-arrow)"/>
+
+<rect x="40" y="48" width="304" height="56" rx="6" fill="#FFFFFF"/>
+<rect x="40" y="48" width="304" height="56" rx="6" fill="rgba(91,101,112,0.10)" stroke="#8A93A0" stroke-width="1"/>
+<text x="192" y="82" fill="#1A1E24" font-size="16" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">The folder you commit</text>
+
+<rect x="40" y="136" width="304" height="416" rx="8" fill="rgba(26,30,36,0.02)" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
+<text x="64" y="160" fill="rgba(26,30,36,0.62)" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.14em">PREPARE WRITES THREE THINGS</text>
+
+<rect x="64" y="176" width="256" height="64" rx="6" fill="#FFFFFF"/>
+<rect x="64" y="176" width="256" height="64" rx="6" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<text x="192" y="205" fill="#1A1E24" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Files in a FAL storage</text>
+<text x="192" y="226" fill="#A05E00" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">shared by every test</text>
+
+<rect x="64" y="256" width="256" height="32" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="192" y="277" fill="#1A1E24" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">the browser loads them</text>
+
+<rect x="64" y="304" width="256" height="64" rx="6" fill="#FFFFFF"/>
+<rect x="64" y="304" width="256" height="64" rx="6" fill="rgba(26,30,36,0.05)" stroke="#8A93A0" stroke-width="1"/>
+<text x="192" y="333" fill="#1A1E24" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">Rows in the template</text>
+<text x="192" y="354" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">sys_file + metadata</text>
+
+<rect x="64" y="384" width="256" height="32" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="192" y="405" fill="#1A1E24" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">copied per test file</text>
+
+<rect x="64" y="432" width="256" height="64" rx="6" fill="#FFFFFF"/>
+<rect x="64" y="432" width="256" height="64" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="192" y="461" fill="#1A1E24" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" text-anchor="middle">A name-to-uid map</text>
+<text x="192" y="482" fill="#5B6570" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">var/playwright/media.json</text>
+
+<rect x="64" y="512" width="256" height="32" rx="6" fill="#ffffff" stroke="#1A1E24" stroke-width="1"/>
+<text x="192" y="533" fill="#1A1E24" font-size="13" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle">withFile('hero.png')</text>
+
+<line x1="40" y1="600" x2="344" y2="600" stroke="rgba(26,30,36,0.10)" stroke-width="0.8"/>
+
+<rect x="40" y="616" width="20" height="16" rx="2" fill="rgba(255,135,0,0.10)" stroke="#ED6D05" stroke-width="1.2"/>
+<text x="72" y="628" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">WRITTEN ONCE</text>
+
+<rect x="40" y="660" width="20" height="16" rx="2" fill="rgba(26,30,36,0.05)" stroke="#8A93A0" stroke-width="1"/>
+<text x="72" y="672" fill="#5B6570" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" letter-spacing="0.04em">COPIED PER TEST FILE</text>
+</svg>
+</div>
+
+    <footer>plan2net &middot; typo3-playwright-toolkit</footer>
+</main>
+</body>
+</html>

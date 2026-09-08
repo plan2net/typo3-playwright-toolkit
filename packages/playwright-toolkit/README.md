@@ -298,6 +298,17 @@ The name is the path inside the folder, so subfolders are part of it. Change an 
 and the next prepare rebuilds the template; delete one from the published folder and
 it rebuilds too.
 
+<picture>
+  <source media="(max-width: 700px)" srcset="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/media-fixtures-narrow.svg">
+  <img width="880" src="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/media-fixtures.svg"
+       alt="A folder of committed media files becomes three separate things when the test database template is prepared. The files are copied into a FAL storage and shared read-only by every test, which is where the browser loads them from. The sys_file and sys_file_metadata rows go into the template and are copied along with each test's own database. A name-to-uid manifest is written for the npm package, which reads it to turn a fixture name into a uid.">
+</picture>
+
+The three differ in lifetime, which is worth knowing when a test surprises you: the
+rows travel with the test's database, the manifest is read once per worker, and the
+files themselves are written once and shared. Only the derivatives TYPO3 processes
+from them are per test.
+
 **Names have to survive FAL.** A storage rewrites the names it stores — spaces become
 underscores, accented characters are normalised, and a case-insensitive storage
 lowercases everything. Prepare refuses a fixture whose name would come out different,
