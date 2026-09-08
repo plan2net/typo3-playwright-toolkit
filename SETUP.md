@@ -266,6 +266,29 @@ test('renders what the builders wrote', async ({ page, state }) => {
 })
 ```
 
+### If your tests need images
+
+Add one setting and a folder of files. Nothing else in this guide changes, and the
+setup wizard reports media as "not configured" until you do:
+
+```php
+'mediaPath' => 'tests/playwright/fixtures/media',
+```
+
+```
+tests/playwright/fixtures/media/hero.png
+```
+
+`ddev playwright-prepare` indexes each file through TYPO3 and a test then names it:
+
+```ts
+.configure((content) => content.withHeader('Gallery').withFile('hero.png'))
+```
+
+Alternative texts, titles and YouTube references go in an optional `media.json` beside
+the files — see
+[Media fixtures](packages/playwright-toolkit/README.md#media-fixtures).
+
 ## 6. Run it
 
 ```bash

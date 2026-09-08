@@ -86,14 +86,14 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         return this
     }
 
-    withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
-        this.relations.withFileReference(column, fileUid, fields)
+    withFileReference(column: string, file: string | number, fields: ContentFields = {}): this {
+        this.relations.withFileReference(column, file, fields)
 
         return this
     }
 
-    withFileReferences(column: string, fileUids: number[], fields: ContentFields = {}): this {
-        this.relations.withFileReferences(column, fileUids, fields)
+    withFileReferences(column: string, files: (string | number)[], fields: ContentFields = {}): this {
+        this.relations.withFileReferences(column, files, fields)
 
         return this
     }

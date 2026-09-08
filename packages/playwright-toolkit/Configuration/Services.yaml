@@ -43,6 +43,13 @@ services:
         identifier: 'plan2net/playwright-toolkit/template-drift-guard'
         event: TYPO3\CMS\Core\Core\Event\BootCompletedEvent
 
+  Plan2net\PlaywrightToolkit\Media\MediaSeeder:
+    public: true
+
+  Plan2net\PlaywrightToolkit\Media\MediaManifest:
+    factory: ['Plan2net\PlaywrightToolkit\Media\MediaManifest', 'inVarPath']
+    public: true
+
   Plan2net\PlaywrightToolkit\SiteName:
     public: true
     tags:

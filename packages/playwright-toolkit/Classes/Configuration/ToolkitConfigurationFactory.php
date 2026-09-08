@@ -25,6 +25,8 @@ final class ToolkitConfigurationFactory
         'preseededSessionId' => 'playwright_test_session',
         'sessionUserId' => 1,
         'cleanupMinimumAgeMs' => 3600000,
+        'mediaPath' => '',
+        'mediaStorage' => '',
     ];
 
     public function __construct(
@@ -42,6 +44,8 @@ final class ToolkitConfigurationFactory
             preseededSessionId: (string) $this->value($configuration, 'preseededSessionId'),
             sessionUserId: (int) $this->value($configuration, 'sessionUserId'),
             cleanupMinimumAgeMs: (int) $this->value($configuration, 'cleanupMinimumAgeMs'),
+            mediaPath: (string) $this->value($configuration, 'mediaPath'),
+            mediaStorage: (string) $this->value($configuration, 'mediaStorage'),
         );
     }
 

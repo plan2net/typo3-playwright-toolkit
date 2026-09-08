@@ -17,6 +17,7 @@ use Plan2net\PlaywrightToolkit\Setup\Check\AdditionalConfiguration;
 use Plan2net\PlaywrightToolkit\Setup\Check\Addon;
 use Plan2net\PlaywrightToolkit\Setup\Check\BrowsersPath;
 use Plan2net\PlaywrightToolkit\Setup\Check\Fixtures;
+use Plan2net\PlaywrightToolkit\Setup\Check\Media;
 use Plan2net\PlaywrightToolkit\Setup\Check\NpmPackage;
 use Plan2net\PlaywrightToolkit\Setup\Check\PlaywrightConfig;
 use Plan2net\PlaywrightToolkit\Setup\Check\SpecFile;
@@ -154,12 +155,12 @@ final class SetupCommand extends Command
     }
 
     /**
-     * @param list<array{step: int, checked: string, result: Result}> $results
+     * @param list<array{key: string, checked: string, result: Result}> $results
      */
     private function write(SymfonyStyle $io, array $results, string $testDirectory, string $testingUrl): bool
     {
-        // Check 6 names files under the configured fixtures path, the others under the
-        // test directory. Writing them all to one place is how step 6 never closes.
+        // The fixtures check names files under the configured fixtures path, every
+        // other check under the test directory.
         $fixtures = self::fixturesPath(
             Environment::getProjectPath(),
             $this->configurationFactory->create()
@@ -167,7 +168,9 @@ final class SetupCommand extends Command
         $bases = [];
         foreach ($results as $row) {
             foreach ($row['result']->missingFiles as $file) {
-                $bases[$file] = 6 === $row['step'] ? $fixtures : Environment::getProjectPath() . '/' . $testDirectory;
+                $bases[$file] = 'fixtures' === $row['key']
+                    ? $fixtures
+                    : Environment::getProjectPath() . '/' . $testDirectory;
             }
         }
         if ([] === $bases) {
@@ -202,12 +205,15 @@ final class SetupCommand extends Command
     }
 
     /**
-     * @param list<array{step: int, checked: string, result: Result}> $results
+     * @param list<array{key: string, checked: string, result: Result}> $results
      */
     private function buildTemplate(SymfonyStyle $io, array $results, bool $interactive): bool
     {
         // It needs the database service and the fixtures, and nothing else.
-        if ($this->passes($results, 9) || !$this->passes($results, 2) || !$this->passes($results, 6)) {
+        if ($this->passes($results, 'template')
+            || !$this->passes($results, 'addon')
+            || !$this->passes($results, 'fixtures')
+        ) {
             return false;
         }
 
@@ -235,12 +241,12 @@ final class SetupCommand extends Command
     }
 
     /**
-     * @param list<array{step: int, checked: string, result: Result}> $results
+     * @param list<array{key: string, checked: string, result: Result}> $results
      */
-    private function passes(array $results, int $step): bool
+    private function passes(array $results, string $key): bool
     {
         foreach ($results as $row) {
-            if ($step === $row['step']) {
+            if ($key === $row['key']) {
                 return $row['result']->passed;
             }
         }
@@ -249,13 +255,13 @@ final class SetupCommand extends Command
     }
 
     /**
-     * @param list<array{step: int, checked: string, result: Result}> $results
+     * @param list<array{key: string, checked: string, result: Result}> $results
      */
     private function print(SymfonyStyle $io, array $results, string $testDirectory, string $testingUrl): bool
     {
-        $failed = static function (array $results, int $step): bool {
+        $failed = static function (array $results, string $key): bool {
             foreach ($results as $row) {
-                if ($step === $row['step']) {
+                if ($key === $row['key']) {
                     return !$row['result']->passed;
                 }
             }
@@ -264,7 +270,7 @@ final class SetupCommand extends Command
         };
 
         foreach ($results as $row) {
-            if (1 === $row['step'] && str_contains($row['result']->detail, TestingHost::WRONG_CONTEXT)) {
+            if ('testing-host' === $row['key'] && str_contains($row['result']->detail, TestingHost::WRONG_CONTEXT)) {
                 $io->section('Your web server decides the context');
                 $io->writeln(WebserverHint::forWebserver(
                     (string) getenv('DDEV_WEBSERVER_TYPE'),
@@ -273,15 +279,17 @@ final class SetupCommand extends Command
             }
         }
 
-        if ($failed($results, 5)) {
+        if ($failed($results, 'additional-configuration')) {
             $io->section('Add this to ' . GeneralUtility::makeInstance(ConfigurationManager::class)
                 ->getAdditionalConfigurationFileLocation());
             $io->writeln(self::ADDITIONAL_CONFIGURATION_SNIPPET);
         }
 
         $testDirectoryConfigured = getenv('PW_TEST_DIR') === $testDirectory;
-        $needsHostCommands = $failed($results, 1) || $failed($results, 2) || $failed($results, 3)
-            || $failed($results, 4)
+        $needsHostCommands = $failed($results, 'testing-host')
+            || $failed($results, 'addon')
+            || $failed($results, 'npm-package')
+            || $failed($results, 'browsers')
             || (!$testDirectoryConfigured && Answers::DEFAULT_TEST_DIRECTORY !== $testDirectory);
         if (!$needsHostCommands) {
             return false;
@@ -289,9 +297,9 @@ final class SetupCommand extends Command
 
         $block = HostCommands::block(
             DdevHostname::flagFor(Environment::getProjectPath(), $testingUrl, (string) getenv('DDEV_TLD')),
-            $failed($results, 4),
+            $failed($results, 'browsers'),
             $testDirectory,
-            $failed($results, 3),
+            $failed($results, 'npm-package'),
             $this->installedVersion ?? InstalledVersions::getPrettyVersion('plan2net/playwright-toolkit'),
             is_file(Environment::getProjectPath() . '/' . $testDirectory . '/package.json'),
             !is_file($this->addonCommand ?? self::ADDON_COMMAND),
@@ -308,7 +316,7 @@ final class SetupCommand extends Command
     }
 
     /**
-     * @return list<array{step: int, checked: string, result: Result}>
+     * @return list<array{key: string, checked: string, result: Result}>
      */
     private function runChecks(string $testDirectory, string $testingUrl, string $secret): array
     {
@@ -320,12 +328,12 @@ final class SetupCommand extends Command
 
         return [
             [
-                'step' => 1,
+                'key' => 'testing-host',
                 'checked' => 'the testing hostname, in a Testing context',
                 'result' => (new TestingHost($testingUrl, $secret, $this->client))->run(),
             ],
             [
-                'step' => 2,
+                'key' => 'addon',
                 'checked' => 'the DDEV add-on and its database service',
                 'result' => (new Addon(
                     $this->addonCommand ?? self::ADDON_COMMAND,
@@ -336,12 +344,12 @@ final class SetupCommand extends Command
                 ))->run(),
             ],
             [
-                'step' => 3,
+                'key' => 'npm-package',
                 'checked' => 'the npm package beside your tests',
                 'result' => (new NpmPackage($directory, $version, $runsElsewhere))->run(),
             ],
             [
-                'step' => 4,
+                'key' => 'browsers',
                 'checked' => 'the browsers',
                 'result' => (new BrowsersPath(
                     getenv('PLAYWRIGHT_BROWSERS_PATH') ?: null,
@@ -351,7 +359,7 @@ final class SetupCommand extends Command
                 ))->run(),
             ],
             [
-                'step' => 5,
+                'key' => 'additional-configuration',
                 'checked' => 'the additional configuration file',
                 'result' => (new AdditionalConfiguration(
                     GeneralUtility::makeInstance(ConfigurationManager::class)
@@ -359,7 +367,7 @@ final class SetupCommand extends Command
                 ))->run(),
             ],
             [
-                'step' => 6,
+                'key' => 'fixtures',
                 'checked' => 'the fixtures and the site root page',
                 'result' => (new Fixtures(
                     self::fixturesPath($projectPath, $configuration),
@@ -368,17 +376,25 @@ final class SetupCommand extends Command
                 ))->run(),
             ],
             [
-                'step' => 7,
+                'key' => 'media',
+                'checked' => 'the media fixtures',
+                'result' => (new Media(
+                    $configuration->mediaPath,
+                    self::mediaDirectory($projectPath, $configuration)
+                ))->run(),
+            ],
+            [
+                'key' => 'playwright-config',
                 'checked' => 'the Playwright configuration',
                 'result' => (new PlaywrightConfig($directory, $testingUrl))->run(),
             ],
             [
-                'step' => 8,
+                'key' => 'spec-file',
                 'checked' => 'your first scenario',
                 'result' => (new SpecFile($directory))->run(),
             ],
             [
-                'step' => 9,
+                'key' => 'template',
                 'checked' => 'the test database template',
                 'result' => $this->templateResult($configuration),
             ],
@@ -427,6 +443,13 @@ final class SetupCommand extends Command
         return '' === $configured ? '' : $projectPath . '/' . $configured;
     }
 
+    private static function mediaDirectory(string $projectPath, ToolkitConfiguration $configuration): string
+    {
+        $configured = ltrim($configuration->mediaPath, '/');
+
+        return '' === $configured ? '' : $projectPath . '/' . $configured;
+    }
+
     private function rootPageId(): ?int
     {
         $sites = $this->siteFinder->getAllSites();
@@ -436,7 +459,7 @@ final class SetupCommand extends Command
     }
 
     /**
-     * @param list<array{step: int, checked: string, result: Result}> $results
+     * @param list<array{key: string, checked: string, result: Result}> $results
      */
     private function report(SymfonyStyle $io, array $results): void
     {
@@ -446,13 +469,13 @@ final class SetupCommand extends Command
         // A detail can be a long path or a cURL message; wrap rather than run off the terminal.
         $table->setColumnMaxWidth(2, self::RESULT_WIDTH);
         $rows = [];
-        foreach ($results as $row) {
+        foreach ($results as $index => $row) {
             if ([] !== $rows) {
                 $rows[] = new TableSeparator();
             }
 
             $rows[] = [
-                (string) $row['step'],
+                (string) ($index + 1),
                 $row['checked'],
                 ($row['result']->passed ? 'ok, ' : 'no, ') . $row['result']->detail,
             ];
@@ -479,7 +502,7 @@ final class SetupCommand extends Command
     }
 
     /**
-     * @param list<array{step: int, checked: string, result: Result}> $results
+     * @param list<array{key: string, checked: string, result: Result}> $results
      */
     private function passed(array $results): bool
     {

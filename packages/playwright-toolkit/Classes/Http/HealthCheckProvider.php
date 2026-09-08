@@ -10,6 +10,7 @@ use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 use Plan2net\PlaywrightToolkit\Database\DatabaseName;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
+use Plan2net\PlaywrightToolkit\Media\MediaSources;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\TestContext;
 use Psr\Http\Message\ResponseInterface;
@@ -62,6 +63,7 @@ final class HealthCheckProvider implements MiddlewareInterface
             'context' => $this->checkTestingContext(),
             'database' => $this->checkDatabase($driver),
             'session' => $this->checkSessionCreation($configuration),
+            'media' => self::checkMedia($configuration),
         ];
 
         $ok = array_reduce($checks, static fn(bool $carry, array $check): bool => $carry && $check['ok'], true);
@@ -88,6 +90,33 @@ final class HealthCheckProvider implements MiddlewareInterface
     private function checkTestingContext(): array
     {
         return ['ok' => true, 'detail' => (string) Environment::getContext()];
+    }
+
+    /**
+     * @return array{ok: bool, detail: string}
+     */
+    private static function checkMedia(ToolkitConfiguration $configuration): array
+    {
+        if ('' === $configuration->mediaPath) {
+            return ['ok' => true, 'detail' => 'not configured'];
+        }
+
+        $directory = Environment::getProjectPath() . '/' . ltrim($configuration->mediaPath, '/');
+        if (!is_dir($directory)) {
+            return ['ok' => false, 'detail' => sprintf('%s does not exist', $directory)];
+        }
+
+        try {
+            $fixtures = \count(MediaSources::scan($directory));
+            $online = \count(MediaSources::onlineMedia($directory));
+        } catch (\Throwable $refusal) {
+            return ['ok' => false, 'detail' => $refusal->getMessage()];
+        }
+
+        return [
+            'ok' => true,
+            'detail' => sprintf('%d file(s) and %d online media in %s', $fixtures, $online, $directory),
+        ];
     }
 
     /**

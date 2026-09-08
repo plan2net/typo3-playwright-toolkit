@@ -390,5 +390,5 @@ jobs:
           PW_TEST_MYSQL_PASSWORD: db
         run: >-
           vendor/bin/phpunit -c phpunit.functional.xml.dist
-          --filter '(Postgres|Mysql)TestDatabaseDriverTest|TemplatePreparerMysqlTest|DatabaseInitializer(Postgres|Mysql)ProvisionTest'
+          --filter '(Postgres|Mysql)TestDatabaseDriverTest|TemplatePreparerMysqlTest|DatabaseInitializer(Postgres|Mysql)ProvisionTest|MediaSeederPostgresTest'
           --fail-on-skipped

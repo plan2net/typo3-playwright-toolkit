@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Database;
 
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfiguration;
+use Plan2net\PlaywrightToolkit\Media\MediaSources;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Schema\SqlReader;
 
@@ -35,8 +36,20 @@ final class SeedSources
                 $this->resolvedSchema->fingerprintSource($schemaStatements),
                 $fixtures,
                 SeededSession::hashedSessionId($configuration->preseededSessionId),
-                $configuration->sessionUserId
+                $configuration->sessionUserId,
+                self::mediaDigest($configuration)
             ),
+        );
+    }
+
+    public static function mediaDigest(ToolkitConfiguration $configuration): string
+    {
+        if ('' === $configuration->mediaPath) {
+            return '';
+        }
+
+        return MediaSources::digest(
+            Environment::getProjectPath() . '/' . ltrim($configuration->mediaPath, '/')
         );
     }
 

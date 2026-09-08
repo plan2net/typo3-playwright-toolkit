@@ -13,3 +13,9 @@ sessionUserId = 1
 
 # cat=playwright; type=int+; label=Youngest test database the cleanup sweep may reclaim, in milliseconds. A request can ask for older, never younger.
 cleanupMinimumAgeMs = 3600000
+
+# cat=playwright; type=string; label=Directory of committed media fixtures (relative to project root). Empty switches media seeding off.
+mediaPath =
+
+# cat=playwright; type=string; label=FAL storage and folder to seed the media into, as a combined identifier such as 1:/playwright-media/. Empty provisions a storage of its own.
+mediaStorage =

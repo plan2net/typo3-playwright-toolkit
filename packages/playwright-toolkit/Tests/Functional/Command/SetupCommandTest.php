@@ -267,8 +267,8 @@ final class SetupCommandTest extends FunctionalTestCase
         $tester = new CommandTester($this->command());
         $tester->execute([], ['interactive' => false]);
 
-        // One below the header, and one between every pair of the nine checks.
-        self::assertSame(9, substr_count($tester->getDisplay(), '├'));
+        // One below the header, and one between every pair of the ten checks.
+        self::assertSame(10, substr_count($tester->getDisplay(), '├'));
     }
 
     #[Test]
@@ -300,13 +300,14 @@ final class SetupCommandTest extends FunctionalTestCase
             'the browsers',
             'the additional configuration file',
             'the fixtures',
+            'the media fixtures',
             'the Playwright configuration',
             'your first scenario',
             'the test database template',
         ] as $checked) {
             self::assertStringContainsString($checked, $display);
         }
-        self::assertStringContainsString('of 9 checks', $display);
+        self::assertStringContainsString('of 10 checks', $display);
     }
 
     #[Test]
@@ -322,7 +323,7 @@ final class SetupCommandTest extends FunctionalTestCase
 
         self::assertFileExists($this->instancePath . '/tests/playwright/tsconfig.json');
         self::assertFileExists($this->instancePath . '/tests/playwright/tests/first.spec.ts');
-        self::assertSame(2, substr_count($display, 'of 9 checks'));
+        self::assertSame(2, substr_count($display, 'of 10 checks'));
     }
 
     #[Test]

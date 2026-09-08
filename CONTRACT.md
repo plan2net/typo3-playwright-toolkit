@@ -15,6 +15,7 @@ Read this before you change anything that touches a test ID.
 | Saved record header | `X-Playwright-Saved-Record` | npm `SAVED_RECORD_HEADER`, PHP `SavedRecord::HEADER` |
 | Refused record header | `X-Playwright-Record-Diagnostics` | npm `RECORD_DIAGNOSTICS_HEADER`, PHP `RecordDiagnostics::HEADER` |
 | Secret file | `var/playwright/api-secret` | PHP writes it, npm reads it |
+| Media manifest | `var/playwright/media.json` | PHP writes it, npm reads it |
 | Secret override | `PLAYWRIGHT_TOOLKIT_SECRET` | environment, read by both |
 | Server key | `HTTP_X_PLAYWRIGHT_TEST_ID` | PHP `TestContext::TEST_ID_SERVER_KEY` |
 | Database prefix | `db` | PHP `TestContext::DATABASE_PREFIX` |

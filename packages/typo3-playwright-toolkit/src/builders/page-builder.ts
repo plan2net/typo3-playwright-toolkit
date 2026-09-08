@@ -69,8 +69,8 @@ export class PageBuilder {
     }
 
     /** A file reference on any column, with the reference's own fields. */
-    withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
-        this.relations.withFileReference(column, fileUid, fields)
+    withFileReference(column: string, file: string | number, fields: ContentFields = {}): this {
+        this.relations.withFileReference(column, file, fields)
         return this
     }
 

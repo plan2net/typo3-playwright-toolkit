@@ -1,5 +1,10 @@
-import { describe, expect, it } from 'vitest'
-import { mergeRecords, RelationSet } from '#src/builders/relations.js'
+import { beforeEach, describe, expect, it } from 'vitest'
+import * as fs from 'fs'
+import * as os from 'os'
+import * as path from 'path'
+import { ChildRecord, mergeRecords, RelationSet } from '#src/builders/relations.js'
+import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
+import { mediaManifestFileFor } from '#src/media/media-manifest.js'
 
 function only(rows: Record<string, Record<string, unknown>>): Record<string, unknown> {
     return Object.values(rows)[0]
@@ -8,6 +13,53 @@ function only(rows: Record<string, Record<string, unknown>>): Record<string, unk
 function identifierOf(rows: Record<string, Record<string, unknown>>): string {
     return Object.keys(rows)[0]
 }
+
+describe('a file reference named by its fixture', () => {
+    const owner = { pid: 7, sys_language_uid: 0 }
+
+    beforeEach(() => {
+        const consumerRoot = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'toolkit-relations-media-')))
+        const config: ToolkitConfig = {
+            testingURL: 'https://example-testing.test',
+            contentTypes: {},
+            paths: {
+                consumerRoot,
+                stateDir: path.join(consumerRoot, '.test-state'),
+                sessionDir: path.join(consumerRoot, 'var/session'),
+            },
+        }
+        const file = mediaManifestFileFor(config)
+        fs.mkdirSync(path.dirname(file), { recursive: true })
+        fs.writeFileSync(file, JSON.stringify({ 'hero.png': 900001 }))
+        setToolkitConfig(config)
+    })
+
+    it('writes the row the uid it resolves to would have written', () => {
+        const byName = new RelationSet('tt_content')
+        byName.withFileReference('image', 'hero.png')
+        const byUid = new RelationSet('tt_content')
+        byUid.withFileReference('image', 900001)
+
+        expect(only(byName.materialise(owner).records.sys_file_reference)).toEqual(
+            only(byUid.materialise(owner).records.sys_file_reference),
+        )
+    })
+
+    it('resolves inside a nested child record too', () => {
+        const child = new ChildRecord('tx_test_item')
+        child.withFileReference('image', 'hero.png')
+
+        const { records } = child.materialise(owner)
+
+        expect(only(records.sys_file_reference)).toMatchObject({ uid_local: 900001 })
+    })
+
+    it('reports the name, not the number, when it does not exist', () => {
+        const relations = new RelationSet('tt_content')
+
+        expect(() => relations.withFileReference('image', 'portrait.jpg')).toThrow(/portrait\.jpg/)
+    })
+})
 
 describe('a file reference', () => {
     it('writes its token into the column and one row naming the owner', () => {

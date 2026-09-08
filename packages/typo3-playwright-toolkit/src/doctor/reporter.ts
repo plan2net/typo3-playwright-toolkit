@@ -163,15 +163,16 @@ export default class DoctorReporter implements Reporter {
                 return
             }
             const failuresBefore = this.failed
-            for (const [name, label] of [
-                ['database', 'Test database created from template'],
-                ['session', 'Backend session usable'],
+            for (const [name, label, remedy] of [
+                ['database', 'Test database created from template', 'Run ddev playwright prepare --force.'],
+                ['session', 'Backend session usable', 'Run ddev playwright prepare --force.'],
+                ['media', 'Media fixtures seeded', 'Check mediaPath and mediaStorage, then run ddev playwright prepare.'],
             ]) {
                 const check = health.body.checks?.[name]
                 if (check?.ok === true) {
                     console.log(`✓ ${label}`)
                 } else {
-                    this.fail(label, `${check?.detail ?? 'No check result returned'}. Run ddev playwright prepare --force.`)
+                    this.fail(label, `${check?.detail ?? 'No check result returned'}. ${remedy}`)
                     if (name === 'database') this.skip('Backend session check')
                     break
                 }

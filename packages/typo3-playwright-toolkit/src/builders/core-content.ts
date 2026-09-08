@@ -78,14 +78,14 @@ export abstract class CoreContent implements ContentBuilderInterface {
         return this.set(column, value)
     }
 
-    withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
-        this.relations.withFileReference(column, fileUid, fields)
+    withFileReference(column: string, file: string | number, fields: ContentFields = {}): this {
+        this.relations.withFileReference(column, file, fields)
 
         return this
     }
 
-    withFileReferences(column: string, fileUids: number[], fields: ContentFields = {}): this {
-        this.relations.withFileReferences(column, fileUids, fields)
+    withFileReferences(column: string, files: (string | number)[], fields: ContentFields = {}): this {
+        this.relations.withFileReferences(column, files, fields)
 
         return this
     }
@@ -132,12 +132,12 @@ abstract class MediaCoreContent extends CoreContent {
     /** The tt_content column the references hang off — `assets`, `image`, `media`. */
     protected abstract readonly mediaColumn: string
 
-    withFile(fileUid: number): this {
-        return this.withFileReference(this.mediaColumn, fileUid)
+    withFile(file: string | number): this {
+        return this.withFileReference(this.mediaColumn, file)
     }
 
-    withFiles(fileUids: number[]): this {
-        return this.withFileReferences(this.mediaColumn, fileUids)
+    withFiles(files: (string | number)[]): this {
+        return this.withFileReferences(this.mediaColumn, files)
     }
 }
 

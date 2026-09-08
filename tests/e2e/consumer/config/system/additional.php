@@ -8,6 +8,7 @@ use TYPO3\CMS\Core\Core\Environment;
 $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['playwright_toolkit'] = [
     'fixturesPath' => 'fixtures',
     'fixtureManifest' => '010-root-page.sql,020-typoscript.sql',
+    'mediaPath' => 'fixtures/media',
 ];
 
 // Two hostnames answer here and only one is the Testing one.

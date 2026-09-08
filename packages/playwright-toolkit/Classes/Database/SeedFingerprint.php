@@ -12,7 +12,7 @@ final class SeedFingerprint
      *
      * @var int
      */
-    public const SEED_FORMAT = 1;
+    public const SEED_FORMAT = 2;
 
     /**
      * @param array<string, string> $fixtures filename => contents, in seed order
@@ -22,6 +22,7 @@ final class SeedFingerprint
         array $fixtures,
         string $hashedSessionId,
         int $sessionUserId,
+        string $mediaDigest = '',
     ): string {
         $parts = ['seed-format=' . self::SEED_FORMAT, $schemaSql];
         foreach ($fixtures as $name => $contents) {
@@ -30,6 +31,7 @@ final class SeedFingerprint
         }
         $parts[] = $hashedSessionId;
         $parts[] = (string) $sessionUserId;
+        $parts[] = $mediaDigest;
 
         return hash('sha256', implode("\0", $parts));
     }

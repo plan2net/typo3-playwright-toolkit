@@ -284,10 +284,24 @@ export class AccordionContent extends CoreContent {
 }
 ```
 
-`withFileReference(column, fileUid)` and `withFileReferences(column, fileUids)` take
+`withFileReference(column, file)` and `withFileReferences(column, files)` take
 the reference's own fields as a third argument, such as a `crop`. `withChild` and
 `withChildren` hand the callback a record with the same four setters, so a child can
 carry its own files and children.
+
+A file is either a `sys_file` uid or the name of a media fixture:
+
+```ts
+element.withFile('hero.png')
+element.withFileReference('image', 'gallery/lawn-01.jpg')
+element.withFileReference('image', 42)
+```
+
+A name is resolved against the manifest `playwright:prepare` writes, so it needs
+`mediaPath` set in the extension settings — see
+[Media fixtures](../playwright-toolkit/README.md#media-fixtures). A name that does not exist
+fails at the line that used it and lists the names that do, which is the reason to
+prefer a name over a number: `42` cannot tell you it used to be a different image.
 
 The order you call them in is the order the records get. A child takes `pid` and
 `sys_language_uid` from the record above it, so a translation sets the language once,

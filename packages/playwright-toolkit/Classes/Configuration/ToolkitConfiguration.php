@@ -13,6 +13,8 @@ final class ToolkitConfiguration
         public readonly string $preseededSessionId,
         public readonly int $sessionUserId,
         public readonly int $cleanupMinimumAgeMs,
+        public readonly string $mediaPath = '',
+        public readonly string $mediaStorage = '',
     ) {
     }
 

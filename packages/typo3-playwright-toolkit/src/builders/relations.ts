@@ -1,4 +1,5 @@
 import type { RecordDataMap } from '../http/record-edit.js'
+import { mediaUid } from '../media/media-manifest.js'
 import type { ContentFields } from '../types/content-builder.js'
 import { newRecordIdentifier } from './identifier.js'
 
@@ -59,8 +60,8 @@ export class ChildRecord {
         return this
     }
 
-    withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
-        this.relations.withFileReference(column, fileUid, fields)
+    withFileReference(column: string, file: string | number, fields: ContentFields = {}): this {
+        this.relations.withFileReference(column, file, fields)
 
         return this
     }
@@ -91,16 +92,16 @@ export class RelationSet {
         private readonly isColumnSet: (column: string) => boolean = () => false,
     ) {}
 
-    withFileReference(column: string, fileUid: number, fields: ContentFields = {}): this {
+    withFileReference(column: string, file: string | number, fields: ContentFields = {}): this {
         this.refuseWiredColumns(fields)
         this.claim(column, 'sys_file_reference')
-        this.references.push({ column, identifier: newRecordIdentifier(), fileUid, fields })
+        this.references.push({ column, identifier: newRecordIdentifier(), fileUid: mediaUid(file), fields })
 
         return this
     }
 
-    withFileReferences(column: string, fileUids: number[], fields: ContentFields = {}): this {
-        fileUids.forEach((fileUid) => this.withFileReference(column, fileUid, fields))
+    withFileReferences(column: string, files: (string | number)[], fields: ContentFields = {}): this {
+        files.forEach((file) => this.withFileReference(column, file, fields))
 
         return this
     }

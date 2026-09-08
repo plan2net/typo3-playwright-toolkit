@@ -27,6 +27,33 @@ final class ToolkitConfigurationFactoryTest extends FunctionalTestCase
         self::assertSame('playwright_test_session', $configuration->preseededSessionId);
         self::assertSame(1, $configuration->sessionUserId);
         self::assertSame(3600000, $configuration->cleanupMinimumAgeMs);
+        self::assertSame('', $configuration->mediaPath);
+        self::assertSame('', $configuration->mediaStorage);
+    }
+
+    // Empty provisions a storage of our own; a combined identifier names one the
+    // project already declares.
+    #[Test]
+    public function readsAConfiguredMediaStorage(): void
+    {
+        $this->get(ExtensionConfiguration::class)
+            ->set('playwright_toolkit', ['mediaStorage' => '1:/playwright-media/']);
+
+        $configuration = (new ToolkitConfigurationFactory($this->get(ExtensionConfiguration::class)))->create();
+
+        self::assertSame('1:/playwright-media/', $configuration->mediaStorage);
+    }
+
+    // Empty switches media seeding off entirely, so the default has to stay empty.
+    #[Test]
+    public function readsAConfiguredMediaPath(): void
+    {
+        $this->get(ExtensionConfiguration::class)
+            ->set('playwright_toolkit', ['mediaPath' => 'tests/playwright/fixtures/media']);
+
+        $configuration = (new ToolkitConfigurationFactory($this->get(ExtensionConfiguration::class)))->create();
+
+        self::assertSame('tests/playwright/fixtures/media', $configuration->mediaPath);
     }
 
     // A consumer may widen the sweep floor; the endpoint clamps requests up to it.

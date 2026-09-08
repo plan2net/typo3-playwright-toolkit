@@ -267,6 +267,77 @@ Keep the manifest to what every test needs: a site root, a TypoScript template, 
 storages your content references. Everything else is faster and clearer built through
 the builders in the test that needs it.
 
+### Media fixtures
+
+A test that needs an image says so by name. Commit the files and point `mediaPath` at
+the folder:
+
+```
+mediaPath = tests/playwright/fixtures/media
+```
+
+```
+tests/playwright/fixtures/media/
+├── media.json          (optional)
+├── hero.png
+└── gallery/
+    ├── lawn-01.jpg
+    └── lawn-02.jpg
+```
+
+`playwright:prepare` copies them into a FAL storage of its own, indexes each one
+through TYPO3, and writes `var/playwright/media.json` so the npm package can turn a
+name into a `sys_file` uid. Nothing in your fixture SQL has to know about files:
+
+```ts
+element.withFile('hero.png')
+element.withFileReferences('gallery', ['gallery/lawn-01.jpg', 'gallery/lawn-02.jpg'])
+```
+
+The name is the path inside the folder, so subfolders are part of it. Change an image
+and the next prepare rebuilds the template; delete one from the published folder and
+it rebuilds too.
+
+**Names have to survive FAL.** A storage rewrites the names it stores — spaces become
+underscores, accented characters are normalised, and a case-insensitive storage
+lowercases everything. Prepare refuses a fixture whose name would come out different,
+naming both, because a name you cannot reference is worse than a rename you make
+yourself.
+
+`media.json` describes what the files cannot:
+
+```json
+{
+    "hero.png":            { "title": "Hero", "alternative": "Rolling green lawn" },
+    "gallery/":            { "alternative": "Campus lawn in summer" },
+    "gallery/lawn-07.jpg": { "alternative": "The one with the bench" },
+    "campus-tour.youtube": { "onlineMediaId": "dQw4w9WgXcQ", "title": "Campus tour" }
+}
+```
+
+`title` and `alternative` are written to `sys_file_metadata`. Set `alternative` for
+anything a test renders: an image with no alternative text is an accessibility
+violation, so an axe scan will fail on it.
+
+A key ending in `/` gives defaults to everything under it. An exact entry overrides
+field by field, and `"alternative": ""` counts as an answer, so it wins over an
+inherited one.
+
+An entry with `onlineMediaId` has no committed file. It becomes the pseudo-file TYPO3
+writes for a YouTube or Vimeo reference, built from the ID alone — prepare makes no
+network request. Give the ID, not a URL.
+
+By default the files go into a storage the extension provisions at uid 900, pointing
+at `fileadmin/playwright-media/`, so your own storages are untouched. To use a storage
+you already declare, name it and a folder inside it:
+
+```
+mediaStorage = 1:/playwright-media/
+```
+
+That folder is emptied on every prepare, so it has to be a folder of its own — not a
+storage root — and the storage has to use the `Local` driver.
+
 ## Using the package
 
 Build the template database once, before the tests run:
@@ -315,9 +386,11 @@ Testing context, a 401 means the secret does not match.
 | `preseededSessionId` | `playwright_test_session` | Backend session ID stored in the template database |
 | `sessionUserId` | `1` | Backend user this session belongs to |
 | `cleanupMinimumAgeMs` | `3600000` | How old a test database must be before cleanup may delete it |
+| `mediaPath` | none | Folder with your committed media fixtures, relative to the project root. Empty switches media seeding off |
+| `mediaStorage` | none | FAL storage and folder to seed into, as `1:/playwright-media/`. Empty provisions a storage of its own |
 
-If you change `fixturesPath`, `fixtureManifest` or the session settings, the next run
-rebuilds the template database.
+If you change `fixturesPath`, `fixtureManifest`, the media settings or the session
+settings, the next run rebuilds the template database.
 
 `sessionUserId` decides who saves the content your tests build, so page permissions,
 table access and mounts all apply to it. Fixtures are applied before the session is

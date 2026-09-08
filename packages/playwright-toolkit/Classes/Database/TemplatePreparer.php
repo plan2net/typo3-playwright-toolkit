@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Database;
 
+use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfiguration;
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriver;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
+use Plan2net\PlaywrightToolkit\Media\MediaManifest;
+use Plan2net\PlaywrightToolkit\Media\MediaSeeder;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\Schema\SchemaMigrator;
 
 final class TemplatePreparer
@@ -18,6 +22,8 @@ final class TemplatePreparer
         private readonly SeedSources $seedSources,
         private readonly BorrowedConnection $borrowedConnection,
         private readonly LockFiles $lockFiles,
+        private readonly MediaSeeder $mediaSeeder,
+        private readonly MediaManifest $mediaManifest,
     ) {
     }
 
@@ -32,17 +38,30 @@ final class TemplatePreparer
         );
 
         $snapshot = $this->seedSources->snapshot($configuration);
+        $mediaPath = self::mediaDirectory($configuration);
+        $mediaStorage = $configuration->mediaStorage;
 
-        return $this->lockFiles->exclusively(LockFiles::TEMPLATE_LOCK, function () use ($driver, $snapshot, $force): array {
+        return $this->lockFiles->exclusively(LockFiles::TEMPLATE_LOCK, function () use ($driver, $snapshot, $force, $mediaPath, $mediaStorage): array {
             // The fingerprint is written last, so a build that died in the middle
-            // reads as null here and is rebuilt.
-            if (!$force && $driver->templateFingerprint() === $snapshot->fingerprint) {
+            // reads as null here and is rebuilt. It hashes the media sources, not
+            // what was published from them, so the destination is checked too.
+            if (!$force
+                && $driver->templateFingerprint() === $snapshot->fingerprint
+                && (null === $mediaPath || $this->mediaSeeder->destinationMatches($mediaPath, $mediaStorage))
+            ) {
+                $this->publishManifest($driver, $mediaPath, $mediaStorage);
+
                 return ['fingerprint' => $snapshot->fingerprint, 'built' => false];
             }
 
             $driver->createEmptyTemplate();
             $this->buildSchema($driver, $snapshot->schemaStatements);
             $driver->seedTemplate($snapshot->templateSeed());
+            $this->seedMedia($driver, $mediaPath, $mediaStorage);
+            // Before the fingerprint, so a manifest that could not be written
+            // leaves the template unfinalised rather than describing rows no
+            // caller can trust.
+            $this->publishManifest($driver, $mediaPath, $mediaStorage);
             $driver->finaliseTemplate($snapshot->fingerprint);
 
             return ['fingerprint' => $snapshot->fingerprint, 'built' => true];
@@ -66,6 +85,44 @@ final class TemplatePreparer
             implode(', ', $others),
             $failure
         );
+    }
+
+    private static function mediaDirectory(ToolkitConfiguration $configuration): ?string
+    {
+        return '' === $configuration->mediaPath
+            ? null
+            : Environment::getProjectPath() . '/' . ltrim($configuration->mediaPath, '/');
+    }
+
+    private function seedMedia(TestDatabaseDriver $driver, ?string $mediaPath, string $mediaStorage): void
+    {
+        if (null === $mediaPath) {
+            return;
+        }
+
+        $this->borrowedConnection->use(
+            $driver->templateConnectionOverrides(),
+            function () use ($mediaPath, $mediaStorage): void {
+                $this->mediaSeeder->seed($mediaPath, $mediaStorage);
+            }
+        );
+    }
+
+    private function publishManifest(TestDatabaseDriver $driver, ?string $mediaPath, string $mediaStorage): void
+    {
+        if (null === $mediaPath) {
+            $this->mediaManifest->remove();
+
+            return;
+        }
+
+        /** @var array<string, int> $map */
+        $map = $this->borrowedConnection->use(
+            $driver->templateConnectionOverrides(),
+            fn(): array => $this->mediaSeeder->readMap($mediaStorage)
+        );
+
+        $this->mediaManifest->write($map);
     }
 
     /**

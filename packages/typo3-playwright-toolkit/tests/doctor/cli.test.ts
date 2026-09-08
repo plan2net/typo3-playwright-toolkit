@@ -73,6 +73,7 @@ beforeEach(async () => {
                 context: { ok: true, detail: context },
                 database: { ok: databaseReady, detail: databaseReady ? 'Test database ready' : 'Template missing' },
                 session: { ok: sessionReady, detail: sessionReady ? 'Session ready' : 'Session unavailable' },
+                media: { ok: true, detail: 'not configured' },
             } }))
         })
     })
@@ -164,6 +165,7 @@ it('checks the API and session, then drops only its own diagnostic database', as
     expect(result.output).toContain('✓ Toolkit API versions compatible')
     expect(result.output).toContain('✓ Test database created from template')
     expect(result.output).toContain('✓ Backend session usable')
+    expect(result.output).toContain('✓ Media fixtures seeded')
     expect(result.output).toContain('✓ Diagnostic database removed')
     expect(result.output).toContain('Ready to run tests.')
     expect(result.code).toBe(0)

@@ -10,6 +10,30 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **plan2net/playwright-toolkit**, **@plan2net/typo3-playwright-toolkit** — a test that
+  needs an image can commit one and reference it by name. Point `mediaPath` at a folder
+  of files; `playwright:prepare` indexes each one into a FAL storage through TYPO3's own
+  API and writes `var/playwright/media.json`, so a spec says `withFile('hero.png')`
+  instead of naming a `sys_file` uid it cannot check.
+
+  There was no way to get a file into a test before this: the builders take a `sys_file`
+  uid, and nothing in the toolkit created one.
+
+  An optional `media.json` in the same folder carries `title` and `alternative` per file,
+  defaults for a whole subfolder, and YouTube or Vimeo references built from an ID alone,
+  which needs no network access. Set `alternative` for anything a test renders, or an
+  axe scan fails on the fixture rather than on your markup.
+
+  By default the files land in a storage the extension provisions at uid 900, leaving a
+  project's own storages alone. `mediaStorage` points the seeding at a storage the
+  project already declares.
+
+  The seed fingerprint now covers the media folder, so changing an image rebuilds the
+  template — `SEED_FORMAT` is 2, which rebuilds every consumer's template once on
+  upgrade, media or not.
+
 ### Fixed
 
 - **plan2net/playwright-toolkit** — images were shared between parallel tests in three

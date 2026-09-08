@@ -15,6 +15,7 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\ServerRequest;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class HealthCheckProviderTest extends FunctionalTestCase
@@ -76,6 +77,48 @@ final class HealthCheckProviderTest extends FunctionalTestCase
         $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
 
         self::assertSame('sqlite', $this->healthJson()['engine']);
+    }
+
+    /**
+     * ok is an AND over every check and a false answer makes the response a 503,
+     * which would fail the preflight of every project that seeds no media.
+     */
+    #[Test]
+    public function reportsMediaAsHealthyWhenItIsNotConfigured(): void
+    {
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+
+        $media = $this->healthJson()['checks']['media'];
+
+        self::assertTrue($media['ok']);
+        self::assertSame('not configured', $media['detail']);
+    }
+
+    #[Test]
+    public function reportsMediaUnhealthyWhenTheConfiguredDirectoryIsMissing(): void
+    {
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['playwright_toolkit']['mediaPath'] = 'no-such-directory';
+
+        $media = $this->healthJson()['checks']['media'];
+
+        self::assertFalse($media['ok']);
+        self::assertStringContainsString('no-such-directory', $media['detail']);
+    }
+
+    #[Test]
+    public function countsTheMediaFixturesItFound(): void
+    {
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+        $directory = rtrim(Environment::getProjectPath(), '/') . '/health-media';
+        GeneralUtility::mkdir_deep($directory);
+        file_put_contents($directory . '/hero.png', 'one');
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['playwright_toolkit']['mediaPath'] = 'health-media';
+
+        $media = $this->healthJson()['checks']['media'];
+
+        self::assertTrue($media['ok']);
+        self::assertStringContainsString('1', $media['detail']);
     }
 
     #[Test]

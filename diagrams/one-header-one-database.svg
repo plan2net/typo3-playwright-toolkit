@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="880" height="776" viewBox="0 0 880 776" role="img" aria-labelledby="ohod-tablet-title ohod-tablet-desc" xmlns="http://www.w3.org/2000/svg">
 <title id="ohod-tablet-title">One test file, one database</title>
-<desc id="ohod-tablet-desc">Three test files each save their own pages and content through one TYPO3 site's record edit route. TYPO3 writes each file's content, by its test ID, into a database of its own. All three databases are copies of one template, built once from the schema and a small fixture on a separate database container, and are dropped when the run ends.</desc>
+<desc id="ohod-tablet-desc">Three test files each save their own pages and content through one TYPO3 site's record edit route. TYPO3 writes each file's content, by its test ID, into a database of its own. All three databases are copies of one template, built once from the schema, a small fixture and any committed media on a separate database container, and are dropped when the run ends.</desc>
 
 <defs>
     <marker id="ohod-t-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
