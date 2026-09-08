@@ -368,7 +368,10 @@ processed images — `fileadmin/_processed_<test id>` for a configured storage,
 as an extension's own — and every conversion gets a scratch name of its own in
 `typo3temp/assets/images/`, where TYPO3 works before moving the result into that
 folder. All of them carry the test ID, so nothing is shared between tests and all of
-it goes when the test database does.
+it goes when the test database does. A GIFBUILDER image, which TYPO3 would otherwise
+encode straight into its final path, is encoded beside it and moved into place in
+one step, so a test arriving while another is still encoding it never reads a
+truncated file.
 
 To check that a project is set up correctly, ask the health endpoint:
 

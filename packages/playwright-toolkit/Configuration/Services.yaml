@@ -6,6 +6,9 @@ services:
 
   Plan2net\PlaywrightToolkit\:
     resource: '../Classes/*'
+    exclude:
+      - '../Classes/Compatibility/AtomicOutputGifBuilder.php'
+      - '../Classes/Compatibility/ScopedGifBuilder.php'
 
   Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory:
     public: true
@@ -77,16 +80,11 @@ services:
         event: TYPO3\CMS\Core\Resource\Event\AfterResourceStorageInitializationEvent
 
   # makeInstance() takes this from the container because core builds it with no
-  # constructor arguments.
+  # constructor arguments. GifBuilder is in Services.php.
   TYPO3\CMS\Core\Imaging\GraphicalFunctions:
     public: true
     shared: false
     factory: ['@Plan2net\PlaywrightToolkit\Imaging\TestScopedGraphicalFunctions', 'create']
-
-  TYPO3\CMS\Frontend\Imaging\GifBuilder:
-    public: true
-    shared: false
-    factory: ['@Plan2net\PlaywrightToolkit\Imaging\TestScopedGraphicalFunctions', 'createGifBuilder']
 
   Plan2net\PlaywrightToolkit\Database\ResolvedSchema:
     public: true

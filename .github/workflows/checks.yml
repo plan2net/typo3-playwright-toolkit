@@ -222,7 +222,7 @@ jobs:
             phpstan-config: .github/typo3-11/phpstan.neon
           - typo3: '12.4'
             php: '8.1'
-            phpstan-config: ''
+            phpstan-config: .github/typo3-12/phpstan.neon
           - typo3: '13.4'
             php: '8.2'
             phpstan-config: .github/typo3-13/phpstan.neon

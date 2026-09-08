@@ -1,0 +1,8 @@
+# Static analysis for the TYPO3 12 row of typo3-versions only. Delete with 12.4
+# support; nothing else references it.
+#
+# AtomicOutputGifBuilder overrides output() as 13.4 and 14.3 declare it, so it
+# cannot be analysed against this core.
+parameters:
+    excludePaths:
+        - '*/Compatibility/AtomicOutputGifBuilder.php'

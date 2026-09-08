@@ -57,6 +57,12 @@ the package a change belongs to.
   `typo3/cms-frontend` — so the package now requires it rather than leaving it to
   whatever the project happens to have installed.
 
+- **plan2net/playwright-toolkit** — a GIFBUILDER image requested by two tests at once
+  could reach the second one truncated. TYPO3 encodes such an image straight into its
+  final path, and a request arriving while that is still under way takes the path as
+  finished. Under a test ID the image is now encoded beside its path and moved into
+  place in one step, on every supported core.
+
 ## [0.16.0] - 2026-09-07
 
 Everything you do around a test run is a subcommand of `ddev playwright` now. `trace`

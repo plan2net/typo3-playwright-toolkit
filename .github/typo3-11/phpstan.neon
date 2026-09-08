@@ -4,6 +4,9 @@
 # Not phpstan.neon.dist: neither entry below is an error on 12-14, so putting
 # them there would be reported as unmatched and fail the main lane instead.
 parameters:
+    # AtomicOutputGifBuilder overrides output() as 13.4 and 14.3 declare it.
+    excludePaths:
+        - '*/Compatibility/AtomicOutputGifBuilder.php'
     # SessionCookieValue's method_exists() guard is redundant on 12+ and carries
     # an inline ignore for it. Here the guard is load-bearing, so that ignore
     # matches nothing — and ignore.unmatchedIdentifier is itself non-ignorable.

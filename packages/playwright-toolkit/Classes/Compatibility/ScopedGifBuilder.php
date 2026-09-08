@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Compatibility;
 
+use Plan2net\PlaywrightToolkit\Imaging\GifBuilderOutput;
+use Plan2net\PlaywrightToolkit\Imaging\TestScopedGraphicalFunctions;
 use TYPO3\CMS\Frontend\Imaging\GifBuilder;
 
 // 11.5 and 12.4 only: there GifBuilder extends GraphicalFunctions and runs the
 // crop, scale and mask conversions itself. 13.4 and 14.3 convert through a
-// GraphicalFunctions the container already scopes.
+// GraphicalFunctions the container already scopes; AtomicOutputGifBuilder covers them.
 final class ScopedGifBuilder extends GifBuilder
 {
     public function __construct(private readonly string $scope = '')
@@ -16,6 +18,25 @@ final class ScopedGifBuilder extends GifBuilder
         parent::__construct();
 
         $this->filenamePrefix = $this->scope;
+    }
+
+    public static function create(): GifBuilder
+    {
+        $scope = TestScopedGraphicalFunctions::scope();
+
+        return '' === $scope ? new GifBuilder() : new self($scope);
+    }
+
+    /**
+     * @param string $file
+     *
+     * @return string
+     */
+    public function output($file)
+    {
+        GifBuilderOutput::write((string) $file, $this->scope, fn(string $scratch) => parent::output($scratch));
+
+        return $file;
     }
 
     /**
