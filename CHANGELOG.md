@@ -10,6 +10,8 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-09-08
+
 ### Fixed
 
 - **plan2net/playwright-toolkit** — a page that loads several images no longer answers
@@ -830,7 +832,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.1...main
+[0.17.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.14.0...v0.15.0
