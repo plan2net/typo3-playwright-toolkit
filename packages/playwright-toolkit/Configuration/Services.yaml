@@ -62,12 +62,24 @@ services:
   Plan2net\PlaywrightToolkit\Imaging\TestScopedGraphicalFunctions:
     public: true
 
+  Plan2net\PlaywrightToolkit\Imaging\TestScopedProcessingFolder:
+    public: true
+    tags:
+      - name: event.listener
+        identifier: 'plan2net/playwright-toolkit/test-scoped-processing-folder'
+        event: TYPO3\CMS\Core\Resource\Event\AfterResourceStorageInitializationEvent
+
   # makeInstance() takes this from the container because core builds it with no
   # constructor arguments.
   TYPO3\CMS\Core\Imaging\GraphicalFunctions:
     public: true
     shared: false
     factory: ['@Plan2net\PlaywrightToolkit\Imaging\TestScopedGraphicalFunctions', 'create']
+
+  TYPO3\CMS\Frontend\Imaging\GifBuilder:
+    public: true
+    shared: false
+    factory: ['@Plan2net\PlaywrightToolkit\Imaging\TestScopedGraphicalFunctions', 'createGifBuilder']
 
   Plan2net\PlaywrightToolkit\Database\ResolvedSchema:
     public: true

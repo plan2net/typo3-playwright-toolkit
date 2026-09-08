@@ -11,6 +11,12 @@ parameters:
         # Extensions TYPO3 loads, not code this package calls: ext_emconf.php is
         # handed its $_EXTKEY by the extension manager.
         - Tests/Functional/Fixtures/Extensions/*
+        # GifBuilder carries filenamePrefix and imageMagickConvert() on 11.5 and
+        # 12.4 only, and this class exists for exactly those two. Analysed by the
+        # typo3-versions rows that install them; here it is read against 13.4,
+        # where every line of it is correctly an error.
+        - Classes/Compatibility/ScopedGifBuilder.php
+        - Tests/Functional/Imaging/ScopedGifBuilderTest.php
     ignoreErrors:
         # Only true for the core installed here: rebuild() arrived with the 13.4
         # schema API, so the guard is load-bearing on 11.5 and 12.4.

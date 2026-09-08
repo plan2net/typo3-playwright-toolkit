@@ -67,7 +67,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        typo3: ['13.4', '14.3']
+        # 12.4 is the row that runs the crop and scale conversions on GifBuilder,
+        # which is where images are shared between tests if the scope is lost.
+        typo3: ['12.4', '13.4', '14.3']
     steps:
       - uses: actions/checkout@v7
 

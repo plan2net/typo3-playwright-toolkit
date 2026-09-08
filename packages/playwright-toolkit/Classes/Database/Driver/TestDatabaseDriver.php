@@ -42,8 +42,6 @@ interface TestDatabaseDriver
 
     public function materialise(string $testId): void;
 
-    public function isolateProcessedFiles(string $testId): void;
-
     /** Lets cleanup tell "nothing to do" from "something else owns this name". */
     public function exists(string $testId): bool;
 

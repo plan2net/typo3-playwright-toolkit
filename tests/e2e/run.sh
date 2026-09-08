@@ -12,8 +12,6 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CONSUMER="${REPO_ROOT}/tests/e2e"/consumer
 PROJECT=t3pw-e2e
-# 13.4 and 14.3 only: the fixture renders through a site-level setup.typoscript,
-# which SiteConfiguration first reads in 13.4.
 TYPO3_VERSION="${PW_E2E_TYPO3:-14.3}"
 KEEP=0
 [ "${1:-}" = "--keep" ] && KEEP=1
@@ -81,7 +79,9 @@ ddev restart -y
 
 say "installing TYPO3 ${TYPO3_VERSION} and the extension"
 # --with rather than a rewritten composer.json: the fixture declares the range it
-# supports and the row picks one out of it, leaving the file untouched.
+# supports and the row picks one out of it, leaving the file untouched. Its config
+# turns the advisory block off, because every public 12.4 release carries advisories
+# that consumers cover with ELTS — the same reason checks.yml does it.
 ddev composer update --no-interaction --no-progress \
     --with "typo3/cms-core:^${TYPO3_VERSION}" \
     --with "typo3/cms-backend:^${TYPO3_VERSION}" \
@@ -105,6 +105,13 @@ ddev exec vendor/bin/typo3 setup --no-interaction --force \
     --admin-email=e2e@example.test --project-name='Playwright toolkit e2e' --server-type=other
 ddev exec vendor/bin/typo3 cache:flush
 
+# public/ is wiped above, so the images the page TypoScript renders are staged here
+# rather than committed under it.
+say 'staging the images every page renders'
+mkdir -p public/fileadmin public/e2e-images
+cp fixtures/e2e-image.png public/fileadmin/inside-a-storage.png
+cp fixtures/e2e-image.png public/e2e-images/outside-any-storage.png
+
 say 'installing the Playwright side'
 (
     cd tests/playwright
@@ -113,6 +120,14 @@ say 'installing the Playwright side'
         "/var/www/html/.artifacts/${TARBALL}" "@playwright/test@${PLAYWRIGHT_VERSION}"
     ddev npx playwright install --with-deps chromium
 )
+
+# Every processed image and every scratch file of a test request carries its test
+# ID, and goes with the test database. What is left in the two shared folders was
+# written under a name two parallel tests would have written to at once.
+unscoped_processed_files() {
+    ddev exec 'find public/typo3temp/assets/_processed_ public/fileadmin/_processed_ -type f 2>/dev/null || true;
+        find public/typo3temp/assets/images -maxdepth 1 -type f -name "crop_*" 2>/dev/null || true'
+}
 
 # Removed first, so the check below cannot pass on a marker an earlier run left.
 rm -f var/e2e-build-ran.txt
@@ -125,6 +140,13 @@ ddev playwright test --reporter=list
 say 'checking that the asset build ran'
 if [ ! -f var/e2e-build-ran.txt ]; then
     echo "[e2e] the toolkit never ran the project's build script" >&2
+    exit 1
+fi
+
+say 'checking that every processed image stayed inside its own test'
+if [ -n "$(unscoped_processed_files)" ]; then
+    echo "[e2e] images were processed into folders every test shares:" >&2
+    unscoped_processed_files >&2
     exit 1
 fi
 

@@ -1,0 +1,9 @@
+# Static analysis for the TYPO3 13 and 14 rows of typo3-versions only.
+#
+# ScopedGifBuilder extends a GifBuilder that carries filenamePrefix and
+# imageMagickConvert() on 11.5 and 12.4 alone; those two rows analyse it for
+# real. Here it is read against a core where GifBuilder has neither, so every
+# line of it is an error — which is the reason the class exists.
+parameters:
+    excludePaths:
+        - '*/Compatibility/ScopedGifBuilder.php'

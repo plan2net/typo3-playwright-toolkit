@@ -162,7 +162,8 @@ jobs:
             "typo3/testing-framework:${{ matrix.framework }}" \
             "phpunit/phpunit:${{ matrix.phpunit }}"
           composer require --no-update --no-interaction \
-            "typo3/cms-core:^${{ matrix.typo3 }}" "typo3/cms-backend:^${{ matrix.typo3 }}"
+            "typo3/cms-core:^${{ matrix.typo3 }}" "typo3/cms-backend:^${{ matrix.typo3 }}" \
+            "typo3/cms-frontend:^${{ matrix.typo3 }}"
           # Supported older cores carry advisories that consumers cover with ELTS.
           composer config policy.advisories.block false
           composer update --no-interaction --no-progress
@@ -224,10 +225,10 @@ jobs:
             phpstan-config: ''
           - typo3: '13.4'
             php: '8.2'
-            phpstan-config: ''
+            phpstan-config: .github/typo3-13/phpstan.neon
           - typo3: '14.3'
             php: '8.2'
-            phpstan-config: ''
+            phpstan-config: .github/typo3-13/phpstan.neon
     steps:
       - uses: actions/checkout@v7
 
@@ -253,6 +254,7 @@ jobs:
             plan2net/playwright-toolkit:@dev \
             "typo3/cms-core:^${{ matrix.typo3 }}" \
             "typo3/cms-backend:^${{ matrix.typo3 }}" \
+            "typo3/cms-frontend:^${{ matrix.typo3 }}" \
             phpstan/phpstan:^2.1
 
       - name: Analyse against the real ${{ matrix.typo3 }} API

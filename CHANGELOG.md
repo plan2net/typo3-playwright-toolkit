@@ -10,6 +10,29 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **plan2net/playwright-toolkit** — images were shared between parallel tests in three
+  places the per-test isolation did not reach, each of which showed up as a missing or
+  stale image in a screenshot rather than as an error.
+
+  A test's processing folder is now set while the request runs rather than written into
+  `sys_file_storage` when the test database is cloned. That reaches two storages the
+  statement never could: the fallback storage, which processes everything belonging to
+  no configured storage — an extension's own images, anything below the public path —
+  and which now uses `typo3temp/assets/_processed_<test id>`; and a storage that appears
+  after the clone, such as the fileadmin row TYPO3 writes itself when the table is empty,
+  or one a test creates.
+
+  On TYPO3 11.5 and 12.4, where cropping, scaling and masking run on `GifBuilder` rather
+  than on `GraphicalFunctions`, no conversion had a scratch name of its own: a cropped
+  image in particular was written to a single path shared by every test cropping that
+  file, and deleted while the other tests were still reading it.
+
+  Fixing that meant registering a replacement for `GifBuilder`, which lives in
+  `typo3/cms-frontend` — so the package now requires it rather than leaving it to
+  whatever the project happens to have installed.
+
 ## [0.16.0] - 2026-09-07
 
 Everything you do around a test run is a subcommand of `ddev playwright` now. `trace`

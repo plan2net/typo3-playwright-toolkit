@@ -44,7 +44,7 @@ final class ProcessedFileIsolation
     // A failed conversion leaves its scratch file behind; a successful one is renamed away.
     private function removeScratchFiles(string $testId): void
     {
-        $scratch = rtrim(Environment::getPublicPath(), '/') . '/typo3temp/assets/images/';
+        $scratch = self::assetsPath() . '/images/';
 
         foreach ((array) glob($scratch . $testId . '-*') as $file) {
             if (is_string($file) && is_file($file)) {
@@ -58,7 +58,8 @@ final class ProcessedFileIsolation
      */
     private function processingRoots(): array
     {
-        $roots = [];
+        // The fallback storage carries no row, and processes below the public path.
+        $roots = [self::assetsPath()];
 
         foreach ($this->storageRepository->findAll() as $storage) {
             if ('Local' !== $storage->getDriverType()) {
@@ -84,5 +85,10 @@ final class ProcessedFileIsolation
         }
 
         return $roots;
+    }
+
+    private static function assetsPath(): string
+    {
+        return rtrim(Environment::getPublicPath(), '/') . '/typo3temp/assets';
     }
 }

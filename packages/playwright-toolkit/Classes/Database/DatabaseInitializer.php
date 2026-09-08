@@ -138,7 +138,6 @@ final class DatabaseInitializer
                 @unlink($this->lockFiles->checkedMarker($databaseName));
 
                 $driver->materialise($testId);
-                $driver->isolateProcessedFiles($testId);
             });
         });
     }

@@ -284,10 +284,12 @@ whose fingerprint still matches skips the rebuild and answers in a moment;
 `ddev playwright` runs this step for you, so you rarely call it directly.
 
 Images are kept apart per test as well. Each test database gets its own folder for
-processed images, `fileadmin/_processed_<test id>`, and every conversion gets a
-scratch name of its own in `typo3temp/assets/images/`, where TYPO3 works before
-moving the result into that folder. Both carry the test ID, so nothing is shared
-between tests and both go when the test database does.
+processed images — `fileadmin/_processed_<test id>` for a configured storage,
+`typo3temp/assets/_processed_<test id>` for files that belong to none of them, such
+as an extension's own — and every conversion gets a scratch name of its own in
+`typo3temp/assets/images/`, where TYPO3 works before moving the result into that
+folder. All of them carry the test ID, so nothing is shared between tests and all of
+it goes when the test database does.
 
 To check that a project is set up correctly, ask the health endpoint:
 
