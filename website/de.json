@@ -12,7 +12,7 @@
   ["End-to-end tests for TYPO3, with ", "End-to-End-Tests für TYPO3, mit "],
   ["'a throwaway database per test file'", "'einer Wegwerf-Datenbank pro Testdatei'"],
   ["'content built through the real backend'", "'Inhalten, die vom echten Backend erstellt wurden'"],
-  ["'a signed link into every failure'", "'einem signierten Link zu jedem fehlgeschlagenen Test'"],
+  ["'its own images, not just its own database'", "'eigenen Bildern, nicht nur einer eigenen Datenbank'"],
   ["Pause the headline", "Überschrift anhalten"],
   ["Resume the headline", "Überschrift fortsetzen"],
 

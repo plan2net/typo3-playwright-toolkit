@@ -12,7 +12,7 @@ const SITE_URL = 'https://plan2net.github.io/typo3-playwright-toolkit/'
 const REPO_URL = 'https://github.com/plan2net/typo3-playwright-toolkit'
 const TITLE = 'TYPO3 Playwright Toolkit'
 const DESCRIPTION =
-    'End-to-end tests for TYPO3 CMS: every test file gets its own throwaway database, content is built through the real backend, and every failure keeps a signed link into its backend.'
+    'End-to-end tests for TYPO3 CMS: every test file gets its own throwaway database, content is built through the real backend, and its own images rather than images shared with every other test.'
 
 const rawSource = fs.readFileSync(path.join(here, 'landing-page.dc.html'), 'utf-8')
 
@@ -44,7 +44,7 @@ const LOCALES = [
         dictionary: GERMAN,
         titleSuffix: 'End-to-End-Tests für TYPO3 CMS',
         description:
-            'End-to-End-Tests für TYPO3 CMS: Jede Testdatei bekommt ihre eigene Wegwerf-Datenbank, die Inhalte entstehen im echten Backend, und jeder fehlgeschlagene Test hinterlässt einen signierten Link in sein Backend.',
+            'End-to-End-Tests für TYPO3 CMS: Jede Testdatei bekommt ihre eigene Wegwerf-Datenbank, die Inhalte entstehen im echten Backend, und ihre eigenen Bilder statt Bilder, die sich alle Tests teilen.',
         imageAlt: `${TITLE}: End-to-End-Tests für TYPO3 CMS`,
         copied: 'In die Zwischenablage kopiert',
         copyFailed: 'Kopieren hat nicht geklappt. Markieren Sie den Text und kopieren Sie ihn selbst.',
