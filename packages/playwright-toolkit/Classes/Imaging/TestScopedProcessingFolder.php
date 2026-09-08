@@ -9,6 +9,7 @@ use Plan2net\PlaywrightToolkit\TestContext;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Resource\Event\AfterResourceStorageInitializationEvent;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class TestScopedProcessingFolder
 {
@@ -44,6 +45,19 @@ final class TestScopedProcessingFolder
         $row['processingfolder'] = self::folderFor($storage->getUid(), $testId);
 
         $record->setValue($storage, $row);
+
+        self::createFolder($storage, $testId);
+    }
+
+    // Core creates it only when missing, so of two parallel requests one fails.
+    private static function createFolder(ResourceStorage $storage, string $testId): void
+    {
+        $root = ProcessedFileIsolation::rootFor($storage);
+        if (null === $root) {
+            return;
+        }
+
+        GeneralUtility::mkdir_deep($root . '/' . ProcessedFileIsolation::folderFor($testId));
     }
 
     // The fallback storage is mounted on the public path, where TYPO3 processes

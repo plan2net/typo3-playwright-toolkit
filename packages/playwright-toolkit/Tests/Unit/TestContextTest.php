@@ -7,11 +7,14 @@ namespace Plan2net\PlaywrightToolkit\Tests\Unit;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Plan2net\PlaywrightToolkit\Compatibility\RetryingProcessingFolderStorage;
 use Plan2net\PlaywrightToolkit\TestContext;
 use Psr\Log\LogLevel;
 use TYPO3\CMS\Core\Core\ApplicationContext;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Log\Writer\DatabaseWriter;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
 
 final class TestContextTest extends TestCase
 {
@@ -97,6 +100,23 @@ final class TestContextTest extends TestCase
         self::assertArrayHasKey(
             'LOG/writerConfiguration/' . LogLevel::ERROR . '/' . DatabaseWriter::class,
             $settings
+        );
+    }
+
+    #[Test]
+    public function replacesTheResourceStorageWhereCoreFailsAFolderRace(): void
+    {
+        if ((new Typo3Version())->getMajorVersion() >= 12) {
+            self::markTestSkipped('This core takes the folder itself.');
+        }
+
+        unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
+
+        $settings = TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql']);
+
+        self::assertSame(
+            RetryingProcessingFolderStorage::class,
+            $settings['SYS/Objects/' . ResourceStorage::class . '/className'] ?? null
         );
     }
 

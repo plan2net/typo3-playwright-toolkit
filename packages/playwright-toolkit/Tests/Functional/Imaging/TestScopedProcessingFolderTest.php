@@ -80,6 +80,32 @@ final class TestScopedProcessingFolderTest extends FunctionalTestCase
         self::assertSame('/_processed_/', $this->processingFolderOf(1));
     }
 
+    // Core fails the second of two parallel requests that both create it.
+    #[Test]
+    public function theFallbackStoragesFolderExistsBeforeAnythingProcesses(): void
+    {
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+
+        $this->get(StorageRepository::class)->findByUid(0);
+
+        self::assertDirectoryExists(
+            $this->assetsPath() . '/' . ProcessedFileIsolation::folderFor(self::TEST_ID)
+        );
+    }
+
+    #[Test]
+    public function aConfiguredStoragesFolderExistsBeforeAnythingProcesses(): void
+    {
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+
+        $this->get(StorageRepository::class)->findByUid(1);
+
+        self::assertDirectoryExists(
+            rtrim(Environment::getPublicPath(), '/') . '/fileadmin/'
+            . ProcessedFileIsolation::folderFor(self::TEST_ID)
+        );
+    }
+
     #[Test]
     public function cleanupRemovesWhatTheFallbackStorageProcessed(): void
     {

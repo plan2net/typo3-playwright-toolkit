@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit;
 
+use Plan2net\PlaywrightToolkit\Compatibility\RetryingProcessingFolderStorage;
 use Plan2net\PlaywrightToolkit\Database\DatabaseInitializer;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
 use Plan2net\PlaywrightToolkit\Log\ErrorCapture;
+use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
 
 final class TestContext
@@ -46,6 +49,10 @@ final class TestContext
         /** @var array<string, mixed> $logConfiguration */
         $logConfiguration = $GLOBALS['TYPO3_CONF_VARS']['LOG'] ?? [];
         $settings = ErrorCapture::settings($logConfiguration);
+        // 12.4 takes a folder a parallel request created; 11.5 fails the request.
+        if ((new Typo3Version())->getMajorVersion() < 12) {
+            $settings['SYS/Objects/' . ResourceStorage::class . '/className'] = RetryingProcessingFolderStorage::class;
+        }
 
         $testId = self::testId();
         if ('' === $testId) {

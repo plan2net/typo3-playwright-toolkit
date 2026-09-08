@@ -12,6 +12,16 @@ the package a change belongs to.
 
 ### Fixed
 
+- **plan2net/playwright-toolkit** — a page that loads several images no longer answers
+  500 with `Folder "_processed_<testId>/" already exists`. The per-test processing folder
+  is created when the storage is initialized, so TYPO3 never reaches the branch where two
+  parallel requests both find it missing and the second one fails to create it.
+
+  On TYPO3 11.5 the same thing could happen one level deeper, in the subfolders TYPO3 creates
+  inside the processing folder, which cannot be created ahead of time. There a replacement
+  storage takes the folder the parallel request created, which is what 12.4 and later do
+  themselves.
+
 - Accessibility on the landing page: a focus ring too faint to see against white, a
   diagram label under the contrast minimum, a sticky banner that filled the viewport at
   400% zoom, and the English terminal output on the German page now marked as English.

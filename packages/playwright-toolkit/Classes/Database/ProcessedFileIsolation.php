@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Database;
 
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -18,6 +19,30 @@ final class ProcessedFileIsolation
     public static function folderFor(string $testId): string
     {
         return '_processed_' . $testId;
+    }
+
+    public static function rootFor(ResourceStorage $storage): ?string
+    {
+        if (0 === $storage->getUid()) {
+            return self::assetsPath();
+        }
+
+        if ('Local' !== $storage->getDriverType()) {
+            return null;
+        }
+
+        $configuration = $storage->getConfiguration();
+        $basePath = trim((string) ($configuration['basePath'] ?? ''), '/');
+        if ('' === $basePath) {
+            return null;
+        }
+
+        $root = 'absolute' === ($configuration['pathType'] ?? 'relative')
+            ? '/' . $basePath
+            : rtrim(Environment::getPublicPath(), '/') . '/' . $basePath;
+
+        // basePath comes from the database, so ".." would resolve above the site.
+        return GeneralUtility::isAllowedAbsPath($root) ? $root : null;
     }
 
     public function remove(string $testId): void
@@ -62,26 +87,10 @@ final class ProcessedFileIsolation
         $roots = [self::assetsPath()];
 
         foreach ($this->storageRepository->findAll() as $storage) {
-            if ('Local' !== $storage->getDriverType()) {
-                continue;
+            $root = self::rootFor($storage);
+            if (null !== $root) {
+                $roots[] = $root;
             }
-
-            $configuration = $storage->getConfiguration();
-            $basePath = trim((string) ($configuration['basePath'] ?? ''), '/');
-            if ('' === $basePath) {
-                continue;
-            }
-
-            $root = 'absolute' === ($configuration['pathType'] ?? 'relative')
-                ? '/' . $basePath
-                : rtrim(Environment::getPublicPath(), '/') . '/' . $basePath;
-
-            // basePath comes from the database, so ".." would resolve above the site.
-            if (!GeneralUtility::isAllowedAbsPath($root)) {
-                continue;
-            }
-
-            $roots[] = $root;
         }
 
         return $roots;
