@@ -39,15 +39,15 @@
 <text x="488" y="200" fill="#A05E00" font-size="12" font-family="'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace" text-anchor="middle" letter-spacing="0.14em">SAVE PATH</text>
 
 <path d="M 64,233 L 72,241 M 72,233 L 64,241" stroke="#8A93A0" stroke-width="1.6" stroke-linecap="round"/>
-<text x="88" y="242" fill="#8A93A0" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">FormEngine fields</text>
+<text x="88" y="242" fill="#6B7481" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">FormEngine fields</text>
 <path d="M 64,267 L 72,275 M 72,267 L 64,275" stroke="#8A93A0" stroke-width="1.6" stroke-linecap="round"/>
-<text x="88" y="276" fill="#8A93A0" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">Permissions</text>
+<text x="88" y="276" fill="#6B7481" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">Permissions</text>
 <path d="M 64,301 L 72,309 M 72,301 L 64,309" stroke="#8A93A0" stroke-width="1.6" stroke-linecap="round"/>
-<text x="88" y="310" fill="#8A93A0" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">DataHandler</text>
+<text x="88" y="310" fill="#6B7481" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">DataHandler</text>
 <path d="M 64,335 L 72,343 M 72,335 L 64,343" stroke="#8A93A0" stroke-width="1.6" stroke-linecap="round"/>
-<text x="88" y="344" fill="#8A93A0" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">TCA rules</text>
+<text x="88" y="344" fill="#6B7481" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">TCA rules</text>
 <path d="M 64,369 L 72,377 M 72,369 L 64,377" stroke="#8A93A0" stroke-width="1.6" stroke-linecap="round"/>
-<text x="88" y="378" fill="#8A93A0" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">File relations</text>
+<text x="88" y="378" fill="#6B7481" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">File relations</text>
 
 <path d="M 420,237 L 424,241.5 L 432,232.5" fill="none" stroke="#ED6D05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="444" y="242" fill="#1A1E24" font-size="14" font-weight="600" font-family="'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">FormEngine fields</text>

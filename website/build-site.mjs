@@ -192,10 +192,12 @@ let current = 0
 let rotating = true
 let timer
 
+// visibility rather than aria-hidden: AT honours it natively, and one property
+// cannot fall out of step with the other.
 function showClaim(index) {
     claims.forEach((claim, i) => {
         claim.style.opacity = i === index ? '1' : '0'
-        claim.setAttribute('aria-hidden', i === index ? 'false' : 'true')
+        claim.style.visibility = i === index ? 'visible' : 'hidden'
     })
 }
 

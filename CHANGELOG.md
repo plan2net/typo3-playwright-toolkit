@@ -10,6 +10,14 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- Accessibility on the landing page: a focus ring too faint to see against white, a
+  diagram label under the contrast minimum, a sticky banner that filled the viewport at
+  400% zoom, and the English terminal output on the German page now marked as English.
+  The markup also uses `figure`, `output` and `header` in place of `role` and
+  `aria-label`.
+
 ## [0.17.0] - 2026-09-08
 
 This release is about images. A test can now commit an image and use it by name,
