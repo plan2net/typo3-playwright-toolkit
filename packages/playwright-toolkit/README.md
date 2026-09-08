@@ -269,8 +269,8 @@ the builders in the test that needs it.
 
 ### Media fixtures
 
-A test that needs an image says so by name. Commit the files and point `mediaPath` at
-the folder:
+A test that needs an image names it. Commit the files and point the
+`mediaPath` extension setting at the folder:
 
 ```
 mediaPath = tests/playwright/fixtures/media
@@ -285,9 +285,9 @@ tests/playwright/fixtures/media/
     └── lawn-02.jpg
 ```
 
-`playwright:prepare` copies them into a FAL storage of its own, indexes each one
-through TYPO3, and writes `var/playwright/media.json` so the npm package can turn a
-name into a `sys_file` uid. Nothing in your fixture SQL has to know about files:
+`playwright:prepare` copies them into a FAL storage of its own and indexes each one
+through TYPO3, then writes `var/playwright/media.json` so the npm package can turn a
+name into a `sys_file` uid. Your fixture SQL never mentions a file:
 
 ```ts
 element.withFile('hero.png')
@@ -295,7 +295,7 @@ element.withFileReferences('gallery', ['gallery/lawn-01.jpg', 'gallery/lawn-02.j
 ```
 
 The name is the path inside the folder, so subfolders are part of it. Change an image
-and the next prepare rebuilds the template; delete one from the published folder and
+and the next prepare rebuilds the template. Delete one from the published folder and
 it rebuilds too.
 
 <picture>
@@ -304,18 +304,16 @@ it rebuilds too.
        alt="A folder of committed media files becomes three separate things when the test database template is prepared. The files are copied into a FAL storage and shared read-only by every test, which is where the browser loads them from. The sys_file and sys_file_metadata rows go into the template and are copied along with each test's own database. A name-to-uid manifest is written for the npm package, which reads it to turn a fixture name into a uid.">
 </picture>
 
-The three differ in lifetime, which is worth knowing when a test surprises you: the
-rows travel with the test's database, the manifest is read once per worker, and the
-files themselves are written once and shared. Only the derivatives TYPO3 processes
-from them are per test.
+The three do not have the same lifetime. The rows travel with the test's database, the
+manifest is read once per worker, and the files are written once and shared by every
+test. Only the derivatives TYPO3 processes from them belong to one test.
 
-**Names have to survive FAL.** A storage rewrites the names it stores — spaces become
-underscores, accented characters are normalised, and a case-insensitive storage
-lowercases everything. Prepare refuses a fixture whose name would come out different,
-naming both, because a name you cannot reference is worse than a rename you make
-yourself.
+A storage rewrites the names it stores: spaces become underscores, accented characters
+are normalised, and a storage marked case-insensitive lowercases everything. Prepare
+refuses a fixture whose name would come out different and prints both names, so you
+rename the file yourself rather than reference a name that does not exist.
 
-`media.json` describes what the files cannot:
+Titles, alternative texts and online media go in `media.json`:
 
 ```json
 {
@@ -327,27 +325,26 @@ yourself.
 ```
 
 `title` and `alternative` are written to `sys_file_metadata`. Set `alternative` for
-anything a test renders: an image with no alternative text is an accessibility
-violation, so an axe scan will fail on it.
+anything a test renders: an image without alternative text fails an axe scan.
 
-A key ending in `/` gives defaults to everything under it. An exact entry overrides
-field by field, and `"alternative": ""` counts as an answer, so it wins over an
-inherited one.
+A key ending in `/` gives defaults to everything under it. An exact entry overrides it
+field by field, and `"alternative": ""` is an answer too, so it wins over an inherited
+value.
 
 An entry with `onlineMediaId` has no committed file. It becomes the pseudo-file TYPO3
-writes for a YouTube or Vimeo reference, built from the ID alone — prepare makes no
+writes for a YouTube or Vimeo reference, built from the ID alone, so prepare makes no
 network request. Give the ID, not a URL.
 
 By default the files go into a storage the extension provisions at uid 900, pointing
 at `fileadmin/playwright-media/`, so your own storages are untouched. To use a storage
-you already declare, name it and a folder inside it:
+you already declare, name it and a folder inside it in the `mediaStorage` setting:
 
 ```
 mediaStorage = 1:/playwright-media/
 ```
 
-That folder is emptied on every prepare, so it has to be a folder of its own — not a
-storage root — and the storage has to use the `Local` driver.
+That folder is emptied on every prepare, so it has to be a folder of its own rather
+than a storage root, and the storage has to use the `Local` driver.
 
 ## Using the package
 

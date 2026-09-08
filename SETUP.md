@@ -269,11 +269,19 @@ test('renders what the builders wrote', async ({ page, state }) => {
 ### If your tests need images
 
 Add one setting and a folder of files. Nothing else in this guide changes, and the
-setup wizard reports media as "not configured" until you do:
+setup wizard reports media as "not configured" until you do.
+
+One more line in the `playwright_toolkit` settings you wrote in step 4:
 
 ```php
-'mediaPath' => 'tests/playwright/fixtures/media',
+$GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['playwright_toolkit'] = [
+    'fixturesPath' => 'tests/playwright/fixtures',
+    'fixtureManifest' => '010-root-page.sql',
+    'mediaPath' => 'tests/playwright/fixtures/media',
+];
 ```
+
+And the files themselves:
 
 ```
 tests/playwright/fixtures/media/hero.png
