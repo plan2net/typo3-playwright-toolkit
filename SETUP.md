@@ -182,7 +182,7 @@ switch the database on your normal hostname too.
 > - Put it after everything else in the file that writes `DB/Connections/Default`.
 >   Many projects collect their settings in an array and apply it at the end; those
 >   need the form shown in
->   [Database selection](packages/playwright-toolkit#database-selection).
+>   [Database selection](packages/playwright-toolkit/README.md#database-selection).
 > - Code in this file that reads the database runs before the switch, so it reads
 >   the normal database. A `be_users` lookup that fills `SYS/systemMaintainers` is the
 >   common case. Skip it in the Testing context.
@@ -226,7 +226,7 @@ export default defineBasePlaywrightConfig(toolkit, { testDir: './tests' })
 ```
 
 `testingURL` is the hostname from step 1, and the only URL you have to give. The
-[npm README](packages/typo3-playwright-toolkit#configure) lists every other option.
+[npm README](packages/typo3-playwright-toolkit/README.md#configure) lists every other option.
 
 And `tests/playwright/.gitignore`, for what a run leaves behind:
 
@@ -305,7 +305,7 @@ ddev playwright test
 
 The first run builds the template database, so it takes longer than the ones after
 it. [What a test looks like](README.md#what-a-test-looks-like) explains the pieces,
-and the [npm README](packages/typo3-playwright-toolkit#writing-a-test) documents the
+and the [npm README](packages/typo3-playwright-toolkit/README.md#writing-a-test) documents the
 builders in full.
 
 What a run does, step by step:

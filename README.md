@@ -80,7 +80,7 @@ ddev playwright test my-feature     # one file
 ddev playwright ui                  # Playwright UI mode
 ```
 
-The [npm README](packages/typo3-playwright-toolkit#writing-a-test) documents the
+The [npm README](packages/typo3-playwright-toolkit/README.md#writing-a-test) documents the
 builders: your own content types, file references, child records, and saving several
 elements in one request.
 
@@ -153,16 +153,16 @@ that uid, which is what you want until access itself is the thing you are testin
 
 - When a test fails, its database is kept and the run prints a link that logs you into
   that database's TYPO3 backend
-  ([kept databases](packages/playwright-toolkit#looking-at-a-kept-database)).
+  ([kept databases](packages/playwright-toolkit/README.md#looking-at-a-kept-database)).
 - A failing test prints the errors TYPO3 logged while it ran, under the failure itself
-  ([TYPO3 errors](packages/typo3-playwright-toolkit#when-something-fails-typo3-says-why)).
+  ([TYPO3 errors](packages/typo3-playwright-toolkit/README.md#when-something-fails-typo3-says-why)).
 - `ddev playwright replay` runs every scenario's setup into one database, so you can
   browse everything the suite builds in one backend
-  ([replay mode](packages/typo3-playwright-toolkit#replay-mode)).
+  ([replay mode](packages/typo3-playwright-toolkit/README.md#replay-mode)).
 - Screenshot comparison, accessibility checks with axe, and CSP violation checks
-  ([screenshots](packages/typo3-playwright-toolkit#screenshots),
-  [accessibility](packages/typo3-playwright-toolkit#accessibility-checks),
-  [CSP](packages/typo3-playwright-toolkit#csp-violations)).
+  ([screenshots](packages/typo3-playwright-toolkit/README.md#screenshots),
+  [accessibility](packages/typo3-playwright-toolkit/README.md#accessibility-checks),
+  [CSP](packages/typo3-playwright-toolkit/README.md#csp-violations)).
 
 ## Getting started
 
