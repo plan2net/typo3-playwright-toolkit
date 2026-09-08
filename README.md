@@ -49,19 +49,23 @@ One file is one scenario. The setup function creates the content, and the tests 
 it.
 
 ```ts
-import { defineScenario, expect } from '@plan2net/typo3-playwright-toolkit'
+import {
+    defineScenario, expect, expectScreenshot, runAccessibilityScan,
+} from '@plan2net/typo3-playwright-toolkit'
 
 const HEADER = 'Hello from the toolkit'
 
 const test = defineScenario(async ({ builders }) => {
     const page = await builders.page().withTitle('First').withSlug('/first').atParentId(1).create()
 
-    // Every TYPO3 core CType already has a builder. You do not have to register it.
+    // Every TYPO3 core CType already has a builder.
     await builders
         .content()
         .onPage(page.id)
-        .ofType('header')
+        .ofType('textmedia')
         .configure((content) => content.withHeader(HEADER))
+        // Images you commit, by name. The file references are written for you.
+        .withFileReferences('assets', ['hero.png', 'lawn.jpg'])
         .create()
 
     return { slug: page.slug }
@@ -71,6 +75,10 @@ test('renders what the builders wrote', async ({ page, state }) => {
     await page.goto(state.slug)
 
     await expect(page.getByText(HEADER)).toBeVisible()
+
+    // Waits for fonts, animations and images before it compares.
+    await expectScreenshot(page, 'first-page')
+    await runAccessibilityScan(page)
 })
 ```
 
@@ -81,8 +89,9 @@ ddev playwright ui                  # Playwright UI mode
 ```
 
 The [npm README](packages/typo3-playwright-toolkit/README.md#writing-a-test) documents the
-builders: your own content types, file references, child records, and saving several
-elements in one request.
+builders: your own content types, child records, and saving several elements in one
+request. The names in `withFileReferences` come from a folder of images you commit, which
+[media fixtures](packages/playwright-toolkit/README.md#media-fixtures) explains.
 
 ## How it works
 

@@ -430,7 +430,7 @@ VALUES (<span style="color:#FFB151;">42</span>, 1, <span style="color:#8FD48A;">
 
     <span style="color:#949DAC;">// Every TYPO3 core CType already has a builder.&#10;</span>    <span style="color:#FFB151;">await</span> builders.content().onPage(page.id).ofType(<span style="color:#8FD48A;">'textmedia'</span>)
         .configure((element) =&gt; element.withHeader(<span style="color:#8FD48A;">'Latest'</span>))
-        <span style="color:#949DAC;">// The sys_file_reference rows are written for you.&#10;</span>        .withFileReferences(<span style="color:#8FD48A;">'assets'</span>, [1, 2], {
+        <span style="color:#949DAC;">// Images you commit, by name. The rows are written for you.&#10;</span>        .withFileReferences(<span style="color:#8FD48A;">'assets'</span>, [<span style="color:#8FD48A;">'hero.png'</span>, <span style="color:#8FD48A;">'lawn.jpg'</span>], {
             crop: imageCrop({ ratio: <span style="color:#8FD48A;">'16:9'</span> }),
         })
         .create()
