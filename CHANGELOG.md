@@ -10,6 +10,13 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-09-08
+
+This release is about images. A test can now commit an image and use it by name,
+instead of pointing at a `sys_file` uid that nothing in the toolkit created. And every
+test now gets its own processed images in every place TYPO3 creates them, so a
+screenshot shows the picture the test asked for.
+
 ### Added
 
 - **plan2net/playwright-toolkit**, **@plan2net/typo3-playwright-toolkit** — a test that
@@ -62,6 +69,16 @@ the package a change belongs to.
   final path, and a request arriving while that is still under way takes the path as
   finished. Under a test ID the image is now encoded beside its path and moved into
   place in one step, on every supported core.
+
+### Documentation
+
+- [Media fixtures](packages/playwright-toolkit/README.md#media-fixtures) documents the
+  folder, the manifest and `media.json`, with a diagram of where a fixture lives: the
+  files are shared by every test, the rows travel with each test's database, and the
+  manifest is read once per worker. [SETUP.md](SETUP.md#if-your-tests-need-images) has
+  the one setting to add.
+
+- The landing page is available in German as well.
 
 ## [0.16.0] - 2026-09-07
 
@@ -795,7 +812,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.16.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.0...main
+[0.17.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.13.0...v0.14.0
