@@ -245,8 +245,18 @@ export async function ensureState<S>(
             continue
         }
 
+        // State no other worker can read back is a failed attempt, and takes the
+        // failure path below: crashing out of the loop would keep the lock, and the
+        // next caller would wait out the whole timeout and blame it.
         if (result.ok) {
-            commitScenarioState(config, { key, testId, attempt, setupMs: durationMs, data: result.data })
+            try {
+                commitScenarioState(config, { key, testId, attempt, setupMs: durationMs, data: result.data })
+            } catch (error) {
+                result = { ok: false, error: error instanceof Error ? error.message : String(error) }
+            }
+        }
+
+        if (result.ok) {
             recordAttemptOutcome(config, { testId, outcome: 'committed', durationMs })
             releaseSetupLock(paths.locksDir, key, nonce)
 

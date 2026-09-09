@@ -195,6 +195,20 @@ describe('ensureState', () => {
         )
     })
 
+    // State that cannot be stored is a failed setup, not a crash out of the loop.
+    it('frees the lock when the state cannot be stored', async () => {
+        await expect(
+            ensureState(config, {
+                key: 'scenario',
+                triggerId: 't1',
+                setup: async () => ({ builtAt: new Date() }),
+                ...noWait,
+            }),
+        ).rejects.toThrow(/JSON/)
+
+        expect(readLockOwner(runPaths(config).locksDir, 'scenario')).toBeUndefined()
+    })
+
     it('frees the lock once it is done', async () => {
         await ensureState(config, { key: 'scenario', triggerId: 't1', setup: async () => ({}), ...noWait })
 

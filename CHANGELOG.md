@@ -34,6 +34,11 @@ the package a change belongs to.
   stayed behind, so an element hidden for one shot was still hidden for the rest of the
   test: a later click missed it, and a later shot of the same element captured nothing.
 
+- **@plan2net/typo3-playwright-toolkit** — a setup whose state cannot be stored now fails
+  and retries like any other failed setup. State that does not survive a JSON round trip
+  — a `Date`, say — used to throw out of the setup loop with the lock still held, so the
+  next test reported a lock timeout minutes later instead of the real error.
+
 ## [0.17.1] - 2026-09-08
 
 ### Fixed
