@@ -36,6 +36,17 @@ secret allows creating or dropping one.
 database and nothing is created. Never answer such a request with an error: anyone
 can send a junk header, and the toolkit did not send it.
 
+**Never follow a redirect with the secret on the request.** Both the browser and
+Node re-send a custom header to whatever a redirect names, so every request
+carrying the secret refuses redirects (`maxRedirects: 0`, `redirect: 'manual'`).
+A misconfigured site answers with the redirect's status instead of leaking.
+
+**A cross-origin redirect does take the test ID with it.** Playwright never routes
+the hop after a redirect, so no header can be removed from it — a site under test
+that redirects to a third party tells it which database the test uses. The ID
+selects a database only on the testing host, and only the secret creates or drops
+one, which is what keeps this a limit rather than a hole.
+
 **Never build a database name from an unchecked value.** The name goes into
 `CREATE DATABASE` and `DROP DATABASE`. `DatabaseName::assertProvisionable()` is the
 gate and must stay in front of both.
