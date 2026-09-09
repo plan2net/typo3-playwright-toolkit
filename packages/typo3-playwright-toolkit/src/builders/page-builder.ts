@@ -24,15 +24,21 @@ const DOKTYPES = {
 
 export type Doktype = keyof typeof DOKTYPES
 
+/**
+ * Creation only. On an update they would unhide a hidden page, turn a shortcut back
+ * into a standard page and empty columns the caller never named.
+ */
+const CREATE_DEFAULTS: Fields = {
+    doktype: 1,
+    shortcut_mode: 0,
+    pid: 1,
+    hidden: false,
+    layout: 0,
+    subtitle: '',
+}
+
 export class PageBuilder {
-    protected fields: Fields = {
-        doktype: 1,
-        shortcut_mode: 0,
-        pid: 1,
-        hidden: false,
-        layout: 0,
-        subtitle: '',
-    }
+    protected fields: Fields = {}
 
     private page: Page
     private readonly relations = new RelationSet('pages', (column) => column in this.fields)
@@ -89,12 +95,13 @@ export class PageBuilder {
     async create(): Promise<{ id: string; slug: string }> {
         const context = resolveRequestContext(this.page, this.requestContext)
         this.claimSlug(context)
+        const fields = { ...CREATE_DEFAULTS, ...this.fields }
         const identifier = newRecordIdentifier()
-        const parentId = replayParentId(context, String(Number(this.fields.pid)))
+        const parentId = replayParentId(context, String(Number(fields.pid)))
         const { columns, records } = this.relations.materialise({ pid: identifier, sys_language_uid: 0 })
 
         const data: RecordDataMap = {
-            pages: { [identifier]: { ...this.pageFields(), ...columns, pid: parentId } },
+            pages: { [identifier]: { ...toColumnValues(fields), ...columns, pid: parentId } },
         }
         mergeRecords(data, records)
 
@@ -115,7 +122,7 @@ export class PageBuilder {
         const context = resolveRequestContext(this.page, this.requestContext)
 
         const { columns, records } = this.relations.materialise({ pid: pageId, sys_language_uid: 0 })
-        const data: RecordDataMap = { pages: { [pageId]: { ...this.pageFields(), ...columns } } }
+        const data: RecordDataMap = { pages: { [pageId]: { ...toColumnValues(this.fields), ...columns } } }
         mergeRecords(data, records)
 
         const saved = await saveRecord(this.page.request, context, {
@@ -144,9 +151,5 @@ export class PageBuilder {
         }
 
         context.usedSlugs.add(slug)
-    }
-
-    private pageFields(): Record<string, unknown> {
-        return toColumnValues(this.fields)
     }
 }

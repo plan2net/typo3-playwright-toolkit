@@ -202,6 +202,14 @@ describe('PageBuilder', () => {
         expect(posted[0].dataMap.pages['42']).toMatchObject({ title: 'Renamed' })
     })
 
+    it('posts only the fields an update was given', async () => {
+        const { posted, page } = fakePage(42)
+
+        await pageBuilder(page).withTitle('Renamed').update('42')
+
+        expect(Object.keys(posted[0].dataMap.pages['42'])).toEqual(['title'])
+    })
+
     it('attaches media by listing the reference on the page itself', async () => {
         const { posted, page } = fakePage(3)
 

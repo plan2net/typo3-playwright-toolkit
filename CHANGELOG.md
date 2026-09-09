@@ -24,6 +24,11 @@ the package a change belongs to.
   protocol-relative URLs are now resolved the way Playwright's `baseURL` resolves them,
   so only the configured origin gets toolkit headers.
 
+- **@plan2net/typo3-playwright-toolkit** — `page().withTitle('New title').update(id)` now
+  posts the title alone. It used to send the defaults a new page needs as well, which
+  unhid a hidden page, turned a shortcut back into a standard page and emptied columns
+  the call never named.
+
 ## [0.17.1] - 2026-09-08
 
 ### Fixed
