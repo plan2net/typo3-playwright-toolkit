@@ -209,6 +209,20 @@ describe('ensureState', () => {
         expect(readLockOwner(runPaths(config).locksDir, 'scenario')).toBeUndefined()
     })
 
+    // Without the stack the report names our own frames, not the scenario's.
+    it('reports where the setup threw, not only what it said', async () => {
+        await expect(
+            ensureState(config, {
+                key: 'scenario',
+                triggerId: 't1',
+                setup: async () => {
+                    throw new Error('content build failed')
+                },
+                ...noWait,
+            }),
+        ).rejects.toThrow(/ensure-state\.test\.ts/)
+    })
+
     it('frees the lock once it is done', async () => {
         await ensureState(config, { key: 'scenario', triggerId: 't1', setup: async () => ({}), ...noWait })
 

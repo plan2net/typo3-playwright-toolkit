@@ -22,6 +22,10 @@ the package a change belongs to.
   only in CI. Locally the base config asked for `on-first-retry` while retries default to
   zero, so a local failure left no trace to open.
 
+- **@plan2net/typo3-playwright-toolkit** — a failed setup is reported with its stack, so
+  the message names the line in your scenario that threw. Only `error.message` was kept
+  before.
+
 ### Fixed
 
 - **@plan2net/typo3-playwright-toolkit** — no request carrying the API secret follows a

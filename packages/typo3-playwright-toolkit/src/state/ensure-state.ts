@@ -129,7 +129,8 @@ async function runAttempt<S>(
 
         return { ok: true, data: outcome }
     } catch (error) {
-        return { ok: false, error: error instanceof Error ? error.message : String(error) }
+        // The stack, so the report names the line in the scenario that threw.
+        return { ok: false, error: error instanceof Error ? (error.stack ?? error.message) : String(error) }
     } finally {
         controller.abort()
         clearTimeout(timer)
