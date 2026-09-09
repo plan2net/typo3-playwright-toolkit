@@ -173,6 +173,15 @@ describe('PageBuilder', () => {
         expect(only(posted[0].dataMap.pages)).toMatchObject({ title: 'A page', pid: '7', hidden: '1' })
     })
 
+    // create() answers a string id, so atParentId(parent.id) has to compile.
+    it('takes a parent id in the shape create() reports it', async () => {
+        const { posted, page } = fakePage(1)
+
+        await pageBuilder(page).withTitle('A child').atParentId('7').create()
+
+        expect(only(posted[0].dataMap.pages).pid).toBe('7')
+    })
+
     it('posts to the backend edit route with the request token', async () => {
         const { posted, page } = fakePage(1)
 

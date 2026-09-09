@@ -26,6 +26,9 @@ the package a change belongs to.
   the message names the line in your scenario that threw. Only `error.message` was kept
   before.
 
+- **@plan2net/typo3-playwright-toolkit** — `atParentId()` takes the id `create()` returns.
+  It only accepted a number, so `atParentId(parent.id)` did not compile.
+
 ### Fixed
 
 - **@plan2net/typo3-playwright-toolkit** — no request carrying the API secret follows a

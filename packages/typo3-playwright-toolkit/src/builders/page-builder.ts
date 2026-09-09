@@ -87,8 +87,9 @@ export class PageBuilder {
         return this
     }
 
-    atParentId(id: number): this {
-        this.fields.pid = id
+    /** A string too, since that is what create() reports. */
+    atParentId(id: number | string): this {
+        this.fields.pid = Number(id)
         return this
     }
 
