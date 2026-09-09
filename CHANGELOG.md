@@ -29,6 +29,11 @@ the package a change belongs to.
   unhid a hidden page, turned a shortcut back into a standard page and emptied columns
   the call never named.
 
+- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` takes its own styles off
+  the page again. The rules that hide `hideBeforeScreenshot` elements and stop animations
+  stayed behind, so an element hidden for one shot was still hidden for the rest of the
+  test: a later click missed it, and a later shot of the same element captured nothing.
+
 ## [0.17.1] - 2026-09-08
 
 ### Fixed

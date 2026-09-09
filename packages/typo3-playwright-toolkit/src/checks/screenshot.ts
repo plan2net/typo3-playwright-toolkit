@@ -286,11 +286,11 @@ export async function expectScreenshot(
     const { shot, wholePage } = resolveScreenshotTarget(target, include)
     const page = 'page' in target ? target.page() : target
 
-    await page.addStyleTag({ content: FREEZE_STYLES })
+    const injected = [await page.addStyleTag({ content: FREEZE_STYLES })]
 
     const hideStyles = buildHideStyles(hiddenSelectors(config.hideBeforeScreenshot, hide))
     if (hideStyles) {
-        await page.addStyleTag({ content: hideStyles })
+        injected.push(await page.addStyleTag({ content: hideStyles }))
     }
 
     await applyDeferredStylesheets(page)
@@ -309,6 +309,12 @@ export async function expectScreenshot(
         await expect(shot).toHaveScreenshot(`${name}.png`, comparisonOptions(wholePage, screenshotOptions))
     } finally {
         await restoreResponsiveImages(page)
+        // Or a hidden element stays hidden for the rest of the test, so a later
+        // click misses it. A navigation took the tag with it already, and that must
+        // not become the failure the caller reads.
+        for (const style of injected) {
+            await style.evaluate((element) => (element as Element).remove()).catch(() => undefined)
+        }
     }
 }
 

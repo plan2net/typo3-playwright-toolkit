@@ -6,6 +6,7 @@ import {
     hiddenSelectors,
     comparisonOptions,
     warnAboutUndecodedImages,
+    expectScreenshot,
 } from '#src/checks/screenshot.js'
 
 describe('resolveScreenshotTarget', () => {
@@ -85,6 +86,68 @@ describe('comparisonOptions', () => {
         })
 
         expect(comparisonOptions(false, {})).not.toHaveProperty('threshold')
+    })
+})
+
+// The comparison needs the Playwright runner and throws here, which is the path
+// that matters: however the shot ends, the page is left as it was.
+describe('the styles expectScreenshot injects', () => {
+    function stubPage(): { page: unknown; added: string[]; removed: string[] } {
+        const added: string[] = []
+        const removed: string[] = []
+        const page = {
+            addStyleTag: async ({ content }: { content: string }) => {
+                added.push(content)
+
+                return { evaluate: async () => removed.push(content) }
+            },
+            evaluate: async () => [],
+            locator: () => ({ page: () => page }),
+        }
+
+        return { page, added, removed }
+    }
+
+    it('are taken off again when the shot is over', async () => {
+        setToolkitConfig({
+            testingURL: 'https://example-testing.test',
+            paths: {
+                consumerRoot: '/srv/project',
+                stateDir: '/srv/project/.test-state',
+                sessionDir: '/srv/project/var/session',
+            },
+            hideBeforeScreenshot: ['.cookie-banner'],
+        })
+        const { page, added, removed } = stubPage()
+
+        await expect(expectScreenshot(page as never, 'a-page')).rejects.toThrow()
+
+        expect(added).toHaveLength(2)
+        expect(removed).toEqual(added)
+    })
+})
+
+describe('a page that moved on under the shot', () => {
+    // The tag went with the old document; removing it must not replace the
+    // failure the caller needs to read.
+    it('keeps the comparison failure rather than the detached tag', async () => {
+        setToolkitConfig({
+            testingURL: 'https://example-testing.test',
+            paths: {
+                consumerRoot: '/srv/project',
+                stateDir: '/srv/project/.test-state',
+                sessionDir: '/srv/project/var/session',
+            },
+        })
+        const page = {
+            addStyleTag: async () => ({
+                evaluate: () => Promise.reject(new Error('Element is not attached to the DOM')),
+            }),
+            evaluate: async () => [],
+            locator: () => ({ page: () => page }),
+        }
+
+        await expect(expectScreenshot(page as never, 'a-page')).rejects.toThrow(/toHaveScreenshot/)
     })
 })
 
