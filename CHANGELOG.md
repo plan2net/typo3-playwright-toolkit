@@ -10,13 +10,24 @@ the package a change belongs to.
 
 ## [Unreleased]
 
-### Changed
+## [0.18.0] - 2026-09-09
+
+This release fixes five bugs that a review of the toolkit turned up. The most serious
+one: a request carrying the API secret followed redirects, so a site under test that
+redirected off its own origin handed the secret to whoever answered. The others reset
+page fields nobody named, left the screenshot styles on the page, and let a failed setup
+keep its lock until the next test timed out. One setting goes with them, `paths.stateDir`,
+which the inspect and clean commands could never find.
+
+### Breaking
 
 - **@plan2net/typo3-playwright-toolkit** — `paths.stateDir` is no longer a setting. Setup
   state always lives in `<consumerRoot>/.test-state`, which is the only place
   `typo3-playwright-inspect` and `typo3-playwright-clean` look: a project that moved it
   got databases neither command could find, and `clean` then reported nothing to clean.
   Naming the same path still works; naming another one is now refused with a message.
+
+### Changed
 
 - **@plan2net/typo3-playwright-toolkit** — a failed test keeps its trace everywhere, not
   only in CI. Locally the base config asked for `on-first-retry` while retries default to
@@ -880,7 +891,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.1...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.18.0...main
+[0.18.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.1...v0.18.0
 [0.17.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.15.0...v0.16.0
