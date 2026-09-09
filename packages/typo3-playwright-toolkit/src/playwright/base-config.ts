@@ -52,7 +52,7 @@ export function defineBasePlaywrightConfig(
         },
         use: {
             ignoreHTTPSErrors: true,
-            trace: process.env.CI ? ('retain-on-failure' as const) : ('on-first-retry' as const),
+            trace: 'retain-on-failure' as const,
             ...use,
             baseURL: toolkitConfig.testingURL,
             // Serves past context.route, so its requests would carry no test ID.

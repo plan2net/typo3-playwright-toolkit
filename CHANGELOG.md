@@ -18,6 +18,10 @@ the package a change belongs to.
   got databases neither command could find, and `clean` then reported nothing to clean.
   Naming the same path still works; naming another one is now refused with a message.
 
+- **@plan2net/typo3-playwright-toolkit** — a failed test keeps its trace everywhere, not
+  only in CI. Locally the base config asked for `on-first-retry` while retries default to
+  zero, so a local failure left no trace to open.
+
 ### Fixed
 
 - **@plan2net/typo3-playwright-toolkit** — no request carrying the API secret follows a

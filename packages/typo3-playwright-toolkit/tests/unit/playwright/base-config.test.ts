@@ -74,6 +74,13 @@ describe('defineBasePlaywrightConfig', () => {
         expect(config.use?.trace).toBeDefined()
     })
 
+    // on-first-retry left nothing to open, because retries default to 0.
+    it('keeps a trace of a failure without needing a retry', () => {
+        const config = defineBasePlaywrightConfig(toolkitConfig())
+
+        expect(config.use?.trace).toBe('retain-on-failure')
+    })
+
     it('merges expect options instead of replacing the block', () => {
         const config = defineBasePlaywrightConfig(toolkitConfig(), {
             expect: { timeout: 10_000 },
