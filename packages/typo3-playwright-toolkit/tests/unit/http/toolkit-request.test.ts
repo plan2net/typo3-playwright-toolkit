@@ -72,6 +72,26 @@ describe('the request client a scenario hands out', () => {
         expect(headersOf(calls)[TEST_ID_HEADER]).toBeUndefined()
     })
 
+    // No scheme, but not relative either: the site's scheme plus another host.
+    it('does not add the test id to a protocol-relative third party', async () => {
+        const calls: Call[] = []
+
+        await toolkitRequest(fakeRequest(calls), config(), TEST_ID).get('//cdn.example.test/app.js')
+
+        expect(headersOf(calls)[TEST_ID_HEADER]).toBeUndefined()
+    })
+
+    // A url we cannot read is not known to be ours; rejecting it is Playwright's job.
+    it('counts a url it cannot parse as off-site', async () => {
+        const calls: Call[] = []
+
+        await toolkitRequest(fakeRequest(calls), config(), TEST_ID).get('http://', {
+            headers: { [SECRET_HEADER]: 'the-secret' },
+        })
+
+        expect(headersOf(calls)).toEqual({})
+    })
+
     it('takes both toolkit headers off a third party the caller addressed itself', async () => {
         const calls: Call[] = []
 

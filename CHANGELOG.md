@@ -19,6 +19,11 @@ the package a change belongs to.
   requests and the recorded-errors request now refuse redirects, as the record route
   already did, and a redirecting site reports its status instead.
 
+- **@plan2net/typo3-playwright-toolkit** — a protocol-relative URL (`//other.example/x`)
+  counted as the site under test and was given the test ID. Relative and
+  protocol-relative URLs are now resolved the way Playwright's `baseURL` resolves them,
+  so only the configured origin gets toolkit headers.
+
 ## [0.17.1] - 2026-09-08
 
 ### Fixed

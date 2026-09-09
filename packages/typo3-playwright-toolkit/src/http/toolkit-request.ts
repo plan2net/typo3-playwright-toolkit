@@ -20,12 +20,10 @@ export function toolkitRequest(
     const onSite = (target: unknown): boolean => {
         const url = 'string' === typeof target ? target : String((target as { url?: () => string })?.url?.() ?? '')
 
-        if (!/^[a-z][a-z0-9+.-]*:/i.test(url)) {
-            return true
-        }
-
         try {
-            return new URL(url).origin === site
+            // Resolved like baseURL does: a relative url lands here, a
+            // protocol-relative one on its own host.
+            return new URL(url, site).origin === site
         } catch {
             return false
         }
