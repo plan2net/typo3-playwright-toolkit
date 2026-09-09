@@ -169,6 +169,11 @@ result as `written`. It never fails a test.
 The setup runs once per file, even when the file runs in several browser projects.
 The other projects use the state and the test database that the first one created.
 
+**Every test in a file shares that one database.** They all read the same records, and so
+does the same file under a second browser project. With `fullyParallel: true` they also
+run at the same time. So when one test writes, the others see it, in an order that is not
+fixed. Keep tests read-only, or put a test that has to write in a file of its own.
+
 The setup has its own time budget, so a test keeps the full timeout for its own work.
 Setup time is not part of a test's duration; the report carries it as an annotation:
 
