@@ -147,9 +147,11 @@ export async function openAuthenticatedPage(
         const page = await context.newPage()
         ;(page as PageWithTestId).testId = testId
 
+        // Playwright would re-send the secret to whatever the redirect names.
         const response = await page.request.post(`${config.testingURL}/typo3/test-api/session`, {
             headers,
             data: { name },
+            maxRedirects: 0,
         })
         if (!response.ok()) {
             throw new Error(`[setup] Session creation failed (${response.status()}): ${await response.text()}`)

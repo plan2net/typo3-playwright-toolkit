@@ -37,6 +37,8 @@ export async function readHealth(
             method: 'GET',
             signal: AbortSignal.timeout(Number(process.env.PW_HEALTH_TIMEOUT_MS) || 5000),
             headers,
+            // A custom header survives a cross-origin redirect, secret included.
+            redirect: 'manual',
         })
     } catch (error) {
         throw new Error(unreachable(error instanceof Error ? error.message : String(error)))

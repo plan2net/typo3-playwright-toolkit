@@ -3,7 +3,7 @@ import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
-import globalSetup, { preflightTestId, runHealthCheck, verifyApiVersion } from '#src/global-setup.js'
+import globalSetup, { preflightTestId, readHealth, runHealthCheck, verifyApiVersion } from '#src/global-setup.js'
 import { configForRun } from '../helpers.js'
 import { REPLAY_TEST_ID, TEST_ID_HEADER, TEST_ID_PATTERN } from '#src/contract.js'
 import { readAttempts } from '#src/state/attempt-registry.js'
@@ -21,6 +21,22 @@ beforeEach(() => {
 afterEach(() => {
     vi.unstubAllGlobals()
     fs.rmSync(tmpRoot, { recursive: true, force: true })
+})
+
+// The one fetch behind the preflight, the health check and the doctor.
+describe('readHealth', () => {
+    it('follows no redirect with the secret on it', async () => {
+        const seen: RequestInit[] = []
+        const fetchImpl = (async (_url: string, init: RequestInit) => {
+            seen.push(init)
+
+            return new Response(JSON.stringify({ ok: true, api: 1 }), { status: 200 })
+        }) as unknown as typeof fetch
+
+        await readHealth('https://example-testing.test/typo3/test-api/health', {}, fetchImpl, () => 'unreachable')
+
+        expect(seen[0].redirect).toBe('manual')
+    })
 })
 
 describe('verifyApiVersion', () => {

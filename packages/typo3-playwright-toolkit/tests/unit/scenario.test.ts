@@ -23,6 +23,7 @@ function fakeBrowser(failAt: 'newPage' | 'session' | 'json' | 'cookies' | 'never
         contextOptions: undefined as undefined | { extraHTTPHeaders?: Record<string, string> },
         postedHeaders: undefined as undefined | Record<string, string>,
         postedData: undefined as undefined | Record<string, unknown>,
+        postedRedirects: undefined as undefined | number,
     }
 
     const context = {
@@ -44,10 +45,15 @@ function fakeBrowser(failAt: 'newPage' | 'session' | 'json' | 'cookies' | 'never
                 request: {
                     post: async (
                         _url: string,
-                        options: { headers: Record<string, string>; data: Record<string, unknown> },
+                        options: {
+                            headers: Record<string, string>
+                            data: Record<string, unknown>
+                            maxRedirects?: number
+                        },
                     ) => {
                         state.postedHeaders = options.headers
                         state.postedData = options.data
+                        state.postedRedirects = options.maxRedirects
                         if ('session' === failAt) {
                             throw new Error('connection refused')
                         }
@@ -125,6 +131,15 @@ describe('openAuthenticatedPage', () => {
 
         expect(state.postedHeaders).toHaveProperty('X-Playwright-Toolkit-Secret')
         expect(state.postedHeaders).toHaveProperty('X-Playwright-Test-Id', 'ABCD1234EFGH5678')
+    })
+
+    // Playwright sends the headers on to the redirect target.
+    it('follows no redirect with the secret on it', async () => {
+        const { browser, state } = fakeBrowser('never')
+
+        await openAuthenticatedPage(browser as never, config(), 'ABCD1234EFGH5678')
+
+        expect(state.postedRedirects).toBe(0)
     })
 })
 

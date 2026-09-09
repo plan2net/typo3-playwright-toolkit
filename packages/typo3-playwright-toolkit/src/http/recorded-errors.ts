@@ -62,6 +62,8 @@ export async function fetchRecordedErrors(
                 method: 'GET',
                 headers: { [SECRET_HEADER]: options.secret ?? resolveApiSecret(config) },
                 signal: AbortSignal.timeout(options.timeoutMs ?? 5000),
+                // Or the secret follows the redirect to another origin.
+                redirect: 'manual',
             },
         )
 

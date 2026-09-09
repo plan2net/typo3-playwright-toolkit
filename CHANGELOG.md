@@ -10,6 +10,15 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — no request carrying the API secret follows a
+  redirect any more. Both the browser and Node re-send a custom header to whatever a
+  redirect names, so a site under test that redirected off its own origin handed the
+  secret to a third party. The session request, the health preflight, the cleanup
+  requests and the recorded-errors request now refuse redirects, as the record route
+  already did, and a redirecting site reports its status instead.
+
 ## [0.17.1] - 2026-09-08
 
 ### Fixed

@@ -28,6 +28,7 @@ interface Call {
     method?: string
     headers: Record<string, string>
     body: unknown
+    redirect?: string
 }
 
 function recorder(respond: (body: unknown) => Response): { calls: Call[]; fetchImpl: typeof fetch } {
@@ -35,9 +36,18 @@ function recorder(respond: (body: unknown) => Response): { calls: Call[]; fetchI
 
     return {
         calls,
-        fetchImpl: (async (url: string, init: { method?: string; headers?: Record<string, string>; body?: string }) => {
+        fetchImpl: (async (
+            url: string,
+            init: { method?: string; headers?: Record<string, string>; body?: string; redirect?: string },
+        ) => {
             const body = init?.body ? JSON.parse(init.body) : undefined
-            calls.push({ url, method: init?.method, headers: init?.headers ?? {}, body })
+            calls.push({
+                url,
+                method: init?.method,
+                headers: init?.headers ?? {},
+                body,
+                redirect: init?.redirect,
+            })
             return respond(body)
         }) as unknown as typeof fetch,
     }
@@ -75,6 +85,15 @@ describe('httpCleanup.drop', () => {
         await httpCleanup(config, { fetchImpl }).drop(['ABCD1234EFGH5678'])
 
         expect(calls[0].headers[TEST_ID_HEADER]).toBeUndefined()
+    })
+
+    // Node's fetch keeps a custom header on a cross-origin redirect.
+    it('follows no redirect', async () => {
+        const { calls, fetchImpl } = recorder(() => ok({ results: [] }))
+
+        await httpCleanup(config, { fetchImpl }).drop(['ABCD1234EFGH5678'])
+
+        expect(calls[0].redirect).toBe('manual')
     })
 
     // Without it the endpoint answers 401 and the run leaks every database it made.

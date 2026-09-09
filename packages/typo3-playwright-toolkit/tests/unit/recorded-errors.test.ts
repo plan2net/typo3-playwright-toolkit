@@ -42,6 +42,19 @@ describe('fetchRecordedErrors', () => {
         ])
     })
 
+    it('follows no redirect with the secret on it', async () => {
+        const seen: RequestInit[] = []
+        const fetchImpl = (async (_url: string, init: RequestInit) => {
+            seen.push(init)
+
+            return { ok: true, status: 200, json: async () => ({ success: true, errors: [] }) }
+        }) as unknown as typeof fetch
+
+        await fetchRecordedErrors(config, 'K7F2QX9M4TB6WZ1P', { fetchImpl, secret: 'the-secret' })
+
+        expect(seen[0].redirect).toBe('manual')
+    })
+
     const failingFetch: Array<[string, typeof fetch]> = [
         ['the request fails', () => Promise.reject(new Error('ECONNREFUSED'))],
         ['the answer is not 200', async () => ({ ok: false, status: 500, json: async () => ({}) })],

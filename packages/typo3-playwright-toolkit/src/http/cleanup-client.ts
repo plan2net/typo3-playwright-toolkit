@@ -79,6 +79,8 @@ export function httpCleanup(
             },
             body: JSON.stringify(payload),
             signal: AbortSignal.timeout(timeoutMs),
+            // Or the secret follows the redirect to another origin.
+            redirect: 'manual',
         })
 
         if (!response.ok) {
