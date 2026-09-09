@@ -10,6 +10,14 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Changed
+
+- **@plan2net/typo3-playwright-toolkit** — `paths.stateDir` is no longer a setting. Setup
+  state always lives in `<consumerRoot>/.test-state`, which is the only place
+  `typo3-playwright-inspect` and `typo3-playwright-clean` look: a project that moved it
+  got databases neither command could find, and `clean` then reported nothing to clean.
+  Naming the same path still works; naming another one is now refused with a message.
+
 ### Fixed
 
 - **@plan2net/typo3-playwright-toolkit** — no request carrying the API secret follows a

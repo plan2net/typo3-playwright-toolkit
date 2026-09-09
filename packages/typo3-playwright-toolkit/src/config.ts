@@ -111,9 +111,9 @@ export interface ToolkitConfig {
     setup?: ToolkitSetupConfig
 }
 
-/** What a consumer writes: only consumerRoot is required, the other two are derived from it. */
+/** What a consumer writes: consumerRoot, and a session directory if theirs moved. */
 export type ToolkitConfigInput = Omit<ToolkitConfig, 'paths'> & {
-    paths: Pick<ToolkitPaths, 'consumerRoot'> & Partial<ToolkitPaths>
+    paths: Pick<ToolkitPaths, 'consumerRoot'> & Partial<Pick<ToolkitPaths, 'sessionDir'>>
 }
 
 let activeConfig: ToolkitConfig | undefined
@@ -125,13 +125,24 @@ function resolvePaths(paths: ToolkitConfigInput['paths']): ToolkitPaths {
         )
     }
 
+    const stateDir = path.join(paths.consumerRoot, '.test-state')
+
+    // Not the consumer's to move: inspect and clean look for this directory by name
+    // and read the API secret from its parent.
+    const named = (paths as Partial<ToolkitPaths>).stateDir
+    if (undefined !== named && named !== stateDir) {
+        throw new Error(
+            `[typo3-playwright-toolkit] paths.stateDir cannot be moved. It is ${stateDir}, ` +
+                'where the inspect and clean commands look for it.',
+        )
+    }
+
     const resolved = {
         consumerRoot: paths.consumerRoot,
-        stateDir: paths.stateDir ?? path.join(paths.consumerRoot, '.test-state'),
+        stateDir,
         sessionDir: paths.sessionDir ?? path.join(paths.consumerRoot, 'var/session'),
     }
 
-    assertDeletableDirectory('stateDir', resolved.stateDir, resolved.consumerRoot)
     assertDeletableDirectory('sessionDir', resolved.sessionDir, resolved.consumerRoot)
 
     return resolved

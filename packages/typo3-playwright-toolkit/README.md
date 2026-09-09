@@ -566,7 +566,6 @@ Everything else:
 | `csp.mode` | `any` | Which policy header a page must send: `any`, `report-only` or `enforced` |
 | `hideBeforeScreenshot` | `[]` | CSS selectors hidden before every screenshot |
 | `paths.sessionDir` | `<consumerRoot>/var/session` | TYPO3 session folder, cleaned after a run |
-| `paths.stateDir` | `<consumerRoot>/.test-state` | Folder for setup state |
 | `prepareContext` | none | Runs on every context a test uses, for your own routes and stubs |
 | `screenshot.maxDiffPixelRatio` | `0.005` | How many pixels may differ, as a share of the image |
 | `screenshot.threshold` | `0.2` | How different one pixel may be, from 0 to 1 |
@@ -738,8 +737,10 @@ fixtures did not create. Use the `builders` argument of `defineScenario`.
 **Settings seem to be ignored.** `defineToolkitConfig` ran too late. It must be the
 first thing in `playwright.config.ts`.
 
-**Cleanup refuses a path.** `stateDir` and `sessionDir` must be absolute and inside
-`consumerRoot`, because cleanup deletes files in both.
+**Cleanup refuses a path.** `sessionDir` must be absolute and inside `consumerRoot`,
+because cleanup deletes files in it. Setup state always lives in
+`<consumerRoot>/.test-state`, which is where `typo3-playwright-inspect` and
+`typo3-playwright-clean` look for it.
 
 **The run builds nothing, or builds the wrong thing.** The default reads
 `consumerRoot/package.json`, not the `package.json` next to your Playwright config.
