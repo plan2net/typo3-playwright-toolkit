@@ -10,6 +10,16 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **ddev-typo3-playwright-toolkit** — preparing the template no longer empties the
+  project database's page caches. The preflight ran `cache:flush`, which reaches the
+  `pages` group and truncates `cache_pages`, `cache_hash` and `cache_rootline`. A CLI
+  run sends no test ID, so the Testing context reads the project's own database, and
+  every test run cleared the caches of the site you work on. It now flushes
+  `--group system`, which is what holds the TCA cache and the container the template
+  build needs rebuilt.
+
 ## [0.18.0] - 2026-09-09
 
 This release fixes five bugs that a review of the toolkit turned up. The most serious

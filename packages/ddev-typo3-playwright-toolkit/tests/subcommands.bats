@@ -165,7 +165,7 @@ setup() {
     [ "$status" -eq 0 ]
     [ ! -e "${TRACE_CALLS}" ]
     run cat "${APPROVE_PREPARE_CALLS}"
-    [ "$output" = $'Testing cache:flush\nTesting playwright:prepare --force' ]
+    [ "$output" = $'Testing cache:flush --group system\nTesting playwright:prepare --force' ]
 }
 
 @test "subcommand help uses the spaced names without requiring a project" {

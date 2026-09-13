@@ -179,10 +179,11 @@ playwright_require_db_test() {
     fi
 }
 
-# The first step that touches the Testing database, so a project that never built one
-# fails here, with a Doctrine trace that names no cause.
+# Only the system group, which holds the TCA cache and the container the rebuild
+# needs. "all" would also truncate cache_pages, cache_hash and cache_rootline in the
+# project's own database, which is what a CLI run resolves to with no test ID.
 playwright_flush_caches() {
-    flush_output="$( (cd "$1" && TYPO3_CONTEXT=Testing ./vendor/bin/typo3 cache:flush) 2>&1 )" && return 0
+    flush_output="$( (cd "$1" && TYPO3_CONTEXT=Testing ./vendor/bin/typo3 cache:flush --group system) 2>&1 )" && return 0
 
     printf '%s\n' "${flush_output}" >&2
 

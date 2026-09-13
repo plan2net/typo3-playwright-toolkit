@@ -96,5 +96,5 @@ setup() {
 
     [ "$status" -eq 0 ]
     run cat "${APPROVE_PREPARE_CALLS}"
-    [ "$output" = $'Testing cache:flush\nTesting playwright:prepare\nplaywright' ]
+    [ "$output" = $'Testing cache:flush --group system\nTesting playwright:prepare\nplaywright' ]
 }

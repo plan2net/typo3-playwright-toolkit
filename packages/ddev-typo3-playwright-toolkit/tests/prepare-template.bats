@@ -29,8 +29,19 @@ STUB
     [ "$status" -eq 0 ]
 
     run cat "${CALLS}"
-    [ "${lines[0]}" = 'Testing cache:flush' ]
+    [ "${lines[0]}" = 'Testing cache:flush --group system' ]
     [ "${lines[1]}" = 'Testing playwright:prepare' ]
+}
+
+# "all" would also truncate cache_pages, cache_hash and cache_rootline in the project's own database.
+@test "flushes only the system group, so the project's page cache survives" {
+    playwright_prepare_template "${HTML}"
+
+    run grep -c 'cache:flush --group system' "${CALLS}"
+    [ "$output" -eq 1 ]
+
+    run grep -c 'cache:flush$' "${CALLS}"
+    [ "$output" -eq 0 ]
 }
 
 @test "runs both steps in the Testing context, never the default one" {
