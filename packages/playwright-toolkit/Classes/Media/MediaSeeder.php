@@ -30,6 +30,8 @@ final class MediaSeeder
      */
     private const STORAGE_NAME = 'Playwright fixtures';
 
+    private const DEFAULT_FILE_DATE = 1704067200;
+
     public function __construct(
         private readonly ConnectionPool $connectionPool,
         private readonly StorageRepository $storageRepository,
@@ -78,6 +80,16 @@ final class MediaSeeder
 
         foreach (MediaSources::metadata($mediaPath) as $name => $fields) {
             $files[$name]->getMetaData()->add($fields)->save();
+        }
+
+        $fileDates = MediaSources::fileDates($mediaPath);
+        foreach ($files as $name => $file) {
+            $dates = ($fileDates[$name] ?? []) + [
+                'creation_date' => self::DEFAULT_FILE_DATE,
+                'modification_date' => self::DEFAULT_FILE_DATE,
+            ];
+            $this->connectionPool->getConnectionForTable('sys_file')->update('sys_file', $dates, ['uid' => $file->getUid()]);
+            $file->updateProperties($dates);
         }
 
         $this->storageRepository->flush();

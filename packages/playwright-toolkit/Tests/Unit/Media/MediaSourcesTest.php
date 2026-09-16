@@ -151,6 +151,129 @@ final class MediaSourcesTest extends TestCase
     }
 
     #[Test]
+    public function readsFileDatesInUtcWithoutPassingThemToMetadata(): void
+    {
+        $this->givenFile('hero.png', 'one');
+        $this->givenConfiguration([
+            'hero.png' => [
+                'title' => 'Hero',
+                'creationDate' => '2024-01-01',
+                'modificationDate' => '2024-02-01',
+            ],
+        ]);
+        $timezone = date_default_timezone_get();
+        date_default_timezone_set('Pacific/Honolulu');
+
+        try {
+            self::assertSame(
+                ['hero.png' => ['creation_date' => 1704067200, 'modification_date' => 1706745600]],
+                MediaSources::fileDates($this->directory)
+            );
+            self::assertSame(['hero.png' => ['title' => 'Hero']], MediaSources::metadata($this->directory));
+        } finally {
+            date_default_timezone_set($timezone);
+        }
+    }
+
+    /**
+     * @return iterable<string, array{string, mixed}>
+     */
+    public static function invalidFileDates(): iterable
+    {
+        foreach (['creationDate', 'modificationDate'] as $field) {
+            foreach ([
+                'relative' => 'today',
+                'invalid day' => '2024-02-30',
+                'invalid month' => '2024-13-01',
+                'empty' => '',
+                'integer' => 1704067200,
+                'null' => null,
+                'array' => [],
+                'boolean' => false,
+                'short date' => '2024-1-1',
+                'invalid hour' => '2024-01-01T24:00',
+                'invalid minute' => '2024-01-01T14:60',
+                'invalid second' => '2024-01-01T14:30:60',
+                'timezone suffix' => '2024-01-01T14:30Z',
+                'timezone offset' => '2024-01-01T14:30+02:00',
+            ] as $case => $value) {
+                yield $field . ' ' . $case => [$field, $value];
+            }
+        }
+    }
+
+    #[Test]
+    #[DataProvider('invalidFileDates')]
+    public function rejectsInvalidFileDatesBeforeReturningMetadata(string $field, mixed $value): void
+    {
+        $this->givenFile('hero.png', 'one');
+        $this->givenFile('media.json', (string) json_encode(['hero.png' => [$field => $value]]));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage($field . ' of "hero.png" must use YYYY-MM-DD with an optional UTC time (THH:MM or THH:MM:SS).');
+
+        MediaSources::metadata($this->directory);
+    }
+
+    /**
+     * @return array<string, array{string, int}>
+     */
+    public static function fileDateTimes(): array
+    {
+        return [
+            'hour and minute' => ['2024-01-01T14:30', 1704119400],
+            'seconds' => ['2024-01-01T14:30:45', 1704119445],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('fileDateTimes')]
+    public function readsFileDatesWithTimes(string $date, int $timestamp): void
+    {
+        $this->givenFile('hero.png', 'one');
+        $this->givenConfiguration(['hero.png' => ['creationDate' => $date, 'modificationDate' => $date]]);
+        $timezone = date_default_timezone_get();
+        date_default_timezone_set('Pacific/Honolulu');
+
+        try {
+            self::assertSame(
+                ['hero.png' => ['creation_date' => $timestamp, 'modification_date' => $timestamp]],
+                MediaSources::fileDates($this->directory)
+            );
+        } finally {
+            date_default_timezone_set($timezone);
+        }
+    }
+
+    #[Test]
+    public function resolvesFileDatesFromPrefixesAndExactEntries(): void
+    {
+        $this->givenFile('gallery/hero.png', 'one');
+        $this->givenFile('gallery/summer/portrait.png', 'two');
+        $this->givenConfiguration([
+            'gallery/' => ['creationDate' => '2024-01-01', 'modificationDate' => '2024-02-01'],
+            'gallery/hero.png' => ['creationDate' => '2024-03-01'],
+            'gallery/summer/' => ['modificationDate' => '2024-04-01'],
+            'video.youtube' => ['onlineMediaId' => 'fixture-video', 'creationDate' => '2024-05-01'],
+        ]);
+
+        self::assertSame([
+            'gallery/hero.png' => ['creation_date' => 1709251200, 'modification_date' => 1706745600],
+            'gallery/summer/portrait.png' => ['modification_date' => 1711929600],
+            'video.youtube' => ['creation_date' => 1714521600],
+        ], MediaSources::fileDates($this->directory));
+        self::assertSame([], MediaSources::metadata($this->directory));
+    }
+
+    #[Test]
+    public function returnsNoFileDatesWithoutAManifest(): void
+    {
+        $this->givenFile('hero.png', 'one');
+
+        self::assertSame([], MediaSources::fileDates($this->directory));
+    }
+
+    #[Test]
     public function aPrefixSuppliesDefaultsThatAnExactEntryOverridesFieldByField(): void
     {
         $this->givenFile('gallery/lawn-01.jpg', 'one');

@@ -20,6 +20,10 @@ the package a change belongs to.
   `--group system`, which is what holds the TCA cache and the container the template
   build needs rebuilt.
 
+- **playwright-toolkit** — media file dates now stay fixed across prepares. Set
+  `creationDate` and `modificationDate` in `media.json`, with an optional UTC time.
+  Missing dates default to `2024-01-01` so screenshots stay stable.
+
 ## [0.18.0] - 2026-09-09
 
 This release fixes five bugs that a review of the toolkit turned up. The most serious

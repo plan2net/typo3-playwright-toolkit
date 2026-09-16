@@ -313,11 +313,11 @@ are normalised, and a storage marked case-insensitive lowercases everything. Pre
 refuses a fixture whose name would come out different and prints both names, so you
 rename the file yourself rather than reference a name that does not exist.
 
-Titles, alternative texts and online media go in `media.json`:
+Titles, alternative texts, file dates and online media go in `media.json`:
 
 ```json
 {
-    "hero.png":            { "title": "Hero", "alternative": "Rolling green lawn" },
+    "hero.png":            { "title": "Hero", "alternative": "Rolling green lawn", "creationDate": "2024-02-01" },
     "gallery/":            { "alternative": "Campus lawn in summer" },
     "gallery/lawn-07.jpg": { "alternative": "The one with the bench" },
     "campus-tour.youtube": { "onlineMediaId": "dQw4w9WgXcQ", "title": "Campus tour" }
@@ -326,6 +326,12 @@ Titles, alternative texts and online media go in `media.json`:
 
 `title` and `alternative` are written to `sys_file_metadata`. Set `alternative` for
 anything a test renders: an image without alternative text fails an axe scan.
+
+`creationDate` and `modificationDate` accept `2024-02-01`, `2024-02-01T14:30` or
+`2024-02-01T14:30:45`. All times use UTC; a date without a time means midnight.
+Each omitted date defaults to `2024-01-01`, including files without a manifest entry
+and online media. These fields are written to `sys_file` so rendered dates stay stable
+across prepares.
 
 A key ending in `/` gives defaults to everything under it. An exact entry overrides it
 field by field, and `"alternative": ""` is an answer too, so it wins over an inherited

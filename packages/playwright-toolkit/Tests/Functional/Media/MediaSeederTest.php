@@ -10,6 +10,7 @@ use Plan2net\PlaywrightToolkit\Media\MediaSeeder;
 use Plan2net\PlaywrightToolkit\Media\MediaSources;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -337,6 +338,53 @@ final class MediaSeederTest extends FunctionalTestCase
         $this->get(MediaSeeder::class)->seed($this->mediaPath);
 
         self::assertSame(['Hero', 'A lawn'], $this->metadataOf('/hero.png'));
+    }
+
+    #[Test]
+    public function pinsFileDatesWithoutAManifestOnEverySeed(): void
+    {
+        $this->givenImage('hero.png');
+        $seeder = $this->get(MediaSeeder::class);
+
+        foreach ([1711929600, 1714521600] as $modified) {
+            touch($this->mediaPath . '/hero.png', $modified);
+            $seeder->seed($this->mediaPath);
+
+            $file = $this->get(ResourceFactory::class)->getFileObject($seeder->readMap()['hero.png']);
+            self::assertSame(1704067200, $file->getProperty('creation_date'));
+            self::assertSame(1704067200, $file->getProperty('modification_date'));
+            self::assertSame('1704067200', $this->columnOf('/hero.png', 'creation_date'));
+            self::assertSame('1704067200', $this->columnOf('/hero.png', 'modification_date'));
+        }
+    }
+
+    #[Test]
+    public function appliesDeclaredDatesAndDefaultsEachMissingDate(): void
+    {
+        $this->givenImage('hero.png');
+        $this->givenImage('gallery/portrait.png');
+        $this->givenConfiguration([
+            'hero.png' => ['creationDate' => '2024-02-01', 'modificationDate' => '2024-03-01T14:30'],
+            'gallery/' => ['creationDate' => '2024-04-01'],
+            'video.youtube' => ['onlineMediaId' => 'fixture-video', 'modificationDate' => '2024-06-01'],
+            'other.youtube' => ['onlineMediaId' => 'other-fixture'],
+        ]);
+        $seeder = $this->get(MediaSeeder::class);
+
+        $seeder->seed($this->mediaPath);
+
+        foreach ([
+            'hero.png' => [1706745600, 1709303400],
+            'gallery/portrait.png' => [1711929600, 1704067200],
+            'video.youtube' => [1704067200, 1717200000],
+            'other.youtube' => [1704067200, 1704067200],
+        ] as $name => [$created, $modified]) {
+            $file = $this->get(ResourceFactory::class)->getFileObject($seeder->readMap()[$name]);
+            self::assertSame($created, $file->getProperty('creation_date'));
+            self::assertSame($modified, $file->getProperty('modification_date'));
+            self::assertSame((string) $created, $this->columnOf('/' . $name, 'creation_date'));
+            self::assertSame((string) $modified, $this->columnOf('/' . $name, 'modification_date'));
+        }
     }
 
     #[Test]

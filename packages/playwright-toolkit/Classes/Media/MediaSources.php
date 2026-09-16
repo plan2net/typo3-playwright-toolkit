@@ -21,6 +21,13 @@ final class MediaSources
      */
     private const ONLINE_MEDIA_ID_PATTERN = '#^[A-Za-z0-9_\-/]+$#';
 
+    private const FILE_DATE_FIELDS = [
+        'creationDate' => 'creation_date',
+        'modificationDate' => 'modification_date',
+    ];
+
+    private const FILE_DATE_PATTERN = '/^(\d{4})-(\d{2})-(\d{2})(?:T(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?)?$/D';
+
     /**
      * @return array<string, string> name => absolute path, ordered by name
      */
@@ -56,9 +63,34 @@ final class MediaSources
         foreach ($names as $name) {
             $fields = array_merge(self::defaultsFor($declared, $name), $declared[$name] ?? []);
             unset($fields[self::ONLINE_MEDIA_FIELD]);
+            $fields = array_diff_key($fields, self::FILE_DATE_FIELDS);
 
             if ([] !== $fields) {
                 $resolved[$name] = $fields;
+            }
+        }
+
+        ksort($resolved);
+
+        return $resolved;
+    }
+
+    /**
+     * @return array<string, array{creation_date?: int, modification_date?: int}>
+     */
+    public static function fileDates(string $mediaPath): array
+    {
+        $declared = self::declared($mediaPath);
+        $names = array_merge(array_keys(self::scan($mediaPath)), array_keys(self::onlineMedia($mediaPath)));
+        self::assertEveryEntryIsClaimed($declared, $names);
+
+        $resolved = [];
+        foreach ($names as $name) {
+            $fields = array_merge(self::defaultsFor($declared, $name), $declared[$name] ?? []);
+            foreach (self::FILE_DATE_FIELDS as $field => $column) {
+                if (isset($fields[$field])) {
+                    $resolved[$name][$column] = (new \DateTimeImmutable($fields[$field], new \DateTimeZone('UTC')))->getTimestamp();
+                }
             }
         }
 
@@ -107,6 +139,24 @@ final class MediaSources
         }
 
         foreach ($declared as $key => $fields) {
+            foreach (array_keys(self::FILE_DATE_FIELDS) as $field) {
+                if (!\array_key_exists($field, $fields)) {
+                    continue;
+                }
+
+                $value = $fields[$field];
+                if (!\is_string($value)
+                    || 1 !== preg_match(self::FILE_DATE_PATTERN, $value, $parts)
+                    || !checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1])
+                ) {
+                    throw new \RuntimeException(sprintf(
+                        'The %s of "%s" must use YYYY-MM-DD with an optional UTC time (THH:MM or THH:MM:SS).',
+                        $field,
+                        $key
+                    ));
+                }
+            }
+
             if (!isset($fields[self::ONLINE_MEDIA_FIELD])) {
                 continue;
             }
