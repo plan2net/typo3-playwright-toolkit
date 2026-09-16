@@ -10,6 +10,20 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-09-16
+
+Two fixes, both about a test run reaching further than it should. Preparing the
+template emptied the page caches of the site you develop on. And a media fixture took
+its file dates from the moment of the prepare, so a rendered date moved under a
+screenshot. Dates are fixed now, and `media.json` can set them.
+
+### Added
+
+- **plan2net/playwright-toolkit** — `creationDate` and `modificationDate` in
+  `media.json`, as `2024-02-01`, `2024-02-01T14:30` or `2024-02-01T14:30:45`. Times are
+  UTC, a date without a time means midnight, and the values go to `sys_file`. A key
+  ending in `/` passes them down like the other fields.
+
 ### Fixed
 
 - **ddev-typo3-playwright-toolkit** — preparing the template no longer empties the
@@ -20,9 +34,10 @@ the package a change belongs to.
   `--group system`, which is what holds the TCA cache and the container the template
   build needs rebuilt.
 
-- **playwright-toolkit** — media file dates now stay fixed across prepares. Set
-  `creationDate` and `modificationDate` in `media.json`, with an optional UTC time.
-  Missing dates default to `2024-01-01` so screenshots stay stable.
+- **plan2net/playwright-toolkit** — a media fixture keeps its file dates across
+  prepares. TYPO3 wrote the time of the prepare into `sys_file`, so a page rendering a
+  file's date got a different one after every rebuild and its screenshot failed. Every
+  date not named in `media.json` is `2024-01-01` now, online media included.
 
 ## [0.18.0] - 2026-09-09
 
@@ -905,7 +920,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.18.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.19.0...main
+[0.19.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.1...v0.18.0
 [0.17.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.0...v0.17.1
 [0.17.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.16.0...v0.17.0
