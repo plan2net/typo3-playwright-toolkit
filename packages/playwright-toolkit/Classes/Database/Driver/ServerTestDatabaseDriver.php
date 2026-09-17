@@ -10,6 +10,8 @@ use Plan2net\PlaywrightToolkit\Database\SeededSession;
 
 abstract class ServerTestDatabaseDriver implements TestDatabaseDriver
 {
+    use SetupCacheDelta;
+
     /**
      * @var string
      */
@@ -234,6 +236,49 @@ abstract class ServerTestDatabaseDriver implements TestDatabaseDriver
      * a previous worker's connection is enough to block it.
      */
     abstract protected function dropDatabase(\PDO $admin, string $database): void;
+
+    /** A SQL expression, not a name: DATABASE() or current_schema(). */
+    abstract protected function currentSchemaExpression(): string;
+
+    protected function quoteValue(\PDO $connection, mixed $value): string
+    {
+        if (null === $value) {
+            return 'NULL';
+        }
+
+        // A blob arrives as a stream, and casting one to string yields "Resource id #7".
+        if (is_resource($value)) {
+            return $connection->quote((string) stream_get_contents($value), \PDO::PARAM_LOB);
+        }
+
+        return $connection->quote((string) $value);
+    }
+
+    abstract protected function tableHash(\PDO $connection, string $table): string;
+
+    /**
+     * @return list<string>
+     */
+    protected function baseTables(\PDO $connection): array
+    {
+        $statement = $connection->query(sprintf(
+            "SELECT table_name FROM information_schema.tables
+             WHERE table_schema = %s AND table_type = 'BASE TABLE' ORDER BY table_name",
+            $this->currentSchemaExpression()
+        ));
+
+        return array_values(array_map('strval', $statement->fetchAll(\PDO::FETCH_COLUMN)));
+    }
+
+    protected function connectionFor(string $testId): \PDO
+    {
+        return $this->connect($this->databaseFor($testId));
+    }
+
+    protected function templateConnection(): \PDO
+    {
+        return $this->connect($this->templateDatabase);
+    }
 
     /**
      * @param array<string, string> $fixtures

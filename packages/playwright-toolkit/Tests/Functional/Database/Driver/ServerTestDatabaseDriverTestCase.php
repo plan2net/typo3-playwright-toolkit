@@ -16,6 +16,8 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
  */
 abstract class ServerTestDatabaseDriverTestCase extends FunctionalTestCase
 {
+    use SetupCacheDeltaTests;
+
     /**
      * @var string
      */
@@ -210,6 +212,16 @@ abstract class ServerTestDatabaseDriverTestCase extends FunctionalTestCase
     abstract protected function connectTo(string $database): \PDO;
 
     abstract protected function databaseExists(string $database): bool;
+
+    protected function openTemplate(): \PDO
+    {
+        return $this->connectTo(static::TEMPLATE);
+    }
+
+    protected function openTestDatabase(): \PDO
+    {
+        return $this->connectTo('db' . self::TEST_ID);
+    }
 
     protected function prepareTemplate(int $userId = 1, string $fingerprint = 'abc'): ServerTestDatabaseDriver
     {

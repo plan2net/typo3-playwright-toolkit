@@ -12,10 +12,12 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class SqliteTestDatabaseDriverTest extends FunctionalTestCase
 {
+    use SetupCacheDeltaTests;
+
     /**
      * @var string
      */
-    private const TEST_ID = 'ABCD1234EFGH5678';
+    protected const TEST_ID = 'ABCD1234EFGH5678';
     protected array $testExtensionsToLoad = [
         'plan2net/playwright-toolkit',
     ];
@@ -239,6 +241,26 @@ final class SqliteTestDatabaseDriverTest extends FunctionalTestCase
         $driver->materialise(self::TEST_ID);
 
         self::assertTrue($driver->checkTestDatabase(self::TEST_ID)['ok']);
+    }
+
+    protected static function binaryColumnType(): string
+    {
+        return 'blob';
+    }
+
+    protected static function keyColumn(): string
+    {
+        return 'uid integer PRIMARY KEY AUTOINCREMENT';
+    }
+
+    protected function openTemplate(): \PDO
+    {
+        return $this->connectTo('playwright_db_template.sqlite');
+    }
+
+    protected function openTestDatabase(): \PDO
+    {
+        return $this->connectTo('db' . self::TEST_ID . '.sqlite');
     }
 
     private function driver(): SqliteTestDatabaseDriver

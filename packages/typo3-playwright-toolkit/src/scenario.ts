@@ -1,5 +1,7 @@
 import { test as base, type APIRequestContext, type Browser, type Page, type TestInfo } from '@playwright/test'
+import * as path from 'path'
 import { toolkitHeaders } from './contract.js'
+import { setupCacheUse } from './setup-cache/use.js'
 import { getToolkitConfig, type ToolkitConfig } from './config.js'
 import { ensureState, setupFixtureTimeout } from './state/ensure-state.js'
 import { applyScenarioOutcome, recordTestFailure } from './state/scenario-outcome.js'
@@ -187,6 +189,12 @@ export async function openAuthenticatedPage(
     }
 }
 
+export function suiteRootOf(testInfo: TestInfo): string {
+    const configFile = testInfo.config.configFile
+
+    return undefined === configFile ? testInfo.project.testDir : path.dirname(configFile)
+}
+
 export function setupAnnotation(setupMs: number, setupRan: boolean): string {
     const seconds = (setupMs / 1000).toFixed(1)
 
@@ -235,6 +243,7 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
                 key,
                 name,
                 triggerId: testInfo.testId,
+                setupCache: setupCacheUse(config, suiteRootOf(testInfo), key),
                 setup: async ({ testId, attempt, signal }) => {
                     if (!setup) {
                         return {} as S

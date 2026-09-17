@@ -11,6 +11,7 @@ use Plan2net\PlaywrightToolkit\Http\HealthCheckProvider;
 use Plan2net\PlaywrightToolkit\Http\InspectProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordedErrorProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
+use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
 use Plan2net\PlaywrightToolkit\TestContext;
@@ -45,6 +46,7 @@ final class ContextGateTest extends FunctionalTestCase
         BackendSessionProvider::class => ['/typo3/test-api/session', 'POST'],
         HealthCheckProvider::class => ['/typo3/test-api/health', 'GET'],
         DatabaseCleanupProvider::class => ['/typo3/test-api/databases/drop', 'POST'],
+        SetupCacheProvider::class => ['/typo3/test-api/setup-cache/restore', 'POST'],
         InspectProvider::class => ['/typo3/test-api/inspect', 'GET'],
         RecordedErrorProvider::class => ['/typo3/test-api/errors', 'GET'],
         RecordEditDiagnostics::class => ['/typo3/record/edit', 'POST'],

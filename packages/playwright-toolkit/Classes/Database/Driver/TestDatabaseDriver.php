@@ -60,4 +60,23 @@ interface TestDatabaseDriver
      * @return array{ok: bool, detail: string}
      */
     public function checkTestDatabase(string $testId): array;
+
+    /**
+     * @return list<string> the tables whose contents differ from the template's
+     */
+    public function changedTables(string $testId): array;
+
+    /**
+     * @param list<string> $tables
+     *
+     * @return array{sql: string, hashes: array<string, string>}
+     */
+    public function dumpWithHashes(string $testId, array $tables): array;
+
+    /**
+     * @param array<string, string> $expectedHashes
+     *
+     * @return bool false when the delta did not produce those hashes, having rolled back
+     */
+    public function applyDelta(string $testId, string $sql, array $expectedHashes = []): bool;
 }

@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Http\DatabaseCleanupProvider;
 use Plan2net\PlaywrightToolkit\Http\HealthCheckProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordedErrorProvider;
+use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
 use Plan2net\PlaywrightToolkit\TestContext;
@@ -63,6 +64,8 @@ final class EndpointAuthenticationTest extends FunctionalTestCase
             'drop' => [DatabaseCleanupProvider::class, '/test-api/databases/drop', 'POST'],
             'sweep' => [DatabaseCleanupProvider::class, '/test-api/databases/sweep', 'POST'],
             'errors' => [RecordedErrorProvider::class, '/test-api/errors', 'GET'],
+            'setup-cache restore' => [SetupCacheProvider::class, '/test-api/setup-cache/restore', 'POST'],
+            'setup-cache store' => [SetupCacheProvider::class, '/test-api/setup-cache/store', 'POST'],
         ];
     }
 

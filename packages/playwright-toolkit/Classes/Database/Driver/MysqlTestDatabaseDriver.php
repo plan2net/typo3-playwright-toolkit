@@ -73,7 +73,7 @@ final class MysqlTestDatabaseDriver extends ServerTestDatabaseDriver
         $target = $this->connect($database);
         $target->exec('SET FOREIGN_KEY_CHECKS = 0');
 
-        foreach (self::copyOrder($this->templateTables($template)) as $table) {
+        foreach (self::copyOrder($this->baseTables($template)) as $table) {
             $target->exec($this->createTableStatement($template, $table));
 
             $columns = $this->copyableColumns($template, $table);
@@ -107,6 +107,26 @@ final class MysqlTestDatabaseDriver extends ServerTestDatabaseDriver
         $template->exec('SET FOREIGN_KEY_CHECKS = 0');
         parent::applyFixtures($template, $fixtures);
         $template->exec('SET FOREIGN_KEY_CHECKS = 1');
+    }
+
+    #[\Override]
+    protected function currentSchemaExpression(): string
+    {
+        return 'DATABASE()';
+    }
+
+    #[\Override]
+    protected function quoteIdentifier(string $identifier): string
+    {
+        return '`' . str_replace('`', '``', $identifier) . '`';
+    }
+
+    #[\Override]
+    protected function tableHash(\PDO $connection, string $table): string
+    {
+        $row = $connection->query(sprintf('CHECKSUM TABLE `%s`', $table))->fetch(\PDO::FETCH_NUM);
+
+        return is_array($row) ? (string) ($row[1] ?? '') : '';
     }
 
     #[\Override]
@@ -152,20 +172,6 @@ final class MysqlTestDatabaseDriver extends ServerTestDatabaseDriver
         }
 
         $admin->exec(sprintf('DROP DATABASE IF EXISTS `%s`', $database));
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function templateTables(\PDO $template): array
-    {
-        $statement = $template->prepare(
-            "SELECT table_name FROM information_schema.tables
-             WHERE table_schema = ? AND table_type = 'BASE TABLE' ORDER BY table_name"
-        );
-        $statement->execute([$this->templateDatabase]);
-
-        return array_values(array_map('strval', $statement->fetchAll(\PDO::FETCH_COLUMN)));
     }
 
     private function createTableStatement(\PDO $template, string $table): string

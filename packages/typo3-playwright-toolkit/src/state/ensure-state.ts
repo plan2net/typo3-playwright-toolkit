@@ -18,6 +18,7 @@ import {
 } from './setup-lock.js'
 import { claimNextAttempt, highestClaimedAttempt } from './attempt-claim.js'
 import { REPLAY_TEST_ID } from '../contract.js'
+import type { SetupCacheClient } from '../setup-cache/client.js'
 
 export const SETUP_DEFAULTS = {
     attemptTimeoutMs: 90_000,
@@ -43,6 +44,13 @@ export interface SetupContext {
     signal: AbortSignal
 }
 
+export interface SetupCacheUse {
+    key: string
+    client: SetupCacheClient
+    /** Without the flag: never read the cache, only keep an existing entry current. */
+    refreshOnly: boolean
+}
+
 export interface EnsureStateOptions<S> {
     key: string
     /** What the inspect listing and the backend call this scenario; the key otherwise. */
@@ -50,6 +58,7 @@ export interface EnsureStateOptions<S> {
     /** Identifies the caller, so its own retries rethrow instead of skipping. */
     triggerId: string
     setup: (context: SetupContext) => Promise<S>
+    setupCache?: SetupCacheUse
     now?: () => number
     sleep?: (ms: number) => Promise<void>
 }
@@ -98,6 +107,49 @@ function giveUp(
     recordScenarioFailure(config, { key, triggeringTestId: triggerId, attempts })
 
     return statusError(reason)
+}
+
+async function restoreFromCache<S>(
+    use: SetupCacheUse | undefined,
+    testId: string,
+    name: string,
+): Promise<{ ok: true; data: S } | undefined> {
+    if (undefined === use || use.refreshOnly) {
+        return undefined
+    }
+
+    try {
+        const restored = await use.client.restore(testId, use.key)
+        if ('applied' === restored.outcome) {
+            return { ok: true, data: restored.state as S }
+        }
+
+        // Without this line a cache that never hits looks like one that does nothing.
+        console.warn(
+            'absent' === restored.outcome
+                ? `[setup-cache] ${name}: nothing cached yet, building it and caching the result.`
+                : `[setup-cache] ${name}: the cached setup was dropped — ${restored.detail}. Building it again.`,
+        )
+
+        return undefined
+    } catch (error) {
+        console.warn(`[setup-cache] Could not restore, building instead: ${messageOf(error)}`)
+
+        return undefined
+    }
+}
+
+/** A cache that cannot answer makes a run slower, never failed. */
+async function storeInCache(use: SetupCacheUse, testId: string, state: Record<string, unknown>): Promise<void> {
+    try {
+        await use.client.store(testId, use.key, state, use.refreshOnly)
+    } catch (error) {
+        console.warn(`[setup-cache] Could not store: ${messageOf(error)}`)
+    }
+}
+
+function messageOf(error: unknown): string {
+    return error instanceof Error ? error.message : String(error)
 }
 
 const TIMED_OUT = Symbol('timed-out')
@@ -231,8 +283,11 @@ export async function ensureState<S>(
         const heartbeat = setInterval(() => heartbeatSetupLock(paths.locksDir, key, nonce), 1_000)
         const attemptStartedAt = now()
         let result: Awaited<ReturnType<typeof runAttempt<S>>>
+        let restoredFromCache = false
         try {
-            result = await runAttempt(setup, { testId, attempt }, tuning.attemptTimeoutMs)
+            const restored = await restoreFromCache<S>(options.setupCache, testId, name)
+            restoredFromCache = undefined !== restored
+            result = restored ?? (await runAttempt(setup, { testId, attempt }, tuning.attemptTimeoutMs))
         } finally {
             clearInterval(heartbeat)
         }
@@ -244,6 +299,12 @@ export async function ensureState<S>(
             recordAttemptOutcome(config, { testId, outcome: 'abandoned', durationMs })
             await sleep(tuning.pollMs)
             continue
+        }
+
+        // Before the state is committed: other workers use this database from then
+        // on, and their writes would land in the delta.
+        if (result.ok && undefined !== options.setupCache && !restoredFromCache) {
+            await storeInCache(options.setupCache, testId, result.data as Record<string, unknown>)
         }
 
         // State no other worker can read back is a failed attempt, and takes the
@@ -266,7 +327,7 @@ export async function ensureState<S>(
                 testId,
                 attempt,
                 data: result.data,
-                setupRan: true,
+                setupRan: !restoredFromCache,
                 waitedMs: 0,
                 setupMs: durationMs,
             }

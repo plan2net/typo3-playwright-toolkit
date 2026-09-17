@@ -179,6 +179,18 @@ final class PostgresTestDatabaseDriverTest extends ServerTestDatabaseDriverTestC
     }
 
     #[\Override]
+    protected static function binaryColumnType(): string
+    {
+        return 'bytea';
+    }
+
+    #[\Override]
+    protected static function keyColumn(): string
+    {
+        return 'uid serial PRIMARY KEY';
+    }
+
+    #[\Override]
     protected static function host(): string
     {
         return self::environment(self::HOST_VARIABLE, 'db-test');

@@ -7,7 +7,7 @@
 ADDON_DIR="$(cd "$(dirname "${BATS_TEST_FILENAME}")/.." && pwd)"
 
 setup() {
-    unset NO_DATABASE_CLEANUP PW_SKIP_BUILD
+    unset NO_DATABASE_CLEANUP PW_SKIP_BUILD PW_REUSE_SETUP
     # shellcheck source=../playwright-lib.sh
     . "${ADDON_DIR}/playwright-lib.sh"
 }
@@ -77,6 +77,20 @@ setup() {
     [ "${#PW_ARGS[@]}" -eq 1 ]
     [ "${PW_ARGS[0]}" = "test" ]
     [ "${PW_SKIP_BUILD}" = "1" ]
+}
+
+@test "--reuse-setup becomes PW_REUSE_SETUP for the toolkit" {
+    playwright_collect_args test --reuse-setup
+
+    [ "${#PW_ARGS[@]}" -eq 1 ]
+    [ "${PW_ARGS[0]}" = "test" ]
+    [ "${PW_REUSE_SETUP}" = "1" ]
+}
+
+@test "leaves --reuse-setup off by default" {
+    playwright_collect_args test
+
+    [ "${PW_REUSE_SETUP:-0}" = "0" ]
 }
 
 @test "leaves --skip-build off by default" {

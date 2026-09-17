@@ -10,6 +10,21 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **all three packages** — `ddev playwright test --reuse-setup` (`PW_REUSE_SETUP=1`)
+  restores a scenario's content from a cached copy instead of building it again
+  through the backend, which is the slowest part of a run. The extension records the
+  rows a setup wrote as SQL under `var/playwright/setup-cache` and
+  replays them into the clone that every run already makes; the delta is applied and
+  verified in one transaction, so a mismatch leaves the plain clone behind. The key
+  covers your Playwright directory and the test database template, and nothing else:
+  a change to your project's PHP, TCA or TSconfig is **not** noticed, which is why the
+  flag is off by default, absent from CI, and warns on every run it is on. A run
+  without the flag refreshes what is already cached;
+  `typo3-playwright-clean --setup-cache` drops it. Works on every supported engine,
+  and is refused in replay mode, where all scenarios share one database.
+
 ### Changed
 
 - **@plan2net/typo3-playwright-toolkit** — the hint a replay run ends with now says that

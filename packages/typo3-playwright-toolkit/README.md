@@ -403,6 +403,31 @@ prepareContext: async (context) => {
 },
 ```
 
+### Reusing a scenario's setup
+
+A scenario's setup posts its content through the real backend, which is the slowest
+part of a run. `PW_REUSE_SETUP=1` restores that content from a cached copy instead,
+so a run you repeat while working on templates or stylesheets skips the rebuild:
+
+```bash
+PW_REUSE_SETUP=1 npx playwright test accordion --project=chromium-desktop
+```
+
+The extension records what the setup wrote as SQL under `var/playwright/setup-cache`,
+keyed by a digest of your Playwright directory. Editing
+a spec, a builder or the config invalidates it, and so does rebuilding the test
+database template.
+
+Nothing else does. **A change to your project's PHP — a `processDatamap` hook, a TCA
+default, a `TCAdefaults` line in page TSconfig — is not noticed**, and the scenario
+keeps serving what the old code built. Every run with the variable set prints that
+warning. Run once without it to rebuild and refresh what is cached, or drop the cache
+with `typo3-playwright-clean --setup-cache`.
+
+Leave it off in CI, where a fresh checkout has nothing to reuse. It is refused in
+replay mode, where every scenario shares one database.
+On DDEV, `ddev playwright test --reuse-setup` sets it.
+
 ### Building your assets
 
 Every run builds your frontend assets before the first test. Tests against a stale
@@ -720,6 +745,12 @@ the replay database are never dropped. On DDEV, `ddev playwright clean` wraps it
 
 Databases kept for `typo3-playwright-inspect` are dropped too, since nothing marks
 them as worth keeping. Read what you need from them first.
+
+`--setup-cache` additionally drops every cached scenario setup:
+
+```bash
+npx typo3-playwright-clean --setup-cache
+```
 
 ### Replay mode
 

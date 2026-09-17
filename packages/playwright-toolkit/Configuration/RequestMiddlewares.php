@@ -7,6 +7,7 @@ use Plan2net\PlaywrightToolkit\Http\HealthCheckProvider;
 use Plan2net\PlaywrightToolkit\Http\InspectProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordedErrorProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
+use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
 
 return [
@@ -25,6 +26,12 @@ return [
         ],
         'plan2net/playwright-toolkit/test-database-cleanup' => [
             'target' => DatabaseCleanupProvider::class,
+            'before' => [
+                'typo3/cms-backend/backend-routing',
+            ],
+        ],
+        'plan2net/playwright-toolkit/test-setup-cache' => [
+            'target' => SetupCacheProvider::class,
             'before' => [
                 'typo3/cms-backend/backend-routing',
             ],

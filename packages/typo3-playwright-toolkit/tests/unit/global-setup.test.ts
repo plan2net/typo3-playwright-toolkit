@@ -298,3 +298,16 @@ describe('runHealthCheck', () => {
         expect(callCount).toBe(1)
     })
 })
+
+describe('globalSetup with the setup cache', () => {
+    it('refuses to start when replay mode is on too', async () => {
+        setToolkitConfig({ ...config, replay: true })
+        process.env.PW_REUSE_SETUP = '1'
+
+        try {
+            await expect(globalSetup()).rejects.toThrow(/replay/i)
+        } finally {
+            delete process.env.PW_REUSE_SETUP
+        }
+    })
+})

@@ -425,6 +425,12 @@ The one exception is `inspect`, which a browser opens. It takes a signed link
 instead of the header, because a browser cannot send one. See
 [Looking at a kept database](#looking-at-a-kept-database).
 
+`setup-cache/store` and `setup-cache/restore` serve the npm package's
+`--reuse-setup`: store records the rows a scenario's setup wrote as SQL under
+`var/playwright/setup-cache`, restore clones the template and replays them. A delta
+is applied and verified in one transaction, so a mismatch leaves the plain clone
+behind. They refuse the replay test ID, where one database is shared.
+
 A save through `record/edit` is also checked: a posted column that TCA does not have
 is answered with `422` and the column name, instead of being dropped in silence. Only
 a request carrying the secret is checked, so an editor saving a form is untouched.

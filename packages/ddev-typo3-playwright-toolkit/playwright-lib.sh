@@ -79,6 +79,9 @@ playwright_collect_args() {
             --skip-build)
                 export PW_SKIP_BUILD=1
                 ;;
+            --reuse-setup)
+                export PW_REUSE_SETUP=1
+                ;;
             # The default now. Swallowed, not forwarded: npx has no such flag.
             --build)
                 ;;

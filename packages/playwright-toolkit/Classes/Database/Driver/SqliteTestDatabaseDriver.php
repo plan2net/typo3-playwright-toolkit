@@ -11,6 +11,8 @@ use TYPO3\CMS\Core\Core\Environment;
 
 final class SqliteTestDatabaseDriver implements TestDatabaseDriver
 {
+    use SetupCacheDelta;
+
     /**
      * @var string
      */
@@ -100,9 +102,7 @@ final class SqliteTestDatabaseDriver implements TestDatabaseDriver
     {
         $connection = $this->connect($this->templateFile());
 
-        foreach ($seed->fixtures as $sql) {
-            $connection->exec($sql);
-        }
+        $this->applyFixtures($connection, $seed->fixtures);
 
         $connection->exec(
             'CREATE TABLE IF NOT EXISTS be_sessions (
@@ -245,6 +245,74 @@ final class SqliteTestDatabaseDriver implements TestDatabaseDriver
         }
 
         return ['ok' => true, 'detail' => sprintf('Test database %s is readable.', $file)];
+    }
+
+    #[\Override]
+    protected function connectionFor(string $testId): \PDO
+    {
+        return $this->connect($this->fileFor($testId));
+    }
+
+    #[\Override]
+    protected function templateConnection(): \PDO
+    {
+        return $this->connect($this->templateFile());
+    }
+
+    #[\Override]
+    protected function baseTables(\PDO $connection): array
+    {
+        $statement = $connection->query(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+        );
+
+        return array_values(array_map('strval', $statement->fetchAll(\PDO::FETCH_COLUMN)));
+    }
+
+    /** SQLite has no md5(), and the file is local, so hash in PHP. */
+    #[\Override]
+    protected function tableHash(\PDO $connection, string $table): string
+    {
+        $rows = $connection
+            ->query(sprintf('SELECT * FROM %s', $this->quoteIdentifier($table)))
+            ->fetchAll(\PDO::FETCH_ASSOC);
+
+        $hashes = array_map(
+            static fn(array $row): string => md5(serialize(array_map(
+                static fn(mixed $value): mixed => is_resource($value) ? stream_get_contents($value) : $value,
+                $row
+            ))),
+            $rows
+        );
+        sort($hashes);
+
+        return md5(implode('', $hashes));
+    }
+
+    #[\Override]
+    protected function quoteIdentifier(string $identifier): string
+    {
+        return '"' . str_replace('"', '""', $identifier) . '"';
+    }
+
+    protected function quoteValue(\PDO $connection, mixed $value): string
+    {
+        if (null === $value) {
+            return 'NULL';
+        }
+
+        $bytes = is_resource($value) ? (string) stream_get_contents($value) : (string) $value;
+
+        // PDO::quote refuses a null byte here; X'' is the blob literal sqlite takes.
+        return str_contains($bytes, "\0") ? "X'" . bin2hex($bytes) . "'" : $connection->quote($bytes);
+    }
+
+    #[\Override]
+    protected function applyFixtures(\PDO $connection, array $fixtures): void
+    {
+        foreach ($fixtures as $sql) {
+            $connection->exec($sql);
+        }
     }
 
     private function templateFile(): string

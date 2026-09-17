@@ -113,6 +113,35 @@ final class PostgresTestDatabaseDriver extends ServerTestDatabaseDriver
             SQL);
     }
 
+    protected function beginSnapshot(\PDO $connection): void
+    {
+        $connection->beginTransaction();
+        $connection->exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
+    }
+
+    #[\Override]
+    protected function currentSchemaExpression(): string
+    {
+        return 'current_schema()';
+    }
+
+    #[\Override]
+    protected function quoteIdentifier(string $identifier): string
+    {
+        return '"' . str_replace('"', '""', $identifier) . '"';
+    }
+
+    #[\Override]
+    protected function tableHash(\PDO $connection, string $table): string
+    {
+        $statement = $connection->query(sprintf(
+            'SELECT md5(coalesce(string_agg(h, \'\' ORDER BY h), \'\')) FROM (SELECT md5(t.*::text) AS h FROM %s t) hashed',
+            $this->quoteIdentifier($table)
+        ));
+
+        return (string) $statement->fetchColumn();
+    }
+
     #[\Override]
     protected function seededSessionInsert(): string
     {

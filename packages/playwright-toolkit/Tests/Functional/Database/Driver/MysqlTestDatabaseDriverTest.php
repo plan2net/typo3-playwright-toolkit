@@ -225,6 +225,18 @@ final class MysqlTestDatabaseDriverTest extends ServerTestDatabaseDriverTestCase
     }
 
     #[\Override]
+    protected static function binaryColumnType(): string
+    {
+        return 'blob';
+    }
+
+    #[\Override]
+    protected static function keyColumn(): string
+    {
+        return 'uid integer AUTO_INCREMENT PRIMARY KEY';
+    }
+
+    #[\Override]
     protected static function host(): string
     {
         return self::environment(self::HOST_VARIABLE, 'db-test-mysql');

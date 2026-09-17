@@ -245,6 +245,33 @@ Only `failed` is kept in the run records, so the problem stays visible. `absent`
 makes a repeated request safe: if an answer is lost, asking again returns `absent`
 instead of an error.
 
+## The setup cache
+
+Off unless the toolkit is run with `--reuse-setup`. The toolkit sends a key and the
+state its setup returned; the extension records the rows that setup wrote and replays
+them, so the two never exchange SQL.
+
+```
+POST /typo3/test-api/setup-cache/store    { "testId": "...", "key": "...", "state": {...}, "onlyIfPresent": false }
+POST /typo3/test-api/setup-cache/restore  { "testId": "...", "key": "..." }
+```
+
+The key is 32 lowercase hex characters, because the extension makes it a file name.
+`restore` answers the stored `state` beside its outcome:
+
+| Outcome | Meaning |
+|---|---|
+| `applied` | the delta is in the test database |
+| `absent` | nothing is cached for that key |
+| `refused` | the delta was built for another template or engine, or did not produce what it promised |
+| `stored` | `store` wrote the delta |
+
+**A delta is applied and verified in one transaction.** The header records the hash
+each table must have afterwards; a mismatch rolls back, so `refused` always leaves
+the plain clone the toolkit then runs its setup against. The replay test ID is
+refused outright: replay shares one database between scenarios, and a delta starts by
+emptying the tables it carries.
+
 ## What TYPO3 recorded
 
 While a test runs, TYPO3 writes its own errors into that test's database, in the

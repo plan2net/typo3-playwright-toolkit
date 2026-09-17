@@ -33,6 +33,10 @@ services:
     factory: ['Plan2net\PlaywrightToolkit\Security\TestApiSecret', 'inVarPath']
     public: true
 
+  Plan2net\PlaywrightToolkit\Database\SetupCache\SetupCache:
+    factory: ['Plan2net\PlaywrightToolkit\Database\SetupCache\SetupCache', 'inVarPath']
+    public: true
+
   Plan2net\PlaywrightToolkit\Database\Cleanup\DatabaseCleanup:
     public: true
 

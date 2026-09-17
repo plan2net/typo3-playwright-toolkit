@@ -257,6 +257,30 @@ database preparation and frontend build as `test`; `--skip-prepare` and
 `--skip-build` skip those steps. Playwright reports the results and updated
 snapshots, and the command returns its exit status.
 
+### Reusing a scenario's setup
+
+Building a scenario's content through the backend is the slowest part of a run. While
+you work on templates and stylesheets that content does not change, so
+`--reuse-setup` restores it from a cached copy instead of building it again:
+
+```bash
+ddev playwright test accordion --reuse-setup --project=chromium-desktop
+```
+
+The first run builds and caches; every later one replays the cache. What you cache is
+the rows your setup wrote — a couple of hundred kilobytes per scenario, under
+`var/playwright/setup-cache`.
+
+It is off by default, and it stays off in CI, because the cache only notices changes
+to your Playwright directory and to the test database template. **Change a
+`processDatamap` hook, a TCA default or a `TCAdefaults` line in TSconfig and the
+cache will not notice** — your tests keep running against content the old code built.
+Every run with the flag says so. After changing anything the backend writes records
+with, run once without the flag — that rebuilds and refreshes the cache — or throw it
+away with `ddev playwright clean --setup-cache`.
+
+Not combinable with replay, where every scenario shares one database.
+
 ### Replay
 
 `ddev playwright replay` runs every scenario's setup into one database on the
@@ -332,6 +356,7 @@ container.
 | `--no-cleanup` | off | Keeps the test databases and state files after the run |
 | `--skip-build` | off | Skips the asset build the toolkit runs before the tests |
 | `--skip-prepare` | off | Reuses the existing template database instead of rebuilding it |
+| `--reuse-setup` | off | Restores each scenario's content from cache instead of building it again |
 
 The build itself belongs to the npm package, which runs your `package.json` build
 script before every run. Set `build` in `defineToolkitConfig` to run something else;
