@@ -734,6 +734,10 @@ it under the fixture root, slugs keep no test-ID suffix, setups run once with no
 retry, and teardown drops nothing. The tests themselves are skipped, because their
 assertions and screenshot baselines belong to a per-test database.
 
+Since nothing is dropped, that database stays until the next replay run. Only the
+printed link expires: after 15 minutes, log in at your testing URL as usual, or run
+`typo3-playwright-inspect --replay` for a new one.
+
 ## Troubleshooting
 
 **"No test ID for this request".** The builder received a page that the toolkit

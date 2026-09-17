@@ -264,6 +264,10 @@ snapshots, and the command returns its exit status.
 tests themselves are skipped, and the run ends by printing a link that logs you in.
 Your project database is never touched.
 
+That database stays until the next replay run, so there is no hurry. Only the link
+expires, after 15 minutes: log in at the testing URL as you normally would, or run
+`ddev playwright inspect --replay` for a fresh one.
+
 ```bash
 ddev playwright replay                   # every scenario
 ddev playwright replay --grep accordion  # a subset

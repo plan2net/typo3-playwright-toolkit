@@ -5,7 +5,7 @@ import { httpCleanup, type CleanupClient } from './http/cleanup-client.js'
 import { readAttemptsFrom, readRegisteredTestIds } from './state/attempt-registry.js'
 import { listRunIds, runLastActiveMs, runPaths, runsRoot } from './state/run-namespace.js'
 import { assertDeletableDirectory, safeJoin } from './state/safe-paths.js'
-import { inspectUrl } from './inspect/token.js'
+import { INSPECT_TOKEN_LIFETIME_MS, inspectUrl } from './inspect/token.js'
 import { REPLAY_TEST_ID } from './contract.js'
 import { recordReplayTarget } from './inspect/replay-target.js'
 import { resolveApiSecret } from './http/api-secret.js'
@@ -355,9 +355,13 @@ async function globalTeardown(): Promise<void> {
         summary = await runTeardown(config, { cleanup: httpCleanup(config), preserve })
 
         if (undefined !== summary.replayUrl) {
+            const minutes = INSPECT_TOKEN_LIFETIME_MS / 60_000
             console.log(`\n[replay] Everything was replayed into the testing site's own database.`)
-            console.log(`[replay] This link logs you into its backend for the next 15 minutes:\n`)
+            console.log(`[replay] It stays there until the next replay run, so take your time.`)
+            console.log(`[replay] This link logs you in for the next ${minutes} minutes:\n`)
             console.log(`  ${summary.replayUrl}\n`)
+            console.log(`[replay] After that, log in as usual at ${config.testingURL}/typo3,`)
+            console.log(`[replay] or run "ddev playwright inspect --replay" for a fresh link.\n`)
         }
 
         // Replay keeps its one database regardless, so there is nothing to report.

@@ -10,6 +10,14 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Changed
+
+- **@plan2net/typo3-playwright-toolkit** — the hint a replay run ends with now says that
+  the replayed database stays until the next replay run, and that once the printed link
+  has expired you can log in at the testing URL as usual or mint a new link with
+  `typo3-playwright-inspect --replay`. Both READMEs say the same. Thanks to
+  [@ikonplant](https://github.com/ikonplant) for the valuable input on this hint.
+
 ## [0.19.0] - 2026-09-16
 
 Two fixes, both about a test run reaching further than it should. Preparing the
