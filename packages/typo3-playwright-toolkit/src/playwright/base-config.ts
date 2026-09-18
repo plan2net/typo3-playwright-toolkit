@@ -3,11 +3,18 @@ import type { ToolkitConfig } from '../config.js'
 
 const GLOBAL_SETUP = '@plan2net/typo3-playwright-toolkit/global-setup'
 const GLOBAL_TEARDOWN = '@plan2net/typo3-playwright-toolkit/global-teardown'
+const DEFAULT_MAX_DIFF_PIXELS = 20
 
 type UseOptions = NonNullable<PlaywrightTestConfig['use']>
 type ProjectConfig = NonNullable<PlaywrightTestConfig['projects']>[number]
 
 type ProtectedUse = Omit<UseOptions, 'baseURL' | 'serviceWorkers'>
+
+interface ScreenshotTolerance {
+    threshold?: number
+    maxDiffPixels?: number
+    maxDiffPixelRatio?: number
+}
 
 /**
  * Playwright's config without the four keys the toolkit depends on: the global
@@ -26,8 +33,7 @@ export function defineBasePlaywrightConfig(
 ): PlaywrightTestConfig {
     refuseProtectedOverrides(overrides)
 
-    const threshold = toolkitConfig.screenshot?.threshold ?? 0.2
-    const maxDiffPixelRatio = toolkitConfig.screenshot?.maxDiffPixelRatio ?? 0.005
+    const tolerance = screenshotTolerance(toolkitConfig.screenshot)
 
     const { use, expect, ...rest } = overrides
 
@@ -47,8 +53,8 @@ export function defineBasePlaywrightConfig(
         expect: {
             timeout: 5000,
             ...expect,
-            toHaveScreenshot: { maxDiffPixelRatio, threshold, ...expect?.toHaveScreenshot },
-            toMatchSnapshot: { maxDiffPixelRatio, threshold, ...expect?.toMatchSnapshot },
+            toHaveScreenshot: withTolerance(tolerance, expect?.toHaveScreenshot),
+            toMatchSnapshot: withTolerance(tolerance, expect?.toMatchSnapshot),
         },
         use: {
             ignoreHTTPSErrors: true,
@@ -59,6 +65,34 @@ export function defineBasePlaywrightConfig(
             serviceWorkers: 'block' as const,
         },
     })
+}
+
+/**
+ * `threshold` absorbs antialiasing noise per pixel; what is left is a few stray
+ * pixels, so the allowance is a fixed count. A share of the image grows with the
+ * shot and can hide a missing button in a full-page one. Setting a ratio replaces
+ * the count.
+ */
+function screenshotTolerance(screenshot: ToolkitConfig['screenshot']): ScreenshotTolerance {
+    const threshold = screenshot?.threshold ?? 0.2
+
+    if (screenshot?.maxDiffPixels !== undefined || screenshot?.maxDiffPixelRatio !== undefined) {
+        return { threshold, maxDiffPixels: screenshot.maxDiffPixels, maxDiffPixelRatio: screenshot.maxDiffPixelRatio }
+    }
+
+    return { threshold, maxDiffPixels: DEFAULT_MAX_DIFF_PIXELS }
+}
+
+/**
+ * Playwright applies both allowances and keeps the smaller one, so the default
+ * count has to go when the caller asks for a ratio, or it caps what they asked for.
+ */
+function withTolerance<T extends ScreenshotTolerance>(tolerance: ScreenshotTolerance, options: T | undefined): T {
+    if (options?.maxDiffPixels !== undefined || options?.maxDiffPixelRatio !== undefined) {
+        return { ...tolerance, maxDiffPixels: undefined, ...options }
+    }
+
+    return { ...tolerance, ...options } as T
 }
 
 // The type already excludes these, but a JS consumer or a cast gets past it.

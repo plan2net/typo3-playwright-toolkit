@@ -9,6 +9,8 @@ export type ContentTypeConstructor = new () => ContentBuilderInterface
 
 export interface ToolkitScreenshotConfig {
     threshold?: number
+    /** Defaults to 20. Setting either allowance replaces that default. */
+    maxDiffPixels?: number
     maxDiffPixelRatio?: number
 }
 

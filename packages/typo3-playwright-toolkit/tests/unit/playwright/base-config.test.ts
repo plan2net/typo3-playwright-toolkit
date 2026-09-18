@@ -31,6 +31,27 @@ describe('defineBasePlaywrightConfig', () => {
         expect(config.expect?.toHaveScreenshot).toMatchObject({ threshold: 0.3, maxDiffPixelRatio: 0.02 })
     })
 
+    // 0.5% of a 1920x2196 full-page shot is 21,081 pixels, enough to hide a
+    // button. The measured difference between two architectures is single pixels.
+    it('allows a fixed pixel count by default, not a share of the image', () => {
+        const config = defineBasePlaywrightConfig({ ...toolkitConfig(), screenshot: undefined }, { testDir: './tests' })
+
+        expect(config.expect?.toHaveScreenshot).toMatchObject({ threshold: 0.2, maxDiffPixels: 20 })
+        expect(config.expect?.toHaveScreenshot?.maxDiffPixelRatio).toBeUndefined()
+    })
+
+    // Playwright applies both allowances and keeps the smaller, so leaving the
+    // default count in place would cap a ratio the consumer asked for.
+    it('drops the default count when an override asks for a ratio', () => {
+        const config = defineBasePlaywrightConfig({ ...toolkitConfig(), screenshot: undefined }, {
+            testDir: './tests',
+            expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.01 } },
+        })
+
+        expect(config.expect?.toHaveScreenshot?.maxDiffPixelRatio).toBe(0.01)
+        expect(config.expect?.toHaveScreenshot?.maxDiffPixels).toBeUndefined()
+    })
+
     it('defaults the global hooks to the package entry points', () => {
         const config = defineBasePlaywrightConfig(toolkitConfig(), { testDir: './tests' })
 

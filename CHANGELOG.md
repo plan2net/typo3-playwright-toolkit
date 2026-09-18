@@ -27,6 +27,16 @@ the package a change belongs to.
 
 ### Changed
 
+- **@plan2net/typo3-playwright-toolkit** — screenshots now allow a fixed number of
+  differing pixels instead of a share of the image: `screenshot.maxDiffPixels`,
+  default `20`, replaces the `screenshot.maxDiffPixelRatio` default of `0.005`. A
+  ratio grows with the shot — half a percent of a 1920x2196 full-page screenshot is
+  21,081 pixels, enough to hide a button — while the difference between two machines
+  rendering the same page is single pixels. Setting either option yourself replaces
+  the default, so an existing `maxDiffPixelRatio` keeps working unchanged. **A suite
+  that relied on the old allowance will report differences it used to pass over**;
+  each one is a real difference between the page and its baseline, so read them
+  before re-recording.
 - **@plan2net/typo3-playwright-toolkit** — the hint a replay run ends with now says that
   the replayed database stays until the next replay run, and that once the printed link
   has expired you can log in at the testing URL as usual or mint a new link with

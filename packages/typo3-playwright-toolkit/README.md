@@ -597,7 +597,8 @@ Everything else:
 | `hideBeforeScreenshot` | `[]` | CSS selectors hidden before every screenshot |
 | `paths.sessionDir` | `<consumerRoot>/var/session` | TYPO3 session folder, cleaned after a run |
 | `prepareContext` | none | Runs on every context a test uses, for your own routes and stubs |
-| `screenshot.maxDiffPixelRatio` | `0.005` | How many pixels may differ, as a share of the image |
+| `screenshot.maxDiffPixels` | `20` | How many pixels may differ, as a count |
+| `screenshot.maxDiffPixelRatio` | none | How many pixels may differ, as a share of the image. Setting it replaces the count |
 | `screenshot.threshold` | `0.2` | How different one pixel may be, from 0 to 1 |
 | `setup.attemptTimeoutMs` | `90000` | How long one setup attempt may take |
 | `setup.attempts` | `2` | Attempts per setup, so `2` means one retry |
