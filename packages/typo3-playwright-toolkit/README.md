@@ -772,6 +772,15 @@ printed link expires: after 15 minutes, log in at your testing URL as usual, or 
 
 ## Troubleshooting
 
+> [!IMPORTANT]
+> **Tests that fail once and pass on the retry, on macOS.** If TYPO3 reports a
+> missing Fluid template, an unreadable l10n cache or a processed image whose type
+> could not be read, it is not your test. TYPO3 reads those files right after
+> checking they exist, and the mount your project is shared through does not keep
+> the two in step, so parallel workers hit misses. Put `var/cache` on a Docker
+> volume — [SETUP.md](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md#the-cache-directory-on-macos)
+> has the snippet.
+
 **"No test ID for this request".** The builder received a page that the toolkit
 fixtures did not create. Use the `builders` argument of `defineScenario`.
 

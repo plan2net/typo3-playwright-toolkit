@@ -308,6 +308,12 @@ it. [What a test looks like](README.md#what-a-test-looks-like) explains the piec
 and the [npm README](packages/typo3-playwright-toolkit/README.md#writing-a-test) documents the
 builders in full.
 
+> [!IMPORTANT]
+> On macOS, put `var/cache` on a Docker volume before you judge any flakiness:
+> [The cache directory, on macOS](#the-cache-directory-on-macos). Tests that fail
+> once and pass on the retry, with TYPO3 reporting a missing Fluid template or an
+> unreadable processed image, are the project mount rather than your tests.
+
 What a run does, step by step:
 
 <picture>
@@ -449,6 +455,40 @@ in both containers, and neither needs the other's disk.
 
 Nothing else changes. The npm package speaks only HTTP, so it needs no database
 client and no credentials, and the test ID travels in a request header either way.
+
+### The cache directory, on macOS
+
+Put `var/cache` on a Docker volume:
+
+```yaml
+# .ddev/docker-compose.varcache.yaml
+services:
+    web:
+        volumes:
+            - varcache:/var/www/html/var/cache
+
+volumes:
+    varcache:
+```
+
+A fresh volume belongs to root, so hand it over once after the first start:
+`ddev exec 'sudo chown -R $(id -u):$(id -g) var/cache'`.
+
+Left where it is, `var/cache` sits on the mount your project is shared through, and
+that mount does not keep a file's existence and its contents in step. TYPO3 checks
+that a cache file exists and then reads it, so with several workers a read fails on a
+file the check just confirmed: a page without its Fluid templates, a processed image
+whose type could not be read. It passes on the retry, which makes it look like flaky
+tests. Cache entries are derived data nothing outside the container needs, so moving
+them is free, and faster.
+
+`public/fileadmin/_processed_*` is exposed the same way, and harder to move, since it
+has to stay where the site serves it from.
+
+> [!NOTE]
+> Mount every cache directory you moved. A project that points a cache somewhere
+> else — say `cacheDirectory` for the `core` cache in a context of its own — keeps
+> the same flaky tests at the new path until that path is on a volume too.
 
 ## Without DDEV
 
