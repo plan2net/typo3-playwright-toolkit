@@ -417,9 +417,21 @@ services:
 ```
 
 The version has to match the `@playwright/test` your project installed. Add
-`platform: linux/amd64` if you compare screenshots across machines: rasterisation
-happens where the browser runs, so an arm64 laptop and an amd64 runner disagree on
-the same page.
+`platform: linux/amd64` if you compare screenshots across machines.
+
+Rasterisation is not what makes the difference: the same image tag renders a page
+identically on either architecture, as long as the layout decides the widths. Text
+measurement is. Where a width comes from the content, a fractional difference changes
+the outcome — an auto-layout table allocates its columns differently and the cells
+re-wrap, so the element ends up a different height. Fractional device pixel ratios
+show it for the same reason, which is why a mobile emulation project feels it most.
+
+Below Playwright 1.63 the pin also decides *which browser* you get: amd64 runs
+Google's Chrome for Testing and arm64 runs Playwright's own Chromium build. 1.63
+gives both platforms the Chrome for Testing build.
+
+One thing no platform pin covers: a site that serves WebP or AVIF generated in the
+container depends on that encoder's version, not on the browser.
 
 ### The run in a container of its own
 
