@@ -27,6 +27,11 @@ the package a change belongs to.
 
 ### Changed
 
+- **all three packages** — the browser-server documentation now recommends Playwright
+  1.63. From that version both platforms run the same Chrome for Testing build, so a
+  screenshot recorded on one architecture reproduces on the other and the container
+  needs no `platform:` pin; below it, amd64 and arm64 run different browsers that
+  measure text differently. The supported range is unchanged.
 - **@plan2net/typo3-playwright-toolkit** — screenshots now allow a fixed number of
   differing pixels instead of a share of the image: `screenshot.maxDiffPixels`,
   default `20`, replaces the `screenshot.maxDiffPixelRatio` default of `0.005`. A

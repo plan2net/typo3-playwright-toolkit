@@ -417,24 +417,22 @@ The server is one container of your own, in
 ```yaml
 services:
     playwright-server:
-        image: mcr.microsoft.com/playwright:v1.61.1-noble
+        image: mcr.microsoft.com/playwright:v1.63.0-noble
         command:
-            ['npx', '-y', 'playwright@1.61.1', 'run-server', '--port', '3000', '--host', '0.0.0.0']
+            ['npx', '-y', 'playwright@1.63.0', 'run-server', '--port', '3000', '--host', '0.0.0.0']
 ```
 
-The version has to match the `@playwright/test` your project installed. Add
-`platform: linux/amd64` if you compare screenshots across machines.
+The version has to match the `@playwright/test` your project installed, and it decides
+whether you also need a `platform:` line.
 
-Rasterisation is not what makes the difference: the same image tag renders a page
-identically on either architecture, as long as the layout decides the widths. Text
-measurement is. Where a width comes from the content, a fractional difference changes
-the outcome — an auto-layout table allocates its columns differently and the cells
-re-wrap, so the element ends up a different height. Fractional device pixel ratios
-show it for the same reason, which is why a mobile emulation project feels it most.
+From 1.63 you do not: both platforms run the same Chrome for Testing build, so a
+screenshot recorded on one reproduces on the other. Below 1.63 they run different
+browsers that measure text differently, so add `platform: linux/amd64` there if you
+compare screenshots across machines.
 
-Below Playwright 1.63 the pin also decides *which browser* you get: amd64 runs
-Google's Chrome for Testing and arm64 runs Playwright's own Chromium build. 1.63
-gives both platforms the Chrome for Testing build.
+An upgrade can move screenshots, so check them as part of it. The odd shot may differ
+by a few dozen pixels between machines as well; give that one its own allowance
+instead of widening the tolerance for the suite.
 
 One thing no platform pin covers: a site that serves WebP or AVIF generated in the
 container depends on that encoder's version, not on the browser.
