@@ -86,6 +86,35 @@ final class TestContextTest extends TestCase
         );
     }
 
+    // TYPO3 caches the resolved site configuration, %env() placeholders and all,
+    // under a key that carries no context, in a directory that carries none either.
+    // Development and Testing share one checkout here, so whichever warms it first
+    // would decide the other's environment.
+    #[Test]
+    public function theTestingContextCachesItsCoreEntriesApart(): void
+    {
+        unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
+        unset($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']);
+
+        $settings = TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql']);
+
+        self::assertSame(
+            Environment::getVarPath() . '/cache-testing/core/',
+            $settings['SYS/caching/cacheConfigurations/core/options/cacheDirectory'] ?? null
+        );
+    }
+
+    #[Test]
+    public function aCoreCacheDirectoryTheProjectSetIsLeftAlone(): void
+    {
+        unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['core']['options']['cacheDirectory'] = '/somewhere/else/';
+
+        $settings = TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql']);
+
+        self::assertArrayNotHasKey('SYS/caching/cacheConfigurations/core/options/cacheDirectory', $settings);
+    }
+
     #[Test]
     public function resolvedSettingsCarryErrorCaptureForAProjectThatAppliesThemItself(): void
     {

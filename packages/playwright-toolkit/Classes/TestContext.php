@@ -8,6 +8,7 @@ use Plan2net\PlaywrightToolkit\Compatibility\RetryingProcessingFolderStorage;
 use Plan2net\PlaywrightToolkit\Database\DatabaseInitializer;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
 use Plan2net\PlaywrightToolkit\Log\ErrorCapture;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
@@ -48,7 +49,7 @@ final class TestContext
     {
         /** @var array<string, mixed> $logConfiguration */
         $logConfiguration = $GLOBALS['TYPO3_CONF_VARS']['LOG'] ?? [];
-        $settings = ErrorCapture::settings($logConfiguration);
+        $settings = ErrorCapture::settings($logConfiguration) + self::coreCacheSettings();
         // 12.4 takes a folder a parallel request created; 11.5 fails the request.
         if ((new Typo3Version())->getMajorVersion() < 12) {
             $settings['SYS/Objects/' . ResourceStorage::class . '/className'] = RetryingProcessingFolderStorage::class;
@@ -93,5 +94,25 @@ final class TestContext
         $fromHeader = trim((string) ($_SERVER[self::TEST_ID_SERVER_KEY] ?? ''));
 
         return '' !== $fromHeader ? $fromHeader : trim((string) ($_COOKIE[self::TEST_ID_COOKIE] ?? ''));
+    }
+
+    /**
+     * The core cache holds the site configuration with its %env() placeholders
+     * already resolved, under a key that names no context and in a directory that
+     * names none either. This context shares its checkout with the one you develop
+     * in, so without a directory of its own, whichever warms the cache first
+     * decides what the other one reads.
+     *
+     * @return array<string, string>
+     */
+    private static function coreCacheSettings(): array
+    {
+        if (isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['core']['options']['cacheDirectory'])) {
+            return [];
+        }
+
+        return [
+            'SYS/caching/cacheConfigurations/core/options/cacheDirectory' => Environment::getVarPath() . '/cache-testing/core/',
+        ];
     }
 }

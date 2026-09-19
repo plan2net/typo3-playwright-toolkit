@@ -10,6 +10,16 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **plan2net/playwright-toolkit** — the Testing context now caches its `core` entries
+  in `var/cache-testing/core/` instead of sharing `var/cache/` with the context you
+  develop in. TYPO3 stores the resolved site configuration there, `%env()`
+  placeholders and all, under a key that names no context — so on a project whose
+  site configuration reads the environment, whichever context warmed the cache first
+  decided what the other one saw. A project that set `cacheDirectory` itself keeps
+  its own value.
+
 ### Added
 
 - **all three packages** — `ddev playwright test --reuse-setup` (`PW_REUSE_SETUP=1`)

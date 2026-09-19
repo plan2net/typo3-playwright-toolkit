@@ -484,9 +484,10 @@ them is free, and faster.
 has to stay where the site serves it from.
 
 > [!NOTE]
-> Mount every cache directory you moved. A project that points a cache somewhere
-> else — say `cacheDirectory` for the `core` cache in a context of its own — keeps
-> the same flaky tests at the new path until that path is on a volume too.
+> Mount every cache directory you moved, including `var/cache-testing`, which the
+> toolkit gives the `core` cache so the Testing context does not share it with the
+> one you develop in. A cache you relocated yourself keeps the same flaky tests at
+> the new path until that path is on a volume too.
 
 ## Without DDEV
 
