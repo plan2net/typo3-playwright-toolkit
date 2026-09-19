@@ -100,6 +100,25 @@ final class ProcessedFileIsolationTest extends FunctionalTestCase
     }
 
     /**
+     * Cleanup runs after the test database was dropped, in a request that carries
+     * no test ID and therefore reads the base database, where no storage is left to
+     * ask. The roots recorded while the folders were created are what it removes.
+     */
+    #[Test]
+    public function removesTheFolderUnderARecordedRoot(): void
+    {
+        $root = Environment::getPublicPath() . '/recorded-storage';
+        $folder = $root . '/' . ProcessedFileIsolation::folderFor(self::TEST_ID);
+        mkdir($folder, 0777, true);
+        touch($folder . '/csm_image_0123456789.jpg');
+        ProcessedFileIsolation::record($root);
+
+        $this->get(ProcessedFileIsolation::class)->remove(self::TEST_ID);
+
+        self::assertDirectoryDoesNotExist($folder);
+    }
+
+    /**
      * is_dir() follows a symlink, so recursing into one would empty whatever it
      * points at — outside the folder we own.
      */
@@ -112,6 +131,7 @@ final class ProcessedFileIsolationTest extends FunctionalTestCase
         mkdir($outside, 0777, true);
         touch($outside . '/keep.txt');
         symlink($outside, $folder . '/escape');
+        ProcessedFileIsolation::record($this->storageBasePath());
 
         $this->get(ProcessedFileIsolation::class)->remove(self::TEST_ID);
 
@@ -127,6 +147,7 @@ final class ProcessedFileIsolationTest extends FunctionalTestCase
         mkdir($outside, 0777, true);
         touch($outside . '/keep.txt');
         symlink($outside, $folder);
+        ProcessedFileIsolation::record($this->storageBasePath());
 
         $this->get(ProcessedFileIsolation::class)->remove(self::TEST_ID);
 

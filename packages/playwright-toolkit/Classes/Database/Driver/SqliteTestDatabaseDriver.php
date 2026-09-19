@@ -49,6 +49,15 @@ final class SqliteTestDatabaseDriver implements TestDatabaseDriver
     }
 
     #[\Override]
+    public function baseConnectionOverrides(): array
+    {
+        return [
+            'DB/Connections/Default/driver' => $this->driverName,
+            'DB/Connections/Default/path' => $this->directory . '/base.sqlite',
+        ];
+    }
+
+    #[\Override]
     public function templateConnectionOverrides(): array
     {
         return [

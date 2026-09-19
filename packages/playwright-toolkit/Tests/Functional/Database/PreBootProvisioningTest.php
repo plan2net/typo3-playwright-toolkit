@@ -149,10 +149,11 @@ final class PreBootProvisioningTest extends FunctionalTestCase
         );
     }
 
-    // A project that merges the paths itself gets them from here, and a database
-    // nothing created would fail every request that follows.
+    // A project that merges the paths itself gets them from here, so they must name
+    // the base database: the per-test one nothing created would fail every request
+    // that follows, and the project's own would put the Testing context on real data.
     #[Test]
-    public function noConnectionIsNamedWhenNothingWasCreated(): void
+    public function theBaseDatabaseIsNamedWhenNothingWasCreated(): void
     {
         $this->get(TemplatePreparer::class)->prepare();
         $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
@@ -164,11 +165,10 @@ final class PreBootProvisioningTest extends FunctionalTestCase
             $settings = TestContext::resolveCurrentRequestSettings($projectConnection);
         });
 
-        self::assertSame([], array_filter(
-            $settings,
-            static fn(string $path): bool => str_starts_with($path, 'DB/'),
-            ARRAY_FILTER_USE_KEY
-        ));
+        self::assertSame(
+            Environment::getVarPath() . '/test-databases/base.sqlite',
+            $settings['DB/Connections/Default/path']
+        );
     }
 
     private function driver(): SqliteTestDatabaseDriver

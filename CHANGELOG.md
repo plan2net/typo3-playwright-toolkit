@@ -12,6 +12,10 @@ the package a change belongs to.
 
 ### Fixed
 
+- **plan2net/playwright-toolkit** — a request or command in the Testing context that
+  carries no test ID connects to the test service's own `db` rather than the database
+  the project normally uses. A malformed ID names no database and lands there too.
+
 - **plan2net/playwright-toolkit** — the Testing context now caches its `core` entries
   in `var/cache-testing/core/` instead of sharing `var/cache/` with the context you
   develop in. TYPO3 stores the resolved site configuration there, `%env()`

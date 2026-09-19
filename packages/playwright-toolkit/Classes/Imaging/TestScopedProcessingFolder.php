@@ -58,6 +58,7 @@ final class TestScopedProcessingFolder
         }
 
         GeneralUtility::mkdir_deep($root . '/' . ProcessedFileIsolation::folderFor($testId));
+        ProcessedFileIsolation::record($root);
     }
 
     // The fallback storage is mounted on the public path, where TYPO3 processes

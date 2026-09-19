@@ -118,6 +118,21 @@ final class TestScopedProcessingFolderTest extends FunctionalTestCase
         self::assertDirectoryDoesNotExist($folder);
     }
 
+    // Cleanup runs in a request that can no longer read the storage, so removing a
+    // configured storage's folder needs the root this listener recorded.
+    #[Test]
+    public function cleanupRemovesWhatAConfiguredStorageProcessed(): void
+    {
+        $_SERVER[TestContext::TEST_ID_SERVER_KEY] = self::TEST_ID;
+        $this->get(StorageRepository::class)->findByUid(1);
+        $folder = rtrim(Environment::getPublicPath(), '/') . '/fileadmin/'
+            . ProcessedFileIsolation::folderFor(self::TEST_ID);
+
+        $this->get(ProcessedFileIsolation::class)->remove(self::TEST_ID);
+
+        self::assertDirectoryDoesNotExist($folder);
+    }
+
     private function processingFolderOf(int $storageUid): string
     {
         $storage = $this->get(StorageRepository::class)->findByUid($storageUid);

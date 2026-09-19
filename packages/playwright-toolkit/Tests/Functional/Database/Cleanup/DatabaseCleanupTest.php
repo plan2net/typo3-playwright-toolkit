@@ -94,6 +94,7 @@ final class DatabaseCleanupTest extends FunctionalTestCase
         $folder = $this->processedFolder();
         mkdir($folder, 0777, true);
         touch($folder . '/csm_image_0123456789.jpg');
+        ProcessedFileIsolation::record(dirname($folder));
 
         self::assertSame(CleanupOutcome::Dropped, $this->cleanup()->drop($this->driver(), self::TEST_ID));
         self::assertDirectoryDoesNotExist($folder);

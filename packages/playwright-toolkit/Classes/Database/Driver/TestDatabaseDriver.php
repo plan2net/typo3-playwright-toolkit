@@ -16,6 +16,11 @@ interface TestDatabaseDriver
     /**
      * @return array<string, mixed>
      */
+    public function baseConnectionOverrides(): array;
+
+    /**
+     * @return array<string, mixed>
+     */
     public function templateConnectionOverrides(): array;
 
     /**

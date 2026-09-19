@@ -160,9 +160,9 @@ Testing one and require that from `additional.php` behind the same check.
 > `ConfigurationManager::getAdditionalConfigurationFileLocation()` is the authority if
 > you need to check a version not listed here.
 
-It reads your `Default` connection and writes the per-test one back. If a request
-carries no test ID, nothing changes and nothing is created: the site uses its normal
-database.
+It reads your `Default` connection and writes the per-test one back. Without a test ID
+it creates nothing and points the connection at the test service's own `db`, so the
+Testing context never reaches the database you develop on.
 
 #### Which of the two calls
 

@@ -55,6 +55,9 @@ final class TestContext
             $settings['SYS/Objects/' . ResourceStorage::class . '/className'] = RetryingProcessingFolderStorage::class;
         }
 
+        $driver = TestDatabaseDriverFactory::fromConnection($defaultConnection);
+        $settings += $driver->baseConnectionOverrides();
+
         $testId = self::testId();
         if ('' === $testId) {
             return $settings;
@@ -66,7 +69,7 @@ final class TestContext
             return $settings;
         }
 
-        return $settings + TestDatabaseDriverFactory::fromConnection($defaultConnection)->connectionOverrides($testId);
+        return $driver->connectionOverrides($testId) + $settings;
     }
 
     // Malformed reads as absent, so a request the toolkit did not send changes

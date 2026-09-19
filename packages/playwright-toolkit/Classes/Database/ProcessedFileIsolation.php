@@ -6,16 +6,10 @@ namespace Plan2net\PlaywrightToolkit\Database;
 
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
-use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class ProcessedFileIsolation
 {
-    public function __construct(
-        private readonly StorageRepository $storageRepository,
-    ) {
-    }
-
     public static function folderFor(string $testId): string
     {
         return '_processed_' . $testId;
@@ -43,6 +37,23 @@ final class ProcessedFileIsolation
 
         // basePath comes from the database, so ".." would resolve above the site.
         return GeneralUtility::isAllowedAbsPath($root) ? $root : null;
+    }
+
+    /**
+     * Recorded while the test's own database is open, because cleanup runs after it
+     * was dropped: that request carries no test ID, so it reads the base database,
+     * which has no storage row to ask. One file per root, written once, so parallel
+     * requests never race over a list.
+     */
+    public static function record(string $root): void
+    {
+        $file = self::recordDirectory() . '/' . sha1($root);
+        if (is_file($file)) {
+            return;
+        }
+
+        GeneralUtility::mkdir_deep(self::recordDirectory());
+        GeneralUtility::writeFile($file, $root);
     }
 
     public function remove(string $testId): void
@@ -83,17 +94,24 @@ final class ProcessedFileIsolation
      */
     private function processingRoots(): array
     {
-        // The fallback storage carries no row, and processes below the public path.
+        // The fallback storage processes below the public path, and is recorded
+        // like the others, so it is in the list whether anything ran or not.
         $roots = [self::assetsPath()];
 
-        foreach ($this->storageRepository->findAll() as $storage) {
-            $root = self::rootFor($storage);
-            if (null !== $root) {
+        foreach ((array) glob(self::recordDirectory() . '/*') as $file) {
+            $root = is_string($file) ? rtrim((string) file_get_contents($file), "\n") : '';
+            // The file is ours, but a root is what rmdir() is pointed at.
+            if ('' !== $root && GeneralUtility::isAllowedAbsPath($root)) {
                 $roots[] = $root;
             }
         }
 
         return $roots;
+    }
+
+    private static function recordDirectory(): string
+    {
+        return Environment::getVarPath() . '/playwright/processing-roots';
     }
 
     private static function assetsPath(): string

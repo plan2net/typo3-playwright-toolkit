@@ -328,8 +328,8 @@ The six steps assume an empty directory. A project that already runs Playwright 
 most of its configuration and none of its tests.
 
 Do not run the old tests and the new ones together. A file that does not come from
-`defineScenario` sends no test ID, and a request without one gets the site's ordinary
-database. Nothing fails: the test passes, against content the toolkit never built.
+`defineScenario` sends no test ID, and a request without one gets the test service's
+base database. Nothing fails: the test passes, against content the toolkit never built.
 Give the toolkit a `testDir` of its own, and move a test into it once you have
 rewritten it as a scenario.
 

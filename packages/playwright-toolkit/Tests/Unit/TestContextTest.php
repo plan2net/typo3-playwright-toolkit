@@ -70,7 +70,7 @@ final class TestContextTest extends TestCase
     }
 
     #[Test]
-    public function applyingWithoutATestIdLeavesTheProjectDatabaseAlone(): void
+    public function applyingWithoutATestIdMovesOffTheProjectDatabase(): void
     {
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
         $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] = [
@@ -80,10 +80,8 @@ final class TestContextTest extends TestCase
 
         TestContext::configureCurrentRequest();
 
-        self::assertSame(
-            'the_real_database',
-            $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['dbname']
-        );
+        self::assertSame('db', $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['dbname']);
+        self::assertSame('db-test', $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default']['host']);
     }
 
     // TYPO3 caches the resolved site configuration, %env() placeholders and all,
@@ -164,11 +162,14 @@ final class TestContextTest extends TestCase
     }
 
     #[Test]
-    public function anEmptyTestIdNamesNoDatabase(): void
+    public function anEmptyTestIdStillMovesTheConnectionToTheTestService(): void
     {
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
 
-        self::assertSame([], self::databasePaths(TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql'])));
+        $settings = TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql']);
+
+        self::assertSame('db-test', $settings['DB/Connections/Default/host']);
+        self::assertSame('db', $settings['DB/Connections/Default/dbname']);
     }
 
     /**
@@ -186,18 +187,21 @@ final class TestContextTest extends TestCase
     }
 
     /**
-     * A request the toolkit did not send must be left alone, whatever it carries in
-     * the header. Changing the site's database off a malformed one is the danger,
-     * and DatabaseName::assertProvisionable() is still there if one ever gets that far.
+     * A header the toolkit did not send must not name the database. It lands on the
+     * fixed base one, and DatabaseName::assertProvisionable() is still there if one
+     * ever gets that far.
      */
     #[Test]
     #[DataProvider('malformedTestIds')]
-    public function usesTheProjectDatabaseForAMalformedTestId(string $testId): void
+    public function usesTheBaseDatabaseForAMalformedTestId(string $testId): void
     {
         $_SERVER[TestContext::TEST_ID_SERVER_KEY] = $testId;
 
         self::assertSame('', TestContext::testId());
-        self::assertSame([], self::databasePaths(TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql'])));
+        self::assertSame(
+            'db',
+            TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql'])['DB/Connections/Default/dbname']
+        );
     }
 
     #[Test]
@@ -254,20 +258,6 @@ final class TestContextTest extends TestCase
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
 
         self::assertNull(TestContext::malformedTestId());
-    }
-
-    /**
-     * @param array<string, mixed> $settings
-     *
-     * @return array<string, mixed>
-     */
-    private static function databasePaths(array $settings): array
-    {
-        return array_filter(
-            $settings,
-            static fn(string $path): bool => str_starts_with($path, 'DB/'),
-            ARRAY_FILTER_USE_KEY
-        );
     }
 
     /**

@@ -17,6 +17,11 @@ abstract class ServerTestDatabaseDriver implements TestDatabaseDriver
      */
     public const TEMPLATE_DATABASE = 'playwright_db_template';
 
+    /**
+     * @var string
+     */
+    public const BASE_DATABASE = 'db';
+
     protected readonly string $driverName;
 
     // final, so onTestServiceFor()'s `new static()` cannot meet a child that took
@@ -40,6 +45,12 @@ abstract class ServerTestDatabaseDriver implements TestDatabaseDriver
         }
 
         return $this->overridesFor($this->databaseFor($testId));
+    }
+
+    #[\Override]
+    public function baseConnectionOverrides(): array
+    {
+        return $this->overridesFor(self::BASE_DATABASE);
     }
 
     #[\Override]
