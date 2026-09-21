@@ -10,6 +10,53 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-09-21
+
+Building a scenario's content through the backend is the slowest part of a run, and
+`--reuse-setup` skips it: the rows a setup wrote are cached and replayed into the
+clone every run already makes. Two fixes keep the Testing context off the site you
+develop on, its database and its core cache both. And a screenshot now allows twenty
+differing pixels rather than half a percent of the image, which on a full-page shot
+was twenty thousand of them.
+
+### Added
+
+- **all three packages** — `ddev playwright test --reuse-setup` (`PW_REUSE_SETUP=1`)
+  restores a scenario's content from a cached copy instead of building it again
+  through the backend, which is the slowest part of a run. The extension records the
+  rows a setup wrote as SQL under `var/playwright/setup-cache` and
+  replays them into the clone that every run already makes; the delta is applied and
+  verified in one transaction, so a mismatch leaves the plain clone behind. The key
+  covers your Playwright directory and the test database template, and nothing else:
+  a change to your project's PHP, TCA or TSconfig is **not** noticed, which is why the
+  flag is off by default, absent from CI, and warns on every run it is on. A run
+  without the flag refreshes what is already cached;
+  `typo3-playwright-clean --setup-cache` drops it. Works on every supported engine,
+  and is refused in replay mode, where all scenarios share one database.
+
+### Changed
+
+- **all three packages** — the browser-server documentation now recommends Playwright
+  1.63. From that version both platforms run the same Chrome for Testing build, so a
+  screenshot recorded on one architecture reproduces on the other and the container
+  needs no `platform:` pin; below it, amd64 and arm64 run different browsers that
+  measure text differently. The supported range is unchanged.
+- **@plan2net/typo3-playwright-toolkit** — screenshots now allow a fixed number of
+  differing pixels instead of a share of the image: `screenshot.maxDiffPixels`,
+  default `20`, replaces the `screenshot.maxDiffPixelRatio` default of `0.005`. A
+  ratio grows with the shot — half a percent of a 1920x2196 full-page screenshot is
+  21,081 pixels, enough to hide a button — while the difference between two machines
+  rendering the same page is single pixels. Setting either option yourself replaces
+  the default, so an existing `maxDiffPixelRatio` keeps working unchanged. **A suite
+  that relied on the old allowance will report differences it used to pass over**;
+  each one is a real difference between the page and its baseline, so read them
+  before re-recording.
+- **@plan2net/typo3-playwright-toolkit** — the hint a replay run ends with now says that
+  the replayed database stays until the next replay run, and that once the printed link
+  has expired you can log in at the testing URL as usual or mint a new link with
+  `typo3-playwright-inspect --replay`. Both READMEs say the same. Thanks to
+  [@ikonplant](https://github.com/ikonplant) for the valuable input on this hint.
+
 ### Fixed
 
 - **plan2net/playwright-toolkit** — a request or command in the Testing context that
@@ -972,7 +1019,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.19.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.20.0...main
+[0.20.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.1...v0.18.0
 [0.17.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.0...v0.17.1
