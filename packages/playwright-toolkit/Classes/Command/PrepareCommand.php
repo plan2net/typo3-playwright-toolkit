@@ -76,10 +76,24 @@ final class PrepareCommand extends Command
         }
 
         $result = $this->preparer->prepare((bool) $input->getOption('force'));
+        $io->writeln(self::phaseLine($result['timings']));
         $io->success($result['built']
             ? 'Test database template prepared. Seed fingerprint: ' . $result['fingerprint']
             : 'Test database template already current, nothing rebuilt. Pass --force to rebuild anyway.');
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @param array<string, float> $timings
+     */
+    private static function phaseLine(array $timings): string
+    {
+        $phases = [];
+        foreach ($timings as $phase => $milliseconds) {
+            $phases[] = sprintf('%s %.1fs', $phase, $milliseconds / 1000);
+        }
+
+        return 'Time spent: ' . implode(' · ', $phases);
     }
 }

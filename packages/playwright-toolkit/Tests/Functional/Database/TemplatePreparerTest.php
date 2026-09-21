@@ -111,6 +111,25 @@ final class TemplatePreparerTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function reportsHowLongEachPhaseTook(): void
+    {
+        $timings = $this->get(TemplatePreparer::class)->prepare()['timings'];
+
+        self::assertSame(['sources', 'schema', 'fixtures', 'media', 'manifest'], array_keys($timings));
+        self::assertGreaterThan(0, $timings['schema']);
+    }
+
+    #[Test]
+    public function reportsTheSourcesOfAPrepareThatBuiltNothing(): void
+    {
+        $this->get(TemplatePreparer::class)->prepare();
+
+        $timings = $this->get(TemplatePreparer::class)->prepare()['timings'];
+
+        self::assertSame(['sources', 'manifest'], array_keys($timings));
+    }
+
+    #[Test]
     public function aFinishedTemplateCarriesTheFingerprintThatWasReturned(): void
     {
         $fingerprint = $this->get(TemplatePreparer::class)->prepare()['fingerprint'];

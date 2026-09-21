@@ -28,7 +28,7 @@ final class TemplatePreparer
     }
 
     /**
-     * @return array{fingerprint: string, built: bool}
+     * @return array{fingerprint: string, built: bool, timings: array<string, float>}
      */
     public function prepare(bool $force = false): array
     {
@@ -37,11 +37,15 @@ final class TemplatePreparer
             $GLOBALS['TYPO3_CONF_VARS']['DB']['Connections']['Default'] ?? []
         );
 
+        // Timed outside the build: resolving the schema against TCA happens here, so
+        // a prepare that rebuilds nothing still pays for it.
+        $startedAt = hrtime(true);
         $snapshot = $this->seedSources->snapshot($configuration);
+        $timings = ['sources' => self::sinceMs($startedAt)];
         $mediaPath = self::mediaDirectory($configuration);
         $mediaStorage = $configuration->mediaStorage;
 
-        return $this->lockFiles->exclusively(LockFiles::TEMPLATE_LOCK, function () use ($driver, $snapshot, $force, $mediaPath, $mediaStorage): array {
+        return $this->lockFiles->exclusively(LockFiles::TEMPLATE_LOCK, function () use ($driver, $snapshot, $force, $mediaPath, $mediaStorage, $timings): array {
             // The fingerprint is written last, so a build that died in the middle
             // reads as null here and is rebuilt. It hashes the media sources, not
             // what was published from them, so the destination is checked too.
@@ -49,22 +53,36 @@ final class TemplatePreparer
                 && $driver->templateFingerprint() === $snapshot->fingerprint
                 && (null === $mediaPath || $this->mediaSeeder->destinationMatches($mediaPath, $mediaStorage))
             ) {
+                $startedAt = hrtime(true);
                 $this->publishManifest($driver, $mediaPath, $mediaStorage);
+                $timings['manifest'] = self::sinceMs($startedAt);
 
-                return ['fingerprint' => $snapshot->fingerprint, 'built' => false];
+                return ['fingerprint' => $snapshot->fingerprint, 'built' => false, 'timings' => $timings];
             }
 
+            $startedAt = hrtime(true);
             $driver->createEmptyTemplate();
             $this->buildSchema($driver, $snapshot->schemaStatements);
+            $timings['schema'] = self::sinceMs($startedAt);
+
+            $startedAt = hrtime(true);
             $driver->seedTemplate($snapshot->templateSeed());
+            $timings['fixtures'] = self::sinceMs($startedAt);
+
+            $startedAt = hrtime(true);
             $this->seedMedia($driver, $mediaPath, $mediaStorage);
+            $timings['media'] = self::sinceMs($startedAt);
+
             // Before the fingerprint, so a manifest that could not be written
             // leaves the template unfinalised rather than describing rows no
             // caller can trust.
+            $startedAt = hrtime(true);
             $this->publishManifest($driver, $mediaPath, $mediaStorage);
+            $timings['manifest'] = self::sinceMs($startedAt);
+
             $driver->finaliseTemplate($snapshot->fingerprint);
 
-            return ['fingerprint' => $snapshot->fingerprint, 'built' => true];
+            return ['fingerprint' => $snapshot->fingerprint, 'built' => true, 'timings' => $timings];
         });
     }
 
@@ -85,6 +103,11 @@ final class TemplatePreparer
             implode(', ', $others),
             $failure
         );
+    }
+
+    private static function sinceMs(float|int $startedAt): float
+    {
+        return (hrtime(true) - $startedAt) / 1_000_000;
     }
 
     private static function mediaDirectory(ToolkitConfiguration $configuration): ?string

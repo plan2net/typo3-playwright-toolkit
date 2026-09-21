@@ -10,6 +10,18 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **plan2net/playwright-toolkit** — `playwright:prepare` says where a build spent its
+  time:
+
+  ```
+  Time spent: sources 12.3s · schema 41.0s · fixtures 2.1s · media 380.4s · manifest 0.2s
+  ```
+
+  `sources` reads the fixtures and resolves the schema against TCA, which a prepare
+  that then rebuilds nothing pays for as well, so it is reported on that path too.
+
 ## [0.20.0] - 2026-09-21
 
 Building a scenario's content through the backend is the slowest part of a run, and

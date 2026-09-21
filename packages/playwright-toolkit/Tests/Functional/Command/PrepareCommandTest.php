@@ -87,6 +87,18 @@ final class PrepareCommandTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function reportsWhatEachPhaseCost(): void
+    {
+        $tester = new CommandTester($this->get(PrepareCommand::class));
+
+        $tester->execute([]);
+
+        foreach (['sources', 'schema', 'fixtures', 'media', 'manifest'] as $phase) {
+            self::assertMatchesRegularExpression('/' . $phase . ' \d+\.\d+s/', $tester->getDisplay());
+        }
+    }
+
+    #[Test]
     public function warnsWhenTheDdevAddOnIsFromAnotherRelease(): void
     {
         $ddev = Environment::getProjectPath() . '/.ddev';
