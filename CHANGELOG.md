@@ -10,6 +10,17 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — a screenshot of an element that a
+  `scroll-margin` or `scroll-padding` keeps from being scrolled fully into view no
+  longer loses everything below the viewport. Playwright decides whether to capture
+  past the viewport from the element's size alone, so an element that fits by size
+  but sits partly below the fold came back at its full size with the lower part
+  white, and a first run recorded that as the baseline. The styles injected before a
+  capture now reset both properties, and are removed again afterwards like the rest
+  of them.
+
 ### Added
 
 - **plan2net/playwright-toolkit** — `playwright:prepare` says where a build spent its

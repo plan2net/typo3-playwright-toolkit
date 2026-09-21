@@ -19,12 +19,22 @@ export interface ScreenshotComparisonOptions {
     timeout?: number
 }
 
-const FREEZE_STYLES = `* {
+/**
+ * Neither scroll property paints anything; both steer where Playwright's own
+ * scrollIntoViewIfNeeded lands before it captures. A scroll margin parks the
+ * element below the viewport top, its bottom stays outside, and Playwright reads
+ * fitsViewport from the element's size alone — so it sends
+ * captureBeyondViewport: false and Chromium answers white below the fold, at the
+ * right image size. A silently wrong baseline, not an error.
+ */
+export const CAPTURE_STYLES = `* {
     animation-duration: 0s !important;
     transition-duration: 0s !important;
     transition-delay: 0s !important;
     contain-intrinsic-size: none !important;
     content-visibility: visible !important;
+    scroll-margin: 0 !important;
+    scroll-padding: 0 !important;
 }`
 
 export function buildHideStyles(selectors: string[]): string {
@@ -286,7 +296,7 @@ export async function expectScreenshot(
     const { shot, wholePage } = resolveScreenshotTarget(target, include)
     const page = 'page' in target ? target.page() : target
 
-    const injected = [await page.addStyleTag({ content: FREEZE_STYLES })]
+    const injected = [await page.addStyleTag({ content: CAPTURE_STYLES })]
 
     const hideStyles = buildHideStyles(hiddenSelectors(config.hideBeforeScreenshot, hide))
     if (hideStyles) {
