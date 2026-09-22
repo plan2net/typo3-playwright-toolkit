@@ -10,6 +10,19 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — the scroll reset 0.21.0 added no longer
+  reaches into scroll containers inside the element being captured. It applied to
+  every element, so a slider that aligns its slides with `scroll-padding` of its own
+  lost that alignment and could be photographed on a different slide each run. It now
+  applies to the element itself and to the containers that scroll it, and nothing
+  else.
+
+- **@plan2net/typo3-playwright-toolkit** — a screenshot waits for scrolling inside
+  the element to stop before it is taken. Playwright waits for the element's own box
+  to hold still, which says nothing about a carousel still scrolling within it.
+
 ## [0.21.0] - 2026-09-22
 
 One fix worth upgrading for: an element screenshot could lose everything below the

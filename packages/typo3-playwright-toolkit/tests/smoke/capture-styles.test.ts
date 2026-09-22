@@ -1,6 +1,12 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { chromium, type Browser, type Page } from '@playwright/test'
-import { captureWouldBeTruncated, SCROLL_RESET_STYLES } from '#src/checks/screenshot.js'
+import {
+    captureWouldBeTruncated,
+    clearScrollResetMarks,
+    markForScrollReset,
+    SCROLL_RESET_STYLES,
+    waitForScrollToSettle,
+} from '#src/checks/screenshot.js'
 
 let browser: Browser
 let page: Page
@@ -67,6 +73,7 @@ describe('capture styles', () => {
     it('captures the bottom of an element its scroll margin pushes past the viewport', async () => {
         const truncated = await inkAtTheBottom()
 
+        await markForScrollReset(page.locator('#target'))
         await page.addStyleTag({ content: SCROLL_RESET_STYLES })
 
         expect(truncated).toBe(0)
@@ -80,6 +87,7 @@ describe('capture styles', () => {
 
         const truncated = await inkAtTheBottom()
 
+        await markForScrollReset(page.locator('#target'))
         await page.addStyleTag({ content: SCROLL_RESET_STYLES })
 
         expect(truncated).toBe(0)
@@ -88,6 +96,77 @@ describe('capture styles', () => {
 
     it('sees that the scroll margin would truncate this capture', async () => {
         expect(await captureWouldBeTruncated(page.locator('#target'))).toBe(true)
+    })
+
+    it('returns only once scrolling has stopped', async () => {
+        await page.setContent('<body style="margin:0"><div style="height:5000px"></div></body>')
+        await page.evaluate(() => {
+            let top = 0
+            const step = () => {
+                top += 50
+                window.scrollTo(0, top)
+                if (top < 1500) {
+                    requestAnimationFrame(step)
+                }
+            }
+            requestAnimationFrame(step)
+        })
+
+        await waitForScrollToSettle(page)
+
+        expect(await page.evaluate(() => window.scrollY)).toBe(1500)
+    })
+
+    // A slider inside the shot aligns its slides with scroll-padding of its own, and
+    // the repair is about the page's offset, not that one.
+    it('leaves a scroll container inside the element alone', async () => {
+        await page.setContent(`<body style="margin:0"><div id="target" style="scroll-margin-top:120px">
+            <div id="carousel" style="overflow-x:auto;scroll-padding-left:40px;width:200px">
+                <div style="width:900px;height:50px"></div>
+            </div></div></body>`)
+
+        await markForScrollReset(page.locator('#target'))
+        await page.addStyleTag({ content: SCROLL_RESET_STYLES })
+
+        expect(
+            await page.evaluate(
+                () => getComputedStyle(document.querySelector('#carousel') as Element).scrollPaddingLeft,
+            ),
+        ).toBe('40px')
+    })
+
+    // Playwright waits for the element's own box to be stable, which says nothing
+    // about a slider still scrolling inside it.
+    it('waits for a scroll inside the element as well', async () => {
+        await page.setContent(`<body style="margin:0"><div id="target" style="height:400px;width:345px">
+            <div id="carousel" style="overflow-x:auto;width:200px"><div style="width:2000px;height:50px"></div></div>
+            </div></body>`)
+        await page.evaluate(() => {
+            const carousel = document.querySelector('#carousel') as Element
+            let left = 0
+            const step = (): void => {
+                left += 20
+                carousel.scrollLeft = left
+                if (left < 400) {
+                    requestAnimationFrame(step)
+                }
+            }
+            requestAnimationFrame(step)
+        })
+
+        await captureWouldBeTruncated(page.locator('#target'))
+
+        expect(await page.evaluate(() => (document.querySelector('#carousel') as Element).scrollLeft)).toBe(400)
+    })
+
+    it('takes its marks off the page again', async () => {
+        await markForScrollReset(page.locator('#target'))
+
+        await clearScrollResetMarks(page)
+
+        expect(
+            await page.evaluate(() => document.querySelectorAll('[data-toolkit-capture-target], [data-toolkit-capture-scroller]').length),
+        ).toBe(0)
     })
 
     // Leaving it alone is what keeps a sticky header clear of it, as its margin asks.

@@ -27,16 +27,92 @@ export const CAPTURE_STYLES = `* {
     content-visibility: visible !important;
 }`
 
+const TARGET_MARK = 'data-toolkit-capture-target'
+const SCROLLER_MARK = 'data-toolkit-capture-scroller'
+
 // Only to repair a truncated capture: a scroll margin usually clears a sticky header.
-export const SCROLL_RESET_STYLES = `* {
+// Scoped to the element and the containers that scroll it, so a slider inside the
+// shot keeps the padding its slides are aligned with.
+export const SCROLL_RESET_STYLES = `[${TARGET_MARK}] {
     scroll-margin: 0 !important;
+}
+[${SCROLLER_MARK}] {
     scroll-padding: 0 !important;
+    scroll-behavior: auto !important;
 }`
+
+export async function markForScrollReset(locator: Locator): Promise<void> {
+    await locator.evaluate(
+        (element, marks) => {
+            element.setAttribute(marks.target, '')
+
+            // Which of the two scrolls the document depends on the rendering mode,
+            // and the padding can be authored on either.
+            for (const root of [document.documentElement, document.body]) {
+                root?.setAttribute(marks.scroller, '')
+            }
+
+            for (let parent = element.parentElement; null !== parent; parent = parent.parentElement) {
+                const { overflowX, overflowY } = getComputedStyle(parent)
+                if (/auto|scroll|overlay/.test(overflowX + overflowY)) {
+                    parent.setAttribute(marks.scroller, '')
+                }
+            }
+        },
+        { target: TARGET_MARK, scroller: SCROLLER_MARK },
+    )
+}
+
+export async function clearScrollResetMarks(page: Page): Promise<void> {
+    await page.evaluate(
+        (marks) => {
+            for (const element of document.querySelectorAll(`[${marks.target}], [${marks.scroller}]`)) {
+                element.removeAttribute(marks.target)
+                element.removeAttribute(marks.scroller)
+            }
+        },
+        { target: TARGET_MARK, scroller: SCROLLER_MARK },
+    )
+}
+
+// Playwright waits for the element's own box to be stable, which says nothing about
+// a slider still scrolling inside it. Scroll events do not bubble, so they are caught
+// on the way down.
+export async function waitForScrollToSettle(page: Page, quietMs = 100, timeout = 2000): Promise<void> {
+    await page.evaluate(
+        ({ quietMs, timeout }) =>
+            new Promise<void>((resolve) => {
+                let lastScroll = performance.now()
+                const deadline = lastScroll + timeout
+                const seen = (): void => {
+                    lastScroll = performance.now()
+                }
+
+                document.addEventListener('scroll', seen, true)
+
+                const tick = (): void => {
+                    const now = performance.now()
+                    if (now - lastScroll >= quietMs || now >= deadline) {
+                        document.removeEventListener('scroll', seen, true)
+                        resolve()
+
+                        return
+                    }
+
+                    requestAnimationFrame(tick)
+                }
+
+                requestAnimationFrame(tick)
+            }),
+        { quietMs, timeout },
+    )
+}
 
 // Playwright judges by the element's size alone, so one that fits but hangs over the
 // edge is captured part white.
 export async function captureWouldBeTruncated(locator: Locator): Promise<boolean> {
     await locator.scrollIntoViewIfNeeded()
+    await waitForScrollToSettle(locator.page())
 
     const box = await locator.boundingBox()
     const viewport = locator.page().viewportSize()
@@ -326,9 +402,14 @@ export async function expectScreenshot(
         warnAboutUndecodedImages(stalled, DECODE_TIMEOUT)
     }
 
-    // Last, because everything above it moves the layout this measures.
+    // Last, because everything above it moves the layout this measures. Scrolling
+    // again here is what leaves nothing for Playwright's own scroll to do, so the
+    // shot is taken from a position that has come to rest.
     if ('page' in shot && (await captureWouldBeTruncated(shot))) {
+        await markForScrollReset(shot)
         injected.push(await page.addStyleTag({ content: SCROLL_RESET_STYLES }))
+        await shot.scrollIntoViewIfNeeded()
+        await waitForScrollToSettle(page)
     }
 
     try {
@@ -338,6 +419,7 @@ export async function expectScreenshot(
         await expect(shot).toHaveScreenshot(`${name}.png`, comparisonOptions(wholePage, screenshotOptions))
     } finally {
         await restoreResponsiveImages(page)
+        await clearScrollResetMarks(page).catch(() => undefined)
         // Or a hidden element stays hidden for the rest of the test, so a later
         // click misses it. A navigation took the tag with it already, and that must
         // not become the failure the caller reads.
