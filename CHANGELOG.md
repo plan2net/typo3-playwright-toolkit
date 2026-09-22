@@ -10,6 +10,13 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-09-22
+
+One fix worth upgrading for: an element screenshot could lose everything below the
+viewport and still come back at its full size, so a first run recorded the missing
+part as the baseline. And `playwright:prepare` now says which of its phases your
+build time went into.
+
 ### Fixed
 
 - **@plan2net/typo3-playwright-toolkit** — a screenshot of an element that a
@@ -1045,7 +1052,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.20.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.21.0...main
+[0.21.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.17.1...v0.18.0
