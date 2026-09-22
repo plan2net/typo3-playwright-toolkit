@@ -486,7 +486,8 @@ list instead, which is what a shot of an element the config hides needs.
 The name carries no file extension; Playwright adds `.png` and the platform suffix
 itself. The first run writes the missing image and fails, as Playwright always does.
 Every other option is passed on to `toHaveScreenshot`, and the tolerances come from
-`screenshot` in `defineToolkitConfig`.
+`screenshot` in `defineToolkitConfig`. One shot can set its own, and a
+`maxDiffPixelRatio` there replaces the configured count, as it does in the config.
 
 > [!IMPORTANT]
 > Images are stored in CSS pixels, which is Playwright's default. If your projects

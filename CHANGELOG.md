@@ -10,12 +10,20 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — a `maxDiffPixelRatio` passed to one
+  `expectScreenshot` call now counts. Playwright compares against the smaller of the
+  two allowances, so the configured `maxDiffPixels` (20 by default) capped it: a shot
+  that asked for 3% of the image was judged at 20 pixels. A ratio per call now clears
+  that count, as it already does in the config.
+
 ### Added
 
 - **@plan2net/typo3-playwright-toolkit** — `hideAlso` hides its selectors on top of
-  `hideBeforeScreenshot` for one shot. `hide` replaces that list, so hiding one extra
-  element meant repeating every configured selector, and forgetting one silently
-  showed it again.
+  `hideBeforeScreenshot` for one shot. `hide` replaces that list, so hiding one more
+  element meant repeating every configured selector, and forgetting one showed it
+  again.
 
 ## [0.21.1] - 2026-09-22
 

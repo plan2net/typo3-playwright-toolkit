@@ -91,6 +91,19 @@ describe('comparisonOptions', () => {
 
         expect(comparisonOptions(false, {})).not.toHaveProperty('threshold')
     })
+
+    // Playwright lays the call over the config and then keeps the smaller of the two
+    // allowances, so the configured count has to be cleared or it caps the ratio.
+    it('clears the configured pixel count when the call asks for a ratio', () => {
+        const options = comparisonOptions(false, { maxDiffPixelRatio: 0.03 })
+
+        expect(Object.keys(options)).toContain('maxDiffPixels')
+        expect(options.maxDiffPixels).toBeUndefined()
+    })
+
+    it('leaves the configured pixel count alone for a call that says nothing', () => {
+        expect(Object.keys(comparisonOptions(false, {}))).not.toContain('maxDiffPixels')
+    })
 })
 
 // The comparison needs the Playwright runner and throws here, which is the path

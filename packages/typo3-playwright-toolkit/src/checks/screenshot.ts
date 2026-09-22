@@ -443,6 +443,9 @@ export function comparisonOptions(
         animations: 'disabled',
         timeout: 15000,
         ...(wholePage ? { fullPage: true } : {}),
+        // Playwright compares against the smaller allowance, so a ratio has to clear
+        // the configured count.
+        ...(undefined !== perCall.maxDiffPixelRatio ? { maxDiffPixels: undefined } : {}),
         ...perCall,
     }
 }
