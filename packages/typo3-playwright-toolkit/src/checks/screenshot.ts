@@ -370,10 +370,16 @@ export interface ScreenshotOptions extends ScreenshotComparisonOptions {
     include?: string
     /** Replaces `hideBeforeScreenshot` for this shot; `[]` hides nothing. */
     hide?: string[]
+    /** Hidden on top of whatever `hide` or the config leaves standing. */
+    hideAlso?: string[]
 }
 
-export function hiddenSelectors(configured: string[] | undefined, perCall: string[] | undefined): string[] {
-    return perCall ?? configured ?? []
+export function hiddenSelectors(
+    configured: string[] | undefined,
+    perCall: string[] | undefined,
+    alsoPerCall: string[] | undefined = undefined,
+): string[] {
+    return [...(perCall ?? configured ?? []), ...(alsoPerCall ?? [])]
 }
 
 export async function expectScreenshot(
@@ -382,13 +388,13 @@ export async function expectScreenshot(
     options: ScreenshotOptions = {},
 ): Promise<void> {
     const config = getToolkitConfig()
-    const { include, hide, ...screenshotOptions } = options
+    const { include, hide, hideAlso, ...screenshotOptions } = options
     const { shot, wholePage } = resolveScreenshotTarget(target, include)
     const page = 'page' in target ? target.page() : target
 
     const injected = [await page.addStyleTag({ content: CAPTURE_STYLES })]
 
-    const hideStyles = buildHideStyles(hiddenSelectors(config.hideBeforeScreenshot, hide))
+    const hideStyles = buildHideStyles(hiddenSelectors(config.hideBeforeScreenshot, hide, hideAlso))
     if (hideStyles) {
         injected.push(await page.addStyleTag({ content: hideStyles }))
     }

@@ -476,7 +476,12 @@ import { expectScreenshot } from '@plan2net/typo3-playwright-toolkit'
 
 await expectScreenshot(page, 'my-page')                             // the whole page
 await expectScreenshot(page, 'accordion', { include: '.accordion' }) // one element
+await expectScreenshot(page, 'home', { hideAlso: ['.chat-widget'] }) // one more hidden
+await expectScreenshot(page, 'header', { hide: [] })                 // nothing hidden
 ```
+
+`hideAlso` hides its selectors on top of `hideBeforeScreenshot`. `hide` replaces that
+list instead, which is what a shot of an element the config hides needs.
 
 The name carries no file extension; Playwright adds `.png` and the platform suffix
 itself. The first run writes the missing image and fails, as Playwright always does.

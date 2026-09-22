@@ -70,6 +70,10 @@ describe('hiddenSelectors', () => {
     it('is empty when neither names anything', () => {
         expect(hiddenSelectors(undefined, undefined)).toEqual([])
     })
+
+    it('adds what a call hides on top of the configured list', () => {
+        expect(hiddenSelectors(['.header'], undefined, ['.banner'])).toEqual(['.header', '.banner'])
+    })
 })
 
 describe('comparisonOptions', () => {
@@ -124,6 +128,23 @@ describe('the styles expectScreenshot injects', () => {
 
         expect(added).toHaveLength(2)
         expect(removed).toEqual(added)
+    })
+
+    it('hide what the config hides plus what the call adds', async () => {
+        setToolkitConfig({
+            testingURL: 'https://example-testing.test',
+            paths: {
+                consumerRoot: '/srv/project',
+                stateDir: '/srv/project/.test-state',
+                sessionDir: '/srv/project/var/session',
+            },
+            hideBeforeScreenshot: ['.cookie-banner'],
+        })
+        const { page, added } = stubPage()
+
+        await expect(expectScreenshot(page as never, 'a-page', { hideAlso: ['.chat'] })).rejects.toThrow()
+
+        expect(added.join('\n')).toContain('.cookie-banner, .chat')
     })
 })
 

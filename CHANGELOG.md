@@ -10,6 +10,13 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **@plan2net/typo3-playwright-toolkit** — `hideAlso` hides its selectors on top of
+  `hideBeforeScreenshot` for one shot. `hide` replaces that list, so hiding one extra
+  element meant repeating every configured selector, and forgetting one silently
+  showed it again.
+
 ## [0.21.1] - 2026-09-22
 
 ### Fixed
