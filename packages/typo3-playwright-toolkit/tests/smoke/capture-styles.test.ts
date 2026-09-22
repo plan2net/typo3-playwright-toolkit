@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { chromium, type Browser, type Page } from '@playwright/test'
-import { CAPTURE_STYLES } from '#src/checks/screenshot.js'
+import { captureWouldBeTruncated, SCROLL_RESET_STYLES } from '#src/checks/screenshot.js'
 
 let browser: Browser
 let page: Page
@@ -9,8 +9,7 @@ const VIEWPORT = { width: 393, height: 727 }
 const ELEMENT_HEIGHT = 721
 const SCROLL_MARGIN = 120
 
-// Tall enough to clear the viewport, with its last 60px painted so a truncated
-// capture is the one that comes back white down there.
+// The last 60px are painted, so a truncated capture is the one that is white there.
 const PAGE = `<html><body style="margin:0">
   <div style="height:400px"></div>
   <div id="target" style="height:${ELEMENT_HEIGHT}px;width:345px;background:#fff;
@@ -65,17 +64,10 @@ beforeEach(async () => {
 })
 
 describe('capture styles', () => {
-    /**
-     * scroll-margin-top parks the element that far below the viewport top, so its
-     * bottom stays outside. Playwright reads fitsViewport from the element's size
-     * alone, sends captureBeyondViewport: false, and Chromium answers white for
-     * everything below the fold — at the right image size, which is what makes it
-     * a silent wrong baseline rather than an error.
-     */
     it('captures the bottom of an element its scroll margin pushes past the viewport', async () => {
         const truncated = await inkAtTheBottom()
 
-        await page.addStyleTag({ content: CAPTURE_STYLES })
+        await page.addStyleTag({ content: SCROLL_RESET_STYLES })
 
         expect(truncated).toBe(0)
         expect(await inkAtTheBottom()).toBeGreaterThan(0)
@@ -88,9 +80,20 @@ describe('capture styles', () => {
 
         const truncated = await inkAtTheBottom()
 
-        await page.addStyleTag({ content: CAPTURE_STYLES })
+        await page.addStyleTag({ content: SCROLL_RESET_STYLES })
 
         expect(truncated).toBe(0)
         expect(await inkAtTheBottom()).toBeGreaterThan(0)
+    })
+
+    it('sees that the scroll margin would truncate this capture', async () => {
+        expect(await captureWouldBeTruncated(page.locator('#target'))).toBe(true)
+    })
+
+    // Leaving it alone is what keeps a sticky header clear of it, as its margin asks.
+    it('leaves an element that lands fully inside the viewport alone', async () => {
+        await page.setContent(PAGE.replace(`height:${ELEMENT_HEIGHT}px`, 'height:400px'))
+
+        expect(await captureWouldBeTruncated(page.locator('#target'))).toBe(false)
     })
 })

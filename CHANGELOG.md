@@ -17,9 +17,12 @@ the package a change belongs to.
   longer loses everything below the viewport. Playwright decides whether to capture
   past the viewport from the element's size alone, so an element that fits by size
   but sits partly below the fold came back at its full size with the lower part
-  white, and a first run recorded that as the baseline. The styles injected before a
-  capture now reset both properties, and are removed again afterwards like the rest
-  of them.
+  white, and a first run recorded that as the baseline. `expectScreenshot` now
+  measures the element after it has scrolled it into view and, only when the capture
+  would lose something, resets both properties for that one shot. An element that
+  lands fully inside the viewport is captured exactly as before, so a scroll margin
+  that exists to clear a sticky header keeps doing its job and no baseline you
+  already approved moves.
 
 ### Added
 

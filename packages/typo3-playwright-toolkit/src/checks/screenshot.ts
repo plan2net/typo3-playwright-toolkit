@@ -19,23 +19,37 @@ export interface ScreenshotComparisonOptions {
     timeout?: number
 }
 
-/**
- * Neither scroll property paints anything; both steer where Playwright's own
- * scrollIntoViewIfNeeded lands before it captures. A scroll margin parks the
- * element below the viewport top, its bottom stays outside, and Playwright reads
- * fitsViewport from the element's size alone — so it sends
- * captureBeyondViewport: false and Chromium answers white below the fold, at the
- * right image size. A silently wrong baseline, not an error.
- */
 export const CAPTURE_STYLES = `* {
     animation-duration: 0s !important;
     transition-duration: 0s !important;
     transition-delay: 0s !important;
     contain-intrinsic-size: none !important;
     content-visibility: visible !important;
+}`
+
+// Only to repair a truncated capture: a scroll margin usually clears a sticky header.
+export const SCROLL_RESET_STYLES = `* {
     scroll-margin: 0 !important;
     scroll-padding: 0 !important;
 }`
+
+// Playwright judges by the element's size alone, so one that fits but hangs over the
+// edge is captured part white.
+export async function captureWouldBeTruncated(locator: Locator): Promise<boolean> {
+    await locator.scrollIntoViewIfNeeded()
+
+    const box = await locator.boundingBox()
+    const viewport = locator.page().viewportSize()
+    if (null === box || null === viewport) {
+        return false
+    }
+
+    if (box.width > viewport.width || box.height > viewport.height) {
+        return false
+    }
+
+    return box.x < 0 || box.y < 0 || box.x + box.width > viewport.width || box.y + box.height > viewport.height
+}
 
 export function buildHideStyles(selectors: string[]): string {
     if (selectors.length === 0) {
@@ -310,6 +324,11 @@ export async function expectScreenshot(
     const stalled = await prepareImagesForCapture(page)
     if (stalled.length > 0) {
         warnAboutUndecodedImages(stalled, DECODE_TIMEOUT)
+    }
+
+    // Last, because everything above it moves the layout this measures.
+    if ('page' in shot && (await captureWouldBeTruncated(shot))) {
+        injected.push(await page.addStyleTag({ content: SCROLL_RESET_STYLES }))
     }
 
     try {
