@@ -10,6 +10,14 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-09-23
+
+A project whose `core` cache is turned off, or on redis, could not run in the Testing
+context at all since 0.20.0: the toolkit wrote a cache directory onto a backend that
+refuses one, and every request and command of that context ended there. The other two
+changes are about screenshots — a tolerance passed to a single call now counts, and
+one element can be hidden on top of the configured list instead of in place of it.
+
 ### Fixed
 
 - **plan2net/playwright-toolkit** — the directory the Testing context caches in only
@@ -1055,7 +1063,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.21.1...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.22.0...main
+[0.22.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.19.0...v0.20.0
