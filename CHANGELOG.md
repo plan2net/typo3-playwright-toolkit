@@ -12,6 +12,17 @@ the package a change belongs to.
 
 ### Fixed
 
+- **plan2net/playwright-toolkit** — the directory the Testing context caches in only
+  reaches caches that can take one. It went to the `core` cache whatever backend that
+  cache had, and only the file backends accept a directory, so a project that turns the
+  core cache off, or moves it to redis, failed every request and every command of the
+  context with `Invalid cache backend option "cacheDirectory"`. Turning a cache off now
+  works, which is also the answer for entries that cannot be shared between test
+  databases, such as a site configuration that resolves page ids — see SETUP.md, "The
+  cache directory, on macOS". The directory now goes to every file-backed cache rather
+  than to `core` alone, since they all shared `var/cache/` with the context you develop
+  in. One you set a `cacheDirectory` for is still left alone.
+
 - **@plan2net/typo3-playwright-toolkit** — a `maxDiffPixelRatio` passed to one
   `expectScreenshot` call now counts. Playwright compares against the smaller of the
   two allowances, so the configured `maxDiffPixels` (20 by default) capped it: a shot

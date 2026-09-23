@@ -485,9 +485,25 @@ has to stay where the site serves it from.
 
 > [!NOTE]
 > Mount every cache directory you moved, including `var/cache-testing`, which the
-> toolkit gives the `core` cache so the Testing context does not share it with the
-> one you develop in. A cache you relocated yourself keeps the same flaky tests at
-> the new path until that path is on a volume too.
+> toolkit gives every file-backed cache so the Testing context does not share one
+> with the context you develop in. A cache you relocated yourself keeps the same
+> flaky tests at the new path until that path is on a volume too.
+
+A cache you gave a `cacheDirectory` yourself, and a cache on any other backend, is
+left alone.
+
+The directory separates this context from the one you develop in. It does not
+separate one test from another: every test database of a run reads the same files,
+and TYPO3 stores the site configuration under a key that names no database. So an
+extension that resolves page ids into the site configuration — dynamic route
+enhancers are the usual one — hands one test's routes to the next. Turn that cache
+off for the Testing context:
+
+```php
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['core']['backend']
+    = \TYPO3\CMS\Core\Cache\Backend\NullBackend::class;
+unset($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['core']['options']);
+```
 
 ## Without DDEV
 

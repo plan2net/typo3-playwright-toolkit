@@ -8,6 +8,7 @@ use Plan2net\PlaywrightToolkit\Compatibility\RetryingProcessingFolderStorage;
 use Plan2net\PlaywrightToolkit\Database\DatabaseInitializer;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
 use Plan2net\PlaywrightToolkit\Log\ErrorCapture;
+use TYPO3\CMS\Core\Cache\Backend\SimpleFileBackend;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
@@ -49,7 +50,7 @@ final class TestContext
     {
         /** @var array<string, mixed> $logConfiguration */
         $logConfiguration = $GLOBALS['TYPO3_CONF_VARS']['LOG'] ?? [];
-        $settings = ErrorCapture::settings($logConfiguration) + self::coreCacheSettings();
+        $settings = ErrorCapture::settings($logConfiguration) + self::fileCacheSettings();
         // 12.4 takes a folder a parallel request created; 11.5 fails the request.
         if ((new Typo3Version())->getMajorVersion() < 12) {
             $settings['SYS/Objects/' . ResourceStorage::class . '/className'] = RetryingProcessingFolderStorage::class;
@@ -100,22 +101,35 @@ final class TestContext
     }
 
     /**
-     * The core cache holds the site configuration with its %env() placeholders
-     * already resolved, under a key that names no context and in a directory that
-     * names none either. This context shares its checkout with the one you develop
-     * in, so without a directory of its own, whichever warms the cache first
-     * decides what the other one reads.
+     * A file cache names no context, in its directory or in its keys, and this
+     * context shares its checkout with the one you develop in. So whichever warms
+     * the cache first decides what the other one reads — the core cache holds the
+     * site configuration with its %env() placeholders already resolved.
      *
      * @return array<string, string>
      */
-    private static function coreCacheSettings(): array
+    private static function fileCacheSettings(): array
     {
-        if (isset($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['core']['options']['cacheDirectory'])) {
-            return [];
+        /** @var array<string, mixed> $configurations */
+        $configurations = $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'] ?? [];
+        $settings = [];
+
+        foreach ($configurations as $name => $configuration) {
+            if (!\is_array($configuration) || isset($configuration['options']['cacheDirectory'])) {
+                continue;
+            }
+
+            // Every other backend throws on the option, an absent one included:
+            // that is Typo3DatabaseBackend.
+            $backend = $configuration['backend'] ?? '';
+            if (!\is_string($backend) || !is_a($backend, SimpleFileBackend::class, true)) {
+                continue;
+            }
+
+            // TYPO3 appends cache/<code|data>/<identifier>/ to this itself.
+            $settings['SYS/caching/cacheConfigurations/' . $name . '/options/cacheDirectory'] = Environment::getVarPath() . '/cache-testing/';
         }
 
-        return [
-            'SYS/caching/cacheConfigurations/core/options/cacheDirectory' => Environment::getVarPath() . '/cache-testing/core/',
-        ];
+        return $settings;
     }
 }

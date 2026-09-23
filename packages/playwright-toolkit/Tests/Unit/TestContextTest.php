@@ -10,6 +10,10 @@ use PHPUnit\Framework\TestCase;
 use Plan2net\PlaywrightToolkit\Compatibility\RetryingProcessingFolderStorage;
 use Plan2net\PlaywrightToolkit\TestContext;
 use Psr\Log\LogLevel;
+use TYPO3\CMS\Core\Cache\Backend\FileBackend;
+use TYPO3\CMS\Core\Cache\Backend\NullBackend;
+use TYPO3\CMS\Core\Cache\Backend\SimpleFileBackend;
+use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Core\ApplicationContext;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Information\Typo3Version;
@@ -89,24 +93,56 @@ final class TestContextTest extends TestCase
     // Development and Testing share one checkout here, so whichever warms it first
     // would decide the other's environment.
     #[Test]
-    public function theTestingContextCachesItsCoreEntriesApart(): void
+    public function theTestingContextCachesItsFileEntriesApart(): void
     {
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
-        unset($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']);
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'] = [
+            'core' => ['backend' => SimpleFileBackend::class],
+            'fluid_template' => ['backend' => FileBackend::class],
+            'pages' => ['backend' => Typo3DatabaseBackend::class],
+        ];
 
         $settings = TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql']);
 
         self::assertSame(
-            Environment::getVarPath() . '/cache-testing/core/',
+            Environment::getVarPath() . '/cache-testing/',
             $settings['SYS/caching/cacheConfigurations/core/options/cacheDirectory'] ?? null
         );
+        self::assertSame(
+            Environment::getVarPath() . '/cache-testing/',
+            $settings['SYS/caching/cacheConfigurations/fluid_template/options/cacheDirectory'] ?? null
+        );
+        self::assertArrayNotHasKey('SYS/caching/cacheConfigurations/pages/options/cacheDirectory', $settings);
+    }
+
+    // A backend throws on an option it has no setter for, so a cache the project
+    // turned off, or moved to redis, would fail every request of this context.
+    #[Test]
+    public function aBackendThatTakesNoDirectoryIsLeftAlone(): void
+    {
+        unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'] = [
+            'core' => ['backend' => NullBackend::class],
+            // An absent backend is Typo3DatabaseBackend.
+            'l10n' => ['options' => []],
+        ];
+
+        $settings = TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql']);
+
+        self::assertArrayNotHasKey('SYS/caching/cacheConfigurations/core/options/cacheDirectory', $settings);
+        self::assertArrayNotHasKey('SYS/caching/cacheConfigurations/l10n/options/cacheDirectory', $settings);
     }
 
     #[Test]
-    public function aCoreCacheDirectoryTheProjectSetIsLeftAlone(): void
+    public function aCacheDirectoryTheProjectSetIsLeftAlone(): void
     {
         unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
-        $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']['core']['options']['cacheDirectory'] = '/somewhere/else/';
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'] = [
+            'core' => [
+                'backend' => SimpleFileBackend::class,
+                'options' => ['cacheDirectory' => '/somewhere/else/'],
+            ],
+        ];
 
         $settings = TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_pgsql']);
 
