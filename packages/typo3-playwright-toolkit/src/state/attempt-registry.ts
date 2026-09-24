@@ -24,8 +24,13 @@ export interface AttemptOutcomeRecord {
     endedAt: string
 }
 
+export interface DroppedRecord {
+    type: 'dropped'
+    testId: string
+}
+
 /** One line per write with O_APPEND, so separate workers never interleave. */
-function appendLine(paths: RunPaths, record: AttemptRecord | AttemptOutcomeRecord): void {
+function appendLine(paths: RunPaths, record: AttemptRecord | AttemptOutcomeRecord | DroppedRecord): void {
     fs.writeFileSync(paths.attemptsFile, `${JSON.stringify(record)}\n`, { flag: 'a' })
     touchRunLiveness(paths.runDir)
 }
@@ -64,6 +69,10 @@ export function recordAttemptOutcome(
         durationMs: input.durationMs,
         endedAt: new Date().toISOString(),
     })
+}
+
+export function recordDropped(config: ToolkitConfig, testId: string): void {
+    appendLine(ensureRunNamespace(config), { type: 'dropped', testId })
 }
 
 function isAttemptRecord(value: unknown): value is AttemptRecord {

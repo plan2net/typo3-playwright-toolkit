@@ -15,7 +15,8 @@ import { REPLAY_TEST_ID } from '#src/contract.js'
 import type { CleanupClient, CleanupOutcome, CleanupResult, SweepReport } from '#src/http/cleanup-client.js'
 import { readAttempts, registerAttempt } from '#src/state/attempt-registry.js'
 import { recordScenarioFailure } from '#src/state/scenario-state.js'
-import { ensureRunNamespace, runPaths } from '#src/state/run-namespace.js'
+import { ensureRunNamespace, prepareRun, runPaths } from '#src/state/run-namespace.js'
+import { inspectLinks } from '#src/inspect/links.js'
 import { configForRun } from '../helpers.js'
 
 let tmpRoot: string
@@ -531,6 +532,38 @@ describe('runTeardown — preserving only what failed', () => {
         await runTeardown(config, { cleanup, preserve: { mode: 'some', testIds: ['AAAAAAAAAAAAAAA1'] } })
 
         expect(cleanup.swept[0]?.keepTestIds).toContain('AAAAAAAAAAAAAAA1')
+    })
+
+    it('leaves inspect a link only for the database it kept', async () => {
+        const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
+        prepareRun(config)
+        registerAttempt(config, { key: 'broken', attempt: 1, testId: 'AAAAAAAAAAAAAAA1', nonce: 'n' })
+        registerAttempt(config, { key: 'fine', attempt: 1, testId: 'BBBBBBBBBBBBBBB1', nonce: 'n' })
+
+        await runTeardown(config, {
+            cleanup: fakeCleanup(),
+            preserve: { mode: 'some', testIds: ['AAAAAAAAAAAAAAA1'] },
+        })
+
+        expect(inspectLinks(config.paths.stateDir, 'secret').map((link) => link.testId)).toEqual([
+            'AAAAAAAAAAAAAAA1',
+        ])
+    })
+
+    it('leaves inspect no link for a database that was already gone', async () => {
+        const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
+        prepareRun(config)
+        registerAttempt(config, { key: 'broken', attempt: 1, testId: 'AAAAAAAAAAAAAAA1', nonce: 'n' })
+        registerAttempt(config, { key: 'fine', attempt: 1, testId: 'BBBBBBBBBBBBBBB1', nonce: 'n' })
+
+        await runTeardown(config, {
+            cleanup: fakeCleanup({ BBBBBBBBBBBBBBB1: 'absent' }),
+            preserve: { mode: 'some', testIds: ['AAAAAAAAAAAAAAA1'] },
+        })
+
+        expect(inspectLinks(config.paths.stateDir, 'secret').map((link) => link.testId)).toEqual([
+            'AAAAAAAAAAAAAAA1',
+        ])
     })
 
     it('keeps the run directory when it kept a database', async () => {

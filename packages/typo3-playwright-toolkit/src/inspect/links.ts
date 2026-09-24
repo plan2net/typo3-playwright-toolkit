@@ -42,8 +42,11 @@ export function inspectLinks(stateDir: string, secret: string, now: number = Dat
             return []
         }
 
-        return readAttemptsFrom(path.join(runDir, 'attempts.jsonl'))
-            .filter((attempt) => 'preflight' !== attempt.key)
+        const attemptsFile = path.join(runDir, 'attempts.jsonl')
+        const dropped = readDroppedTestIds(attemptsFile)
+
+        return readAttemptsFrom(attemptsFile)
+            .filter((attempt) => 'preflight' !== attempt.key && !dropped.has(attempt.testId))
             .map((attempt) => ({
                 runId,
                 key: attempt.key,
@@ -52,6 +55,29 @@ export function inspectLinks(stateDir: string, secret: string, now: number = Dat
                 url: inspectUrl(testingURL, secret, attempt.testId, now),
             }))
     })
+}
+
+function readDroppedTestIds(attemptsFile: string): Set<string> {
+    const dropped = new Set<string>()
+    let lines: string[]
+    try {
+        lines = fs.readFileSync(attemptsFile, 'utf-8').split('\n')
+    } catch {
+        return dropped
+    }
+
+    for (const line of lines) {
+        try {
+            const record = JSON.parse(line) as { type?: unknown; testId?: unknown }
+            if ('dropped' === record.type && 'string' === typeof record.testId) {
+                dropped.add(record.testId)
+            }
+        } catch {
+            continue
+        }
+    }
+
+    return dropped
 }
 
 function readTestingUrl(metaFile: string): string | undefined {

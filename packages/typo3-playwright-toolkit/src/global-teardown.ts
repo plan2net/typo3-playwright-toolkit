@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { getToolkitConfig, type ToolkitConfig } from './config.js'
 import { httpCleanup, type CleanupClient } from './http/cleanup-client.js'
-import { readAttemptsFrom, readRegisteredTestIds } from './state/attempt-registry.js'
+import { readAttemptsFrom, readRegisteredTestIds, recordDropped } from './state/attempt-registry.js'
 import { listRunIds, runLastActiveMs, runPaths, runsRoot } from './state/run-namespace.js'
 import { assertDeletableDirectory, safeJoin } from './state/safe-paths.js'
 import { INSPECT_TOKEN_LIFETIME_MS, inspectUrl } from './inspect/token.js'
@@ -277,6 +277,7 @@ async function dropRegisteredDatabases(
     for (const result of await cleanup.drop(targets)) {
         if ('dropped' === result.outcome) {
             report.dropped++
+            recordDropped(config, result.testId)
             continue
         }
         // Only a failure can change on a retry, so only it keeps the registry.
@@ -285,12 +286,14 @@ async function dropRegisteredDatabases(
             report.leaked.push(result.testId)
             continue
         }
+        if ('absent' === result.outcome) {
+            recordDropped(config, result.testId)
+            continue
+        }
         // Terminal but worth saying out loud: something else owns a name this
         // run recorded, or the id was never contract-shaped.
-        if ('absent' !== result.outcome) {
-            console.error(`[teardown] db${result.testId}: ${result.outcome}`)
-            report.leaked.push(result.testId)
-        }
+        console.error(`[teardown] db${result.testId}: ${result.outcome}`)
+        report.leaked.push(result.testId)
     }
 
     return report
