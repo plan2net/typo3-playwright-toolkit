@@ -61,7 +61,7 @@ jobs:
         run: npm run test:pack
 
   consumer-chain:
-    name: consumer chain (typo3 ${{ matrix.typo3 }})
+    name: consumer chain (typo3 ${{ matrix.typo3 }}, ${{ matrix.database }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -70,6 +70,8 @@ jobs:
         # 12.4 is the row that runs the crop and scale conversions on GifBuilder,
         # which is where images are shared between tests if the scope is lost.
         typo3: ['12.4', '13.4', '14.3']
+        # Each engine has a driver of its own, and only this job runs them end to end.
+        database: [postgres, mariadb, mysql, sqlite]
     steps:
       - uses: actions/checkout@v7
 
@@ -103,13 +105,14 @@ jobs:
       - name: Install all three packages and drive defineScenario
         env:
           PW_E2E_TYPO3: ${{ matrix.typo3 }}
+          PW_E2E_DATABASE: ${{ matrix.database }}
         run: tests/e2e/run.sh
 
       - name: Playwright report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
-          name: e2e-report-typo3-${{ matrix.typo3 }}
+          name: e2e-report-typo3-${{ matrix.typo3 }}-${{ matrix.database }}
           path: |
             tests/e2e/consumer/tests/playwright/test-results/
             tests/e2e/consumer/tests/playwright/playwright-report/

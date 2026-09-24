@@ -6,6 +6,9 @@
 #
 # Usage: tests/e2e/run.sh [--keep]
 #   --keep   leave the DDEV project running afterwards, to poke at it
+#
+# PW_E2E_TYPO3 picks the core (default 14.3), PW_E2E_DATABASE the engine: postgres
+# (default), mariadb, mysql or sqlite.
 
 set -euo pipefail
 
@@ -13,13 +16,25 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CONSUMER="${REPO_ROOT}/tests/e2e"/consumer
 PROJECT=t3pw-e2e
 TYPO3_VERSION="${PW_E2E_TYPO3:-14.3}"
+DATABASE="${PW_E2E_DATABASE:-postgres}"
 KEEP=0
 [ "${1:-}" = "--keep" ] && KEEP=1
 
 say() { echo "[e2e] $*"; }
 
+case "${DATABASE}" in
+    postgres | mariadb | mysql | sqlite) ;;
+    *)
+        echo "[e2e] unknown PW_E2E_DATABASE \"${DATABASE}\": use postgres, mariadb, mysql or sqlite" >&2
+        exit 1
+        ;;
+esac
+
 cleanup_project() {
     ddev delete -Oy "${PROJECT}" >/dev/null 2>&1 || true
+    # `ddev delete` keeps the add-on's volume, and a server of another engine cannot
+    # read the data files the previous run left in it.
+    docker volume rm -f "ddev-${PROJECT}_db-test-data" >/dev/null 2>&1 || true
 }
 
 # `psql | grep -q` cannot be used under pipefail: grep exits on the first match, psql
@@ -27,7 +42,13 @@ cleanup_project() {
 # reads as one that found none.
 test_databases() {
     local list
-    list="$(ddev exec --service db-test psql -U db -lqt)"
+    case "${DATABASE}" in
+        postgres) list="$(ddev exec --service db-test psql -U db -lqt)" ;;
+        # The MariaDB 11 image no longer ships a `mysql` binary.
+        mariadb) list="$(ddev exec --service db-test mariadb -uroot -proot -N -e 'SHOW DATABASES')" ;;
+        mysql) list="$(ddev exec --service db-test mysql -uroot -proot -N -e 'SHOW DATABASES')" ;;
+        sqlite) list="$(ddev exec 'ls var/test-databases 2>/dev/null || true')" ;;
+    esac
 
     grep -oE 'db[A-Z0-9]{16}' <<<"${list}" || true
 }
@@ -39,9 +60,17 @@ cleanup_project
 # which is how a stale composer path package survives and how the TYPO3 package
 # artifact ends up disagreeing with what is on disk.
 for generated in .artifacts vendor public var .test-state composer.lock \
-    config/system/settings.php tests/playwright/node_modules tests/playwright/package-lock.json; do
+    config/system/settings.php tests/playwright/node_modules tests/playwright/package-lock.json \
+    .ddev/config.e2e-database.yaml; do
     rm -rf "${CONSUMER:?}/${generated}"
 done
+
+# config.yaml runs postgres; the other engines override it for this run only. An
+# sqlite row keeps the postgres container, which nothing then uses.
+case "${DATABASE}" in
+    mariadb) printf "database:\n  type: mariadb\n  version: '10.11'\n" >"${CONSUMER}/.ddev/config.e2e-database.yaml" ;;
+    mysql) printf "database:\n  type: mysql\n  version: '8.0'\n" >"${CONSUMER}/.ddev/config.e2e-database.yaml" ;;
+esac
 mkdir -p "${CONSUMER}/.artifacts" "${CONSUMER}/.cache/composer" "${CONSUMER}/.cache/ms-playwright"
 
 say 'staging the extension inside the mount'
@@ -70,11 +99,19 @@ say "toolkit ${TARBALL}, @playwright/test ${PLAYWRIGHT_VERSION}"
 cd "${CONSUMER}"
 
 say 'starting the project'
+# Inside a checkout whose own DDEV project is registered, `ddev start -y` starts that
+# one instead of this unregistered nested one. `ddev config` registers it, but
+# rewrites config.yaml, so the file is put back afterwards.
+cp .ddev/config.yaml .artifacts/config.yaml
+ddev config --auto >/dev/null
+cp .artifacts/config.yaml .ddev/config.yaml
 ddev start -y
 
 say 'installing the DDEV add-on'
 # Host-side, so this one reads the repository path directly and needs no staging.
 ddev add-on get "${REPO_ROOT}/packages/ddev-typo3-playwright-toolkit"
+# The add-on installs the service matching DDEV's database, and sqlite needs none.
+[ "${DATABASE}" = "sqlite" ] && rm -f .ddev/docker-compose.db-test.yaml
 ddev restart -y
 
 say "installing TYPO3 ${TYPO3_VERSION} and the extension"
@@ -95,12 +132,23 @@ ddev composer update --no-interaction --no-progress \
 # configuration and the root page are the fixture's own.
 # `typo3 setup` refuses a database that already has tables, and --force does not
 # cover that check, so a rerun would stop here on the previous run's schema.
-say 'emptying the main database'
-ddev exec psql -U db -d db -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'
+say "emptying the main ${DATABASE} database"
+case "${DATABASE}" in
+    postgres)
+        ddev exec psql -U db -d db -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'
+        CONNECTION=(--driver=postgres --host=db --port=5432 --dbname=db --username=db --password=db)
+        ;;
+    mariadb | mysql)
+        ddev exec --service db mysql -uroot -proot -e 'DROP DATABASE IF EXISTS db; CREATE DATABASE db;'
+        CONNECTION=(--driver=mysqli --host=db --port=3306 --dbname=db --username=db --password=db)
+        ;;
+    # The file lives under var/, which was removed above.
+    sqlite) CONNECTION=(--driver=sqlite) ;;
+esac
 
 say 'installing TYPO3 into the main database'
 ddev exec vendor/bin/typo3 setup --no-interaction --force \
-    --driver=postgres --host=db --port=5432 --dbname=db --username=db --password=db \
+    "${CONNECTION[@]}" \
     --admin-username=e2eadmin --admin-user-password='Playwright!e2e-2026' \
     --admin-email=e2e@example.test --project-name='Playwright toolkit e2e' --server-type=other
 ddev exec vendor/bin/typo3 cache:flush
