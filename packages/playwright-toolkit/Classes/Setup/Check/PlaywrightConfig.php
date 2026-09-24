@@ -11,6 +11,7 @@ final class PlaywrightConfig
     public function __construct(
         private readonly string $directory,
         private readonly string $testingUrl,
+        private readonly string $recordedTestingUrlFile,
     ) {
     }
 
@@ -26,10 +27,19 @@ final class PlaywrightConfig
 
         // A config for another host is the user's to change; we would overwrite their work.
         $config = $this->directory . '/playwright.config.ts';
-        if (!str_contains((string) file_get_contents($config), $this->testingUrl)) {
+        if (!str_contains((string) file_get_contents($config), $this->testingUrl)
+            && $this->recordedTestingUrl() !== $this->testingUrl) {
             return Result::fail('playwright.config.ts does not name ' . $this->testingUrl);
         }
 
         return Result::pass($this->testingUrl);
+    }
+
+    // Every test run writes this file, so it shows the URL even when the config reads it from an env var.
+    private function recordedTestingUrl(): ?string
+    {
+        $recorded = json_decode((string) @file_get_contents($this->recordedTestingUrlFile), true);
+
+        return \is_array($recorded) && \is_string($recorded['testingURL'] ?? null) ? $recorded['testingURL'] : null;
     }
 }

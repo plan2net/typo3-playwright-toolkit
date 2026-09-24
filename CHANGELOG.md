@@ -16,6 +16,9 @@ the package a change belongs to.
   run. It found the testing URL only in a run's own directory, which a passing run
   removes, so it said "Nothing to clean" and left every database behind. `--setup-cache`
   no longer needs a testing URL at all.
+- **plan2net/playwright-toolkit** — `playwright:setup` accepts a `playwright.config.ts`
+  that reads the testing URL from an environment variable, once a test run has
+  used that URL. It passed only when the file named the URL literally.
 
 ## [0.22.0] - 2026-09-23
 

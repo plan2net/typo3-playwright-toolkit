@@ -386,7 +386,11 @@ final class SetupCommand extends Command
             [
                 'key' => 'playwright-config',
                 'checked' => 'the Playwright configuration',
-                'result' => (new PlaywrightConfig($directory, $testingUrl))->run(),
+                'result' => (new PlaywrightConfig(
+                    $directory,
+                    $testingUrl,
+                    $projectPath . '/.test-state/testing-url.json'
+                ))->run(),
             ],
             [
                 'key' => 'spec-file',

@@ -33,7 +33,7 @@ final class PlaywrightConfigTest extends TestCase
     #[Test]
     public function failsWhenTheConfigIsMissing(): void
     {
-        $result = (new PlaywrightConfig($this->directory, self::TESTING_URL))->run();
+        $result = (new PlaywrightConfig($this->directory, self::TESTING_URL, $this->directory . '/testing-url.json'))->run();
 
         self::assertFalse($result->passed);
         self::assertStringContainsString('playwright.config.ts', $result->detail);
@@ -49,11 +49,26 @@ final class PlaywrightConfigTest extends TestCase
         file_put_contents($this->directory . '/tsconfig.json', "{}\n");
         file_put_contents($this->directory . '/.gitignore', "test-results/\n");
 
-        $result = (new PlaywrightConfig($this->directory, self::TESTING_URL))->run();
+        $result = (new PlaywrightConfig($this->directory, self::TESTING_URL, $this->directory . '/testing-url.json'))->run();
 
         self::assertFalse($result->passed);
         self::assertStringContainsString(self::TESTING_URL, $result->detail);
         self::assertSame([], $result->missingFiles);
+    }
+
+    #[Test]
+    public function passesWhenARunRecordedTheTestingUrlTheConfigReadsFromTheEnvironment(): void
+    {
+        file_put_contents(
+            $this->directory . '/playwright.config.ts',
+            "defineToolkitConfig({ testingURL: process.env.TESTING_URL })\n"
+        );
+        file_put_contents($this->directory . '/tsconfig.json', "{}\n");
+        file_put_contents($this->directory . '/.gitignore', "test-results/\n");
+        $recorded = $this->directory . '/testing-url.json';
+        file_put_contents($recorded, json_encode(['testingURL' => self::TESTING_URL]));
+
+        self::assertTrue((new PlaywrightConfig($this->directory, self::TESTING_URL, $recorded))->run()->passed);
     }
 
     #[Test]
@@ -65,7 +80,7 @@ final class PlaywrightConfigTest extends TestCase
         );
         file_put_contents($this->directory . '/.gitignore', "test-results/\n");
 
-        $result = (new PlaywrightConfig($this->directory, self::TESTING_URL))->run();
+        $result = (new PlaywrightConfig($this->directory, self::TESTING_URL, $this->directory . '/testing-url.json'))->run();
 
         self::assertFalse($result->passed);
         self::assertStringContainsString('tsconfig.json', $result->detail);
@@ -79,7 +94,7 @@ final class PlaywrightConfigTest extends TestCase
             "defineToolkitConfig({ testingURL: '" . self::TESTING_URL . "' })\n"
         );
 
-        $detail = (new PlaywrightConfig($this->directory, self::TESTING_URL))->run()->detail;
+        $detail = (new PlaywrightConfig($this->directory, self::TESTING_URL, $this->directory . '/testing-url.json'))->run()->detail;
 
         self::assertStringContainsString('tsconfig.json', $detail);
         self::assertStringContainsString('.gitignore', $detail);
@@ -88,7 +103,7 @@ final class PlaywrightConfigTest extends TestCase
     #[Test]
     public function asksForEveryMissingFileByName(): void
     {
-        $result = (new PlaywrightConfig($this->directory, self::TESTING_URL))->run();
+        $result = (new PlaywrightConfig($this->directory, self::TESTING_URL, $this->directory . '/testing-url.json'))->run();
 
         self::assertSame(
             ['playwright.config.ts', 'tsconfig.json', '.gitignore'],
@@ -106,6 +121,6 @@ final class PlaywrightConfigTest extends TestCase
         file_put_contents($this->directory . '/tsconfig.json', "{}\n");
         file_put_contents($this->directory . '/.gitignore', "test-results/\n");
 
-        self::assertTrue((new PlaywrightConfig($this->directory, self::TESTING_URL))->run()->passed);
+        self::assertTrue((new PlaywrightConfig($this->directory, self::TESTING_URL, $this->directory . '/testing-url.json'))->run()->passed);
     }
 }
