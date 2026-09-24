@@ -119,6 +119,7 @@ final class MysqlTestDatabaseDriverTest extends ServerTestDatabaseDriverTestCase
             ->query('SELECT tax, total FROM tx_odd_columns WHERE uid = 1')
             ->fetch(\PDO::FETCH_ASSOC);
 
+        self::assertIsArray($row);
         self::assertSame('20.00', $row['tax']);
         self::assertSame('120.00', $row['total']);
     }
@@ -284,9 +285,9 @@ final class MysqlTestDatabaseDriverTest extends ServerTestDatabaseDriverTestCase
      */
     private function createTableStatement(string $database, string $table): string
     {
-        $row = $this->connectTo($database)->query('SHOW CREATE TABLE `' . $table . '`')->fetch(\PDO::FETCH_NUM);
+        $statement = $this->connectTo($database)->query('SHOW CREATE TABLE `' . $table . '`')->fetchColumn(1);
 
-        return str_replace($database, '<database>', (string) $row[1]);
+        return str_replace($database, '<database>', (string) $statement);
     }
 
     private static function user(): string

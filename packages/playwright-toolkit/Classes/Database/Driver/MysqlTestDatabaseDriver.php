@@ -176,9 +176,7 @@ final class MysqlTestDatabaseDriver extends ServerTestDatabaseDriver
 
     private function createTableStatement(\PDO $template, string $table): string
     {
-        $row = $template->query(sprintf('SHOW CREATE TABLE `%s`', $table))->fetch(\PDO::FETCH_NUM);
-
-        return (string) $row[1];
+        return (string) $template->query(sprintf('SHOW CREATE TABLE `%s`', $table))->fetchColumn(1);
     }
 
     /**
@@ -201,8 +199,7 @@ final class MysqlTestDatabaseDriver extends ServerTestDatabaseDriver
      */
     private function createViewStatement(\PDO $template, string $view, string $database): string
     {
-        $row = $template->query(sprintf('SHOW CREATE VIEW `%s`', $view))->fetch(\PDO::FETCH_NUM);
-        $statement = (string) $row[1];
+        $statement = (string) $template->query(sprintf('SHOW CREATE VIEW `%s`', $view))->fetchColumn(1);
 
         $statement = preg_replace(
             '/^CREATE\s+(?:ALGORITHM=\S+\s+)?(?:DEFINER=\S+\s+)?(?:SQL SECURITY \w+\s+)?VIEW/i',
