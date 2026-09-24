@@ -3,6 +3,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import type { ToolkitConfig } from '../config.js'
 import { resolveRunId, RUN_ID_PATTERN } from './run-id.js'
+import { recordTestingUrl } from './testing-url.js'
 
 export interface RunPaths {
     runId: string
@@ -49,6 +50,7 @@ export const OWNER_ACTIVE_MS = 30_000
 export function prepareRun(config: ToolkitConfig): RunPaths {
     const paths = ensureRunNamespace(config)
     assertNamespaceIsFree(paths)
+    recordTestingUrl(config.paths.stateDir, config.testingURL)
 
     if (!fs.existsSync(paths.metaFile)) {
         fs.writeFileSync(

@@ -3,8 +3,9 @@ import * as path from 'path'
 import type { ToolkitConfig } from '../config.js'
 import { sweepOrphans } from '../global-teardown.js'
 import { httpCleanup } from '../http/cleanup-client.js'
-import { findStateDir, recordedTestingUrl } from '../inspect/links.js'
+import { findStateDir } from '../inspect/links.js'
 import { OWNER_ACTIVE_MS } from '../state/run-namespace.js'
+import { recordedTestingUrl } from '../state/testing-url.js'
 import { discardSetupCache } from '../setup-cache/discard.js'
 
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
@@ -20,13 +21,20 @@ if (undefined === stateDir) {
     process.exit(0)
 }
 
+const consumerRoot = path.dirname(stateDir)
+
+if (process.argv.includes('--setup-cache')) {
+    const discarded = discardSetupCache(consumerRoot)
+
+    console.log(`Dropped ${discarded} cached scenario setup${1 === discarded ? '' : 's'}.`)
+}
+
 const testingURL = recordedTestingUrl(stateDir)
 if (undefined === testingURL) {
     console.log('Nothing to clean: no run recorded a testing URL.')
     process.exit(0)
 }
 
-const consumerRoot = path.dirname(stateDir)
 const config: ToolkitConfig = {
     testingURL,
     paths: { consumerRoot, stateDir, sessionDir: path.join(consumerRoot, 'var/session') },
@@ -38,9 +46,3 @@ const config: ToolkitConfig = {
 const reclaimed = await sweepOrphans(config, httpCleanup(config))
 
 console.log(`Dropped ${reclaimed} test database${1 === reclaimed ? '' : 's'}.`)
-
-if (process.argv.includes('--setup-cache')) {
-    const discarded = discardSetupCache(consumerRoot)
-
-    console.log(`Dropped ${discarded} cached scenario setup${1 === discarded ? '' : 's'}.`)
-}

@@ -10,6 +10,13 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — `ddev playwright clean` works after a passing
+  run. It found the testing URL only in a run's own directory, which a passing run
+  removes, so it said "Nothing to clean" and left every database behind. `--setup-cache`
+  no longer needs a testing URL at all.
+
 ## [0.22.0] - 2026-09-23
 
 A project whose `core` cache is turned off, or on redis, could not run in the Testing

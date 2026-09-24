@@ -55,6 +55,7 @@ function writeRun(runId: string, testIds: string[], lastActiveMs: number): strin
     const runDir = join(root, '.test-state/runs', runId)
     mkdirSync(runDir, { recursive: true })
     writeFileSync(join(runDir, 'meta.json'), JSON.stringify({ testingURL }))
+    writeFileSync(join(root, '.test-state/testing-url.json'), JSON.stringify({ testingURL }))
     writeFileSync(
         join(runDir, 'attempts.jsonl'),
         testIds.map((testId) => JSON.stringify({
@@ -89,6 +90,28 @@ it('says there is nothing to clean when no run was ever recorded', async () => {
     expect(result.code).toBe(0)
     expect(result.output).toContain('Nothing to clean')
     expect(requests).toHaveLength(0)
+})
+
+it('still sweeps after a passing run removed its run directory', async () => {
+    mkdirSync(join(root, '.test-state/runs'), { recursive: true })
+    writeFileSync(join(root, '.test-state/testing-url.json'), JSON.stringify({ testingURL }))
+
+    const result = await clean()
+
+    expect(result.code).toBe(0)
+    expect(requests.map((request) => request.url)).toContain('/typo3/test-api/databases/sweep')
+})
+
+it('drops the setup cache even when no run recorded a testing url', async () => {
+    mkdirSync(join(root, '.test-state/runs'), { recursive: true })
+    const cacheDir = join(root, 'var/playwright/setup-cache')
+    mkdirSync(cacheDir, { recursive: true })
+    writeFileSync(join(cacheDir, 'entry.sql'), '')
+
+    const result = await clean(['--setup-cache'])
+
+    expect(result.code).toBe(0)
+    expect(existsSync(join(cacheDir, 'entry.sql'))).toBe(false)
 })
 
 it('leaves a run that is still going, and tells the sweep to keep its databases', async () => {
