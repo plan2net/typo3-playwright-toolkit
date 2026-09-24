@@ -30,7 +30,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium firefox
 
       - run: npm run typecheck
 
@@ -67,14 +67,14 @@ jobs:
 
       - run: npm ci
 
-      # 1.44 asks apt for libasound2, which Ubuntu 24.04 renamed, so the system
-      # libraries come from the current Playwright and only the browser from 1.44.
-      - run: npx playwright install --with-deps chromium
+      # The system libraries come from the current Playwright, which knows the
+      # runner's Ubuntu, and only the browsers from the floor.
+      - run: npx playwright install --with-deps chromium firefox
 
       # The floor of the peerDependency range.
-      - run: npm install --no-save @playwright/test@1.44.0
+      - run: npm install --no-save @playwright/test@1.47.0
 
-      - run: npx playwright install chromium
+      - run: npx playwright install chromium firefox
 
       - run: npm run typecheck
 

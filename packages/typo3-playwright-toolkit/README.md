@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@plan2net/typo3-playwright-toolkit"><img src="https://img.shields.io/npm/v/@plan2net/typo3-playwright-toolkit?style=for-the-badge&logo=npm&logoColor=white&labelColor=24273a&color=fff3b0" alt="npm version"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node-22.12%2B-a0c4ff?style=for-the-badge&logo=nodedotjs&logoColor=white&labelColor=24273a" alt="Node 22.12 or newer"></a>
-  <a href="https://playwright.dev"><img src="https://img.shields.io/badge/Playwright-1.44%2B-b5ead7?style=for-the-badge&labelColor=24273a&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTcgNHYxNmwxMy04eiIvPjwvc3ZnPg%3D%3D" alt="Playwright 1.44 or newer"></a>
+  <a href="https://playwright.dev"><img src="https://img.shields.io/badge/Playwright-1.47%2B-b5ead7?style=for-the-badge&labelColor=24273a&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTcgNHYxNmwxMy04eiIvPjwvc3ZnPg%3D%3D" alt="Playwright 1.47 or newer"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/licence-GPL--2.0--or--later-ffc6d9?style=for-the-badge&logo=gnu&logoColor=white&labelColor=24273a" alt="GPL-2.0-or-later licence"></a>
 </p>
 
@@ -35,7 +35,7 @@ which provides the database service and the commands.
 ## Requirements
 
 - Node 22.12 or newer
-- `@playwright/test` 1.44 or newer, so a project that already runs Playwright keeps its
+- `@playwright/test` 1.47 or newer, so a project that already runs Playwright keeps its
   version and its screenshot baselines
 - The Composer extension, installed in the same project
 

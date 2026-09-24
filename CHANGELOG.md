@@ -10,6 +10,14 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Changed
+
+- **@plan2net/typo3-playwright-toolkit** — needs `@playwright/test` 1.47 or newer,
+  up from 1.44. On older versions, Firefox loses the test ID after any redirect,
+  so the page a redirect leads to (for example `/` to `/en/`) comes from the normal
+  database instead of the test's own, and nothing reports it. Chromium and WebKit
+  were not affected. If you run Playwright 1.44 to 1.46, update it.
+
 ### Fixed
 
 - **@plan2net/typo3-playwright-toolkit** — `ddev playwright clean` works after a passing

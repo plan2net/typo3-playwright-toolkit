@@ -104,7 +104,7 @@ directories and installs into the project above. `type: module` is needed becaus
 Playwright config in step 4 uses `import.meta.url`.
 
 If your project already runs Playwright, install `@plan2net/typo3-playwright-toolkit`
-alone and keep the `@playwright/test` you have: 1.44 and newer work. Then read
+alone and keep the `@playwright/test` you have: 1.47 and newer work. Then read
 [Migrating an existing Playwright suite](#migrating-an-existing-playwright-suite).
 Your configuration mostly carries over, your tests do not.
 
@@ -363,7 +363,7 @@ and `use.serviceWorkers` keep the test ID on one origin, and a project's own `us
 restricted the same way. TypeScript rejects all four, and a JavaScript config gets an
 error naming the key and the reason.
 
-Keep the `@playwright/test` you have, 1.44 or newer. Install
+Keep the `@playwright/test` you have, 1.47 or newer. Install
 `@plan2net/typo3-playwright-toolkit` on its own and your version stays.
 
 Your tests can stay where they are. The `ddev playwright*` commands look in

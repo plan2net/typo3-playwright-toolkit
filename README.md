@@ -10,7 +10,7 @@
   <a href="https://github.com/plan2net/typo3-playwright-toolkit/actions/workflows/e2e.yml"><img src="https://img.shields.io/github/actions/workflow/status/plan2net/typo3-playwright-toolkit/e2e.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=e2e&labelColor=24273a" alt="e2e"></a>
   <a href="https://get.typo3.org"><img src="https://img.shields.io/badge/TYPO3-11.5%20%7C%2012.4%20%7C%2013.4%20%7C%2014.3-ffb997?style=for-the-badge&logo=typo3&logoColor=white&labelColor=24273a" alt="TYPO3 11.5, 12.4, 13.4 and 14.3"></a>
   <a href="https://www.php.net"><img src="https://img.shields.io/badge/PHP-8.1%2B-c3b1e1?style=for-the-badge&logo=php&logoColor=white&labelColor=24273a" alt="PHP 8.1 or newer"></a>
-  <a href="https://playwright.dev"><img src="https://img.shields.io/badge/Playwright-1.44%2B-b5ead7?style=for-the-badge&labelColor=24273a&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTcgNHYxNmwxMy04eiIvPjwvc3ZnPg%3D%3D" alt="Playwright 1.44 or newer"></a>
+  <a href="https://playwright.dev"><img src="https://img.shields.io/badge/Playwright-1.47%2B-b5ead7?style=for-the-badge&labelColor=24273a&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTcgNHYxNmwxMy04eiIvPjwvc3ZnPg%3D%3D" alt="Playwright 1.47 or newer"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/licence-GPL--2.0--or--later-ffc6d9?style=for-the-badge&logo=gnu&logoColor=white&labelColor=24273a" alt="GPL-2.0-or-later licence"></a>
 </p>
 
