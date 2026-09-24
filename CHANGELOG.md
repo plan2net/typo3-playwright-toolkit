@@ -16,6 +16,10 @@ the package a change belongs to.
   run. It found the testing URL only in a run's own directory, which a passing run
   removes, so it said "Nothing to clean" and left every database behind. `--setup-cache`
   no longer needs a testing URL at all.
+- **@plan2net/typo3-playwright-toolkit** — `ddev playwright clean` says how many test
+  databases it left alone and why: they belong to a run that is still going, or they
+  are younger than the minimum age the extension allows (one hour by default). It
+  printed only "Dropped 0 test databases", which looked like a failure.
 - **@plan2net/typo3-playwright-toolkit** — `ddev playwright inspect` lists only the
   databases a failed run kept. It also listed the ones the teardown had dropped or
   found already gone, so every run with more than one scenario printed links that

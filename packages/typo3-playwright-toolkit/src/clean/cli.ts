@@ -43,6 +43,12 @@ const config: ToolkitConfig = {
     cleanup: { orphanAgeMs: OWNER_ACTIVE_MS },
 }
 
-const reclaimed = await sweepOrphans(config, httpCleanup(config))
+const { dropped, kept, cutoffMs } = await sweepOrphans(config, httpCleanup(config))
 
-console.log(`Dropped ${reclaimed} test database${1 === reclaimed ? '' : 's'}.`)
+console.log(`Dropped ${dropped} test database${1 === dropped ? '' : 's'}.`)
+if (kept > 0) {
+    console.log(
+        `Kept ${kept} test database${1 === kept ? '' : 's'} that ${1 === kept ? 'is' : 'are'} in use ` +
+            `or younger than ${Math.round(cutoffMs / 60_000)} minutes.`,
+    )
+}

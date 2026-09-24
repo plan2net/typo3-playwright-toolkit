@@ -264,11 +264,11 @@ describe('sweepOrphans', () => {
         const abandonedDir = ageRun(theirs, 2 * dayMs)
         const cleanup = fakeCleanup()
 
-        const reclaimed = await sweepOrphans(mine, cleanup)
+        const { dropped } = await sweepOrphans(mine, cleanup)
 
         expect(cleanup.dropped).toEqual([['OLDOLD11OLDOLD11']])
         expect(fs.existsSync(abandonedDir)).toBe(false)
-        expect(reclaimed).toBe(1)
+        expect(dropped).toBe(1)
         // Never passed as "keep": that is what made revision 1 protect them forever.
         expect(cleanup.swept[0].keepTestIds).toEqual(['LIVE1111LIVE1111'])
     })

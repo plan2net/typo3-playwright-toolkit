@@ -114,7 +114,7 @@ export async function sweepOrphans(
     config: ToolkitConfig,
     cleanup: CleanupClient,
     now: number = Date.now(),
-): Promise<number> {
+): Promise<{ dropped: number; kept: number; cutoffMs: number }> {
     const { stateDir } = config.paths
     const orphanAgeMs = config.cleanup?.orphanAgeMs ?? DEFAULT_ORPHAN_AGE_MS
     const cutoff = now - orphanAgeMs
@@ -172,7 +172,7 @@ export async function sweepOrphans(
     const sweep = await cleanup.sweep([...liveTestIds], orphanAgeMs)
     reclaimed += sweep.results.filter((result) => 'dropped' === result.outcome).length
 
-    return reclaimed
+    return { dropped: reclaimed, kept: sweep.kept, cutoffMs: sweep.cutoffMs }
 }
 
 export function describePreservedRun(

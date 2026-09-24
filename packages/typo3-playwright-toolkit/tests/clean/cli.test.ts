@@ -14,6 +14,7 @@ let root: string
 let server: Server
 let testingURL: string
 let requests: Array<{ url: string; headers: IncomingHttpHeaders; body: string }>
+let sweepReply: { results: unknown[]; kept: number; cutoffMs: number }
 
 beforeAll(() => {
     execFileSync('npm', ['run', 'build'], { cwd: packageRoot, stdio: 'pipe' })
@@ -21,6 +22,7 @@ beforeAll(() => {
 
 beforeEach(async () => {
     requests = []
+    sweepReply = { results: [], kept: 0, cutoffMs: 0 }
     server = createServer((request, response) => {
         let body = ''
         request.on('data', (chunk: Buffer) => { body += chunk.toString() })
@@ -35,7 +37,7 @@ beforeEach(async () => {
 
                 return
             }
-            response.end(JSON.stringify({ results: [], kept: 0, cutoffMs: 0 }))
+            response.end(JSON.stringify(sweepReply))
         })
     })
     await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
@@ -100,6 +102,16 @@ it('still sweeps after a passing run removed its run directory', async () => {
 
     expect(result.code).toBe(0)
     expect(requests.map((request) => request.url)).toContain('/typo3/test-api/databases/sweep')
+})
+
+it('says how many databases it left alone, and the age they have to reach', async () => {
+    mkdirSync(join(root, '.test-state/runs'), { recursive: true })
+    writeFileSync(join(root, '.test-state/testing-url.json'), JSON.stringify({ testingURL }))
+    sweepReply = { results: [], kept: 2, cutoffMs: 3_600_000 }
+
+    const result = await clean()
+
+    expect(result.output).toContain('Kept 2 test databases that are in use or younger than 60 minutes.')
 })
 
 it('drops the setup cache even when no run recorded a testing url', async () => {
