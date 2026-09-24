@@ -445,6 +445,49 @@ final class SetupCommandTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function writesTheRootPageOfTheSiteTheTestingUrlNames(): void
+    {
+        putenv('DDEV_SITENAME=example');
+        $this->configureSite(2573, 'a-shop', 'shop-testing.ddev.site');
+        $this->configureSite(1);
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['playwright_toolkit'] = [
+            'fixturesPath' => 'tests/playwright/fixtures-by-url',
+            'fixtureManifest' => '010-root-page.sql',
+        ];
+
+        $tester = new CommandTester($this->command());
+        $tester->setInputs(['', 'https://example-testing.ddev.site', 'yes', 'no']);
+        $tester->execute([]);
+
+        self::assertSame('a-shop', array_key_first($this->get(SiteFinder::class)->getAllSites()));
+        self::assertStringContainsString(
+            'VALUES (1, 0,',
+            (string) file_get_contents($this->instancePath . '/tests/playwright/fixtures-by-url/010-root-page.sql')
+        );
+    }
+
+    #[Test]
+    public function asksForTheSiteWhenTheTestingUrlNamesNone(): void
+    {
+        putenv('DDEV_SITENAME=example');
+        $this->configureSite(2573, 'a-shop', 'shop.example');
+        $this->configureSite(1, 'main', 'main.example');
+        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['playwright_toolkit'] = [
+            'fixturesPath' => 'tests/playwright/fixtures-by-choice',
+            'fixtureManifest' => '010-root-page.sql',
+        ];
+
+        $tester = new CommandTester($this->command());
+        $tester->setInputs(['', 'https://example-testing.ddev.site', 'yes', 'a-shop', 'no']);
+        $tester->execute([]);
+
+        self::assertStringContainsString(
+            'VALUES (2573, 0,',
+            (string) file_get_contents($this->instancePath . '/tests/playwright/fixtures-by-choice/010-root-page.sql')
+        );
+    }
+
+    #[Test]
     public function offersToBuildTheTemplateOnceTheServiceAndFixturesAreThere(): void
     {
         putenv('DDEV_SITENAME=example');
@@ -508,13 +551,16 @@ final class SetupCommandTest extends FunctionalTestCase
      * Check 6 compares the fixture's uid against a site's rootPageId, so without a
      * site configuration there is nothing for it to agree with.
      */
-    private function configureSite(int $rootPageId): void
-    {
-        $site = Environment::getConfigPath() . '/sites/main';
+    private function configureSite(
+        int $rootPageId,
+        string $identifier = 'main',
+        string $host = 'example-testing.ddev.site',
+    ): void {
+        $site = Environment::getConfigPath() . '/sites/' . $identifier;
         mkdir($site, 0777, true);
         file_put_contents($site . '/config.yaml', <<<YAML
             rootPageId: {$rootPageId}
-            base: 'https://example-testing.ddev.site/'
+            base: 'https://{$host}/'
             languages:
               -
                 languageId: 0

@@ -24,6 +24,11 @@ the package a change belongs to.
   databases a failed run kept. It also listed the ones the teardown had dropped or
   found already gone, so every run with more than one scenario printed links that
   answered 404.
+- **plan2net/playwright-toolkit** — `playwright:setup` works on a project with more
+  than one site. It compared the fixtures against the first site TYPO3 listed, so it
+  could fail on fixtures that were right, and write a root page for the wrong site.
+  It now accepts the root page of any site, and writes the one for the site whose base
+  has the testing URL's host name. If no site has it, the wizard asks.
 - **plan2net/playwright-toolkit** — `playwright:setup` accepts a `playwright.config.ts`
   that reads the testing URL from an environment variable, once a test run has
   used that URL. It passed only when the file named the URL literally.

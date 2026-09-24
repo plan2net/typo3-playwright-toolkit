@@ -203,6 +203,13 @@ VALUES (1, 0, 'Root', '/', 1, 1, 0, 0);
 The `uid` has to be the `rootPageId` of your site configuration, and that
 configuration has to exist. It is a file, so the template already has it.
 
+With more than one site, the wizard writes the root page of the site whose `base`,
+or one of its `baseVariants`, has the testing URL's host name. If no site has it,
+the wizard asks which site to use, and `--no-interaction` lists the sites instead.
+The check passes when the fixtures create the root page of any of your sites. It
+reads only the first `INSERT INTO pages` row, so a fixture it cannot read passes
+with "could not verify the seeded root".
+
 Write the SQL by hand, against the current schema. A dump of your project database
 does not work: it still has columns that TYPO3 removed in an older upgrade, and the
 template does not have them.

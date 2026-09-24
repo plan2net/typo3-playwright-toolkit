@@ -29,6 +29,7 @@ use Plan2net\PlaywrightToolkit\Setup\HostCommands;
 use Plan2net\PlaywrightToolkit\Setup\PrepareRun;
 use Plan2net\PlaywrightToolkit\Setup\Result;
 use Plan2net\PlaywrightToolkit\Setup\RunLocation;
+use Plan2net\PlaywrightToolkit\Setup\TestingSite;
 use Plan2net\PlaywrightToolkit\Setup\WebserverHint;
 use Psr\Http\Client\ClientInterface;
 use Symfony\Component\Console\Command\Command;
@@ -38,6 +39,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use TYPO3\CMS\Core\Configuration\ConfigurationManager;
 use TYPO3\CMS\Core\Core\Environment;
+use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -190,7 +192,9 @@ final class SetupCommand extends Command
         $placeholders = [
             'TESTING_URL' => $testingUrl,
             'PROJECT_ROOT' => Answers::relativeProjectRoot($testDirectory),
-            'ROOT_PAGE_ID' => (string) ($this->rootPageId() ?? 1),
+            'ROOT_PAGE_ID' => isset($bases[Fixtures::ROOT_PAGE_FIXTURE])
+                ? (string) $this->rootPageId($io, $testingUrl)
+                : '',
         ];
         foreach ($bases as $file => $base) {
             try {
@@ -372,7 +376,8 @@ final class SetupCommand extends Command
                 'result' => (new Fixtures(
                     self::fixturesPath($projectPath, $configuration),
                     $configuration->fixtureManifest,
-                    $this->rootPageId()
+                    $this->siteRoots(),
+                    $this->testingSite($testingUrl)
                 ))->run(),
             ],
             [
@@ -454,12 +459,36 @@ final class SetupCommand extends Command
         return '' === $configured ? '' : $projectPath . '/' . $configured;
     }
 
-    private function rootPageId(): ?int
+    /**
+     * @return array<string, int>
+     */
+    private function siteRoots(): array
     {
-        $sites = $this->siteFinder->getAllSites();
-        $site = reset($sites);
+        return array_map(
+            static fn(Site $site): int => $site->getRootPageId(),
+            $this->siteFinder->getAllSites()
+        );
+    }
 
-        return false === $site ? null : $site->getRootPageId();
+    private function testingSite(string $testingUrl): ?string
+    {
+        return TestingSite::for(
+            array_map(static fn(Site $site): array => $site->getConfiguration(), $this->siteFinder->getAllSites()),
+            $testingUrl
+        );
+    }
+
+    private function rootPageId(SymfonyStyle $io, string $testingUrl): int
+    {
+        $roots = $this->siteRoots();
+        if ([] === $roots) {
+            return 1;
+        }
+
+        $site = $this->testingSite($testingUrl)
+            ?? (string) $io->choice('The testing URL matches no site. Which one should the root page fixture create?', $roots);
+
+        return $roots[$site];
     }
 
     /**
