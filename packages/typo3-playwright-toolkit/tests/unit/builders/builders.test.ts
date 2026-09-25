@@ -145,6 +145,17 @@ beforeEach(() => {
 })
 
 describe('PageBuilder', () => {
+    it('leaves the columns TCA defaults to the backend', async () => {
+        const { posted, page } = fakePage(4711)
+
+        await pageBuilder(page).withTitle('A page').create()
+
+        const row = only(posted[0].dataMap.pages)
+        expect(row).not.toHaveProperty('shortcut_mode')
+        expect(row).not.toHaveProperty('layout')
+        expect(row).not.toHaveProperty('subtitle')
+    })
+
     it('returns the uid TYPO3 assigned, not a counter', async () => {
         const { page } = fakePage(4711)
 

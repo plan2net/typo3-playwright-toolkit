@@ -30,11 +30,8 @@ export type Doktype = keyof typeof DOKTYPES
  */
 const CREATE_DEFAULTS: Fields = {
     doktype: 1,
-    shortcut_mode: 0,
     pid: 1,
     hidden: false,
-    layout: 0,
-    subtitle: '',
 }
 
 export class PageBuilder {
