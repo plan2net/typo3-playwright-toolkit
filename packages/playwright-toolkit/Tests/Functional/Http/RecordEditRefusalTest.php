@@ -412,6 +412,7 @@ final class RecordEditRefusalTest extends FunctionalTestCase
     public static function bodiesTheBuildersPost(): \Generator
     {
         yield 'an image element' => ['content-image-datamap'];
+        yield 'nested content' => ['content-nested-datamap'];
     }
 
     #[Test]

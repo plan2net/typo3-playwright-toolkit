@@ -7,7 +7,6 @@
     "data[tt_content][NEWcontent][header]": "With items",
     "data[tt_content][NEWcontent][tx_relationstest_items]": "NEWitem",
     "data[tx_relationstest_item][NEWitem][pid]": "2",
-    "data[tx_relationstest_item][NEWitem][sys_language_uid]": "0",
     "data[tx_relationstest_item][NEWitem][title]": "First",
     "data[tx_relationstest_item][NEWitem][image]": "NEWitemimage",
     "data[sys_file_reference][NEWitemimage][uid_local]": "1",

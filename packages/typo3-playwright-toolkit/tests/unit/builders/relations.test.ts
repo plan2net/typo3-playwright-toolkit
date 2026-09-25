@@ -124,9 +124,17 @@ describe('a child record', () => {
         expect(columns.items).toBe(identifierOf(records.tx_demo_item))
         expect(only(records.tx_demo_item)).toEqual({
             pid: 7,
-            sys_language_uid: 0,
             title: 'First',
         })
+    })
+
+    it('carries the language of a translated owner', () => {
+        const relations = new RelationSet('tt_content')
+        relations.withChild('items', 'tx_demo_item', (item) => item.withField('title', 'Erste'))
+
+        const { records } = relations.materialise({ pid: 7, sys_language_uid: 1 })
+
+        expect(only(records.tx_demo_item)).toMatchObject({ sys_language_uid: 1 })
     })
 
     it('writes one row per item, in the order the items are given', () => {

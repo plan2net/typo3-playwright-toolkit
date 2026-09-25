@@ -32,6 +32,10 @@ the package a change belongs to.
 
 ### Fixed
 
+- **@plan2net/typo3-playwright-toolkit** — a child record built with `withChild()` saves
+  when its table has no language field. It was always sent the parent's
+  `sys_language_uid`, which such a table does not have, so the save was refused. It is
+  now sent only for a translation.
 - **@plan2net/typo3-playwright-toolkit** — a new page no longer posts `shortcut_mode`,
   `layout` and `subtitle`. Most page types do not show them in the form, and TYPO3
   fills in the same defaults itself.

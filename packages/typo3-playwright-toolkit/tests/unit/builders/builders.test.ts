@@ -589,6 +589,19 @@ describe('ContentBuilder', () => {
         })
     })
 
+    it('leaves the language of a child in the default language to the backend', async () => {
+        registerContentTypes({ demo_accordion: AccordionContent })
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page)
+            .onPage('12')
+            .ofType('demo_accordion')
+            .withChild('items', 'tx_demo_accordion_item', (item) => item.withField('title', 'First'))
+            .create()
+
+        expect(only(posted[0].dataMap.tx_demo_accordion_item)).not.toHaveProperty('sys_language_uid')
+    })
+
     it('posts one child per item named on the builder', async () => {
         registerContentTypes({ demo_accordion: AccordionContent })
         const { posted, page } = fakePage(42)

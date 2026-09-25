@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 $GLOBALS['TCA']['tt_content']['columns']['tx_relationstest_items'] = [
     'label' => 'Items',
     'config' => [
@@ -10,3 +12,5 @@ $GLOBALS['TCA']['tt_content']['columns']['tx_relationstest_items'] = [
         'foreign_field' => 'parentid',
     ],
 ];
+
+ExtensionManagementUtility::addToAllTCAtypes('tt_content', 'tx_relationstest_items', 'text');

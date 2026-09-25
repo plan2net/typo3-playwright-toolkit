@@ -74,8 +74,9 @@ export class ChildRecord {
 
     /** Relations inherit from the merged row, so a pid the child sets reaches them. */
     materialise(owner: RelationOwner): { row: Record<string, unknown>; records: RecordDataMap } {
-        const row = { pid: owner.pid, sys_language_uid: owner.sys_language_uid, ...this.fields }
-        const { columns, records } = this.relations.materialise(row)
+        const language = 0 === Number(owner.sys_language_uid) ? {} : { sys_language_uid: owner.sys_language_uid }
+        const row = { pid: owner.pid, ...language, ...this.fields }
+        const { columns, records } = this.relations.materialise({ sys_language_uid: owner.sys_language_uid, ...row })
 
         return { row: { ...row, ...columns }, records }
     }
