@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Plan2net\PlaywrightToolkit\Http;
+namespace Plan2net\PlaywrightToolkit\DataHandling;
 
 final class UnknownColumns
 {

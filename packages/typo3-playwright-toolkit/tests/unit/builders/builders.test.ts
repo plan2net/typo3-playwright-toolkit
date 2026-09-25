@@ -37,6 +37,7 @@ function config(): ToolkitConfig {
 
 interface Posted {
     url: string
+    headers: Record<string, string>
     fields: Record<string, string>
     dataMap: RecordDataMap
 }
@@ -76,7 +77,7 @@ function fakePage(uid: number | number[], refusalBody?: string, testId: string =
         testId,
         request: {
             async post(url: string, options: { headers: Record<string, string>; multipart: Record<string, string> }) {
-                posted.push({ url, fields: options.multipart, dataMap: toDataMap(options.multipart) })
+                posted.push({ url, headers: options.headers, fields: options.multipart, dataMap: toDataMap(options.multipart) })
 
                 if (undefined !== refusalBody) {
                     return { status: () => 200, headers: () => ({}), text: async () => refusalBody }
@@ -154,6 +155,14 @@ describe('PageBuilder', () => {
         expect(row).not.toHaveProperty('shortcut_mode')
         expect(row).not.toHaveProperty('layout')
         expect(row).not.toHaveProperty('subtitle')
+    })
+
+    it('asks the extension to skip the form rules for a page that opts out', async () => {
+        const { posted, page } = fakePage(4711)
+
+        await pageBuilder(page).withTitle('A page').withoutFormRules().create()
+
+        expect(posted[0].headers['X-Playwright-Skip-Form-Rules']).toBe('1')
     })
 
     it('returns the uid TYPO3 assigned, not a counter', async () => {
@@ -439,6 +448,14 @@ describe('ContentBuilder', () => {
 
     // Every element used to be posted with the page id, so a scenario's elements
     // rendered in the reverse of the order it created them.
+    it('asks the extension to skip the form rules for an element that opts out', async () => {
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page).onPage('12').ofType('text').withoutFormRules().create()
+
+        expect(posted[0].headers['X-Playwright-Skip-Form-Rules']).toBe('1')
+    })
+
     it('appends each element after the previous one on the same page', async () => {
         const { posted, page } = fakePage([11, 22])
 
@@ -816,6 +833,17 @@ describe('batch', () => {
 
         expect(posted).toHaveLength(1)
         expect(created.map((element) => element.id)).toEqual(['21', '22', '23'])
+    })
+
+    it('skips the form rules for the whole post when one element opts out', async () => {
+        const { posted, page } = fakePage([21, 22])
+
+        await batch(page)(
+            contentBuilder(page).onPage('5').ofType('header').configure((c) => c.withHeader('First')),
+            contentBuilder(page).onPage('5').ofType('header').withoutFormRules(),
+        )
+
+        expect(posted[0].headers['X-Playwright-Skip-Form-Rules']).toBe('1')
     })
 
     // A plain pid inserts at the top, so without the chain the page reads backwards.

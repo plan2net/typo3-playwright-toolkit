@@ -213,6 +213,16 @@ so the failure points at the save and not at a later assertion. A `withField()` 
 that TCA does not have fails there too, naming the closest column that exists: TYPO3
 would drop such a field without saying so, leaving the test without its content.
 
+A save also fails when the backend form would not allow it for the user the test runs
+as: an empty required field, too few or too many items, a number out of range, a value
+shorter than the minimum, or a field the form does not show for the record's type and
+values. The message names the field, for example `tt_content NEW1: "header" is required.`
+A test that means to create such a record, say to cover an import, says so:
+
+```ts
+await builders.content().onPage(pageId).ofType('text').withoutFormRules().create()
+```
+
 <picture>
   <source media="(max-width: 700px)" srcset="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/scenario-fan-out-narrow.svg">
   <img width="880" src="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/scenario-fan-out.svg"

@@ -7,6 +7,7 @@ use Plan2net\PlaywrightToolkit\Http\HealthCheckProvider;
 use Plan2net\PlaywrightToolkit\Http\InspectProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordedErrorProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
+use Plan2net\PlaywrightToolkit\Http\RecordEditRefusal;
 use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
 
@@ -52,6 +53,15 @@ return [
             'target' => RecordEditDiagnostics::class,
             'before' => [
                 'typo3/cms-backend/backend-routing',
+            ],
+        ],
+        'plan2net/playwright-toolkit/record-edit-refusal' => [
+            'target' => RecordEditRefusal::class,
+            'after' => [
+                'typo3/cms-backend/authentication',
+            ],
+            'before' => [
+                'typo3/cms-backend/site-resolver',
             ],
         ],
     ],

@@ -14,6 +14,7 @@ Read this before you change anything that touches a test ID.
 | Secret header | `X-Playwright-Toolkit-Secret` | npm `SECRET_HEADER`, PHP `TestApiSecret::HEADER` |
 | Saved record header | `X-Playwright-Saved-Record` | npm `SAVED_RECORD_HEADER`, PHP `SavedRecord::HEADER` |
 | Refused record header | `X-Playwright-Record-Diagnostics` | npm `RECORD_DIAGNOSTICS_HEADER`, PHP `RecordDiagnostics::HEADER` |
+| Skip form rules header | `X-Playwright-Skip-Form-Rules` | npm `SKIP_FORM_RULES_HEADER`, PHP `RecordEditRefusal::SKIP_FORM_RULES_HEADER` |
 | Secret file | `var/playwright/api-secret` | PHP writes it, npm reads it |
 | Media manifest | `var/playwright/media.json` | PHP writes it, npm reads it |
 | Secret override | `PLAYWRIGHT_TOOLKIT_SECRET` | environment, read by both |
@@ -171,12 +172,26 @@ X-Playwright-Record-Diagnostics: {"errors":[{"message":"…","table":"tt_content
 It is absent when the save was clean, and the two headers are separate because one says
 what was written and the other says what was not.
 
-The same header carries a refusal the middleware makes **before** DataHandler runs: a
-posted column that TCA has no column for would be dropped in silence, so the request is
-answered `422` with no `Location`, and the body holds every message. `count` is the
-number of refusals; `errors` holds as many as fit in a header a webserver will pass on,
-so it can hold fewer. A caller with a `count` larger than that reads the rest from the
-body, or from the errors endpoint below for a DataHandler refusal, which is logged.
+The same header carries a refusal `RecordEditRefusal` makes **before** DataHandler runs,
+answered `422` with no `Location`, the body holding every message. It refuses, in this
+order:
+
+- a posted column TCA has no column for (`contract/record-diagnostics-unknown-column.json`);
+- a posted column the user who posts may not edit;
+- what the backend form would not save for that user: a posted field the form of the
+  posted type and values does not show, and a field breaking `required`, `minitems`,
+  `maxitems`, `range` or `min`, FlexForm fields and inline children included
+  (`contract/record-diagnostics-form-rule.json`).
+
+`count` is the number of refusals; `errors` holds as many as fit in a header a webserver
+will pass on, so it can hold fewer. A caller with a `count` larger than that reads the
+rest from the body, or from the errors endpoint below for a DataHandler refusal, which is
+logged.
+
+A POST with `X-Playwright-Skip-Form-Rules: 1` skips the form rules and the hidden-field
+check. The unknown-column and the permission refusal stay, because DataHandler would
+drop those fields either way. The header is read only on a request that carries the
+secret; the toolkit sends it for a builder that called `.withoutFormRules()`.
 
 `POST /typo3/test-api/session` returns the session cookie and the tokens:
 

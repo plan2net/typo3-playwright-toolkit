@@ -1,0 +1,6 @@
+"be_users",,,,,,,
+,"uid","pid","username","password","admin","disable","deleted"
+,1,0,"admin","*",1,0,0
+"pages",,,,,,,
+,"uid","pid","title","doktype","slug","deleted","hidden"
+,1,0,"Root",1,"/",0,0

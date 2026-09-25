@@ -17,6 +17,18 @@ the package a change belongs to.
   so the page a redirect leads to (for example `/` to `/en/`) comes from the normal
   database instead of the test's own, and nothing reports it. Chromium and WebKit
   were not affected. If you run Playwright 1.44 to 1.46, update it.
+- **plan2net/playwright-toolkit** — a builder save the backend form would not allow is
+  refused before it is saved. DataHandler accepts what the form's JavaScript stops: an
+  empty required field, too few or too many items (it cuts extra items without a word),
+  a number out of range, a value shorter than the minimum, and fields the form does
+  not show for the posted type and values, which can write rows no editor could. The
+  check uses the form of the user the test runs as, including TSconfig, displayCond,
+  translations, inline children and FlexForms. The save answers 422 and the builder
+  throws, for example `tt_content NEW1: "header" is required.` A test that means to
+  create such a record calls `.withoutFormRules()` on its builder.
+- **@plan2net/typo3-playwright-toolkit** — builders have `.withoutFormRules()`. In a
+  `batch()`, one element that calls it skips the form rules for the whole batch.
+  `QueuedContent` has a new `skipsFormRules` property.
 
 ### Fixed
 

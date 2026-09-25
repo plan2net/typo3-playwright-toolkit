@@ -1,5 +1,5 @@
 import { getToolkitConfig } from '../config.js'
-import { RECORD_DIAGNOSTICS_HEADER, SAVED_RECORD_HEADER, toolkitHeaders } from '../contract.js'
+import { RECORD_DIAGNOSTICS_HEADER, SAVED_RECORD_HEADER, SKIP_FORM_RULES_HEADER, toolkitHeaders } from '../contract.js'
 
 /** Relative to the backend entry point, which a project may have moved. */
 export const RECORD_EDIT_ROUTE = '/record/edit'
@@ -52,6 +52,7 @@ export interface RecordToSave {
     /** `edit[table][target]` — the parent page when creating, the record itself when updating. */
     target: number
     data: RecordDataMap
+    withoutFormRules?: boolean
 }
 
 /**
@@ -79,7 +80,10 @@ export async function saveRecord(
         `&token=${encodeURIComponent(context.routeToken)}`
 
     const response = await poster.post(url, {
-        headers: toolkitHeaders(getToolkitConfig(), context.testId),
+        headers: {
+            ...toolkitHeaders(getToolkitConfig(), context.testId),
+            ...(record.withoutFormRules ? { [SKIP_FORM_RULES_HEADER]: '1' } : {}),
+        },
         multipart: formFields(record.data),
         // The new uid only exists in the redirect; following it loses it.
         maxRedirects: 0,

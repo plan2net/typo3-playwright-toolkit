@@ -47,6 +47,7 @@ export class ContentBuilder {
 export interface QueuedContent {
     readonly identifier: string
     readonly targetPageId: string
+    readonly skipsFormRules: boolean
     prepared(
         context: RequestContext,
         positionPid: string,
@@ -59,6 +60,7 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
     readonly identifier = newRecordIdentifier()
 
     private builder: ContentBuilderInterface
+    private optedOutOfFormRules = false
     private readonly fields: ContentFields = {}
     private readonly relations = new RelationSet('tt_content', (column) => column in this.fields)
 
@@ -75,6 +77,10 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         return this.pageId
     }
 
+    get skipsFormRules(): boolean {
+        return this.optedOutOfFormRules
+    }
+
     configure(fn: (builder: B) => void): this {
         fn(this.builder as B)
         return this
@@ -82,6 +88,12 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
 
     withField(column: string, value: ContentFields[string]): this {
         this.fields[column] = value
+
+        return this
+    }
+
+    withoutFormRules(): this {
+        this.optedOutOfFormRules = true
 
         return this
     }
@@ -128,6 +140,7 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
             identifier: this.identifier,
             target: Number(pageId),
             data,
+            withoutFormRules: this.optedOutOfFormRules,
         })
 
         lastElementOnPage.get(this.page)?.set(pageId, saved.uid)
@@ -215,6 +228,7 @@ export async function saveBatch(
         identifier: queued[0].identifier,
         target: Number(pageId),
         data,
+        withoutFormRules: queued.some((element) => element.skipsFormRules),
     })
 
     const uids = saved.uids.slice(0, queued.length)

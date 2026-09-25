@@ -1,0 +1,10 @@
+{
+    "_comment": "The exact X-Playwright-Record-Diagnostics envelope a record/edit save answers with when the backend form would not save the posted record, alongside status 422 and no Location. Here a new record leaves a required field out. The extension asserts its real header matches this; the toolkit asserts its client turns it into the thrown message. Neither side may change it alone.",
+    "errors": [
+        {
+            "table": "tx_formrulestest_record",
+            "message": "tx_formrulestest_record NEW1: \"title\" is required."
+        }
+    ],
+    "count": 1
+}

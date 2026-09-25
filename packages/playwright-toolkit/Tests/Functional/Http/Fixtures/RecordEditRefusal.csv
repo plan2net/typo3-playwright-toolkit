@@ -1,0 +1,15 @@
+"be_groups",,,,,,,,,
+,"uid","pid","title","tables_select","tables_modify","non_exclude_fields","db_mountpoints","deleted","hidden"
+,1,0,"Editors","tx_formrulestest_record","tx_formrulestest_record","",1,0,0
+"be_users",,,,,,,,,
+,"uid","pid","username","password","admin","usergroup","disable","deleted",
+,1,0,"admin","*",1,"",0,0,
+,2,0,"editor","*",0,"1",0,0,
+"pages",,,,,,,,,
+,"uid","pid","title","doktype","slug","deleted","hidden","perms_everybody",
+,1,0,"Root",1,"/",0,0,31,
+"tx_formrulestest_record",,,,,,,,,
+,"uid","pid","title","kind","settings",,,,
+,5,1,"Stored","plain","",,,,
+,6,1,"Flexible","flexible","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?><T3FlexForms><data><sheet index=""sDEF""><language index=""lDEF""><field index=""limit""><value index=""vDEF"">10</value></field></language></sheet></data></T3FlexForms>",,,,
+,7,1,"Sectioned","flexible","<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes"" ?><T3FlexForms><data><sheet index=""sDEF""><language index=""lDEF""><field index=""limit""><value index=""vDEF"">10</value></field></language></sheet><sheet index=""sItems""><language index=""lDEF""><field index=""items""><el index=""el""><field index=""a1""><value index=""item""><el index=""el""><field index=""name""><value index=""vDEF""></value></field></el></value></field></el></field></language></sheet></data></T3FlexForms>",,,,

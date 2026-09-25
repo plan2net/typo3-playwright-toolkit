@@ -279,6 +279,32 @@ describe('saveRecord', () => {
         ).rejects.toThrow(/bodytxt[\s\S]*bodytext/)
     })
 
+    it('names the field out of the envelope a form rule refusal answers with', async () => {
+        const fixturePath = path.resolve(
+            path.dirname(fileURLToPath(import.meta.url)),
+            '../../../../../contract/record-diagnostics-form-rule.json',
+        )
+        const envelope = JSON.parse(fs.readFileSync(fixturePath, 'utf-8')) as Record<string, unknown>
+        delete envelope._comment
+
+        const { poster } = fakePoster({
+            status: 422,
+            refused: envelope as unknown as {
+                errors: Array<{ message: string; table: string }>
+                count: number
+            },
+        })
+
+        await expect(
+            saveRecord(poster, context, {
+                table: 'tx_formrulestest_record',
+                identifier: 'NEW1',
+                target: 1,
+                data: { tx_formrulestest_record: { NEW1: { pid: 1 } } },
+            }),
+        ).rejects.toThrow(/"title" is required\./)
+    })
+
     it('prints every refusal the site listed, not only the first', async () => {
         const { poster } = fakePoster({
             status: 422,

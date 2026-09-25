@@ -38,6 +38,7 @@ export class PageBuilder {
     protected fields: Fields = {}
 
     private page: Page
+    private optedOutOfFormRules = false
     private readonly relations = new RelationSet('pages', (column) => column in this.fields)
     private readonly requestContext?: Partial<RequestContext>
 
@@ -54,6 +55,11 @@ export class PageBuilder {
     /** Any other TCA column — doktype, layout, backend_layout, shortcut_mode, … */
     withField(column: string, value: string | number | boolean): this {
         this.fields[column] = value
+        return this
+    }
+
+    withoutFormRules(): this {
+        this.optedOutOfFormRules = true
         return this
     }
 
@@ -108,6 +114,7 @@ export class PageBuilder {
             identifier,
             target: Number(parentId),
             data,
+            withoutFormRules: this.optedOutOfFormRules,
         })
 
         // So its children keep it as their parent.
@@ -128,6 +135,7 @@ export class PageBuilder {
             identifier: pageId,
             target: Number(pageId),
             data,
+            withoutFormRules: this.optedOutOfFormRules,
         })
 
         return { id: pageId, slug: saved.slug ?? ((this.fields.slug as string) || '') }

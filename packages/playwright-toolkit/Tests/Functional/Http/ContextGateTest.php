@@ -11,6 +11,7 @@ use Plan2net\PlaywrightToolkit\Http\HealthCheckProvider;
 use Plan2net\PlaywrightToolkit\Http\InspectProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordedErrorProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
+use Plan2net\PlaywrightToolkit\Http\RecordEditRefusal;
 use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
@@ -24,6 +25,8 @@ use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Http\Stream;
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 /**
@@ -50,11 +53,21 @@ final class ContextGateTest extends FunctionalTestCase
         InspectProvider::class => ['/typo3/test-api/inspect', 'GET'],
         RecordedErrorProvider::class => ['/typo3/test-api/errors', 'GET'],
         RecordEditDiagnostics::class => ['/typo3/record/edit', 'POST'],
+        RecordEditRefusal::class => ['/typo3/record/edit', 'POST'],
     ];
 
     protected array $testExtensionsToLoad = [
         'plan2net/playwright-toolkit',
     ];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/ContextGate.csv');
+        $backendUser = $this->setUpBackendUser(1);
+        $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)
+            ->createFromUserPreferences($backendUser);
+    }
 
     protected function tearDown(): void
     {
@@ -116,7 +129,11 @@ final class ContextGateTest extends FunctionalTestCase
 
         $response = $this->dispatch($middleware, $path, $method);
 
-        self::assertNotSame('{"passedThrough":true}', (string) $response->getBody());
+        $headers = array_map('strtolower', array_keys($response->getHeaders()));
+        self::assertTrue(
+            '{"passedThrough":true}' !== (string) $response->getBody()
+            || [] !== preg_grep('/^x-playwright/', $headers)
+        );
     }
 
     /**
@@ -181,7 +198,7 @@ final class ContextGateTest extends FunctionalTestCase
         return new class implements RequestHandlerInterface {
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
-                return new JsonResponse(['passedThrough' => true]);
+                return new JsonResponse(['passedThrough' => true], 200, ['location' => '/typo3/record/edit?edit%5Bpages%5D%5B1%5D=edit']);
             }
         };
     }

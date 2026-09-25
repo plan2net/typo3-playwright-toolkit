@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Plan2net\PlaywrightToolkit\Tests\Unit\Http;
+namespace Plan2net\PlaywrightToolkit\Tests\Unit\DataHandling;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Plan2net\PlaywrightToolkit\Http\UnknownColumns;
+use Plan2net\PlaywrightToolkit\DataHandling\UnknownColumns;
 
 final class UnknownColumnsTest extends TestCase
 {
