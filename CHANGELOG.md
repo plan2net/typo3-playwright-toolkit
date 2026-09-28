@@ -10,6 +10,14 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-09-28
+
+One run now tests every site of an installation. The toolkit finds the sites and
+checks each one before a test uses it, and a scenario names the site it is about.
+A builder save that the backend form would not allow is now refused instead of
+saved, which can fail tests that passed before. The toolkit needs Playwright 1.47,
+because Firefox on older versions lost the test ID after a redirect.
+
 ### Added
 
 - **plan2net/playwright-toolkit** — the health endpoint lists every site, with its root
@@ -22,12 +30,12 @@ the package a change belongs to.
   `defineScenario(setup, { site: 'shop' })`; relative URLs, the default parent page and
   the CSP check then follow that site, and `siteURL('corporate', 'about')` builds a link
   to another one. Without `site`, a single-site project works as before.
-- **@plan2net/typo3-playwright-toolkit** — the same slug on two sites no longer fails a
-  scenario. A repeated slug is still reported when TYPO3 renames it, and the message now
-  names the slug TYPO3 stored.
 
 ### Changed
 
+- **@plan2net/typo3-playwright-toolkit** — the same slug on two sites no longer fails a
+  scenario. A repeated slug is still reported when TYPO3 renames it, and the message now
+  names the slug TYPO3 stored.
 - **@plan2net/typo3-playwright-toolkit** — needs `@playwright/test` 1.47 or newer,
   up from 1.44. On older versions, Firefox loses the test ID after any redirect,
   so the page a redirect leads to (for example `/` to `/en/`) comes from the normal
@@ -1133,7 +1141,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.22.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.0...main
+[0.23.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.20.0...v0.21.0
