@@ -796,16 +796,24 @@ describe('the body a flexform element posts', () => {
 })
 
 describe('duplicate slugs within one scenario', () => {
-    it('refuses a slug another page already claimed', async () => {
+    it('refuses a slug TYPO3 renamed because this scenario already stored it', async () => {
         const context = { routeToken: ROUTE_TOKEN, usedSlugs: new Set<string>() }
-        const first = fakePage(10)
-        const second = fakePage(11)
 
-        await new PageBuilder(first.page, context).withTitle('One').withSlug('/same').create()
+        await new PageBuilder(storing(10, requested), context).withTitle('One').withSlug('/same').create()
 
         await expect(
-            new PageBuilder(second.page, context).withTitle('Two').withSlug('/same').create(),
-        ).rejects.toThrow(/slug/)
+            new PageBuilder(storing(11, `${requested}-1`), context).withTitle('Two').withSlug('/same').create(),
+        ).rejects.toThrow(`already created a page with the slug "${requested}". TYPO3 stored this one as "${requested}-1"`)
+    })
+
+    it('refuses a repeated slug that TYPO3 stores in another form', async () => {
+        const context = { routeToken: ROUTE_TOKEN, usedSlugs: new Set<string>() }
+
+        await new PageBuilder(storing(10, requested), context).withTitle('One').withSlug('/Same').create()
+
+        await expect(
+            new PageBuilder(storing(11, `${requested}-1`), context).withTitle('Two').withSlug('/Same').create(),
+        ).rejects.toThrow('already created a page with the slug')
     })
 
     it('allows the same slug in another scenario', async () => {
@@ -823,6 +831,34 @@ describe('duplicate slugs within one scenario', () => {
                 .withSlug('/same')
                 .create(),
         ).resolves.toMatchObject({ id: '11' })
+    })
+
+    function storing(uid: number, stored: string) {
+        const fake = fakePage(uid)
+        const request = (fake.page as unknown as {
+            request: { post: (...args: unknown[]) => Promise<{ headers: () => Record<string, string> }> }
+        }).request
+        const post = request.post.bind(request)
+        request.post = async (...args: unknown[]) => {
+            const response = await post(...args)
+            const headers = response.headers()
+
+            return { ...response, headers: () => ({ ...headers, 'x-playwright-saved-record': JSON.stringify({ slug: stored }) }) }
+        }
+
+        return fake.page
+    }
+
+    const requested = `/same-${TEST_ID.toLowerCase()}`
+
+    it('allows the same slug on another site, where TYPO3 stores it unchanged', async () => {
+        const context = { routeToken: ROUTE_TOKEN, usedSlugs: new Set<string>() }
+
+        await new PageBuilder(storing(10, requested), context).withTitle('Corporate').withSlug('/same').create()
+
+        await expect(
+            new PageBuilder(storing(11, requested), context).withTitle('Shop').withSlug('/same').atParentId(2573).create(),
+        ).resolves.toMatchObject({ id: '11', slug: requested })
     })
 
     // update() re-saves an existing page with its own slug.

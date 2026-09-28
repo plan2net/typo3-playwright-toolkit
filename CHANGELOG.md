@@ -22,6 +22,9 @@ the package a change belongs to.
   `defineScenario(setup, { site: 'shop' })`; relative URLs, the default parent page and
   the CSP check then follow that site, and `siteURL('corporate', 'about')` builds a link
   to another one. Without `site`, a single-site project works as before.
+- **@plan2net/typo3-playwright-toolkit** — the same slug on two sites no longer fails a
+  scenario. A repeated slug is still reported when TYPO3 renames it, and the message now
+  names the slug TYPO3 stored.
 
 ### Changed
 

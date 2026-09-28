@@ -98,7 +98,6 @@ export class PageBuilder {
 
     async create(): Promise<{ id: string; slug: string }> {
         const context = resolveRequestContext(this.page, this.requestContext)
-        this.claimSlug(context)
         const fields = { ...CREATE_DEFAULTS, pid: context.rootPageId ?? CREATE_DEFAULTS.pid, ...this.fields }
         const identifier = newRecordIdentifier()
         const parentId = replayParentId(context, String(Number(fields.pid)))
@@ -116,6 +115,7 @@ export class PageBuilder {
             data,
             withoutFormRules: this.optedOutOfFormRules,
         })
+        this.rememberSlug(context, saved.slug)
 
         // So its children keep it as their parent.
         context.replayFolder?.ownPages.add(String(saved.uid))
@@ -141,21 +141,21 @@ export class PageBuilder {
         return { id: pageId, slug: saved.slug ?? ((this.fields.slug as string) || '') }
     }
 
-    // TYPO3 would store the repeat elsewhere while create() still reports this slug.
-    private claimSlug(context: RequestContext): void {
-        const slug = this.fields.slug
-        if ('string' !== typeof slug || '' === slug || !context.usedSlugs) {
+    private rememberSlug(context: RequestContext, stored: string | undefined): void {
+        const requested = this.fields.slug
+        if ('string' !== typeof requested || '' === requested || !context.usedSlugs || undefined === stored) {
             return
         }
 
-        if (context.usedSlugs.has(slug)) {
+        if (stored !== requested && context.usedSlugs.has(requested)) {
             throw new Error(
-                `[typo3-playwright-toolkit] This scenario already created a page with the slug "${slug}". ` +
-                    'TYPO3 would store the second one under a different path, and every test reading it ' +
-                    'would land on the first page. Give them distinct slugs.',
+                `[typo3-playwright-toolkit] This scenario already created a page with the slug "${requested}". ` +
+                    `TYPO3 stored this one as "${stored}", and every test reading it would land on the first page. ` +
+                    'Give them distinct slugs.',
             )
         }
 
-        context.usedSlugs.add(slug)
+        context.usedSlugs.add(stored)
+        context.usedSlugs.add(requested)
     }
 }
