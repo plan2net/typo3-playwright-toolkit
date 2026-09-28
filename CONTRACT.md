@@ -15,6 +15,7 @@ Read this before you change anything that touches a test ID.
 | Saved record header | `X-Playwright-Saved-Record` | npm `SAVED_RECORD_HEADER`, PHP `SavedRecord::HEADER` |
 | Refused record header | `X-Playwright-Record-Diagnostics` | npm `RECORD_DIAGNOSTICS_HEADER`, PHP `RecordDiagnostics::HEADER` |
 | Skip form rules header | `X-Playwright-Skip-Form-Rules` | npm `SKIP_FORM_RULES_HEADER`, PHP `RecordEditRefusal::SKIP_FORM_RULES_HEADER` |
+| Site probe header | `X-Playwright-Probe` | npm `PROBE_HEADER`, PHP `SiteProbe::HEADER` |
 | Secret file | `var/playwright/api-secret` | PHP writes it, npm reads it |
 | Media manifest | `var/playwright/media.json` | PHP writes it, npm reads it |
 | Secret override | `PLAYWRIGHT_TOOLKIT_SECRET` | environment, read by both |
@@ -25,13 +26,16 @@ The database for a test is `db` plus its test ID.
 
 ## Rules
 
-**Send the test ID as a header.** The toolkit puts it on every request to the
-testing host. Apache and nginx pass it to PHP on their own. Do not add webserver
+**Send the test ID as a header.** The toolkit puts it on every request to a testing
+host: the testing URL, and every site the probe below proved. Apache and nginx pass it to PHP on their own. Do not add webserver
 configuration for it, and do not let the DDEV add-on write any.
 
 **Send the secret to every `/typo3/test-api/*` endpoint.** Without it the endpoint
 answers `401` and nothing else. The test ID alone selects a database; only the
-secret allows creating or dropping one.
+secret allows creating or dropping one. The site probe is the one exception: it
+carries a signature made from the secret instead, because it goes to a host before
+that host is proven (see [Sites](#sites)). No other endpoint may do this without the
+same reason.
 
 **Treat a missing or invalid test ID as "not our request".** The site keeps its own
 database and nothing is created. Never answer such a request with an error: anyone
@@ -363,3 +367,38 @@ test ID, using a request with no headers, and stops if the extension is too old.
 
 **Keep that order.** If a test ID were created first, it would create a database
 that an old extension has no endpoint to delete.
+
+## Sites
+
+From API 3 the health response lists every site
+([`contract/health-sites.json`](contract/health-sites.json)):
+
+```json
+"sites": [{ "identifier": "shop", "rootPageId": 2573, "base": "https://shop-testing.ddev.site/" }]
+```
+
+`base` is the one TYPO3 selects for the Testing context. Before any test runs, the
+toolkit checks each site on its own host, with the preflight test ID
+([`contract/site-probe.json`](contract/site-probe.json)):
+
+```
+GET <base>
+X-Playwright-Test-Id: <preflight test ID>
+X-Playwright-Probe:   hex(HMAC-SHA256(secret, "probe:" + test ID))
+```
+
+It follows no redirect. `SiteProbe` answers right after TYPO3 resolved the site,
+before any page is rendered:
+
+```json
+{ "testId": "…", "database": "db…", "site": "shop" }
+```
+
+`database` is `null` when the request did not reach the test database. A wrong or
+missing signature passes through, as if there were no probe.
+
+**Send a test ID only to a proven site.** A site is proven when the answer has this
+test ID, a database, and the expected site. A redirect, an ordinary page, another
+site, or no database makes it unavailable, and the toolkit says which. The secret
+itself never goes to a site's host; only the signature does, and it is good for this
+one test ID.

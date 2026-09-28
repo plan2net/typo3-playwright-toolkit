@@ -1,0 +1,11 @@
+{
+    "_comment": "The site probe: the signature a secret and a test ID produce, and the answer SiteProbe gives a valid probe. The signature is hex(HMAC-SHA256(secret, 'probe:' + testId)). Both packages assert on it; neither may change it alone.",
+    "secret": "contract-fixture-secret",
+    "testId": "ABCD1234EFGH5678",
+    "signature": "2f16d60597eaf3ae0fb1a6594fda713caf1c224b30d47443ef6197660656843f",
+    "response": {
+        "testId": "ABCD1234EFGH5678",
+        "database": "dbABCD1234EFGH5678",
+        "site": "shop"
+    }
+}

@@ -22,6 +22,7 @@ function config(): ToolkitConfig {
 async function handled(
     url: string,
     headers: Record<string, string>,
+    origins?: ReadonlySet<string>,
 ): Promise<{ headers: Record<string, string>; via: string }> {
     let handle: ((route: unknown) => Promise<void>) | undefined
     const context = {
@@ -30,7 +31,7 @@ async function handled(
         },
     }
 
-    await applyToolkitHeaders(context as never, config(), TEST_ID)
+    await applyToolkitHeaders(context as never, config(), TEST_ID, origins)
 
     const outcome = { headers: {} as Record<string, string>, via: 'nothing' }
     await handle?.({
@@ -96,5 +97,15 @@ describe('applyToolkitHeaders', () => {
 
     it('hands a third party on as well, stripped rather than swallowed', async () => {
         expect((await handled('https://cdn.example.test/app.js', {})).via).toBe('fallback')
+    })
+})
+
+describe('several testing origins', () => {
+    it('adds the test ID for every origin it was given', async () => {
+        const origins = new Set(['https://site-testing.test', 'https://shop-testing.test'])
+
+        const outcome = await handled('https://shop-testing.test/cart', {}, origins)
+
+        expect(outcome.headers[TEST_ID_HEADER]).toBe(TEST_ID)
     })
 })

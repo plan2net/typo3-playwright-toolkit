@@ -20,6 +20,7 @@ import { applyToolkitHeaders } from './http/off-site-headers.js'
 import { prepareScenarioContext } from './http/prepare-context.js'
 import { toolkitRequest } from './http/toolkit-request.js'
 import { runAccessibilityScan, shouldScanAutomatically } from './checks/accessibility.js'
+import { readSitesFile, resolveScenarioSite, siteCacheKey, type ScenarioSite } from './sites/registry.js'
 import { reportRecordedErrors, reportSetupFailure } from './report/recorded-error-report.js'
 
 type SetupFailureReporter = (
@@ -71,9 +72,14 @@ export interface ScenarioFixtures<S> {
     testId: string
 }
 
+export interface ScenarioOptions {
+    site?: string
+}
+
 interface ResolvedScenario<S> {
     data: S
     testId: string
+    site: ScenarioSite
 }
 
 /**
@@ -103,7 +109,7 @@ export async function createScenarioFolder(
         // Or TYPO3 derives one from the title and the scenario's own page,
         // wanting "/news" too, has to take "/news-1".
         .withField('slug', `/replay-${name}`)
-        .atParentId(FIXTURE_ROOT_ID)
+        .atParentId(builderContext.rootPageId ?? FIXTURE_ROOT_ID)
         .create()
 
     return { id: folder.id, ownPages: new Set() }
@@ -115,6 +121,7 @@ export async function buildScenarioContext(
     session: { backendPath: string; routeToken: string },
     testId: string,
     name: string,
+    site?: ScenarioSite,
 ): Promise<Partial<RequestContext>> {
     const context: Partial<RequestContext> = {
         testId,
@@ -122,6 +129,7 @@ export async function buildScenarioContext(
         backendPath: session.backendPath,
         routeToken: session.routeToken,
         usedSlugs: new Set(),
+        rootPageId: site?.rootPageId,
     }
 
     if (!config.replay) {
@@ -137,9 +145,10 @@ export async function openAuthenticatedPage(
     config: ToolkitConfig,
     testId: string,
     name = '',
+    site?: ScenarioSite,
 ): Promise<{ page: Page; routeToken: string; backendPath: string; close: () => Promise<void> }> {
     const headers = toolkitHeaders(config, testId)
-    const context = await browser.newContext({ ignoreHTTPSErrors: true })
+    const context = await browser.newContext({ ignoreHTTPSErrors: true, baseURL: site?.base, serviceWorkers: 'block' })
 
     // The close handle is only returned on success, so a failure closes its own context.
     try {
@@ -225,7 +234,10 @@ export function claimScenarioFile(file: string, owner: symbol): void {
  * One test file is one scenario: the first test that needs state runs the setup,
  * the rest wait for it or are skipped if it failed.
  */
-export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupTools) => Promise<S>) {
+export function defineScenario<S = Record<string, never>>(
+    setup?: (tools: SetupTools) => Promise<S>,
+    options: ScenarioOptions = {},
+) {
     const owner = Symbol('scenario')
 
     return base.extend<
@@ -238,19 +250,20 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
             const key = sanitizeScenarioKey(testInfo.file)
             const name = scenarioName(testInfo.file)
 
-            const outcome = await resolveSetupOutcome(config, key, testInfo, () =>
-                ensureState<S>(config, {
+            const { outcome, site } = await resolveSetupOutcome(config, key, testInfo, async () => {
+                const site = resolveScenarioSite(config, readSitesFile(config), options.site)
+                const outcome = await ensureState<S>(config, {
                 key,
                 name,
                 triggerId: testInfo.testId,
-                setupCache: setupCacheUse(config, suiteRootOf(testInfo), key),
+                setupCache: setupCacheUse(config, suiteRootOf(testInfo), siteCacheKey(key, site)),
                 setup: async ({ testId, attempt, signal }) => {
                     if (!setup) {
                         return {} as S
                     }
 
                     const label = attempt > 1 ? `${name} #${attempt}` : name
-                    const session = await openAuthenticatedPage(browser, config, testId, label)
+                    const session = await openAuthenticatedPage(browser, config, testId, label, site)
                     try {
                         const builderContext = await buildScenarioContext(
                             session.page,
@@ -258,6 +271,7 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
                             session,
                             testId,
                             name,
+                            site,
                         )
 
                         return await setup({
@@ -265,7 +279,7 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
                             attempt,
                             signal,
                             page: session.page,
-                            request: toolkitRequest(session.page.request, config, testId),
+                            request: toolkitRequest(session.page.request, config, testId, site),
                             builders: {
                                 page: () => new PageBuilder(session.page, builderContext),
                                 content: () => new ContentBuilder(session.page, builderContext),
@@ -280,8 +294,10 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
                         await session.close()
                     }
                 },
-                }),
-            )
+                })
+
+                return { outcome, site }
+            })
 
             const data = applyScenarioOutcome(
                 outcome,
@@ -298,7 +314,7 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
                 })
             }
 
-            await use({ data, testId: outcome.status === 'ready' ? outcome.testId : '' })
+            await use({ data, testId: outcome.status === 'ready' ? outcome.testId : '', site })
 
             if (testInfo.status !== testInfo.expectedStatus) {
                 recordTestFailure(config, key, testInfo.error?.message ?? `test ${testInfo.status}`)
@@ -319,13 +335,18 @@ export function defineScenario<S = Record<string, never>>(setup?: (tools: SetupT
             await use(resolvedScenario.testId)
         },
 
-        context: async ({ context, testId }, use) => {
+        baseURL: async ({ resolvedScenario }, use) => {
+            await use(resolvedScenario.site.base)
+        },
+
+        context: async ({ context, testId, resolvedScenario }, use) => {
+            ;(context as ContextWithTestId).site = resolvedScenario.site
             await prepareScenarioContext(context, getToolkitConfig(), testId)
             await use(context)
         },
 
-        request: async ({ request, testId }, use) => {
-            await use(toolkitRequest(request, getToolkitConfig(), testId))
+        request: async ({ request, testId, resolvedScenario }, use) => {
+            await use(toolkitRequest(request, getToolkitConfig(), testId, resolvedScenario.site))
         },
 
         automaticAccessibilityScan: [

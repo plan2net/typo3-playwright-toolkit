@@ -9,6 +9,7 @@ use Plan2net\PlaywrightToolkit\Http\RecordedErrorProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
 use Plan2net\PlaywrightToolkit\Http\RecordEditRefusal;
 use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
+use Plan2net\PlaywrightToolkit\Http\SiteProbe;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
 
 return [
@@ -74,6 +75,15 @@ return [
         ],
         'plan2net/playwright-toolkit/test-errors' => [
             'target' => RecordedErrorProvider::class,
+        ],
+        'plan2net/playwright-toolkit/site-probe' => [
+            'target' => SiteProbe::class,
+            'after' => [
+                'typo3/cms-frontend/site',
+            ],
+            'before' => [
+                'typo3/cms-frontend/base-redirect-resolver',
+            ],
         ],
     ],
 ];

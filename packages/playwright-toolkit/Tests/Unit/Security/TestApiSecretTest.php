@@ -7,6 +7,7 @@ namespace Plan2net\PlaywrightToolkit\Tests\Unit\Security;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Plan2net\PlaywrightToolkit\Security\InspectToken;
+use Plan2net\PlaywrightToolkit\Security\ProbeSignature;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 
 final class TestApiSecretTest extends TestCase
@@ -142,6 +143,15 @@ final class TestApiSecretTest extends TestCase
         $token = InspectToken::mint('any-secret', 'ABCD1234EFGH5678', time() + 60);
 
         self::assertFalse($this->subject()->matchesInspectToken('ABCD1234EFGH5678', $token));
+    }
+
+    #[Test]
+    public function acceptsAProbeSignedWithItsOwnSecret(): void
+    {
+        $subject = $this->subject();
+        $signature = ProbeSignature::sign($subject->ensureExists(), 'ABCD1234EFGH5678');
+
+        self::assertTrue($subject->matchesProbe('ABCD1234EFGH5678', $signature));
     }
 
     private function subject(): TestApiSecret

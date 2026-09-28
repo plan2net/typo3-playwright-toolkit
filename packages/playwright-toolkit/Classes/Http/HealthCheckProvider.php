@@ -20,6 +20,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Session\UserSessionManager;
+use TYPO3\CMS\Core\Site\SiteFinder;
 
 final class HealthCheckProvider implements MiddlewareInterface
 {
@@ -32,6 +33,7 @@ final class HealthCheckProvider implements MiddlewareInterface
         private readonly ToolkitConfigurationFactory $configurationFactory,
         private readonly LockFiles $lockFiles,
         private readonly TestApiSecret $secret,
+        private readonly SiteFinder $siteFinder,
     ) {
     }
 
@@ -75,6 +77,7 @@ final class HealthCheckProvider implements MiddlewareInterface
                 // old" from "unhealthy" on the same response.
                 'api' => TestContext::API_VERSION,
                 'engine' => $driver?->engine()->value,
+                'sites' => SiteList::from($this->siteFinder->getAllSites()),
                 'checks' => $checks,
             ],
             $ok ? 200 : 503

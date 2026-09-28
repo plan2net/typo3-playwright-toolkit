@@ -2,6 +2,7 @@ import type { APIRequestContext } from '@playwright/test'
 import { SECRET_HEADER } from './api-secret.js'
 import { TEST_ID_HEADER, browserHeaders } from '../contract.js'
 import type { ToolkitConfig } from '../config.js'
+import { testingOrigins, type ScenarioSite } from '../sites/registry.js'
 
 const TOOLKIT_HEADERS = [TEST_ID_HEADER.toLowerCase(), SECRET_HEADER.toLowerCase()]
 const SENDING_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'fetch']
@@ -14,8 +15,17 @@ export function toolkitRequest(
     request: APIRequestContext,
     config: ToolkitConfig,
     testId: string,
+    scenarioSite?: ScenarioSite,
 ): APIRequestContext {
-    const site = new URL(config.testingURL).origin
+    const origins = testingOrigins(config)
+    const base = scenarioSite?.base ?? `${config.testingURL}/`
+    const resolved = (target: unknown): unknown => {
+        try {
+            return 'string' === typeof target ? new URL(target, base).toString() : target
+        } catch {
+            return target
+        }
+    }
 
     const onSite = (target: unknown): boolean => {
         const url = 'string' === typeof target ? target : String((target as { url?: () => string })?.url?.() ?? '')
@@ -23,7 +33,7 @@ export function toolkitRequest(
         try {
             // Resolved like baseURL does: a relative url lands here, a
             // protocol-relative one on its own host.
-            return new URL(url, site).origin === site
+            return origins.has(new URL(url, base).origin)
         } catch {
             return false
         }
@@ -51,7 +61,7 @@ export function toolkitRequest(
             }
 
             return (url: unknown, options: { headers?: Record<string, string> } = {}) =>
-                (value as (...args: unknown[]) => unknown).call(target, url, {
+                (value as (...args: unknown[]) => unknown).call(target, resolved(url), {
                     ...options,
                     headers: headersFor(url, options.headers),
                 })

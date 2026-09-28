@@ -1,5 +1,6 @@
 import { expect, type BrowserContext, type TestInfo } from '@playwright/test'
 import { getToolkitConfig } from '../config.js'
+import type { ContextWithTestId } from '../types/playwright-extensions.js'
 
 export type CspMode = 'any' | 'report-only' | 'enforced'
 
@@ -126,7 +127,10 @@ export class CspVerifier {
     ) {
         const config = getToolkitConfig()
         this.expectedOrigin =
-            options.expectedOrigin ?? config.csp?.expectedOrigin ?? new URL(config.testingURL).origin
+            options.expectedOrigin ??
+            config.csp?.expectedOrigin ??
+            (context as ContextWithTestId).site?.origin ??
+            new URL(config.testingURL).origin
         this.mode = options.mode ?? config.csp?.mode ?? 'any'
     }
 

@@ -26,7 +26,7 @@ final class TestContext
     /**
      * Raise this whenever an endpoint the toolkit depends on changes shape.
      */
-    public const API_VERSION = 2;
+    public const API_VERSION = 3;
 
     /**
      * @param array<string, mixed>|null $defaultConnection pass it when $GLOBALS does not carry it yet

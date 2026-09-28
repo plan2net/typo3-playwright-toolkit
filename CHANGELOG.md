@@ -10,6 +10,19 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **plan2net/playwright-toolkit** — the health endpoint lists every site, with its root
+  page and the base the Testing context selects. The API version is now 3.
+- **plan2net/playwright-toolkit** — a signed probe on a site's own host answers which
+  test database and site the request reached, so the toolkit can check a site before
+  it runs tests there.
+- **@plan2net/typo3-playwright-toolkit** — one run tests every site of an installation.
+  The toolkit finds the sites itself and checks each one. A scenario names its site with
+  `defineScenario(setup, { site: 'shop' })`; relative URLs, the default parent page and
+  the CSP check then follow that site, and `siteURL('corporate', 'about')` builds a link
+  to another one. Without `site`, a single-site project works as before.
+
 ### Changed
 
 - **@plan2net/typo3-playwright-toolkit** — needs `@playwright/test` 1.47 or newer,

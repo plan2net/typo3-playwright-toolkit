@@ -4,6 +4,12 @@ import { SECRET_HEADER } from '#src/http/api-secret.js'
 import { TEST_ID_HEADER } from '#src/contract.js'
 import { toolkitRequest } from '#src/http/toolkit-request.js'
 import type { ToolkitConfig } from '#src/config.js'
+import * as fs from 'fs'
+import * as os from 'os'
+import * as path from 'path'
+import { configForRun } from '../../helpers.js'
+import { ensureRunNamespace } from '#src/state/run-namespace.js'
+import { writeSitesFile } from '#src/sites/registry.js'
 
 const TEST_ID = 'ABCD1234EFGH5678'
 
@@ -152,5 +158,30 @@ describe('the request client a scenario hands out', () => {
         for (const call of calls) {
             expect(call.options?.headers?.[TEST_ID_HEADER]).toBe(TEST_ID)
         }
+    })
+})
+
+describe('a scenario site', () => {
+    const shop = { identifier: 'shop', rootPageId: 7, base: 'https://shop-testing.test/', origin: 'https://shop-testing.test' }
+
+    it('resolves a relative URL against the site and sends it absolute', async () => {
+        const calls: Call[] = []
+
+        await toolkitRequest(fakeRequest(calls), config(), TEST_ID, shop).get('/cart')
+
+        expect(calls[0].url).toBe('https://shop-testing.test/cart')
+    })
+
+    it('gives a site of this run the test ID', async () => {
+        const root = fs.mkdtempSync(path.join(os.tmpdir(), 'toolkit-request-'))
+        const run = configForRun(root, 'aaaaaaaaaaaaaaaa')
+        ensureRunNamespace(run)
+        writeSitesFile(run, { sites: [{ ...shop, available: true }] })
+        const calls: Call[] = []
+
+        await toolkitRequest(fakeRequest(calls), run, TEST_ID, shop).get('/cart')
+
+        fs.rmSync(root, { recursive: true, force: true })
+        expect(headersOf(calls)[TEST_ID_HEADER]).toBe(TEST_ID)
     })
 })

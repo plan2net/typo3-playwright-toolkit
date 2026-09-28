@@ -13,6 +13,8 @@ use Plan2net\PlaywrightToolkit\Http\RecordedErrorProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
 use Plan2net\PlaywrightToolkit\Http\RecordEditRefusal;
 use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
+use Plan2net\PlaywrightToolkit\Http\SiteProbe;
+use Plan2net\PlaywrightToolkit\Security\ProbeSignature;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
 use Plan2net\PlaywrightToolkit\TestContext;
@@ -54,6 +56,7 @@ final class ContextGateTest extends FunctionalTestCase
         RecordedErrorProvider::class => ['/typo3/test-api/errors', 'GET'],
         RecordEditDiagnostics::class => ['/typo3/record/edit', 'POST'],
         RecordEditRefusal::class => ['/typo3/record/edit', 'POST'],
+        SiteProbe::class => ['/', 'GET'],
     ];
 
     protected array $testExtensionsToLoad = [
@@ -184,6 +187,7 @@ final class ContextGateTest extends FunctionalTestCase
         $request = (new ServerRequest('https://example.test' . $path . '?id=' . self::TEST_ID, $method))
             ->withHeader(TestApiSecret::HEADER, $secret)
             ->withHeader(TestContext::TEST_ID_HEADER, self::TEST_ID)
+            ->withHeader(SiteProbe::HEADER, ProbeSignature::sign($secret, self::TEST_ID))
             ->withParsedBody(['data' => ['pages' => ['NEW1' => ['thisColumnDoesNotExist' => 'x']]]])
             ->withBody($body);
 

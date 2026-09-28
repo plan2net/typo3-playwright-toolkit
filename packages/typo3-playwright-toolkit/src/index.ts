@@ -2,8 +2,10 @@ export {
     defineScenario,
     type ScenarioBuilders,
     type ScenarioFixtures,
+    type ScenarioOptions,
     type SetupTools,
 } from './scenario.js'
+export { siteURL } from './sites/registry.js'
 export { expect } from '@playwright/test'
 export {
     defineToolkitConfig,

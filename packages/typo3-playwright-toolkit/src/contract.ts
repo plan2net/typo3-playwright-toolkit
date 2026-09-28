@@ -9,6 +9,7 @@ export const TEST_ID_PATTERN = /^[A-Z0-9]{16}$/
 export const SAVED_RECORD_HEADER = 'X-Playwright-Saved-Record'
 export const RECORD_DIAGNOSTICS_HEADER = 'X-Playwright-Record-Diagnostics'
 export const SKIP_FORM_RULES_HEADER = 'X-Playwright-Skip-Form-Rules'
+export const PROBE_HEADER = 'X-Playwright-Probe'
 
 /** Replay's own test ID; the extension maps it to the throwaway base database. */
 export const REPLAY_TEST_ID = 'REPLAY0000000000'

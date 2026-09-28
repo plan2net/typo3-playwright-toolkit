@@ -253,6 +253,16 @@ describe('CspVerifier', () => {
         await expect(verifier.assertNoViolations()).rejects.toThrow(/install\(\)/)
     })
 
+    it('expects the origin of the scenario site', () => {
+        const context = Object.assign(fakeContext(), {
+            site: { identifier: 'shop', rootPageId: 7, base: 'https://shop-testing.test/', origin: 'https://shop-testing.test' },
+        })
+
+        expect((new CspVerifier(context as never) as unknown as { expectedOrigin: string }).expectedOrigin).toBe(
+            'https://shop-testing.test',
+        )
+    })
+
     it('collects a same-origin violation and fails naming its directive', async () => {
         const context = fakeContext()
         const verifier = new CspVerifier(context as never)

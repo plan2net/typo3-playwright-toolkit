@@ -193,6 +193,14 @@ describe('PageBuilder', () => {
         expect(only(posted[0].dataMap.pages)).toMatchObject({ title: 'A page', pid: '7', hidden: '1' })
     })
 
+    it('puts a page under the scenario site root without atParentId', async () => {
+        const { posted, page } = fakePage(1)
+
+        await new PageBuilder(page, { routeToken: ROUTE_TOKEN, rootPageId: 2573 }).withTitle('A shop page').create()
+
+        expect(only(posted[0].dataMap.pages).pid).toBe('2573')
+    })
+
     // create() answers a string id, so atParentId(parent.id) has to compile.
     it('takes a parent id in the shape create() reports it', async () => {
         const { posted, page } = fakePage(1)

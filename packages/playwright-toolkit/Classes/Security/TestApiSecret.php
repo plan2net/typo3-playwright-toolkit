@@ -93,6 +93,11 @@ final class TestApiSecret
         return InspectToken::lapsed((string) $this->resolve(), $testId, $token, time());
     }
 
+    public function matchesProbe(string $testId, string $signature): bool
+    {
+        return ProbeSignature::verify((string) $this->resolve(), $testId, $signature);
+    }
+
     public function file(): string
     {
         return $this->secretFile;

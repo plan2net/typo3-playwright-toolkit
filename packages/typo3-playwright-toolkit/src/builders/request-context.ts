@@ -20,6 +20,7 @@ export interface RequestContext {
     replayFolder?: ReplayFolder
     /** Slugs this scenario already created. */
     usedSlugs?: Set<string>
+    rootPageId?: number
 }
 
 /** A fixture page as parent means the record moves into the folder; one the scenario made keeps it. */
@@ -67,6 +68,7 @@ export function resolveRequestContext(
     return {
         replayFolder: explicit.replayFolder,
         usedSlugs: explicit.usedSlugs,
+        rootPageId: explicit.rootPageId,
         // Never derived from page.url(): the request carries the API secret, and a
         // page that navigated off-site must not decide where the builder posts it.
         baseUrl: explicit.baseUrl ?? getToolkitConfig().testingURL,

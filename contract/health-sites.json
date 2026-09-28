@@ -1,0 +1,7 @@
+{
+    "_comment": "The sites list the health endpoint answers with. The extension asserts SiteList produces it for the two sites its test builds; the toolkit asserts it parses it. Neither side may change it alone.",
+    "sites": [
+        { "identifier": "corporate", "rootPageId": 1, "base": "https://corporate-testing.ddev.site/" },
+        { "identifier": "shop", "rootPageId": 2573, "base": "https://shop-testing.ddev.site/" }
+    ]
+}

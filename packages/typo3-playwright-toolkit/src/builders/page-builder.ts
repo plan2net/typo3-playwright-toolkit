@@ -99,7 +99,7 @@ export class PageBuilder {
     async create(): Promise<{ id: string; slug: string }> {
         const context = resolveRequestContext(this.page, this.requestContext)
         this.claimSlug(context)
-        const fields = { ...CREATE_DEFAULTS, ...this.fields }
+        const fields = { ...CREATE_DEFAULTS, pid: context.rootPageId ?? CREATE_DEFAULTS.pid, ...this.fields }
         const identifier = newRecordIdentifier()
         const parentId = replayParentId(context, String(Number(fields.pid)))
         const { columns, records } = this.relations.materialise({ pid: identifier, sys_language_uid: 0 })

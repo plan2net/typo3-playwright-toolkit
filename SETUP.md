@@ -87,6 +87,33 @@ Testing.
 
 Step 6 checks this too, and stops if the site answers in another context.
 
+### Several sites
+
+Each site needs a testing hostname of its own, and each site configuration needs a
+base for the Testing context:
+
+```bash
+ddev config --additional-hostnames=example-testing,shop-testing
+```
+
+```yaml
+# config/sites/shop/config.yaml
+base: 'https://shop.example/'
+baseVariants:
+  - base: 'https://shop-testing.ddev.site/'
+    condition: 'applicationContext == "Testing"'
+```
+
+The context rules above already match every `-testing.ddev.site` hostname. The
+toolkit finds the sites itself and checks each one before a test runs there. A site
+without a Testing base is left out with a warning:
+
+```
+[typo3-playwright-toolkit] The site "shop" (https://shop.example/) is unavailable:
+no toolkit answered: the host is not in the Testing context, or it is another
+installation. Scenarios that name it will fail.
+```
+
 ## 2. The three packages
 
 ```bash
@@ -201,7 +228,8 @@ VALUES (1, 0, 'Root', '/', 1, 1, 0, 0);
 ```
 
 The `uid` has to be the `rootPageId` of your site configuration, and that
-configuration has to exist. It is a file, so the template already has it.
+configuration has to exist. It is a file, so the template already has it. With
+several sites, the fixtures create the root page of every site.
 
 With more than one site, the wizard writes the root page of the site whose `base`,
 or one of its `baseVariants`, has the testing URL's host name. If no site has it,

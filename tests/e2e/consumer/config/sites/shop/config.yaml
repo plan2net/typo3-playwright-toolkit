@@ -1,0 +1,13 @@
+rootPageId: 2
+base: 'https://t3pw-e2e-shop.ddev.site/'
+baseVariants:
+  - base: 'https://t3pw-e2e-shop-testing.ddev.site/'
+    condition: 'applicationContext == "Testing"'
+websiteTitle: 'Playwright toolkit e2e shop'
+languages:
+  - languageId: 0
+    title: English
+    navigationTitle: English
+    base: '/'
+    locale: en_US.UTF-8
+    flag: gb

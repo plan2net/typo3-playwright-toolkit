@@ -12,6 +12,18 @@ describe('defineScenario', () => {
     })
 })
 
+describe('defineScenario with a site', () => {
+    it('takes a site as an optional second argument', () => {
+        setToolkitConfig({
+            testingURL: 'https://example-testing.test',
+            contentTypes: {},
+            paths: { consumerRoot: '/srv', stateDir: '/srv/.s', sessionDir: '/srv/s' },
+        })
+
+        expect(typeof defineScenario(async () => ({}), { site: 'shop' }).extend).toBe('function')
+    })
+})
+
 describe('one scenario per file', () => {
     it('refuses a second scenario in the same file', () => {
         claimScenarioFile('/tests/two-scenarios.spec.ts', Symbol('first'))

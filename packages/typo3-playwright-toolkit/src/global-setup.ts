@@ -5,6 +5,8 @@ import { announceSetupCache } from './setup-cache/announce.js'
 import { REPLAY_TEST_ID, TEST_ID_HEADER, generateTestId } from './contract.js'
 import { SECRET_HEADER, resolveApiSecret } from './http/api-secret.js'
 import { registerSetupAttempt } from './state/attempt-registry.js'
+import { parseDiscoveredSites, writeSitesFile, type SiteEntry } from './sites/registry.js'
+import { probeSite } from './sites/probe.js'
 
 export function preflightTestId(config: ToolkitConfig): string {
     const testId = generateTestId()
@@ -16,10 +18,12 @@ export function preflightTestId(config: ToolkitConfig): string {
 /** The oldest extension this toolkit can talk to. */
 export const MINIMUM_API_VERSION = 1
 
+export const SITES_API_VERSION = 3
+
 interface HealthResponse {
     status: number
     ok: boolean
-    body: { ok?: boolean; api?: unknown; checks?: Record<string, { ok: boolean; detail: string }> }
+    body: { ok?: boolean; api?: unknown; checks?: Record<string, { ok: boolean; detail: string }>; sites?: unknown }
 }
 
 /**
@@ -201,18 +205,55 @@ async function globalSetup(): Promise<void> {
     prepareRun(config)
 
     if (process.env.PW_SKIP_HEALTH === '1') {
+        writeSitesFile(config, { skipped: 'PW_SKIP_HEALTH=1' })
+
         return
     }
 
+    writeSitesFile(config, { skipped: 'site discovery did not finish' })
+
     // Order matters: verify the engine before minting an ID, or a mismatch leaves
     // behind a database teardown can no longer reach.
-    await verifyApiVersion(config)
+    const api = await verifyApiVersion(config)
 
     // Replay checks its own database; a throwaway one its teardown never drops.
-    await runHealthCheck(config.testingURL, {
-        testId: config.replay ? REPLAY_TEST_ID : preflightTestId(config),
-        secret: resolveApiSecret(config),
-    })
+    const testId = config.replay ? REPLAY_TEST_ID : preflightTestId(config)
+    await runHealthCheck(config.testingURL, { testId, secret: resolveApiSecret(config) })
+
+    if (api < SITES_API_VERSION) {
+        writeSitesFile(config, {
+            skipped: `the extension reports api ${api}; upgrade it to ${SITES_API_VERSION} or newer to list its sites`,
+        })
+
+        return
+    }
+
+    const sites = await discoverSites(config, testId)
+    writeSitesFile(config, { sites })
+
+    for (const site of sites) {
+        if (!site.available) {
+            console.warn(
+                `[typo3-playwright-toolkit] The site "${site.identifier}" (${site.base}) is unavailable: ${site.reason}. ` +
+                    'Scenarios that name it will fail.',
+            )
+        }
+    }
+}
+
+async function discoverSites(config: ToolkitConfig, testId: string): Promise<SiteEntry[]> {
+    const secret = resolveApiSecret(config)
+    const healthUrl = `${config.testingURL}/typo3/test-api/health`
+    const { body } = await readHealth(
+        healthUrl,
+        { [SECRET_HEADER]: secret },
+        fetch,
+        (reason) => `Site discovery failed: could not read ${healthUrl} (${reason}).`,
+    )
+
+    return Promise.all(
+        parseDiscoveredSites(body.sites, config.testingURL).map((site) => probeSite(site, { testId, secret })),
+    )
 }
 
 export default globalSetup

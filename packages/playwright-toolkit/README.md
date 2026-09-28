@@ -425,6 +425,12 @@ The one exception is `inspect`, which a browser opens. It takes a signed link
 instead of the header, because a browser cannot send one. See
 [Looking at a kept database](#looking-at-a-kept-database).
 
+`health` also lists every site, with its root page and the base the Testing context
+selects. The npm package then checks each site on its own hostname: a frontend
+request signed with `X-Playwright-Probe` gets back the test database and the site it
+reached, before any page is rendered. The probe carries a signature made from the
+secret, not the secret itself, because it goes to a host before that host is proven.
+
 `setup-cache/store` and `setup-cache/restore` serve the npm package's
 `--reuse-setup`: store records the rows a scenario's setup wrote as SQL under
 `var/playwright/setup-cache`, restore clones the template and replays them. A delta

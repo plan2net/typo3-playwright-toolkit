@@ -69,6 +69,16 @@ final class HealthCheckProviderTest extends FunctionalTestCase
         self::assertSame(TestContext::API_VERSION, $body['api']);
     }
 
+    #[Test]
+    public function listsTheSitesEvenWhenACheckFails(): void
+    {
+        unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
+
+        $body = (array) json_decode((string) $this->getHealth()->getBody(), true);
+
+        self::assertSame([], $body['sites']);
+    }
+
     // For whoever reads the health output: the toolkit knows no engine, so this is
     // the only place a run says which one it provisioned against.
     #[Test]

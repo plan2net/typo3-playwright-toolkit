@@ -7,7 +7,7 @@ use TYPO3\CMS\Core\Core\Environment;
 
 $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['playwright_toolkit'] = [
     'fixturesPath' => 'fixtures',
-    'fixtureManifest' => '010-root-page.sql,020-typoscript.sql',
+    'fixtureManifest' => '010-root-page.sql,020-typoscript.sql,030-shop-site.sql',
     'mediaPath' => 'fixtures/media',
 ];
 

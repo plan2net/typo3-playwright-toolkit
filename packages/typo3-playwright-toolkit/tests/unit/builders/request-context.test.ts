@@ -36,6 +36,10 @@ describe('resolveRequestContext', () => {
         expect(resolved.baseUrl).toBe('https://example-testing.test')
     })
 
+    it('passes the site root on', () => {
+        expect(resolveRequestContext(pageAt('about:blank'), { testId: 'ABCD1234EFGH5678', rootPageId: 2573 }).rootPageId).toBe(2573)
+    })
+
     // The session endpoint reports it; a builder used outside a scenario has none.
     it('assumes the stock backend path when none is given', () => {
         const resolved = resolveRequestContext(pageAt('https://site.test'), { testId: 'ABCD1234EFGH5678' })

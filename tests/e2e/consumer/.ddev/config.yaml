@@ -10,6 +10,7 @@ database:
 # The Testing context is bound to this hostname in .ddev/nginx_full/nginx-site.conf.
 additional_hostnames:
   - t3pw-e2e-testing
+  - t3pw-e2e-shop-testing
 # TYPO3 settings are the fixture's own; DDEV must not rewrite them.
 disable_settings_management: true
 web_environment:

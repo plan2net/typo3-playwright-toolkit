@@ -141,6 +141,15 @@ describe('openAuthenticatedPage', () => {
 
         expect(state.postedRedirects).toBe(0)
     })
+
+    it('opens the setup page on the scenario site, with service workers blocked', async () => {
+        const { browser, state } = fakeBrowser('never')
+        const shop = { identifier: 'shop', rootPageId: 2573, base: 'https://shop-testing.test/', origin: 'https://shop-testing.test' }
+
+        await openAuthenticatedPage(browser as never, config(), 'ABCD1234EFGH5678', 'news', shop)
+
+        expect(state.contextOptions).toMatchObject({ baseURL: 'https://shop-testing.test/', serviceWorkers: 'block' })
+    })
 })
 
 describe('openAuthenticatedPage in replay mode', () => {
@@ -244,6 +253,15 @@ describe('createScenarioFolder', () => {
             await buildScenarioContext(page as never, replayConfig(), session, REPLAY_TEST_ID, 'news')
 
             expect(Object.values(dataMap(posted[0].fields).pages)[0]).toMatchObject({ pid: '1' })
+        })
+
+        it('creates the folder under the scenario site root', async () => {
+            const { posted, page } = folderPage(900)
+            const shop = { identifier: 'shop', rootPageId: 2573, base: 'https://shop-testing.test/', origin: 'https://shop-testing.test' }
+
+            await buildScenarioContext(page as never, replayConfig(), session, REPLAY_TEST_ID, 'news', shop)
+
+            expect(Object.values(dataMap(posted[0].fields).pages)[0]).toMatchObject({ pid: '2573' })
         })
 
         it('creates no folder outside replay mode', async () => {

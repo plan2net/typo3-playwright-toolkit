@@ -2,6 +2,7 @@ import type { BrowserContext } from '@playwright/test'
 import { SECRET_HEADER } from './api-secret.js'
 import { TEST_ID_HEADER, browserHeaders } from '../contract.js'
 import type { ToolkitConfig } from '../config.js'
+import { testingOrigins } from '../sites/registry.js'
 
 const TOOLKIT_HEADERS = [TEST_ID_HEADER.toLowerCase(), SECRET_HEADER.toLowerCase()]
 
@@ -18,15 +19,14 @@ export async function applyToolkitHeaders(
     context: BrowserContext,
     config: ToolkitConfig,
     testId: string,
+    origins: ReadonlySet<string> = testingOrigins(config),
 ): Promise<void> {
-    const site = new URL(config.testingURL).origin
-
     await context.route(
         () => true,
         async (route) => {
             const headers = { ...route.request().headers() }
 
-            if (new URL(route.request().url()).origin === site) {
+            if (origins.has(new URL(route.request().url()).origin)) {
                 await route.fallback({ headers: { ...headers, ...browserHeaders(testId) } })
 
                 return

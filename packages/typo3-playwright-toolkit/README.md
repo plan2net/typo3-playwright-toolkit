@@ -149,6 +149,20 @@ test('renders the page title', async ({ page, state }) => {
 setup, and the other tests wait. If the setup fails, the tests are skipped with the
 reason instead of failing because content is missing.
 
+On an installation with several sites, name the site the scenario is about:
+
+```ts
+const test = defineScenario(async ({ builders }) => { /* … */ }, { site: 'shop' })
+```
+
+Relative URLs then go to that site, and a new page goes under its root page. Without
+`site`, a scenario uses the only site, or the one on your testing URL. To open another
+site, build its URL with `siteURL('corporate', 'about')`.
+
+A slug starts with `/`, so `page.goto(state.slug)` leaves out a path in the site's
+base. On a site like `https://example.test/shop/`, navigate with
+`page.goto(siteURL('shop', state.slug))`, which keeps it.
+
 The `slug` you get back is the one the site stored, which is not always the one you
 asked for. A translation and a name already in use are two cases, and an extension
 can add more. Navigate with the returned value, never with the string you passed in.
@@ -622,6 +636,10 @@ Everything else:
 | `setup.pollMs` | `100` | Gap between polls while waiting for a scenario |
 | `setup.waitTimeoutMs` | `300000` | How long a test waits for its scenario in total, lock included |
 
+`defineScenario(setup, options)` takes one option, `site`: the TYPO3 site identifier,
+the folder name under `config/sites/`. `siteURL(identifier, path?)` answers the
+address of `path` on that site, and throws for a site this run does not know.
+
 `defineBasePlaywrightConfig` sets Playwright's `baseURL` to `testingURL` and adds
 this package's setup and cleanup functions. Values in its second argument win, and
 `use` and `expect` are merged instead of replaced. Four keys cannot be overridden
@@ -799,6 +817,12 @@ printed link expires: after 15 minutes, log in at your testing URL as usual, or 
 
 **"No test ID for this request".** The builder received a page that the toolkit
 fixtures did not create. Use the `builders` argument of `defineScenario`.
+
+**"The site … is unavailable".** Before the first test, the toolkit asks each site's
+own hostname which test database and site answered. The reason says what came back
+instead: a redirect, a page with no toolkit behind it (the host is not in the Testing
+context), another installation, or another site. Check the site's Testing base variant
+and that its hostname is set up as in step 1 of SETUP.md.
 
 **Settings seem to be ignored.** `defineToolkitConfig` ran too late. It must be the
 first thing in `playwright.config.ts`.
