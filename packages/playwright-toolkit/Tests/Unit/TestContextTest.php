@@ -13,6 +13,7 @@ use Psr\Log\LogLevel;
 use TYPO3\CMS\Core\Cache\Backend\FileBackend;
 use TYPO3\CMS\Core\Cache\Backend\NullBackend;
 use TYPO3\CMS\Core\Cache\Backend\SimpleFileBackend;
+use TYPO3\CMS\Core\Cache\Backend\TransientMemoryBackend;
 use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Core\ApplicationContext;
 use TYPO3\CMS\Core\Core\Environment;
@@ -131,6 +132,33 @@ final class TestContextTest extends TestCase
 
         self::assertArrayNotHasKey('SYS/caching/cacheConfigurations/core/options/cacheDirectory', $settings);
         self::assertArrayNotHasKey('SYS/caching/cacheConfigurations/l10n/options/cacheDirectory', $settings);
+    }
+
+    #[Test]
+    public function aSqliteTestDatabaseKeepsItsCachesInMemory(): void
+    {
+        unset($_SERVER[TestContext::TEST_ID_SERVER_KEY]);
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'] = [
+            'pages' => ['backend' => Typo3DatabaseBackend::class, 'options' => ['compression' => true]],
+            'hash' => [],
+            'core' => ['backend' => SimpleFileBackend::class],
+        ];
+
+        $settings = TestContext::resolveCurrentRequestSettings(['driver' => 'pdo_sqlite']);
+
+        self::assertSame(
+            [
+                'SYS/caching/cacheConfigurations/pages/backend' => TransientMemoryBackend::class,
+                'SYS/caching/cacheConfigurations/pages/options' => [],
+                'SYS/caching/cacheConfigurations/hash/backend' => TransientMemoryBackend::class,
+                'SYS/caching/cacheConfigurations/hash/options' => [],
+            ],
+            array_filter(
+                $settings,
+                static fn(string $path): bool => str_ends_with($path, '/backend') || str_ends_with($path, '/options'),
+                ARRAY_FILTER_USE_KEY
+            )
+        );
     }
 
     #[Test]

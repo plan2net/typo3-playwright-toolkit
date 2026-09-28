@@ -6,9 +6,12 @@ namespace Plan2net\PlaywrightToolkit;
 
 use Plan2net\PlaywrightToolkit\Compatibility\RetryingProcessingFolderStorage;
 use Plan2net\PlaywrightToolkit\Database\DatabaseInitializer;
+use Plan2net\PlaywrightToolkit\Database\Driver\Engine;
 use Plan2net\PlaywrightToolkit\Database\Driver\TestDatabaseDriverFactory;
 use Plan2net\PlaywrightToolkit\Log\ErrorCapture;
 use TYPO3\CMS\Core\Cache\Backend\SimpleFileBackend;
+use TYPO3\CMS\Core\Cache\Backend\TransientMemoryBackend;
+use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
@@ -58,6 +61,9 @@ final class TestContext
 
         $driver = TestDatabaseDriverFactory::fromConnection($defaultConnection);
         $settings += $driver->baseConnectionOverrides();
+        if (Engine::Sqlite === $driver->engine()) {
+            $settings += self::memoryCacheSettings();
+        }
 
         $testId = self::testId();
         if ('' === $testId) {
@@ -98,6 +104,28 @@ final class TestContext
         $fromHeader = trim((string) ($_SERVER[self::TEST_ID_SERVER_KEY] ?? ''));
 
         return '' !== $fromHeader ? $fromHeader : trim((string) ($_COOKIE[self::TEST_ID_COOKIE] ?? ''));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function memoryCacheSettings(): array
+    {
+        /** @var array<string, mixed> $configurations */
+        $configurations = $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'] ?? [];
+        $settings = [];
+
+        foreach ($configurations as $name => $configuration) {
+            $backend = \is_array($configuration) ? ($configuration['backend'] ?? Typo3DatabaseBackend::class) : null;
+            if (Typo3DatabaseBackend::class !== $backend) {
+                continue;
+            }
+
+            $settings['SYS/caching/cacheConfigurations/' . $name . '/backend'] = TransientMemoryBackend::class;
+            $settings['SYS/caching/cacheConfigurations/' . $name . '/options'] = [];
+        }
+
+        return $settings;
     }
 
     /**

@@ -48,6 +48,10 @@ the package a change belongs to.
 
 ### Fixed
 
+- **plan2net/playwright-toolkit** — on SQLite, two tests that open the same page at
+  the same time no longer fail with "database is locked". Both first views filled
+  TYPO3's database caches, and SQLite refuses one of two such writes at once instead
+  of waiting. A SQLite test database now keeps those caches in memory.
 - **@plan2net/typo3-playwright-toolkit** — a child record built with `withChild()` saves
   when its table has no language field. It was always sent the parent's
   `sys_language_uid`, which such a table does not have, so the save was refused. It is

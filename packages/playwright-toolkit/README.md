@@ -43,6 +43,11 @@ which provides the database service.
 - PHP 8.1 or newer
 - PostgreSQL, MySQL, MariaDB or SQLite
 
+On SQLite, TYPO3's database caches live in memory for the length of one request in
+the Testing context. SQLite refuses a write that races another one instead of waiting,
+and two tests opening the same page at once would do exactly that. So on SQLite a
+page is never served from the page cache, which the other engines can do.
+
 TYPO3 11.5 and 12.4 are both ELTS. CI verifies each against its last public release,
 11.5.41 and 12.4.45, because ELTS releases sit behind credentials and cannot be
 tested here.
