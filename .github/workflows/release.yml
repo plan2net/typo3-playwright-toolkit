@@ -144,7 +144,7 @@ jobs:
         working-directory: packages/typo3-playwright-toolkit
         run: |
           npm ci
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium firefox
           npm run typecheck
           npm test
 
