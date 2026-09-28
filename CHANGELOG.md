@@ -10,6 +10,12 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.23.1] - 2026-09-28
+
+The npm package of 0.23.0 was never published: the release stopped on a missing
+browser before its publish step. 0.23.1 is the same release, published to npm too.
+The extension and the add-on are unchanged from 0.23.0.
+
 ## [0.23.0] - 2026-09-28
 
 One run now tests every site of an installation. The toolkit finds the sites and
@@ -1141,7 +1147,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.1...main
+[0.23.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.0...v0.23.1
 [0.23.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.21.0...v0.21.1
