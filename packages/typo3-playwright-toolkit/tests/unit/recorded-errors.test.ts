@@ -7,7 +7,7 @@ import type { ToolkitConfig } from '#src/config.js'
 
 const config = {
     testingURL: 'https://example-testing.ddev.site',
-    paths: { consumerRoot: '/app', stateDir: '/app/.test-state', sessionDir: '/app/var/session' },
+    paths: { consumerRoot: '/app', stateDir: '/app/.test-state' },
 } as ToolkitConfig
 
 describe('fetchRecordedErrors', () => {

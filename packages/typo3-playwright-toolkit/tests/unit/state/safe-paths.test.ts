@@ -40,7 +40,7 @@ describe('assertDeletableDirectory', () => {
     it('rejects a filesystem root', () => {
         const root = realTempRoot()
 
-        expect(() => assertDeletableDirectory('sessionDir', path.parse(root).root, root)).toThrow(/inside/)
+        expect(() => assertDeletableDirectory('stateDir', path.parse(root).root, root)).toThrow(/inside/)
     })
 
     it('rejects a path that escapes the consumer root', () => {
@@ -65,7 +65,7 @@ describe('assertDeletableDirectory', () => {
     it('names the offending field so the consumer knows which one to fix', () => {
         const root = realTempRoot()
 
-        expect(() => assertDeletableDirectory('sessionDir', '/', root)).toThrow(/sessionDir/)
+        expect(() => assertDeletableDirectory('stateDir', '/', root)).toThrow(/stateDir/)
     })
 })
 

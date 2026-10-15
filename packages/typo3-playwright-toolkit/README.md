@@ -625,7 +625,6 @@ Everything else:
 | `csp.expectedOrigin` | origin of `testingURL` | Whose violations count |
 | `csp.mode` | `any` | Which policy header a page must send: `any`, `report-only` or `enforced` |
 | `hideBeforeScreenshot` | `[]` | CSS selectors hidden before every screenshot |
-| `paths.sessionDir` | `<consumerRoot>/var/session` | TYPO3 session folder, cleaned after a run |
 | `prepareContext` | none | Runs on every context a test uses, for your own routes and stubs |
 | `screenshot.maxDiffPixels` | `20` | How many pixels may differ, as a count |
 | `screenshot.maxDiffPixelRatio` | none | How many pixels may differ, as a share of the image. Setting it replaces the count |
@@ -827,8 +826,8 @@ and that its hostname is set up as in step 1 of SETUP.md.
 **Settings seem to be ignored.** `defineToolkitConfig` ran too late. It must be the
 first thing in `playwright.config.ts`.
 
-**Cleanup refuses a path.** `sessionDir` must be absolute and inside `consumerRoot`,
-because cleanup deletes files in it. Setup state always lives in
+**Cleanup refuses a path.** `consumerRoot` must be an absolute path, because cleanup
+deletes files below it. Setup state always lives in
 `<consumerRoot>/.test-state`, which is where `typo3-playwright-inspect` and
 `typo3-playwright-clean` look for it.
 

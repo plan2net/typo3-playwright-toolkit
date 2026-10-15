@@ -24,9 +24,7 @@ describe('a file reference named by its fixture', () => {
             contentTypes: {},
             paths: {
                 consumerRoot,
-                stateDir: path.join(consumerRoot, '.test-state'),
-                sessionDir: path.join(consumerRoot, 'var/session'),
-            },
+                stateDir: path.join(consumerRoot, '.test-state'),            },
         }
         const file = mediaManifestFileFor(config)
         fs.mkdirSync(path.dirname(file), { recursive: true })

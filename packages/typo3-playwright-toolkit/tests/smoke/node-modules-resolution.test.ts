@@ -58,9 +58,7 @@ describe('package resolved from node_modules', () => {
                 runId: 'packsmoke0000',
                 paths: {
                     consumerRoot: root,
-                    stateDir,
-                    sessionDir: path.join(root, 'var/session'),
-                },
+                    stateDir,                },
             },
             {
                 // The installed package must accept an injected client, which is

@@ -4,16 +4,13 @@ import { getToolkitConfig, type ToolkitConfig } from './config.js'
 import { httpCleanup, type CleanupClient } from './http/cleanup-client.js'
 import { readAttemptsFrom, readRegisteredTestIds, recordDropped } from './state/attempt-registry.js'
 import { listRunIds, runLastActiveMs, runPaths, runsRoot } from './state/run-namespace.js'
-import { assertDeletableDirectory, safeJoin } from './state/safe-paths.js'
+import { assertDeletableDirectory } from './state/safe-paths.js'
 import { INSPECT_TOKEN_LIFETIME_MS, inspectUrl } from './inspect/token.js'
 import { REPLAY_TEST_ID } from './contract.js'
 import { recordReplayTarget } from './inspect/replay-target.js'
 import { resolveApiSecret } from './http/api-secret.js'
 
 export const DEFAULT_ORPHAN_AGE_MS = 86_400_000
-
-/** Age at which a TYPO3 session directory is no longer any run's. */
-const STALE_SESSION_AGE_MS = 60 * 60 * 1000
 
 const ALL_SCENARIOS = '*'
 
@@ -207,14 +204,13 @@ export function describePreservedRun(
 }
 
 export async function runTeardown(config: ToolkitConfig, options: TeardownOptions): Promise<TeardownSummary> {
-    const { stateDir, sessionDir } = config.paths
+    const { stateDir } = config.paths
     const { cleanup, preserve } = options
     const secret = options.secret ?? inspectSecret(config)
 
     // setToolkitConfig bypasses defineToolkitConfig, so re-check here: everything
     // below this line deletes recursively.
     assertDeletableDirectory('stateDir', stateDir, config.paths.consumerRoot)
-    assertDeletableDirectory('sessionDir', sessionDir, config.paths.consumerRoot)
 
     // Nothing to drop, but the state has to go: a pinned run id would otherwise
     // make the next replay skip every setup on this run's committed state.
@@ -244,11 +240,9 @@ export async function runTeardown(config: ToolkitConfig, options: TeardownOption
         await sweepOrphans(config, cleanup)
     }
 
-    const cleanedSessions = pruneStaleSessions(sessionDir, Date.now() - STALE_SESSION_AGE_MS)
-
     if ('none' === preserve.mode) {
         removeRunState(config, drop.incomplete)
-        report(drop.dropped, cleanedSessions)
+        report(drop.dropped)
     }
 
     return { dropped: drop.dropped, leaked: drop.leaked, preserved: kept }
@@ -299,25 +293,6 @@ async function dropRegisteredDatabases(
     return report
 }
 
-function pruneStaleSessions(sessionDir: string, cutoffMs: number): number {
-    if (!fs.existsSync(sessionDir)) {
-        return 0
-    }
-
-    let cleaned = 0
-    for (const dir of fs.readdirSync(sessionDir)) {
-        const sessionPath = safeJoin(sessionDir, dir)
-        // sessionDir is shared, so another teardown may have taken it since the listing.
-        const stats = fs.statSync(sessionPath, { throwIfNoEntry: false })
-        if (stats?.isDirectory() && stats.mtimeMs < cutoffMs) {
-            fs.rmSync(sessionPath, { recursive: true, force: true })
-            cleaned++
-        }
-    }
-
-    return cleaned
-}
-
 function removeRunState(config: ToolkitConfig, keepRegistry: boolean): void {
     const paths = runPaths(config)
 
@@ -335,17 +310,9 @@ function removeRunState(config: ToolkitConfig, keepRegistry: boolean): void {
     fs.rmSync(paths.runDir, { recursive: true, force: true })
 }
 
-function report(droppedDatabases: number, cleanedSessions: number): void {
-    const parts: string[] = []
+function report(droppedDatabases: number): void {
     if (droppedDatabases > 0) {
-        parts.push(`${droppedDatabases} DBs`)
-    }
-    if (cleanedSessions > 0) {
-        parts.push(`${cleanedSessions} session dirs`)
-    }
-
-    if (parts.length > 0) {
-        console.log(`[teardown] Cleaned ${parts.join(', ')}.`)
+        console.log(`[teardown] Cleaned ${droppedDatabases} DBs.`)
     }
 }
 

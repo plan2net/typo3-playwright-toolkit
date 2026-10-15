@@ -83,9 +83,7 @@ describe('comparisonOptions', () => {
             testingURL: 'https://example-testing.test',
             paths: {
                 consumerRoot: '/srv/project',
-                stateDir: '/srv/project/.test-state',
-                sessionDir: '/srv/project/var/session',
-            },
+                stateDir: '/srv/project/.test-state',            },
             screenshot: { threshold: 0.3 },
         })
 
@@ -130,9 +128,7 @@ describe('the styles expectScreenshot injects', () => {
             testingURL: 'https://example-testing.test',
             paths: {
                 consumerRoot: '/srv/project',
-                stateDir: '/srv/project/.test-state',
-                sessionDir: '/srv/project/var/session',
-            },
+                stateDir: '/srv/project/.test-state',            },
             hideBeforeScreenshot: ['.cookie-banner'],
         })
         const { page, added, removed } = stubPage()
@@ -148,9 +144,7 @@ describe('the styles expectScreenshot injects', () => {
             testingURL: 'https://example-testing.test',
             paths: {
                 consumerRoot: '/srv/project',
-                stateDir: '/srv/project/.test-state',
-                sessionDir: '/srv/project/var/session',
-            },
+                stateDir: '/srv/project/.test-state',            },
             hideBeforeScreenshot: ['.cookie-banner'],
         })
         const { page, added } = stubPage()
@@ -169,9 +163,7 @@ describe('a page that moved on under the shot', () => {
             testingURL: 'https://example-testing.test',
             paths: {
                 consumerRoot: '/srv/project',
-                stateDir: '/srv/project/.test-state',
-                sessionDir: '/srv/project/var/session',
-            },
+                stateDir: '/srv/project/.test-state',            },
         })
         const page = {
             addStyleTag: async () => ({

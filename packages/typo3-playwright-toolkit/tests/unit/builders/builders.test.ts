@@ -29,9 +29,7 @@ function config(): ToolkitConfig {
         contentTypes: {},
         paths: {
             consumerRoot: '/srv/project',
-            stateDir: '/srv/project/.test-state',
-            sessionDir: '/srv/project/var/session',
-        },
+            stateDir: '/srv/project/.test-state',        },
     }
 }
 

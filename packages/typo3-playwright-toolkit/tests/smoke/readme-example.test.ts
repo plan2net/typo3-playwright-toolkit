@@ -32,9 +32,7 @@ describe('the documented configuration example', () => {
             testingURL: 'https://example-testing.test',
             contentTypes: { generic_text: GenericTextContent },
             paths: {
-                consumerRoot: '/srv/project',
-                sessionDir: '/srv/project/var/session',
-            },
+                consumerRoot: '/srv/project',            },
             screenshot: { threshold: 0.2, maxDiffPixelRatio: 0.01 },
             hideBeforeScreenshot: ['.cookie-banner'],
         })

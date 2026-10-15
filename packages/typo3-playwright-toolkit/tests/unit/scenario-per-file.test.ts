@@ -17,7 +17,7 @@ describe('defineScenario with a site', () => {
         setToolkitConfig({
             testingURL: 'https://example-testing.test',
             contentTypes: {},
-            paths: { consumerRoot: '/srv', stateDir: '/srv/.s', sessionDir: '/srv/s' },
+            paths: { consumerRoot: '/srv', stateDir: '/srv/.s' },
         })
 
         expect(typeof defineScenario(async () => ({}), { site: 'shop' }).extend).toBe('function')

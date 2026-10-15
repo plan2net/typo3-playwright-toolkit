@@ -16,9 +16,7 @@ function configFor(root: string): ToolkitConfig {
         contentTypes: {},
         paths: {
             consumerRoot: root,
-            stateDir: path.join(root, '.test-state'),
-            sessionDir: path.join(root, 'var/session'),
-        },
+            stateDir: path.join(root, '.test-state'),        },
         runId: 'aaaaaaaaaaaaaaaa',
     }
 }

@@ -24,9 +24,7 @@ function fixtureConfig(): ToolkitConfig {
         contentTypes: { generic_text: GenericTextContent },
         paths: {
             consumerRoot: '/srv/project',
-            stateDir: '/srv/project/.test-state',
-            sessionDir: '/srv/project/var/session',
-        },
+            stateDir: '/srv/project/.test-state',        },
     }
 }
 

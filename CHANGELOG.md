@@ -69,6 +69,12 @@ the package a change belongs to.
   version differs from the old default should also remove the old data, as above, since
   a server of another major version may not read it: `ddev stop`,
   `docker volume rm ddev-<project>_db-test-data`, `ddev start`.
+- **@plan2net/typo3-playwright-toolkit** — teardown no longer deletes anything in
+  `var/session`, and the `paths.sessionDir` option is gone. It removed every directory
+  there older than an hour, but the tests never write there. TYPO3's install tool keeps
+  its sessions in such a directory, so a test run could log you out of it.
+
+  **Migration:** remove `paths.sessionDir` from `defineToolkitConfig` if you set it.
 - **plan2net/playwright-toolkit** — a test run keeps the site name as it is. The test
   ID was added to it on every request of a test, and that ID is new on every run, so
   every screenshot of the backend differed. An inspect link still shows it, so two open

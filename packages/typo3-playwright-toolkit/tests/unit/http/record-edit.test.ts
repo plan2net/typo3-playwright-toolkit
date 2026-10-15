@@ -13,9 +13,7 @@ function config(): ToolkitConfig {
         testingURL: 'https://example-testing.test',
         paths: {
             consumerRoot: '/srv/project',
-            stateDir: '/srv/project/.test-state',
-            sessionDir: '/srv/project/var/session',
-        },
+            stateDir: '/srv/project/.test-state',        },
     }
 }
 

@@ -3,7 +3,6 @@ import type { BrowserContext } from '@playwright/test'
 import type { ContentBuilderInterface } from './types/content-builder.js'
 import { registerContentTypes } from './builders/content-factory.js'
 import { resolveRunId } from './state/run-id.js'
-import { assertDeletableDirectory } from './state/safe-paths.js'
 
 export type ContentTypeConstructor = new () => ContentBuilderInterface
 
@@ -41,12 +40,10 @@ export interface ToolkitCspConfig {
     expectedOrigin?: string
 }
 
-/** All three are absolute, and both writable ones must sit inside consumerRoot. */
+/** Both are absolute, and stateDir sits inside consumerRoot. */
 export interface ToolkitPaths {
     consumerRoot: string
     stateDir: string
-    /** TYPO3 session directory; teardown deletes stale entries from it. */
-    sessionDir: string
 }
 
 /** Every default lives in SETUP_DEFAULTS (ensure-state.ts), which is exported. */
@@ -113,9 +110,9 @@ export interface ToolkitConfig {
     setup?: ToolkitSetupConfig
 }
 
-/** What a consumer writes: consumerRoot, and a session directory if theirs moved. */
+/** What a consumer writes: consumerRoot only. */
 export type ToolkitConfigInput = Omit<ToolkitConfig, 'paths'> & {
-    paths: Pick<ToolkitPaths, 'consumerRoot'> & Partial<Pick<ToolkitPaths, 'sessionDir'>>
+    paths: Pick<ToolkitPaths, 'consumerRoot'>
 }
 
 let activeConfig: ToolkitConfig | undefined
@@ -139,15 +136,7 @@ function resolvePaths(paths: ToolkitConfigInput['paths']): ToolkitPaths {
         )
     }
 
-    const resolved = {
-        consumerRoot: paths.consumerRoot,
-        stateDir,
-        sessionDir: paths.sessionDir ?? path.join(paths.consumerRoot, 'var/session'),
-    }
-
-    assertDeletableDirectory('sessionDir', resolved.sessionDir, resolved.consumerRoot)
-
-    return resolved
+    return { consumerRoot: paths.consumerRoot, stateDir }
 }
 
 function resolveTestingURL(testingURL: string): string {
