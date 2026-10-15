@@ -60,6 +60,20 @@ setup() {
     [ "$status" -ne 0 ]
 }
 
+@test "runs the version of the project's own database" {
+    playwright_install_db_test_service 'mariadb:10.11'
+
+    grep -q 'image: mariadb:10.11$' docker-compose.db-test.yaml
+}
+
+@test "says why it does not run a version older than it supports" {
+    run playwright_install_db_test_service 'mysql:5.7'
+
+    [ "$status" -eq 0 ]
+    grep -q 'image: mysql:8$' docker-compose.db-test.yaml
+    [[ "$output" == *'oldest mysql it runs is 8.0'* ]]
+}
+
 @test "names the image db-test actually runs, not the project's own version" {
     run playwright_install_db_test_service 'mariadb:10.2'
 

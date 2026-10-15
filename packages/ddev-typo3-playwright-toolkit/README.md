@@ -127,9 +127,10 @@ If theirs wins, a run no longer rebuilds the database template first and looks i
 
 ### A different database system
 
-Install picks the `db-test` service that matches your project. If you change your
-project's database system afterwards, run the selection again with the database type
-and version:
+Install picks the `db-test` service that matches your project, in your project's own
+version. Below MariaDB 10.5, MySQL 8.0 or Postgres 10 it runs its default (`mariadb:11`,
+`mysql:8`, `postgres:16`) and says so. If you change your project's database system or
+version afterwards, run the selection again:
 
 ```bash
 cd .ddev && bash db-test/select-service.sh postgres:16

@@ -60,6 +60,15 @@ the package a change belongs to.
   the new service, then `ddev stop`, `docker volume rm ddev-<project>_db-test-data`,
   `ddev start` and `ddev playwright-prepare --force`. Baselines of lists sorted in SQL
   can change. Check them, then accept them with `--update-snapshots`.
+- **DDEV add-on** — the db-test service runs the version of your project's own
+  database. It always ran `mariadb:11`, `mysql:8` or `postgres:16`, so tests ran against
+  a server the project never uses, with other defaults and other SQL behaviour. Below
+  MariaDB 10.5, MySQL 8.0 or Postgres 10 it keeps the default and says so.
+
+  **Migration:** run `ddev add-on get` again, then `ddev restart`. A project whose
+  version differs from the old default should also remove the old data, as above, since
+  a server of another major version may not read it: `ddev stop`,
+  `docker volume rm ddev-<project>_db-test-data`, `ddev start`.
 - **plan2net/playwright-toolkit** — a test run keeps the site name as it is. The test
   ID was added to it on every request of a test, and that ID is new on every run, so
   every screenshot of the backend differed. An inspect link still shows it, so two open

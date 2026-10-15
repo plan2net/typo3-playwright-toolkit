@@ -61,7 +61,7 @@ cleanup_project
 # artifact ends up disagreeing with what is on disk.
 for generated in .artifacts vendor public var .test-state composer.lock \
     config/system/settings.php tests/playwright/node_modules tests/playwright/package-lock.json \
-    .ddev/config.e2e-database.yaml; do
+    .ddev/config.e2e-database.yaml .ddev/docker-compose.db-test.yaml; do
     rm -rf "${CONSUMER:?}/${generated}"
 done
 

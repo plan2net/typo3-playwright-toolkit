@@ -27,6 +27,22 @@ playwright_db_test_image() {
     sed -n 's/^ *image: *//p' "$1" | head -1
 }
 
+playwright_db_test_oldest_version() {
+    case "$(playwright_db_test_type "$1")" in
+        postgres) printf '10' ;;
+        mariadb) printf '10.5' ;;
+        mysql) printf '8.0' ;;
+    esac
+}
+
+playwright_db_test_runs_version() {
+    local version="${1#*:}"
+    local oldest
+    oldest="$(playwright_db_test_oldest_version "$1")"
+
+    [ "${version}" != "$1" ] && [ "$(printf '%s\n%s\n' "${oldest}" "${version}" | sort -V | head -1)" = "${oldest}" ]
+}
+
 playwright_install_db_test_service() {
     local database="${1:-}"
     local target='docker-compose.db-test.yaml'
@@ -45,8 +61,15 @@ playwright_install_db_test_service() {
         return 1
     fi
 
+    if playwright_db_test_runs_version "${database}"; then
+        sed "s|^\( *image: *\).*|\1${database}|" "${source}" >"${target}"
+        echo "typo3-playwright: installed ${target}; db-test runs $(playwright_db_test_image "${target}") for your ${database} database."
+        return
+    fi
+
     cp "${source}" "${target}"
-    echo "typo3-playwright: installed ${target}; db-test runs $(playwright_db_test_image "${target}") for your ${database} database."
+    echo "typo3-playwright: installed ${target}; db-test runs $(playwright_db_test_image "${target}") for your ${database} database," \
+        "because the oldest $(playwright_db_test_type "${database}") it runs is $(playwright_db_test_oldest_version "${database}")."
 }
 
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
