@@ -49,7 +49,7 @@ export abstract class CoreContent implements ContentBuilderInterface {
         return this.set('subheader', subheader)
     }
 
-    /** 0 is "hidden", 1–5 are h1–h5 in a stock fluid_styled_content install. */
+    /** 0 is the default, 1–5 are h1–h5 and 100 is hidden in a stock fluid_styled_content install. */
     withHeaderLayout(layout: number): this {
         return this.set('header_layout', layout)
     }
