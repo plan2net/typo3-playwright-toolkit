@@ -151,6 +151,19 @@ describe('openAuthenticatedPage', () => {
         expect(state.postedRedirects).toBe(0)
     })
 
+    it("opens the setup page with the project's own HTTPS, credential and proxy options", async () => {
+        const { browser, state } = fakeBrowser('never')
+        const projectOptions = {
+            ignoreHTTPSErrors: false,
+            httpCredentials: { username: 'staging', password: 'secret' },
+            proxy: { server: 'http://proxy.test:3128' },
+        }
+
+        await openAuthenticatedPage(browser as never, config(), 'ABCD1234EFGH5678', 'news', undefined, projectOptions)
+
+        expect(state.contextOptions).toMatchObject(projectOptions)
+    })
+
     it('opens the setup page on the scenario site, with service workers blocked', async () => {
         const { browser, state } = fakeBrowser('never')
         const shop = { identifier: 'shop', rootPageId: 2573, base: 'https://shop-testing.test/', origin: 'https://shop-testing.test' }

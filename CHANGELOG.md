@@ -96,6 +96,10 @@ the package a change belongs to.
 - **plan2net/playwright-toolkit** — `ddev playwright setup` clears only TYPO3's system
   caches before it builds the test database template, like `ddev playwright test`
   does. It cleared every cache, including the page cache of the site you work on.
+- **@plan2net/typo3-playwright-toolkit** — a scenario's setup runs with the
+  `ignoreHTTPSErrors`, `httpCredentials` and `proxy` of your Playwright project, like its
+  tests do. It always ignored certificate errors and used neither credentials nor a
+  proxy, so the setup of a site behind HTTP authentication failed before it started.
 
 ## [0.23.1] - 2026-09-28
 

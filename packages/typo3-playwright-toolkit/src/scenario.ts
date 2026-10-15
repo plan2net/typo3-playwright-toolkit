@@ -1,4 +1,11 @@
-import { test as base, type APIRequestContext, type Browser, type Page, type TestInfo } from '@playwright/test'
+import {
+    test as base,
+    type APIRequestContext,
+    type Browser,
+    type BrowserContextOptions,
+    type Page,
+    type TestInfo,
+} from '@playwright/test'
 import * as path from 'path'
 import { toolkitHeaders } from './contract.js'
 import { setupCacheUse } from './setup-cache/use.js'
@@ -140,15 +147,18 @@ export async function buildScenarioContext(
     return { ...context, replayFolder: await createScenarioFolder(page, context, name) }
 }
 
+export type ProjectContextOptions = Pick<BrowserContextOptions, 'ignoreHTTPSErrors' | 'httpCredentials' | 'proxy'>
+
 export async function openAuthenticatedPage(
     browser: Browser,
     config: ToolkitConfig,
     testId: string,
     name = '',
     site?: ScenarioSite,
+    projectOptions: ProjectContextOptions = {},
 ): Promise<{ page: Page; routeToken: string; backendPath: string; close: () => Promise<void> }> {
     const headers = toolkitHeaders(config, testId)
-    const context = await browser.newContext({ ignoreHTTPSErrors: true, baseURL: site?.base, serviceWorkers: 'block' })
+    const context = await browser.newContext({ ...projectOptions, baseURL: site?.base, serviceWorkers: 'block' })
 
     // The close handle is only returned on success, so a failure closes its own context.
     try {
@@ -243,7 +253,7 @@ export function defineScenario<S = Record<string, never>>(
     return base.extend<
         ScenarioFixtures<S> & { resolvedScenario: ResolvedScenario<S>; automaticAccessibilityScan: void }
     >({
-        resolvedScenario: [async ({ browser }, use, testInfo: TestInfo) => {
+        resolvedScenario: [async ({ browser, ignoreHTTPSErrors, httpCredentials, proxy }, use, testInfo: TestInfo) => {
             claimScenarioFile(testInfo.file, owner)
 
             const config = getToolkitConfig()
@@ -263,7 +273,11 @@ export function defineScenario<S = Record<string, never>>(
                     }
 
                     const label = attempt > 1 ? `${name} #${attempt}` : name
-                    const session = await openAuthenticatedPage(browser, config, testId, label, site)
+                    const session = await openAuthenticatedPage(browser, config, testId, label, site, {
+                        ignoreHTTPSErrors,
+                        httpCredentials,
+                        proxy,
+                    })
                     try {
                         const builderContext = await buildScenarioContext(
                             session.page,
