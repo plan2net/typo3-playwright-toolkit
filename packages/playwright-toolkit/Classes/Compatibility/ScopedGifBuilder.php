@@ -6,6 +6,7 @@ namespace Plan2net\PlaywrightToolkit\Compatibility;
 
 use Plan2net\PlaywrightToolkit\Imaging\GifBuilderOutput;
 use Plan2net\PlaywrightToolkit\Imaging\TestScopedGraphicalFunctions;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Imaging\GifBuilder;
 
 // 11.5 and 12.4 only: there GifBuilder extends GraphicalFunctions and runs the
@@ -22,9 +23,18 @@ final class ScopedGifBuilder extends GifBuilder
 
     public static function create(): GifBuilder
     {
+        $gifBuilder = GeneralUtility::makeInstanceForDi(GifBuilder::class);
         $scope = TestScopedGraphicalFunctions::scope();
+        if ('' === $scope) {
+            return $gifBuilder;
+        }
+        if (GifBuilder::class !== $gifBuilder::class) {
+            $gifBuilder->filenamePrefix = $scope;
 
-        return '' === $scope ? new GifBuilder() : new self($scope);
+            return $gifBuilder;
+        }
+
+        return new self($scope);
     }
 
     /**
