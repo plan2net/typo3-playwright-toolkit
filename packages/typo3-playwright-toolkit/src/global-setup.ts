@@ -4,6 +4,7 @@ import { prepareRun } from './state/run-namespace.js'
 import { announceSetupCache } from './setup-cache/announce.js'
 import { REPLAY_TEST_ID, TEST_ID_HEADER, generateTestId } from './contract.js'
 import { SECRET_HEADER, resolveApiSecret } from './http/api-secret.js'
+import { testApiUrl, type TestApiTarget } from './http/test-api.js'
 import { registerSetupAttempt } from './state/attempt-registry.js'
 import { parseDiscoveredSites, writeSitesFile, type SiteEntry } from './sites/registry.js'
 import { probeSite } from './sites/probe.js'
@@ -71,6 +72,8 @@ function notInTestingContext(healthUrl: string): string[] {
         `The endpoint only exists in the Testing context. Check that ${new URL(healthUrl).origin}`,
         'is the hostname your web server maps to TYPO3_CONTEXT=Testing, and that testingURL',
         'in playwright.config.ts names that same hostname.',
+        'If the project moved the backend with BE/entryPoint, set backendPath in',
+        'defineToolkitConfig to the same path.',
     ]
 }
 
@@ -89,7 +92,7 @@ export async function verifyApiVersion(
     config: ToolkitConfig,
     options: { fetchImpl?: typeof fetch } = {},
 ): Promise<number> {
-    const healthUrl = `${config.testingURL}/typo3/test-api/health`
+    const healthUrl = testApiUrl(config, 'health')
 
     const { status, body } = await readHealth(
         healthUrl,
@@ -152,10 +155,10 @@ function assertTestingContext(healthUrl: string, reported: string | undefined): 
 }
 
 export async function runHealthCheck(
-    testingURL: string,
+    target: TestApiTarget,
     options: { testId?: string; secret?: string; fetchImpl?: typeof fetch } = {},
 ): Promise<void> {
-    const healthUrl = `${testingURL}/typo3/test-api/health`
+    const healthUrl = testApiUrl(target, 'health')
     const headers: Record<string, string> = {}
     if (options.testId) {
         headers[TEST_ID_HEADER] = options.testId
@@ -218,7 +221,7 @@ async function globalSetup(): Promise<void> {
 
     // Replay checks its own database; a throwaway one its teardown never drops.
     const testId = config.replay ? REPLAY_TEST_ID : preflightTestId(config)
-    await runHealthCheck(config.testingURL, { testId, secret: resolveApiSecret(config) })
+    await runHealthCheck(config, { testId, secret: resolveApiSecret(config) })
 
     if (api < SITES_API_VERSION) {
         writeSitesFile(config, {
@@ -243,7 +246,7 @@ async function globalSetup(): Promise<void> {
 
 async function discoverSites(config: ToolkitConfig, testId: string): Promise<SiteEntry[]> {
     const secret = resolveApiSecret(config)
-    const healthUrl = `${config.testingURL}/typo3/test-api/health`
+    const healthUrl = testApiUrl(config, 'health')
     const { body } = await readHealth(
         healthUrl,
         { [SECRET_HEADER]: secret },

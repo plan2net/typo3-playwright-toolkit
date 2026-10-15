@@ -57,7 +57,7 @@ beforeEach(async () => {
                 response.writeHead(401).end('{"error":"Unauthorized"}')
                 return
             }
-            if (request.url === '/typo3/test-api/databases/drop') {
+            if (request.url!.endsWith('/test-api/databases/drop')) {
                 response.end(JSON.stringify({
                     results: JSON.parse(body).testIds.map((testId: string) => ({ testId, outcome: cleanupOutcome })),
                 }))
@@ -179,6 +179,17 @@ it('checks the API and session, then drops only its own diagnostic database', as
     expect(JSON.parse(drops[0].body)).toEqual({ testIds: [testId] })
     expect(drops[0].headers['x-playwright-test-id']).toBeUndefined()
     expect(existsSync(join(root, '.test-state'))).toBe(false)
+})
+
+it('asks the test API behind the configured backend path', async () => {
+    const file = join(root, 'playwright.config.ts')
+    writeFileSync(file, readFileSync(file, 'utf8').replace("build: 'exit 99',", "build: 'exit 99', backendPath: '/admin',"))
+
+    await doctor()
+
+    const apiRequests = requests.filter((request) => request.url.includes('/test-api/'))
+    expect(apiRequests.length).toBeGreaterThan(0)
+    expect(apiRequests.every((request) => request.url.startsWith('/admin/test-api/'))).toBe(true)
 })
 
 it('skips dependent checks when the testing URL cannot answer', async () => {

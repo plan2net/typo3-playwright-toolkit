@@ -37,6 +37,14 @@ describe('readHealth', () => {
 
         expect(seen[0].redirect).toBe('manual')
     })
+
+    it('names backendPath when the site answers with its own not-found page', async () => {
+        const fetchImpl = (async () => new Response('<h1>Page not found</h1>', { status: 404 })) as unknown as typeof fetch
+
+        await expect(
+            readHealth('https://example-testing.test/typo3/test-api/health', {}, fetchImpl, () => 'unreachable'),
+        ).rejects.toThrow(/BE\/entryPoint[\s\S]*backendPath/)
+    })
 })
 
 describe('verifyApiVersion', () => {
@@ -56,6 +64,18 @@ describe('verifyApiVersion', () => {
     // Header-less on purpose: a request carrying a test ID would make the
     // extension provision a database, and against a too-old extension there
     // would then be no endpoint able to clean it up.
+    it('asks behind the configured backend path', async () => {
+        const urls: string[] = []
+        const fetchImpl = (async (url: string) => {
+            urls.push(url)
+            return new Response(JSON.stringify({ ok: true, api: 1 }), { status: 200 })
+        }) as unknown as typeof fetch
+
+        await verifyApiVersion({ ...config, backendPath: '/admin' }, { fetchImpl })
+
+        expect(urls).toEqual(['https://example-testing.test/admin/test-api/health'])
+    })
+
     it('probes without a test id', async () => {
         await verifyApiVersion(config, { fetchImpl: probeReporting({ ok: true, api: 1 }) })
 
@@ -257,13 +277,25 @@ describe('runHealthCheck', () => {
             })
     }
 
+    it('asks behind the configured backend path', async () => {
+        const urls: string[] = []
+        const fetchImpl = (async (url: string) => {
+            urls.push(url)
+            return new Response(JSON.stringify({ ok: true }), { status: 200 })
+        }) as unknown as typeof fetch
+
+        await runHealthCheck({ testingURL: 'https://example-testing.test', backendPath: '/admin' }, { fetchImpl })
+
+        expect(urls).toEqual(['https://example-testing.test/admin/test-api/health'])
+    })
+
     it('refuses a context that is not Testing', async () => {
         const wrong = reporting('Development/Docker')
 
-        await expect(runHealthCheck('https://example-testing.test', { fetchImpl: wrong })).rejects.toThrow(
+        await expect(runHealthCheck({ testingURL: 'https://example-testing.test' }, { fetchImpl: wrong })).rejects.toThrow(
             /Development\/Docker/,
         )
-        await expect(runHealthCheck('https://example-testing.test', { fetchImpl: wrong })).rejects.toThrow(
+        await expect(runHealthCheck({ testingURL: 'https://example-testing.test' }, { fetchImpl: wrong })).rejects.toThrow(
             /TYPO3_CONTEXT/,
         )
     })
@@ -276,7 +308,7 @@ describe('runHealthCheck', () => {
             return new Response(JSON.stringify({ ok: true }), { status: 200 })
         }) as unknown as typeof fetch
 
-        await runHealthCheck('https://example-testing.test', { testId: 'ABCD1234EFGH5678', fetchImpl })
+        await runHealthCheck({ testingURL: 'https://example-testing.test' }, { testId: 'ABCD1234EFGH5678', fetchImpl })
 
         expect(seen[0][TEST_ID_HEADER]).toBe('ABCD1234EFGH5678')
     })
@@ -293,7 +325,7 @@ describe('runHealthCheck', () => {
         }) as unknown as typeof fetch
 
         await expect(
-            runHealthCheck('https://example-testing.test', { testId: 'ABCD1234EFGH5678', fetchImpl }),
+            runHealthCheck({ testingURL: 'https://example-testing.test' }, { testId: 'ABCD1234EFGH5678', fetchImpl }),
         ).rejects.toThrow(/database: schema dump absent/)
         expect(callCount).toBe(1)
     })

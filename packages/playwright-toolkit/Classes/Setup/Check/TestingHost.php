@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Setup\Check;
 
+use Plan2net\PlaywrightToolkit\Configuration\BackendSettings;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\Setup\Result;
 use Plan2net\PlaywrightToolkit\TestContext;
@@ -23,7 +24,7 @@ final class TestingHost
     /**
      * @var string
      */
-    private const HEALTH_PATH = '/typo3/test-api/health';
+    private const HEALTH_PATH = '/test-api/health';
 
     public function __construct(
         private readonly string $testingUrl,
@@ -34,7 +35,7 @@ final class TestingHost
 
     public function run(): Result
     {
-        $url = $this->testingUrl . self::HEALTH_PATH;
+        $url = $this->testingUrl . BackendSettings::entryPoint() . self::HEALTH_PATH;
 
         try {
             $response = $this->client->sendRequest(new Request($url, 'GET', 'php://temp', [

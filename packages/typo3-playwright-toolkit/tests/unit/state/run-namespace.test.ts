@@ -81,6 +81,13 @@ describe('prepareRun', () => {
         expect(meta.testingURL).toBe('https://example-testing.test')
     })
 
+    it('records the backend path the run used', () => {
+        const paths = prepareRun({ ...configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa'), backendPath: '/admin' })
+        const meta = JSON.parse(fs.readFileSync(paths.metaFile, 'utf-8'))
+
+        expect(meta.backendPath).toBe('/admin')
+    })
+
     it('keeps the original startedAt when called again', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
         const first = JSON.parse(fs.readFileSync(prepareRun(config).metaFile, 'utf-8'))

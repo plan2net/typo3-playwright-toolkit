@@ -5,7 +5,7 @@ import { sweepOrphans } from '../global-teardown.js'
 import { httpCleanup } from '../http/cleanup-client.js'
 import { findStateDir } from '../inspect/links.js'
 import { OWNER_ACTIVE_MS } from '../state/run-namespace.js'
-import { recordedTestingUrl } from '../state/testing-url.js'
+import { recordedTestApiTarget } from '../state/testing-url.js'
 import { discardSetupCache } from '../setup-cache/discard.js'
 
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
@@ -29,14 +29,14 @@ if (process.argv.includes('--setup-cache')) {
     console.log(`Dropped ${discarded} cached scenario setup${1 === discarded ? '' : 's'}.`)
 }
 
-const testingURL = recordedTestingUrl(stateDir)
-if (undefined === testingURL) {
+const target = recordedTestApiTarget(stateDir)
+if (undefined === target) {
     console.log('Nothing to clean: no run recorded a testing URL.')
     process.exit(0)
 }
 
 const config: ToolkitConfig = {
-    testingURL,
+    ...target,
     paths: { consumerRoot, stateDir },
     // The window prepareRun uses to decide another process owns a run, so a run
     // younger than it keeps its databases and state.

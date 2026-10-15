@@ -1,5 +1,6 @@
 import type { ToolkitConfig } from '../config.js'
 import { SECRET_HEADER, resolveApiSecret } from './api-secret.js'
+import { testApiUrl } from './test-api.js'
 
 /** Mirrors the extension's CleanupOutcome. */
 export type CleanupOutcome = 'dropped' | 'absent' | 'unclaimed' | 'refused' | 'failed'
@@ -67,7 +68,7 @@ export function httpCleanup(
     const timeoutMs = options.timeoutMs ?? (Number(process.env.PW_CLEANUP_TIMEOUT_MS) || 30000)
 
     async function post(operation: string, payload: Record<string, unknown>): Promise<unknown> {
-        const url = `${config.testingURL}/typo3/test-api/databases/${operation}`
+        const url = testApiUrl(config, `databases/${operation}`)
 
         // No test-ID header: one would make the extension provision a database
         // on the way in, and this request exists to remove them.

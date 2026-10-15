@@ -327,6 +327,24 @@ final class SetupCommandTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function writesTheMovedBackendIntoThePlaywrightConfig(): void
+    {
+        putenv('DDEV_SITENAME=example');
+        $GLOBALS['TYPO3_CONF_VARS']['BE']['entryPoint'] = '/admin';
+        @unlink($this->instancePath . '/tests/playwright/playwright.config.ts');
+
+        $tester = new CommandTester($this->command());
+        $tester->setInputs(['', '', 'yes', 'no']);
+        $tester->execute([]);
+        unset($GLOBALS['TYPO3_CONF_VARS']['BE']['entryPoint']);
+
+        self::assertStringContainsString(
+            "backendPath: '/admin',",
+            (string) file_get_contents($this->instancePath . '/tests/playwright/playwright.config.ts')
+        );
+    }
+
+    #[Test]
     public function writesAFixtureIntoTheConfiguredFixturesPath(): void
     {
         putenv('DDEV_SITENAME=example');

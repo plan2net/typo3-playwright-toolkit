@@ -3,6 +3,7 @@ import { defineToolkitConfig, defineBasePlaywrightConfig } from '@plan2net/typo3
 
 const toolkit = defineToolkitConfig({
     testingURL: 'https://t3pw-e2e-testing.ddev.site',
+    backendPath: process.env.PW_E2E_BACKEND || undefined,
     paths: { consumerRoot: fileURLToPath(new URL('../..', import.meta.url)) },
 })
 

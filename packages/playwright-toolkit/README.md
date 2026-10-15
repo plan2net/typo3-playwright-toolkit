@@ -427,6 +427,9 @@ your own at that uid wins. Without one, the toolkit writes an admin there.
 
 All endpoints start with `/typo3/test-api/`, need the
 `X-Playwright-Toolkit-Secret` header, and answer `404` outside the Testing context.
+If your project moves the backend with `BE/entryPoint`, they move with it, for
+example to `/admin/test-api/`. Set `backendPath` in `defineToolkitConfig` to the same
+path; `ddev playwright setup` writes it for you.
 [CONTRACT.md](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/CONTRACT.md)
 describes them.
 

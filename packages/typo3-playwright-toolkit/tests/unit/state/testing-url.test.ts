@@ -3,7 +3,7 @@ import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
 import { prepareRun } from '#src/state/run-namespace.js'
-import { recordedTestingUrl } from '#src/state/testing-url.js'
+import { recordedTestApiTarget } from '#src/state/testing-url.js'
 import { configForRun } from '../../helpers.js'
 
 let tmpRoot: string
@@ -20,5 +20,12 @@ it('keeps the testing url after the run directory is removed', () => {
     const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
     fs.rmSync(prepareRun(config).runDir, { recursive: true })
 
-    expect(recordedTestingUrl(config.paths.stateDir)).toBe('https://example-testing.test')
+    expect(recordedTestApiTarget(config.paths.stateDir)?.testingURL).toBe('https://example-testing.test')
+})
+
+it('keeps the backend path beside it', () => {
+    const config = { ...configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa'), backendPath: '/admin' }
+    prepareRun(config)
+
+    expect(recordedTestApiTarget(config.paths.stateDir)?.backendPath).toBe('/admin')
 })

@@ -6,8 +6,8 @@ import { getToolkitConfig, type ToolkitConfig } from './config.js'
 import { ensureState, setupFixtureTimeout } from './state/ensure-state.js'
 import { applyScenarioOutcome, recordTestFailure } from './state/scenario-outcome.js'
 import { sanitizeScenarioKey } from './state/run-namespace.js'
+import { DEFAULT_BACKEND_PATH, testApiUrl } from './http/test-api.js'
 import {
-    DEFAULT_BACKEND_PATH,
     resolveRequestContext,
     type ReplayFolder,
     type RequestContext,
@@ -159,7 +159,7 @@ export async function openAuthenticatedPage(
         ;(page as PageWithTestId).testId = testId
 
         // Playwright would re-send the secret to whatever the redirect names.
-        const response = await page.request.post(`${config.testingURL}/typo3/test-api/session`, {
+        const response = await page.request.post(testApiUrl(config, 'session'), {
             headers,
             data: { name },
             maxRedirects: 0,

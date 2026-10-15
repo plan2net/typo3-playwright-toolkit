@@ -2,6 +2,7 @@ import * as path from 'path'
 import type { BrowserContext } from '@playwright/test'
 import type { ContentBuilderInterface } from './types/content-builder.js'
 import { registerContentTypes } from './builders/content-factory.js'
+import { DEFAULT_BACKEND_PATH, normaliseBackendPath } from './http/test-api.js'
 import { resolveRunId } from './state/run-id.js'
 
 export type ContentTypeConstructor = new () => ContentBuilderInterface
@@ -77,6 +78,8 @@ export interface ToolkitConfig {
      * query, fragment or credentials; `defineToolkitConfig` refuses anything else.
      */
     testingURL: string
+    /** TYPO3's `BE/entryPoint`, when the project changed it. Defaults to `/typo3`. */
+    backendPath?: string
     /** Screenshot tolerances merged into the base Playwright config + Screenshot helper. */
     screenshot?: ToolkitScreenshotConfig
     /**
@@ -160,7 +163,7 @@ function resolveTestingURL(testingURL: string): string {
     if (url.search || url.hash) {
         return refuse('must carry no query string or fragment')
     }
-    // The test API answers at /typo3/test-api/…, so a subdirectory install cannot
+    // The test API answers at <backendPath>/test-api/…, so a subdirectory install cannot
     // work and dropping the path silently would hide that.
     if (!/^\/+$/.test(url.pathname)) {
         return refuse('must be a bare origin, with no path')
@@ -174,6 +177,7 @@ export function defineToolkitConfig(config: ToolkitConfigInput): ToolkitConfig {
     const resolved: ToolkitConfig = {
         ...config,
         testingURL: resolveTestingURL(config.testingURL),
+        backendPath: normaliseBackendPath(config.backendPath ?? DEFAULT_BACKEND_PATH),
         paths: resolvePaths(config.paths),
         runId: resolveRunId(config.runId),
         replay: '1' === process.env.PW_REPLAY,

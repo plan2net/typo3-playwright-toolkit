@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Plan2net\PlaywrightToolkit\Command;
 
 use Composer\InstalledVersions;
+use Plan2net\PlaywrightToolkit\Configuration\BackendSettings;
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfiguration;
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use Plan2net\PlaywrightToolkit\Database\Driver\Engine;
@@ -191,6 +192,9 @@ final class SetupCommand extends Command
 
         $placeholders = [
             'TESTING_URL' => $testingUrl,
+            'BACKEND_PATH' => BackendSettings::DEFAULT_ENTRY_POINT === BackendSettings::entryPoint()
+                ? ''
+                : "\n    backendPath: '" . BackendSettings::entryPoint() . "',",
             'PROJECT_ROOT' => Answers::relativeProjectRoot($testDirectory),
             'ROOT_PAGE_ID' => isset($bases[Fixtures::ROOT_PAGE_FIXTURE])
                 ? (string) $this->rootPageId($io, $testingUrl)

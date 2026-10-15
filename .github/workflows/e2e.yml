@@ -61,7 +61,7 @@ jobs:
         run: npm run test:pack
 
   consumer-chain:
-    name: consumer chain (typo3 ${{ matrix.typo3 }}, ${{ matrix.database }})
+    name: consumer chain (typo3 ${{ matrix.typo3 }}, ${{ matrix.database }}${{ matrix.backend && format(', backend {0}', matrix.backend) || '' }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -72,6 +72,10 @@ jobs:
         typo3: ['12.4', '13.4', '14.3']
         # Each engine has a driver of its own, and only this job runs them end to end.
         database: [postgres, mariadb, mysql, sqlite]
+        include:
+          - typo3: '14.3'
+            database: postgres
+            backend: /admin
     steps:
       - uses: actions/checkout@v7
 
@@ -106,6 +110,7 @@ jobs:
         env:
           PW_E2E_TYPO3: ${{ matrix.typo3 }}
           PW_E2E_DATABASE: ${{ matrix.database }}
+          PW_E2E_BACKEND: ${{ matrix.backend }}
         run: tests/e2e/run.sh
 
       - name: Playwright report

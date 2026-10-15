@@ -76,6 +76,24 @@ describe('defineToolkitConfig testing url', () => {
     })
 })
 
+describe('defineToolkitConfig backend path', () => {
+    it.each([
+        ['without a leading slash', 'admin', '/admin'],
+        ['with a trailing slash', '/admin/', '/admin'],
+        ['with doubled slashes', '//cms//backend/', '/cms/backend'],
+    ])('normalises one %s', (_case, backendPath, expected) => {
+        expect(defineToolkitConfig({ ...baseConfig(), backendPath }).backendPath).toBe(expected)
+    })
+
+    it.each([
+        ['a whole URL', 'https://backend.example.test/admin'],
+        ['a query string', '/admin?x=1'],
+        ['a fragment', '/admin#top'],
+    ])('refuses %s', (_case, backendPath) => {
+        expect(() => defineToolkitConfig({ ...baseConfig(), backendPath })).toThrow(/backendPath/)
+    })
+})
+
 describe('defineToolkitConfig', () => {
     it('resolves onto its own object and leaves the caller\'s untouched', () => {
         delete process.env.PW_RUN_ID

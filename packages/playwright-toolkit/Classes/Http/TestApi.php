@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Http;
 
+use Plan2net\PlaywrightToolkit\Configuration\BackendSettings;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -11,15 +12,11 @@ use TYPO3\CMS\Core\Http\JsonResponse;
 
 final class TestApi
 {
-    /**
-     * @var string
-     */
-    private const BACKEND_PREFIX = '/typo3';
-
     public static function matches(string $path, string ...$endpoints): bool
     {
+        $entryPoint = BackendSettings::entryPoint();
         foreach ($endpoints as $endpoint) {
-            if ($path === $endpoint || $path === self::BACKEND_PREFIX . $endpoint) {
+            if ($path === $endpoint || $path === $entryPoint . $endpoint) {
                 return true;
             }
         }

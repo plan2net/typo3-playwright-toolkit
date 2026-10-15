@@ -1,5 +1,6 @@
 import type { ToolkitConfig } from '../config.js'
 import { SECRET_HEADER, resolveApiSecret } from '../http/api-secret.js'
+import { testApiUrl } from '../http/test-api.js'
 
 export type SetupCacheOutcome = 'applied' | 'absent' | 'refused' | 'stored'
 
@@ -28,7 +29,7 @@ export function httpSetupCache(
     const timeoutMs = options.timeoutMs ?? (Number(process.env.PW_CLEANUP_TIMEOUT_MS) || 30000)
 
     async function post(operation: string, payload: Record<string, unknown>): Promise<Record<string, unknown>> {
-        const url = `${config.testingURL}/typo3/test-api/setup-cache/${operation}`
+        const url = testApiUrl(config, `setup-cache/${operation}`)
 
         const response = await doFetch(url, {
             method: 'POST',

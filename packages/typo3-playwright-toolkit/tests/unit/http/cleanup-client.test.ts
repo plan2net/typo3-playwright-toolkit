@@ -66,6 +66,14 @@ afterEach(() => {
 })
 
 describe('httpCleanup.drop', () => {
+    it('posts behind the configured backend path', async () => {
+        const { calls, fetchImpl } = recorder(() => ok({ results: [] }))
+
+        await httpCleanup({ ...config, backendPath: '/admin' }, { fetchImpl }).drop(['ABCD1234EFGH5678'])
+
+        expect(calls[0].url).toBe('https://example-testing.test/admin/test-api/databases/drop')
+    })
+
     it('posts the ids to the drop endpoint', async () => {
         const { calls, fetchImpl } = recorder(() => ok({ results: [] }))
 

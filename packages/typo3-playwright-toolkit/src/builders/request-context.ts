@@ -1,8 +1,6 @@
 import { getToolkitConfig } from '../config.js'
 import { ContextWithTestId, PageWithTestId } from '../types/playwright-extensions.js'
-
-/** TYPO3's own default for `BE/entryPoint`, which 11.5 and 12.4 have no setting for. */
-export const DEFAULT_BACKEND_PATH = '/typo3'
+import { DEFAULT_BACKEND_PATH } from '../http/test-api.js'
 
 /** Replay only: the scenario's folder and the pages it created inside it. */
 export interface ReplayFolder {
@@ -72,7 +70,7 @@ export function resolveRequestContext(
         // Never derived from page.url(): the request carries the API secret, and a
         // page that navigated off-site must not decide where the builder posts it.
         baseUrl: explicit.baseUrl ?? getToolkitConfig().testingURL,
-        backendPath: explicit.backendPath ?? DEFAULT_BACKEND_PATH,
+        backendPath: explicit.backendPath ?? getToolkitConfig().backendPath ?? DEFAULT_BACKEND_PATH,
         testId: requireTestId(page, explicit.testId),
         routeToken: explicit.routeToken ?? '',
     }

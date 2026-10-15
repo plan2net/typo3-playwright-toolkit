@@ -2,7 +2,7 @@ import { fileURLToPath } from 'url'
 import { defineToolkitConfig, defineBasePlaywrightConfig } from '@plan2net/typo3-playwright-toolkit/playwright'
 
 const toolkit = defineToolkitConfig({
-    testingURL: '{{TESTING_URL}}',
+    testingURL: '{{TESTING_URL}}',{{BACKEND_PATH}}
     paths: { consumerRoot: fileURLToPath(new URL('{{PROJECT_ROOT}}', import.meta.url)) },
 })
 

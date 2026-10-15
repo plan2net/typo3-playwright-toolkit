@@ -398,6 +398,15 @@ describe('describePreservedRun', () => {
         expect(described).toContain('https://example-testing.test/typo3/test-api/inspect?id=AAAAAAAAAAAAAAA1&t=')
     })
 
+    it('links behind the configured backend path', () => {
+        const config = { ...configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa'), backendPath: '/admin' }
+        registerAttempt(config, { key: 'checkout', attempt: 1, testId: 'AAAAAAAAAAAAAAA1', nonce: 'n' })
+
+        const described = describePreservedRun(config, ['AAAAAAAAAAAAAAA1'], 'the-secret', 0)
+
+        expect(described).toContain('https://example-testing.test/admin/test-api/inspect?id=AAAAAAAAAAAAAAA1&t=')
+    })
+
     it('leaves the link out when no secret is available', () => {
         const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
         registerAttempt(config, { key: 'checkout', attempt: 1, testId: 'AAAAAAAAAAAAAAA1', nonce: 'n' })

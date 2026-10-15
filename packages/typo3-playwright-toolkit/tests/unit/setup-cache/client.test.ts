@@ -25,6 +25,18 @@ describe('httpSetupCache', () => {
         expect(restored).toEqual({ outcome: 'applied', state: { slug: '/from-the-setup' }, detail: '' })
     })
 
+    it('asks behind the configured backend path', async () => {
+        const { fetchImpl, calls } = answering({ ok: true, outcome: 'stored' })
+
+        await httpSetupCache({ ...configForRun('/tmp/consumer'), backendPath: '/admin' }, { fetchImpl }).store(
+            'ABCD1234EFGH5678',
+            'a'.repeat(32),
+            {},
+        )
+
+        expect(calls[0]?.url).toBe('https://example-testing.test/admin/test-api/setup-cache/store')
+    })
+
     it('sends the setup state to be stored', async () => {
         const { fetchImpl, calls } = answering({ ok: true, outcome: 'stored' })
 

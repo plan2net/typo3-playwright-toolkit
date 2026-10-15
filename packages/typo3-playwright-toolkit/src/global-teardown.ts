@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { getToolkitConfig, type ToolkitConfig } from './config.js'
 import { httpCleanup, type CleanupClient } from './http/cleanup-client.js'
+import { DEFAULT_BACKEND_PATH } from './http/test-api.js'
 import { readAttemptsFrom, readRegisteredTestIds, recordDropped } from './state/attempt-registry.js'
 import { listRunIds, runLastActiveMs, runPaths, runsRoot } from './state/run-namespace.js'
 import { assertDeletableDirectory } from './state/safe-paths.js'
@@ -192,7 +193,7 @@ export function describePreservedRun(
             return line
         }
 
-        return `${line}\n    ${inspectUrl(config.testingURL, secret, attempt.testId, now)}`
+        return `${line}\n    ${inspectUrl(config, secret, attempt.testId, now)}`
     })
     const dropped = attempts.length - kept.length
     const alsoDropped = dropped > 0 ? `, ${dropped} passing one(s) dropped` : ''
@@ -216,14 +217,14 @@ export async function runTeardown(config: ToolkitConfig, options: TeardownOption
     // make the next replay skip every setup on this run's committed state.
     if (config.replay) {
         removeRunState(config, false)
-        recordReplayTarget(stateDir, config.testingURL)
+        recordReplayTarget(stateDir, config)
 
         return {
             dropped: 0,
             leaked: [],
             preserved: [],
             replayUrl:
-                '' === secret ? undefined : inspectUrl(config.testingURL, secret, REPLAY_TEST_ID, Date.now()),
+                '' === secret ? undefined : inspectUrl(config, secret, REPLAY_TEST_ID, Date.now()),
         }
     }
 
@@ -330,7 +331,7 @@ async function globalTeardown(): Promise<void> {
             console.log(`[replay] It stays there until the next replay run, so take your time.`)
             console.log(`[replay] This link logs you in for the next ${minutes} minutes:\n`)
             console.log(`  ${summary.replayUrl}\n`)
-            console.log(`[replay] After that, log in as usual at ${config.testingURL}/typo3,`)
+            console.log(`[replay] After that, log in as usual at ${config.testingURL}${config.backendPath ?? DEFAULT_BACKEND_PATH},`)
             console.log(`[replay] or run "ddev playwright inspect --replay" for a fresh link.\n`)
         }
 

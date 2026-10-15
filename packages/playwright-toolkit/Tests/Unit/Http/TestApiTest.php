@@ -11,6 +11,23 @@ use Plan2net\PlaywrightToolkit\Http\TestApi;
 
 final class TestApiTest extends TestCase
 {
+    /**
+     * @var array<string, mixed>
+     */
+    private array $backendConfiguration = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->backendConfiguration = $GLOBALS['TYPO3_CONF_VARS']['BE'] ?? [];
+    }
+
+    protected function tearDown(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['BE'] = $this->backendConfiguration;
+        parent::tearDown();
+    }
+
     #[Test]
     public function acceptsTheBareEndpoint(): void
     {
@@ -21,6 +38,14 @@ final class TestApiTest extends TestCase
     public function acceptsTheEndpointBehindTheBackendPrefix(): void
     {
         self::assertTrue(TestApi::matches('/typo3/test-api/session', '/test-api/session'));
+    }
+
+    #[Test]
+    public function acceptsTheEndpointBehindAConfiguredEntryPoint(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['BE']['entryPoint'] = '/admin';
+
+        self::assertTrue(TestApi::matches('/admin/test-api/session', '/test-api/session'));
     }
 
     #[Test]

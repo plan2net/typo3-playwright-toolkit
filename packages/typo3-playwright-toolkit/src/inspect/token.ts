@@ -1,4 +1,5 @@
 import { createHmac } from 'node:crypto'
+import { testApiUrl, type TestApiTarget } from '../http/test-api.js'
 
 const PURPOSE = 'inspect'
 
@@ -11,12 +12,11 @@ export function mintInspectToken(secret: string, testId: string, expiresAt: numb
     return `${expiresAt}.${signature}`
 }
 
-export function inspectUrl(testingURL: string, secret: string, testId: string, now: number): string {
+export function inspectUrl(target: TestApiTarget, secret: string, testId: string, now: number): string {
     const expiresAt = Math.floor((now + INSPECT_TOKEN_LIFETIME_MS) / 1000)
 
-    return (
-        `${testingURL}/typo3/test-api/inspect` +
-        `?id=${encodeURIComponent(testId)}` +
-        `&t=${encodeURIComponent(mintInspectToken(secret, testId, expiresAt))}`
+    return testApiUrl(
+        target,
+        `inspect?id=${encodeURIComponent(testId)}&t=${encodeURIComponent(mintInspectToken(secret, testId, expiresAt))}`,
     )
 }

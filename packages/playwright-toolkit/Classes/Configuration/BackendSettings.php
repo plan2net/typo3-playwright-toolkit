@@ -15,7 +15,7 @@ final class BackendSettings
     /**
      * @var string
      */
-    private const DEFAULT_ENTRY_POINT = '/typo3';
+    public const DEFAULT_ENTRY_POINT = '/typo3';
 
     public static function cookieName(): string
     {

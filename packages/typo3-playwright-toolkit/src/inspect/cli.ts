@@ -3,7 +3,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { findStateDir, inspectLinks } from './links.js'
 import { INSPECT_TOKEN_LIFETIME_MS, inspectUrl } from './token.js'
-import { replayTestingUrl } from './replay-target.js'
+import { replayTarget } from './replay-target.js'
 import { REPLAY_TEST_ID } from '../contract.js'
 
 function readSecret(stateDir: string): string {
@@ -32,14 +32,14 @@ if ('' === secret) {
 
 // The link a replay run printed expires, and its run state is gone by then.
 if (process.argv.includes('--replay')) {
-    const testingURL = replayTestingUrl(stateDir)
-    if (undefined === testingURL) {
+    const target = replayTarget(stateDir)
+    if (undefined === target) {
         console.error('No replay recorded. Run "ddev playwright replay" first.')
         process.exit(1)
     }
 
     console.log(`Logs you into the replayed database, for ${INSPECT_TOKEN_LIFETIME_MS / 60_000} minutes.\n`)
-    console.log(`  ${inspectUrl(testingURL, secret, REPLAY_TEST_ID, Date.now())}\n`)
+    console.log(`  ${inspectUrl(target, secret, REPLAY_TEST_ID, Date.now())}\n`)
     process.exit(0)
 }
 

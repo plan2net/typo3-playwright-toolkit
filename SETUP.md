@@ -260,7 +260,9 @@ const toolkit = defineToolkitConfig({
 export default defineBasePlaywrightConfig(toolkit, { testDir: './tests' })
 ```
 
-`testingURL` is the hostname from step 1, and the only URL you have to give. The
+`testingURL` is the hostname from step 1, and the only URL you have to give. If your
+project moved the backend with `BE/entryPoint`, add `backendPath: '/admin'` (your
+path) below it; the setup wizard does that for you. The
 [npm README](packages/typo3-playwright-toolkit/README.md#configure) lists every other option.
 
 And `tests/playwright/.gitignore`, for what a run leaves behind:

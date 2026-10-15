@@ -11,6 +11,10 @@ $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['playwright_toolkit'] = [
     'mediaPath' => 'fixtures/media',
 ];
 
+if ('' !== (string) getenv('PW_E2E_BACKEND')) {
+    $GLOBALS['TYPO3_CONF_VARS']['BE']['entryPoint'] = (string) getenv('PW_E2E_BACKEND');
+}
+
 // Two hostnames answer here and only one is the Testing one.
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['trustedHostsPattern'] = '.*';
 

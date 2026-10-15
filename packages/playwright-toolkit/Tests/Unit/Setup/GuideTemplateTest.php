@@ -21,6 +21,7 @@ final class GuideTemplateTest extends TestCase
      */
     private const GUIDE_VALUES = [
         'TESTING_URL' => 'https://example-testing.ddev.site',
+        'BACKEND_PATH' => '',
         'PROJECT_ROOT' => '../..',
         'ROOT_PAGE_ID' => '1',
     ];

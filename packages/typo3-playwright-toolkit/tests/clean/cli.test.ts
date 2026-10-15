@@ -104,6 +104,15 @@ it('still sweeps after a passing run removed its run directory', async () => {
     expect(requests.map((request) => request.url)).toContain('/typo3/test-api/databases/sweep')
 })
 
+it('sweeps behind the backend path the run recorded', async () => {
+    mkdirSync(join(root, '.test-state/runs'), { recursive: true })
+    writeFileSync(join(root, '.test-state/testing-url.json'), JSON.stringify({ testingURL, backendPath: '/admin' }))
+
+    await clean()
+
+    expect(requests.map((request) => request.url)).toContain('/admin/test-api/databases/sweep')
+})
+
 it('says how many databases it left alone, and the age they have to reach', async () => {
     mkdirSync(join(root, '.test-state/runs'), { recursive: true })
     writeFileSync(join(root, '.test-state/testing-url.json'), JSON.stringify({ testingURL }))

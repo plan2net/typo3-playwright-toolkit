@@ -617,6 +617,7 @@ Everything else:
 | `accessibility.disabledRules` | `[]` | axe rules turned off for the whole project |
 | `accessibility.projects` | all projects | Projects that run axe checks |
 | `accessibility.tags` | `DEFAULT_SCAN_TAGS` | Which axe rule sets to run |
+| `backendPath` | `/typo3` | Where the backend answers. Set it to the path of `BE/entryPoint` if your project moved the backend |
 | `build` | your `build` script | Command that builds your assets before the run, or `false` for none |
 | `cleanup.failOnLeak` | true in CI | Fail the run if a test database could not be deleted |
 | `cleanup.orphanAgeMs` | 24 hours | How old a leftover database must be before cleanup deletes it |

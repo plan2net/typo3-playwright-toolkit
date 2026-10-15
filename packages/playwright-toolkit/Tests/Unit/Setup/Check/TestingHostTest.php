@@ -18,6 +18,33 @@ final class TestingHostTest extends TestCase
 {
     private const TESTING_URL = 'https://example-testing.ddev.site';
 
+    /**
+     * @var array<string, mixed>
+     */
+    private array $backendConfiguration = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->backendConfiguration = $GLOBALS['TYPO3_CONF_VARS']['BE'] ?? [];
+    }
+
+    protected function tearDown(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['BE'] = $this->backendConfiguration;
+        parent::tearDown();
+    }
+
+    #[Test]
+    public function asksTheHealthEndpointBehindTheConfiguredEntryPoint(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['BE']['entryPoint'] = '/admin';
+
+        $detail = (new TestingHost(self::TESTING_URL, 'secret', self::clientThrowing('refused')))->run()->detail;
+
+        self::assertStringStartsWith(self::TESTING_URL . '/admin/test-api/health ', $detail);
+    }
+
     #[Test]
     public function failsWhenTheHostCannotBeReached(): void
     {

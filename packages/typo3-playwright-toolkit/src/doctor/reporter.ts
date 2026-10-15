@@ -4,6 +4,7 @@ import { getToolkitConfig, type ToolkitConfig } from '../config.js'
 import { generateTestId, TEST_ID_HEADER } from '../contract.js'
 import { resolveApiSecret, SECRET_HEADER } from '../http/api-secret.js'
 import { httpCleanup } from '../http/cleanup-client.js'
+import { testApiUrl } from '../http/test-api.js'
 import { isTestingContext, MINIMUM_API_VERSION, readHealth } from '../global-setup.js'
 
 const BROWSERS = { chromium, firefox, webkit }
@@ -107,7 +108,7 @@ export default class DoctorReporter implements Reporter {
 
             return
         }
-        const url = `${config.testingURL}/typo3/test-api/health`
+        const url = testApiUrl(config, 'health')
         const headers = { [SECRET_HEADER]: secret }
         let preflight: Awaited<ReturnType<typeof readHealth>>
         try {

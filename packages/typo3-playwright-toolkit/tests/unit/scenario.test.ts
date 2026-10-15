@@ -20,6 +20,7 @@ function fakeBrowser(failAt: 'newPage' | 'session' | 'json' | 'cookies' | 'never
     const state = {
         closed: false,
         contextOptions: undefined as undefined | { extraHTTPHeaders?: Record<string, string> },
+        postedUrl: undefined as undefined | string,
         postedHeaders: undefined as undefined | Record<string, string>,
         postedData: undefined as undefined | Record<string, unknown>,
         postedRedirects: undefined as undefined | number,
@@ -43,13 +44,14 @@ function fakeBrowser(failAt: 'newPage' | 'session' | 'json' | 'cookies' | 'never
             return {
                 request: {
                     post: async (
-                        _url: string,
+                        url: string,
                         options: {
                             headers: Record<string, string>
                             data: Record<string, unknown>
                             maxRedirects?: number
                         },
                     ) => {
+                        state.postedUrl = url
                         state.postedHeaders = options.headers
                         state.postedData = options.data
                         state.postedRedirects = options.maxRedirects
@@ -130,6 +132,14 @@ describe('openAuthenticatedPage', () => {
 
         expect(state.postedHeaders).toHaveProperty('X-Playwright-Toolkit-Secret')
         expect(state.postedHeaders).toHaveProperty('X-Playwright-Test-Id', 'ABCD1234EFGH5678')
+    })
+
+    it('asks for the session behind the configured backend path', async () => {
+        const { browser, state } = fakeBrowser('never')
+
+        await openAuthenticatedPage(browser as never, { ...config(), backendPath: '/admin' }, 'ABCD1234EFGH5678')
+
+        expect(state.postedUrl).toBe('https://example-testing.test/admin/test-api/session')
     })
 
     // Playwright sends the headers on to the redirect target.

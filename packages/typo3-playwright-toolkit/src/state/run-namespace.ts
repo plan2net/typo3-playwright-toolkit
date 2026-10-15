@@ -50,7 +50,7 @@ export const OWNER_ACTIVE_MS = 30_000
 export function prepareRun(config: ToolkitConfig): RunPaths {
     const paths = ensureRunNamespace(config)
     assertNamespaceIsFree(paths)
-    recordTestingUrl(config.paths.stateDir, config.testingURL)
+    recordTestingUrl(config.paths.stateDir, config)
 
     if (!fs.existsSync(paths.metaFile)) {
         fs.writeFileSync(
@@ -61,6 +61,7 @@ export function prepareRun(config: ToolkitConfig): RunPaths {
                     startedAt: new Date().toISOString(),
                     ownerPid: process.pid,
                     testingURL: config.testingURL,
+                    backendPath: config.backendPath,
                 },
                 null,
                 2,

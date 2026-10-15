@@ -10,7 +10,7 @@ test('leaves the ordinary hostname outside the test run', async ({ page }) => {
     const sent: Record<string, string>[] = []
     page.on('request', (request) => sent.push(request.headers()))
 
-    const response = await page.goto(`${ORDINARY_URL}/typo3/test-api/health`)
+    const response = await page.goto(`${ORDINARY_URL}${process.env.PW_E2E_BACKEND || '/typo3'}/test-api/health`)
 
     // Outside the Testing context the middleware passes the request through and
     // core answers it — a redirect to the backend login, never the health JSON. If

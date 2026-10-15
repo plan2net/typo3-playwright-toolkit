@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { requireTestId, resolveRequestContext, type RequestContextSource } from '#src/builders/request-context.js'
-import { setToolkitConfig } from '#src/config.js'
+import { getToolkitConfig, setToolkitConfig } from '#src/config.js'
 
 function pageAt(url: string, ambient: { page?: string; context?: string } = {}): RequestContextSource {
     return {
@@ -44,6 +44,14 @@ describe('resolveRequestContext', () => {
         const resolved = resolveRequestContext(pageAt('https://site.test'), { testId: 'ABCD1234EFGH5678' })
 
         expect(resolved.backendPath).toBe('/typo3')
+    })
+
+    it('takes the configured backend path when none is given', () => {
+        setToolkitConfig({ ...getToolkitConfig(), backendPath: '/admin' })
+
+        const resolved = resolveRequestContext(pageAt('https://site.test'), { testId: 'ABCD1234EFGH5678' })
+
+        expect(resolved.backendPath).toBe('/admin')
     })
 
     it('prefers an explicit backend path', () => {

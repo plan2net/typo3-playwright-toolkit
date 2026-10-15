@@ -85,6 +85,14 @@ the package a change belongs to.
   used, and in a test it still gets a scratch name per test. An XCLASSed `GifBuilder`
   does not write its output atomically, though, so two tests that request the same
   GIFBUILDER image at once can read a half-written file.
+- **All three packages** — a project that moved its backend with `BE/entryPoint` can
+  run the tests. The test API answered only below `/typo3`, so on such a project the
+  preflight failed and no scenario could build anything. The endpoints now follow the
+  entry point, and the new `backendPath` option tells the toolkit where it is. The
+  setup wizard checks the right path and writes the option for you.
+
+  **Migration:** if your project sets `BE/entryPoint`, add its path to
+  `defineToolkitConfig`, for example `backendPath: '/admin'`.
 
 ## [0.23.1] - 2026-09-28
 

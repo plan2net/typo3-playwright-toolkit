@@ -8,7 +8,8 @@
 #   --keep   leave the DDEV project running afterwards, to poke at it
 #
 # PW_E2E_TYPO3 picks the core (default 14.3), PW_E2E_DATABASE the engine: postgres
-# (default), mariadb, mysql or sqlite.
+# (default), mariadb, mysql or sqlite. PW_E2E_BACKEND moves the backend to another
+# entry point, such as /admin.
 
 set -euo pipefail
 
@@ -17,6 +18,7 @@ CONSUMER="${REPO_ROOT}/tests/e2e"/consumer
 PROJECT=t3pw-e2e
 TYPO3_VERSION="${PW_E2E_TYPO3:-14.3}"
 DATABASE="${PW_E2E_DATABASE:-postgres}"
+BACKEND="${PW_E2E_BACKEND:-}"
 KEEP=0
 [ "${1:-}" = "--keep" ] && KEEP=1
 
@@ -61,7 +63,7 @@ cleanup_project
 # artifact ends up disagreeing with what is on disk.
 for generated in .artifacts vendor public var .test-state composer.lock \
     config/system/settings.php tests/playwright/node_modules tests/playwright/package-lock.json \
-    .ddev/config.e2e-database.yaml .ddev/docker-compose.db-test.yaml; do
+    .ddev/config.e2e-database.yaml .ddev/config.e2e-backend.yaml .ddev/docker-compose.db-test.yaml; do
     rm -rf "${CONSUMER:?}/${generated}"
 done
 
@@ -71,6 +73,9 @@ case "${DATABASE}" in
     mariadb) printf "database:\n  type: mariadb\n  version: '10.11'\n" >"${CONSUMER}/.ddev/config.e2e-database.yaml" ;;
     mysql) printf "database:\n  type: mysql\n  version: '8.0'\n" >"${CONSUMER}/.ddev/config.e2e-database.yaml" ;;
 esac
+if [ -n "${BACKEND}" ]; then
+    printf "web_environment:\n  - PW_E2E_BACKEND=%s\n" "${BACKEND}" >"${CONSUMER}/.ddev/config.e2e-backend.yaml"
+fi
 mkdir -p "${CONSUMER}/.artifacts" "${CONSUMER}/.cache/composer" "${CONSUMER}/.cache/ms-playwright"
 
 say 'staging the extension inside the mount'

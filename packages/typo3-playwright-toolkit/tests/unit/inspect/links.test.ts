@@ -73,6 +73,18 @@ describe('inspectLinks', () => {
         expect(links[0].url).toContain('https://site-testing.test/typo3/test-api/inspect?id=AAAAAAAAAAAAAAA1&t=')
     })
 
+    it('links behind the backend path the run recorded', () => {
+        const runDir = writeRun('bbbbbbbbbbbbbbbb', 'https://site-testing.test', [{ key: 'checkout', testId: 'AAAAAAAAAAAAAAA1' }])
+        fs.writeFileSync(
+            path.join(runDir, 'meta.json'),
+            JSON.stringify({ runId: 'bbbbbbbbbbbbbbbb', testingURL: 'https://site-testing.test', backendPath: '/admin' }),
+        )
+
+        const links = inspectLinks(path.join(root, '.test-state'), 'the-secret', 0)
+
+        expect(links[0].url).toContain('https://site-testing.test/admin/test-api/inspect?id=AAAAAAAAAAAAAAA1&t=')
+    })
+
     // The preflight probe registers an id but never builds a page worth opening.
     it('leaves the preflight probe out', () => {
         writeRun('bbbbbbbbbbbbbbbb', 'https://site-testing.test', [

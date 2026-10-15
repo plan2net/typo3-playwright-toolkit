@@ -42,6 +42,19 @@ describe('fetchRecordedErrors', () => {
         ])
     })
 
+    it('asks behind the configured backend path', async () => {
+        const seen: string[] = []
+        const fetchImpl = (async (url: string) => {
+            seen.push(url)
+
+            return { ok: false, status: 404 }
+        }) as unknown as typeof fetch
+
+        await fetchRecordedErrors({ ...config, backendPath: '/admin' }, 'K7F2QX9M4TB6WZ1P', { fetchImpl, secret: 's' })
+
+        expect(seen[0]).toBe('https://example-testing.ddev.site/admin/test-api/errors?id=K7F2QX9M4TB6WZ1P')
+    })
+
     it('follows no redirect with the secret on it', async () => {
         const seen: RequestInit[] = []
         const fetchImpl = (async (_url: string, init: RequestInit) => {

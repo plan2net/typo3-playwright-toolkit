@@ -214,6 +214,12 @@ it is told: `cookieName` for the cookie it sets, `backendPath` for the route it
 posts to. `BE/entryPoint` exists only on TYPO3 13.4 and 14.3; on 11.5 and 12.4 the
 answer is always `/typo3`.
 
+The test API itself lives below the same entry point, so every `/typo3/test-api/*`
+path in this file is `<entry point>/test-api/*` on a project that moved it. Only the
+backend application runs the endpoints, and TYPO3 picks that application by the entry
+point, so the toolkit cannot ask where it is: `backendPath` in `defineToolkitConfig`
+names it, and defaults to `/typo3`.
+
 The request may send a readable name for the test:
 
 ```json

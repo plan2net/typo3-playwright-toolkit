@@ -1,5 +1,6 @@
 import type { ToolkitConfig } from '../config.js'
 import { SECRET_HEADER, resolveApiSecret } from './api-secret.js'
+import { testApiUrl } from './test-api.js'
 
 export interface RecordedError {
     uid: number
@@ -57,7 +58,7 @@ export async function fetchRecordedErrors(
         // No test-ID header: it would provision the database on the way in, so
         // asking about a test that never ran would create it.
         const response = await doFetch(
-            `${config.testingURL}/typo3/test-api/errors?id=${encodeURIComponent(testId)}`,
+            testApiUrl(config, `errors?id=${encodeURIComponent(testId)}`),
             {
                 method: 'GET',
                 headers: { [SECRET_HEADER]: options.secret ?? resolveApiSecret(config) },

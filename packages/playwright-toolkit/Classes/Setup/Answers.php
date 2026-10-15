@@ -74,7 +74,7 @@ final class Answers
             return 'The testing URL must not contain a query string or a fragment.';
         }
 
-        // The test API answers at /typo3/test-api/…, so a site in a subdirectory cannot work.
+        // The test API answers at <entry point>/test-api/…, so a site in a subdirectory cannot work.
         if (1 !== preg_match('#^/*\z#', $parts['path'] ?? '')) {
             return 'The testing URL must be a bare origin, so it can have no path.';
         }
