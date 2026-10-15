@@ -84,7 +84,6 @@ describe('comparisonOptions', () => {
             paths: {
                 consumerRoot: '/srv/project',
                 stateDir: '/srv/project/.test-state',
-                sessionDir: '/srv/project/var/session',
             },
             screenshot: { threshold: 0.3 },
         })
@@ -131,7 +130,6 @@ describe('the styles expectScreenshot injects', () => {
             paths: {
                 consumerRoot: '/srv/project',
                 stateDir: '/srv/project/.test-state',
-                sessionDir: '/srv/project/var/session',
             },
             hideBeforeScreenshot: ['.cookie-banner'],
         })
@@ -149,7 +147,6 @@ describe('the styles expectScreenshot injects', () => {
             paths: {
                 consumerRoot: '/srv/project',
                 stateDir: '/srv/project/.test-state',
-                sessionDir: '/srv/project/var/session',
             },
             hideBeforeScreenshot: ['.cookie-banner'],
         })
@@ -170,7 +167,6 @@ describe('a page that moved on under the shot', () => {
             paths: {
                 consumerRoot: '/srv/project',
                 stateDir: '/srv/project/.test-state',
-                sessionDir: '/srv/project/var/session',
             },
         })
         const page = {

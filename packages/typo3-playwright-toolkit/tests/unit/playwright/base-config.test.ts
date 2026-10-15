@@ -9,7 +9,6 @@ function toolkitConfig(): ToolkitConfig {
         paths: {
             consumerRoot: '/srv/project',
             stateDir: '/srv/project/.test-state',
-            sessionDir: '/srv/project/var/session',
         },
         screenshot: { threshold: 0.3, maxDiffPixelRatio: 0.02 },
     }

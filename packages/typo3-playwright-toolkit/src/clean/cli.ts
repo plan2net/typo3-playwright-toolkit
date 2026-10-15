@@ -37,7 +37,7 @@ if (undefined === testingURL) {
 
 const config: ToolkitConfig = {
     testingURL,
-    paths: { consumerRoot, stateDir, sessionDir: path.join(consumerRoot, 'var/session') },
+    paths: { consumerRoot, stateDir },
     // The window prepareRun uses to decide another process owns a run, so a run
     // younger than it keeps its databases and state.
     cleanup: { orphanAgeMs: OWNER_ACTIVE_MS },

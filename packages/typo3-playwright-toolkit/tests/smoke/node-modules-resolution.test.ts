@@ -59,7 +59,6 @@ describe('package resolved from node_modules', () => {
                 paths: {
                     consumerRoot: root,
                     stateDir,
-                    sessionDir: path.join(root, 'var/session'),
                 },
             },
             {

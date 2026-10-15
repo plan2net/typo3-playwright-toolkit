@@ -8,7 +8,6 @@ export function configForRun(root: string, runId?: string): ToolkitConfig {
         paths: {
             consumerRoot: root,
             stateDir: path.join(root, '.test-state'),
-            sessionDir: path.join(root, 'var/session'),
         },
         ...(runId === undefined ? {} : { runId }),
     }

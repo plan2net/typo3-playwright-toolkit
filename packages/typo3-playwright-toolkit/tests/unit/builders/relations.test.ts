@@ -25,7 +25,6 @@ describe('a file reference named by its fixture', () => {
             paths: {
                 consumerRoot,
                 stateDir: path.join(consumerRoot, '.test-state'),
-                sessionDir: path.join(consumerRoot, 'var/session'),
             },
         }
         const file = mediaManifestFileFor(config)

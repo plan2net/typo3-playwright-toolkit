@@ -16,7 +16,6 @@ function configWith(accessibility?: ToolkitConfig['accessibility']): ToolkitConf
         paths: {
             consumerRoot: '/srv/project',
             stateDir: '/srv/project/.test-state',
-            sessionDir: '/srv/project/var/session',
         },
         accessibility,
     }

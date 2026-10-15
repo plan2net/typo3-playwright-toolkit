@@ -71,6 +71,18 @@ describe('runTeardown', () => {
         expect(fs.existsSync(otherRun)).toBe(true)
     })
 
+    it('leaves the install tool sessions in var/session alone', async () => {
+        const config = configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa')
+        const installToolSessions = path.join(tmpRoot, 'var/session/0123abcd')
+        fs.mkdirSync(installToolSessions, { recursive: true })
+        const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000)
+        fs.utimesSync(installToolSessions, twoHoursAgo, twoHoursAgo)
+
+        await runTeardown(config, { cleanup: fakeCleanup(), preserve: { mode: 'none' } as const })
+
+        expect(fs.existsSync(installToolSessions)).toBe(true)
+    })
+
     describe('in replay mode', () => {
         function replayConfig(): ToolkitConfig {
             return { ...configForRun(tmpRoot, 'aaaaaaaaaaaaaaaa'), replay: true }

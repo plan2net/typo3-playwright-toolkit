@@ -20,7 +20,6 @@ function config(): ToolkitConfig {
         paths: {
             consumerRoot: '/srv/project',
             stateDir: '/srv/project/.test-state',
-            sessionDir: '/srv/project/var/session',
         },
     }
 }

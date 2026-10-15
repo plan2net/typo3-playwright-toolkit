@@ -17,7 +17,6 @@ function baseConfig(): ToolkitConfig {
         paths: {
             consumerRoot: '/srv/project',
             stateDir: '/srv/project/.test-state',
-            sessionDir: '/srv/project/var/session',
         },
     }
 }
@@ -30,13 +29,6 @@ afterEach(() => {
 })
 
 describe('defineToolkitConfig path validation', () => {
-    it('rejects a session directory outside the consumer root', () => {
-        const config = baseConfig()
-        config.paths.sessionDir = '/var/lib/typo3'
-
-        expect(() => defineToolkitConfig(config)).toThrow(/sessionDir/)
-    })
-
     it('rejects a relative consumer root', () => {
         const config = baseConfig()
         config.paths.consumerRoot = 'project'
@@ -97,23 +89,13 @@ describe('defineToolkitConfig', () => {
         expect(getToolkitConfig()).toBe(resolved)
     })
 
-    it('defaults the state and session directories to the consumer root', () => {
+    it('puts the state directory under the consumer root', () => {
         const resolved = defineToolkitConfig({
                 testingURL: 'https://example-testing.test',
             paths: { consumerRoot: '/srv/project' },
         })
 
         expect(resolved.paths.stateDir).toBe('/srv/project/.test-state')
-        expect(resolved.paths.sessionDir).toBe('/srv/project/var/session')
-    })
-
-    it('keeps a session directory the consumer named', () => {
-        const config = baseConfig()
-        config.paths.sessionDir = '/srv/project/var/other-session'
-
-        const resolved = defineToolkitConfig(config)
-
-        expect(resolved.paths.sessionDir).toBe('/srv/project/var/other-session')
     })
 
     // The type refuses it too; this is for a JS consumer and for a cast.
