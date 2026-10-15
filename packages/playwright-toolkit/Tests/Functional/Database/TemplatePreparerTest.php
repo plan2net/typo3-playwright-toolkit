@@ -67,6 +67,14 @@ final class TemplatePreparerTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function givesTheBaseDatabaseTheSchemaToo(): void
+    {
+        $this->get(TemplatePreparer::class)->prepare();
+
+        self::assertContains('sys_log', $this->tablesOf('base.sqlite'));
+    }
+
+    #[Test]
     public function theTemplateCarriesTheFixtures(): void
     {
         $this->get(TemplatePreparer::class)->prepare();
@@ -260,7 +268,16 @@ final class TemplatePreparerTest extends FunctionalTestCase
      */
     private function templateTables(): array
     {
-        $names = $this->template()
+        return $this->tablesOf('playwright_db_template.sqlite');
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function tablesOf(string $file): array
+    {
+        $connection = new \PDO('sqlite:' . $this->templateDirectory() . '/' . $file);
+        $names = $connection
             ->query("SELECT name FROM sqlite_master WHERE type = 'table'")
             ->fetchAll(\PDO::FETCH_COLUMN);
 

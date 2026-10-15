@@ -188,21 +188,30 @@ playwright_require_db_test() {
 playwright_flush_caches() {
     flush_output="$( (cd "$1" && TYPO3_CONTEXT=Testing ./vendor/bin/typo3 cache:flush --group system) 2>&1 )" && return 0
 
-    printf '%s\n' "${flush_output}" >&2
-
     case "${flush_output}" in
         *TableNotFoundException*|*'Base table or view not found'*|*'does not exist'*)
-            cat >&2 <<'HINT'
+            return 2
+            ;;
+    esac
+
+    printf '%s\n' "${flush_output}" >&2
+
+    return 1
+}
+
+playwright_report_missing_tables() {
+    printf '%s\n' "${flush_output}" >&2
+    cat >&2 <<'HINT'
 
 [playwright] The Testing context reached a database with no TYPO3 tables.
 [playwright] Either build the schema there:
 [playwright]     ddev exec 'TYPO3_CONTEXT=Testing ./vendor/bin/typo3 database:updateschema'
 [playwright] or point the Testing context at the database your project already uses.
 HINT
-            ;;
-    esac
+}
 
-    return 1
+playwright_typo3_prepare() {
+    (cd "${prepare_root}" && TYPO3_CONTEXT=Testing ./vendor/bin/typo3 playwright:prepare "$@")
 }
 
 playwright_run_prepare() {
@@ -213,10 +222,21 @@ playwright_run_prepare() {
     [ $# -gt 0 ] && shift
 
     echo "[playwright] Flushing Testing-context TYPO3 caches…"
-    playwright_flush_caches "${prepare_root}" || return 1
+    flushed=0
+    playwright_flush_caches "${prepare_root}" || flushed=$?
+
+    if [ "${flushed}" -eq 2 ]; then
+        echo "[playwright] The test databases have no TYPO3 tables yet, so they are built first…"
+        if playwright_typo3_prepare --force; then
+            flushed=0
+            playwright_flush_caches "${prepare_root}" || flushed=$?
+        fi
+        [ "${flushed}" -eq 2 ] && playwright_report_missing_tables
+    fi
+    [ "${flushed}" -eq 0 ] || return 1
 
     echo "[playwright] Preparing the test database template…"
-    (cd "${prepare_root}" && TYPO3_CONTEXT=Testing ./vendor/bin/typo3 playwright:prepare "$@") || return 1
+    playwright_typo3_prepare "$@" || return 1
 }
 
 playwright_replay_prepare() {

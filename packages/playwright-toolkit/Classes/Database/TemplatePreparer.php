@@ -62,7 +62,8 @@ final class TemplatePreparer
 
             $startedAt = hrtime(true);
             $driver->createEmptyTemplate();
-            $this->buildSchema($driver, $snapshot->schemaStatements);
+            $this->buildSchema($driver->templateConnectionOverrides(), $snapshot->schemaStatements);
+            $this->buildSchema($driver->baseConnectionOverrides(), $snapshot->schemaStatements);
             $timings['schema'] = self::sinceMs($startedAt);
 
             $startedAt = hrtime(true);
@@ -149,11 +150,12 @@ final class TemplatePreparer
     }
 
     /**
-     * @param list<string> $schemaStatements
+     * @param array<string, mixed> $connectionOverrides
+     * @param list<string>         $schemaStatements
      */
-    private function buildSchema(TestDatabaseDriver $driver, array $schemaStatements): void
+    private function buildSchema(array $connectionOverrides, array $schemaStatements): void
     {
-        $this->borrowedConnection->use($driver->templateConnectionOverrides(), function () use ($schemaStatements): void {
+        $this->borrowedConnection->use($connectionOverrides, function () use ($schemaStatements): void {
             $names = array_map(strval(...), array_keys($GLOBALS['TYPO3_CONF_VARS']['DB']['Connections'] ?? []));
 
             try {

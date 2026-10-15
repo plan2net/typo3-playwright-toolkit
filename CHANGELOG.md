@@ -105,6 +105,12 @@ the package a change belongs to.
   `sys_language_uid`, which the backend form never sends for such a user, so the
   extension refused every content element the user tried to build. A language the test
   sets with `withField('sys_language_uid', …)` is still sent.
+- **plan2net/playwright-toolkit**, **DDEV add-on** — a project with a cache stored in
+  the database can run its tests on a new db-test service. Without a test ID, the
+  Testing context uses the service's own `db`, which had no tables, so the cache flush
+  before every run failed. `playwright:prepare` now gives that database the project's
+  tables whenever it builds the template, and `ddev playwright test` builds them first
+  when the flush finds none.
 
 ## [0.23.1] - 2026-09-28
 

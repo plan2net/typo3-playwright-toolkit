@@ -79,6 +79,30 @@ STUB
     [ "$output" -eq 1 ]
 }
 
+@test "builds the schema first when a fresh db-test has no tables to flush" {
+    FLUSHES="${BATS_TEST_TMPDIR}/flushes"
+    cat > "${HTML}/vendor/bin/typo3" <<STUB
+#!/bin/sh
+echo "\$TYPO3_CONTEXT \$*" >> "${CALLS}"
+if [ "\$1" = cache:flush ] && [ ! -f "${FLUSHES}" ]; then
+    touch "${FLUSHES}"
+    echo 'TableNotFoundException: relation "cache_example" does not exist' >&2
+    exit 1
+fi
+STUB
+    chmod +x "${HTML}/vendor/bin/typo3"
+
+    run playwright_prepare_template "${HTML}"
+    [ "$status" -eq 0 ]
+
+    run cat "${CALLS}"
+    [ "${lines[0]}" = 'Testing cache:flush --group system' ]
+    [ "${lines[1]}" = 'Testing playwright:prepare --force' ]
+    [ "${lines[2]}" = 'Testing cache:flush --group system' ]
+    [ "${lines[3]}" = 'Testing playwright:prepare' ]
+    [ "${#lines[@]}" -eq 4 ]
+}
+
 @test "names the missing schema when the flush cannot find TYPO3 tables" {
     cat > "${HTML}/vendor/bin/typo3" <<'STUB'
 #!/bin/sh
