@@ -19,11 +19,14 @@ export interface ScreenshotComparisonOptions {
     timeout?: number
 }
 
+const SKIPPED_CONTENT_MARK = 'data-toolkit-skipped-content'
+
 export const CAPTURE_STYLES = `* {
     animation-duration: 0s !important;
     transition-duration: 0s !important;
     transition-delay: 0s !important;
-    contain-intrinsic-size: none !important;
+}
+[${SKIPPED_CONTENT_MARK}] {
     content-visibility: visible !important;
 }`
 
@@ -385,6 +388,7 @@ export async function expectScreenshot(
     } finally {
         await restoreResponsiveImages(page)
         await clearScrollResetMarks(page).catch(() => undefined)
+        await clearSkippedContentMarks(page).catch(() => undefined)
         // Or a hidden element stays hidden for the rest of the test, so a later
         // click misses it. A navigation took the tag with it already, and that must
         // not become the failure the caller reads.
@@ -396,11 +400,30 @@ export async function expectScreenshot(
 
 /** @returns the sources of the images that never decoded, empty when all did */
 export async function prepareForCapture(page: Page): Promise<string[]> {
+    await markSkippedContent(page)
     await page.evaluate(() => document.fonts.ready)
     await waitForAnimations(page, undefined, 3000)
     await loadLazyElements(page)
 
     return prepareImagesForCapture(page)
+}
+
+async function markSkippedContent(page: Page): Promise<void> {
+    await page.evaluate((mark) => {
+        for (const element of document.querySelectorAll('*')) {
+            if ('auto' === getComputedStyle(element).contentVisibility) {
+                element.setAttribute(mark, '')
+            }
+        }
+    }, SKIPPED_CONTENT_MARK)
+}
+
+export async function clearSkippedContentMarks(page: Page): Promise<void> {
+    await page.evaluate((mark) => {
+        for (const element of document.querySelectorAll(`[${mark}]`)) {
+            element.removeAttribute(mark)
+        }
+    }, SKIPPED_CONTENT_MARK)
 }
 
 export function comparisonOptions(

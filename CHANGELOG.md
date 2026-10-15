@@ -33,6 +33,14 @@ the package a change belongs to.
 
   Any other project needs nothing. Remove a workaround that hid a print stylesheet from
   the toolkit, such as rewriting `media="print"` to `print and (min-width: 0px)`.
+- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` renders content that
+  `content-visibility: auto` skips, and nothing else. It set `content-visibility: visible`
+  and `contain-intrinsic-size: none` on every element, so a collapsed
+  `hidden="until-found"` panel was captured open, and a box that `contain: size` keeps at
+  a reserved height collapsed.
+
+  **Migration:** a baseline that shows such a panel open, or such a box collapsed, no
+  longer matches. Check the new picture and accept it with `--update-snapshots`.
 
 ## [0.23.1] - 2026-09-28
 
