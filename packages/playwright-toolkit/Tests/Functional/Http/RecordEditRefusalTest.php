@@ -10,9 +10,11 @@ use Plan2net\PlaywrightToolkit\Http\RecordDiagnostics;
 use Plan2net\PlaywrightToolkit\Http\RecordEditRefusal;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\Tests\ContractFixture;
+use Plan2net\PlaywrightToolkit\Tests\Functional\Http\Fixtures\LanguageReadingProvider;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Backend\Form\FormDataProvider\TcaSelectItems;
 use TYPO3\CMS\Core\Http\RedirectResponse;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Information\Typo3Version;
@@ -421,6 +423,40 @@ final class RecordEditRefusalTest extends FunctionalTestCase
         self::assertSame('', $this->refusal($response));
     }
 
+    #[Test]
+    public function opensANewElementThatPostsNoLanguageInTheDefaultLanguage(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/Files.csv');
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][LanguageReadingProvider::class] = [
+            'depends' => [TcaSelectItems::class],
+        ];
+        LanguageReadingProvider::$languages = [];
+        parse_str(http_build_query(ContractFixture::read('content-image-datamap')), $body);
+        /** @var array<string, array<string, array<string, mixed>>> $datamap */
+        $datamap = $body['data'];
+
+        $this->save($datamap);
+
+        self::assertSame([['0']], array_map(static fn(array $language): array => array_map(strval(...), $language), LanguageReadingProvider::$languages));
+    }
+
+    #[Test]
+    public function opensANewElementWithTheDefaultValuesTheRequestNames(): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/Files.csv');
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][LanguageReadingProvider::class] = [
+            'depends' => [TcaSelectItems::class],
+        ];
+        LanguageReadingProvider::$languages = [];
+
+        $this->save(
+            ['tt_content' => ['NEW1' => ['pid' => 1, 'CType' => 'text', 'header' => 'H']]],
+            defaultValues: ['tt_content' => ['sys_language_uid' => -1]],
+        );
+
+        self::assertSame([['-1']], array_map(static fn(array $language): array => array_map(strval(...), $language), LanguageReadingProvider::$languages));
+    }
+
     /**
      * @return \Generator<string, array{string}>
      */
@@ -568,6 +604,7 @@ final class RecordEditRefusalTest extends FunctionalTestCase
 
     /**
      * @param array<string, array<int|string, array<string, mixed>>> $data
+     * @param array<string, array<string, mixed>>                    $defaultValues
      */
     private function save(
         array $data,
@@ -575,6 +612,7 @@ final class RecordEditRefusalTest extends FunctionalTestCase
         string $path = '/typo3/record/edit',
         string $action = 'new',
         bool $skipFormRules = false,
+        array $defaultValues = [],
     ): ResponseInterface {
         $table = (string) array_key_first($data);
         $target = 'new' === $action ? 1 : (int) array_key_first($data[$table]);
@@ -582,7 +620,7 @@ final class RecordEditRefusalTest extends FunctionalTestCase
         $request = (new ServerRequest('https://testing.test' . $path . '?' . http_build_query($edit), 'POST'))
             ->withQueryParams($edit)
             ->withHeader(TestApiSecret::HEADER, $secret ?? $this->secret)
-            ->withParsedBody(['data' => $data]);
+            ->withParsedBody(['data' => $data, ...([] === $defaultValues ? [] : ['defVals' => $defaultValues])]);
         if ($skipFormRules) {
             $request = $request->withHeader(RecordEditRefusal::SKIP_FORM_RULES_HEADER, '1');
         }

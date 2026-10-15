@@ -157,12 +157,29 @@ final class FormRules
                 'command' => $isNew ? 'new' : 'edit',
                 'tableName' => $table,
                 'vanillaUid' => $isNew ? $page : (int) $identifier,
+                'defaultValues' => $isNew ? self::defaultValues($compiling['request'], $table) : [],
                 'customData' => [PostedValuesOverlay::KEY => $values],
                 ...$inlineContext,
             ], $compiling['group'], $compiling['request']);
         } catch (FormException) {
             return null;
         }
+    }
+
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    private static function defaultValues(ServerRequestInterface $request, string $table): array
+    {
+        $body = (array) $request->getParsedBody();
+        $requested = $body['defVals'] ?? $request->getQueryParams()['defVals'] ?? [];
+        $defaultValues = \is_array($requested) ? $requested : [];
+        $languageField = (string) ($GLOBALS['TCA'][$table]['ctrl']['languageField'] ?? '');
+        if ('' !== $languageField) {
+            $defaultValues[$table][$languageField] ??= 0;
+        }
+
+        return $defaultValues;
     }
 
     /**
