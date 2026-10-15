@@ -384,6 +384,10 @@ encode straight into its final path, is encoded beside it and moved into place i
 one step, so a test arriving while another is still encoding it never reads a
 truncated file.
 
+A project that XCLASSes `GifBuilder` keeps its own class, in tests too. It still gets
+a scratch name per test, but it loses the encode-then-move step, so two tests that
+request the same GIFBUILDER image at the same time can read a half-written file.
+
 To check that a project is set up correctly, ask the health endpoint:
 
 ```bash

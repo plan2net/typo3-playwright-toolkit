@@ -79,6 +79,12 @@ the package a change belongs to.
   ID was added to it on every request of a test, and that ID is new on every run, so
   every screenshot of the backend differed. An inspect link still shows it, so two open
   tabs stay apart.
+- **plan2net/playwright-toolkit** — a project's XCLASS of `GraphicalFunctions` or
+  `GifBuilder` works again. The extension replaced both classes for its per-test image
+  scratch names and ignored an XCLASS, even outside tests. Now the project's class is
+  used, and in a test it still gets a scratch name per test. An XCLASSed `GifBuilder`
+  does not write its output atomically, though, so two tests that request the same
+  GIFBUILDER image at once can read a half-written file.
 
 ## [0.23.1] - 2026-09-28
 
