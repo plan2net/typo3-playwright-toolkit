@@ -41,6 +41,14 @@ the package a change belongs to.
 
   **Migration:** a baseline that shows such a panel open, or such a box collapsed, no
   longer matches. Check the new picture and accept it with `--update-snapshots`.
+- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer makes lazy
+  iframes eager, only lazy images. Nothing waited for an iframe anyway, so a video or map
+  embed was loaded from the third party on every shot and captured in whatever state it
+  had reached.
+
+  **Migration:** a baseline that shows a below-the-fold embed loaded now shows it the way
+  the browser leaves a lazy iframe. To show the embed, scroll it into view, or stub it in
+  `prepareContext`.
 
 ## [0.23.1] - 2026-09-28
 

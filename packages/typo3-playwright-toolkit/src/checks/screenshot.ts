@@ -167,12 +167,12 @@ export async function waitForAnimations(page: Page, selector?: string, timeout =
 }
 
 // fullPage captures past the viewport instead of scrolling to it, so a lazy
-// element below the fold never starts loading at all.
-export async function loadLazyElements(page: Page): Promise<void> {
+// image below the fold never starts loading at all.
+export async function loadLazyImages(page: Page): Promise<void> {
     await page.evaluate(() =>
         document
-            .querySelectorAll<HTMLImageElement | HTMLIFrameElement>('[loading="lazy"]')
-            .forEach((element) => (element.loading = 'eager')),
+            .querySelectorAll<HTMLImageElement>('img[loading="lazy"]')
+            .forEach((image) => (image.loading = 'eager')),
     )
 }
 
@@ -403,7 +403,7 @@ export async function prepareForCapture(page: Page): Promise<string[]> {
     await markSkippedContent(page)
     await page.evaluate(() => document.fonts.ready)
     await waitForAnimations(page, undefined, 3000)
-    await loadLazyElements(page)
+    await loadLazyImages(page)
 
     return prepareImagesForCapture(page)
 }

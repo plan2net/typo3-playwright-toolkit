@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { chromium, type Browser, type Page } from '@playwright/test'
-import { loadLazyElements } from '#src/checks/screenshot.js'
+import { loadLazyImages } from '#src/checks/screenshot.js'
 
 let browser: Browser
 let page: Page
@@ -26,7 +26,7 @@ afterAll(async () => {
     await browser?.close()
 })
 
-describe('loadLazyElements', () => {
+describe('loadLazyImages', () => {
     // Without it waitForImagesDecoded burns its whole timeout and shoots the placeholder.
     it('leaves a below-the-fold lazy image unloaded when it is not called', async () => {
         await page.setContent(BELOW_THE_FOLD)
@@ -37,8 +37,16 @@ describe('loadLazyElements', () => {
     it('loads a below-the-fold lazy image', async () => {
         await page.setContent(BELOW_THE_FOLD)
 
-        await loadLazyElements(page)
+        await loadLazyImages(page)
 
         await page.waitForFunction(imageLoaded, null, { timeout: 5000 })
+    })
+
+    it('leaves a lazy iframe lazy', async () => {
+        await page.setContent('<div style="height:30000px"></div><iframe loading="lazy" src="https://example.test/embed"></iframe>')
+
+        await loadLazyImages(page)
+
+        expect(await page.locator('iframe').getAttribute('loading')).toBe('lazy')
     })
 })
