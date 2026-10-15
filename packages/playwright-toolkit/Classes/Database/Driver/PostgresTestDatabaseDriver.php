@@ -63,9 +63,8 @@ final class PostgresTestDatabaseDriver extends ServerTestDatabaseDriver
     #[\Override]
     protected function createDatabase(\PDO $admin, string $database): void
     {
-        // C collation keeps sort order identical whatever locale the host runs.
         $admin->exec(sprintf(
-            "CREATE DATABASE \"%s\" WITH ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' TEMPLATE template0",
+            "CREATE DATABASE \"%s\" WITH ENCODING 'UTF8' TEMPLATE template0",
             $database
         ));
     }

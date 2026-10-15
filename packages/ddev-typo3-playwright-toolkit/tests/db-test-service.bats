@@ -50,7 +50,14 @@ setup() {
 @test "installs postgres for a postgres project" {
     run playwright_install_db_test_service 'postgres:16'
     [ "$status" -eq 0 ]
-    grep -q 'postgres:16-alpine' docker-compose.db-test.yaml
+    grep -q 'image: postgres:16$' docker-compose.db-test.yaml
+}
+
+@test "lets postgres sort and compare in the server's own locale" {
+    playwright_install_db_test_service 'postgres:16'
+
+    run grep -E 'lc-collate|lc-ctype' docker-compose.db-test.yaml
+    [ "$status" -ne 0 ]
 }
 
 @test "names the image db-test actually runs, not the project's own version" {
@@ -120,7 +127,7 @@ setup() {
 
     run bash "${ADDON_DIR}/db-test/select-service.sh" 'postgres:16'
     [ "$status" -eq 0 ]
-    grep -q 'postgres:16-alpine' docker-compose.db-test.yaml
+    grep -q 'image: postgres:16$' docker-compose.db-test.yaml
 }
 
 @test "falls back to DDEV_DATABASE when given no argument" {

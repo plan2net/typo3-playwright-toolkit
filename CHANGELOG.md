@@ -49,6 +49,17 @@ the package a change belongs to.
   **Migration:** a baseline that shows a below-the-fold embed loaded now shows it the way
   the browser leaves a lazy iframe. To show the embed, scroll it into view, or stub it in
   `prepareContext`.
+- **plan2net/playwright-toolkit**, **DDEV add-on** — Postgres test databases sort and
+  compare text the way DDEV's own Postgres does (`en_US.utf8`). They were created with
+  the `C` locale, so `Äpfel` sorted after `zebra`, uppercase before lowercase, and
+  `lower('Ä')` stayed `Ä`, which broke case-insensitive search for umlauts. The db-test
+  service now runs `postgres:16` instead of `postgres:16-alpine`, because Alpine sorts
+  by code point even in `en_US.utf8`.
+
+  **Migration:** the old db-test volume keeps the `C` locale. Run `ddev add-on get` for
+  the new service, then `ddev stop`, `docker volume rm ddev-<project>_db-test-data`,
+  `ddev start` and `ddev playwright-prepare --force`. Baselines of lists sorted in SQL
+  can change. Check them, then accept them with `--update-snapshots`.
 
 ## [0.23.1] - 2026-09-28
 

@@ -11,7 +11,7 @@ services:
 
   db-test:
     container_name: ddev-${DDEV_SITENAME}-db-test
-    image: postgres:16-alpine
+    image: postgres:16
     restart: 'unless-stopped'
     stop_grace_period: 60s
 
@@ -35,8 +35,7 @@ services:
       - DDEV_UID=$DDEV_UID
       - DDEV_GID=$DDEV_GID
       - DDEV_SKIP_RESTORE=true
-      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --lc-collate=C --lc-ctype=C
-        --no-sync
+      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --no-sync
 
     # Optimized for speed
     command: [

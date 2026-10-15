@@ -48,6 +48,20 @@ final class PostgresTestDatabaseDriverTest extends ServerTestDatabaseDriverTestC
     }
 
     #[Test]
+    public function theTemplateSortsAndComparesLikeTheServer(): void
+    {
+        $this->prepareTemplate();
+
+        $statement = $this->adminConnection()->prepare(
+            "SELECT datname, datcollate || '/' || datctype FROM pg_database WHERE datname IN ('template1', ?)"
+        );
+        $statement->execute([self::TEMPLATE]);
+        $locales = $statement->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+        self::assertSame($locales['template1'], $locales[self::TEMPLATE]);
+    }
+
+    #[Test]
     public function aMaterialisedDatabaseCarriesTheFixtures(): void
     {
         $driver = $this->prepareTemplate();
