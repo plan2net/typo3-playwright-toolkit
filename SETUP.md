@@ -566,7 +566,7 @@ Seven commands, each a wrapper you can run yourself:
 
 | Command | Runs |
 |---|---|
-| `ddev playwright test` | `typo3 cache:flush`, `typo3 playwright:prepare`, then `npx playwright test` |
+| `ddev playwright test` | `typo3 cache:flush --group system`, `typo3 playwright:prepare`, then `npx playwright test` |
 | `ddev playwright prepare` | `typo3 playwright:prepare` |
 | `ddev playwright ui` | `npx playwright test --ui` |
 | `ddev playwright replay` | `typo3 playwright:replay-prepare`, then `npx playwright test` with `PW_REPLAY=1` |

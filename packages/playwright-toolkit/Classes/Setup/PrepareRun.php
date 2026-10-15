@@ -17,7 +17,7 @@ final class PrepareRun
         $binary = escapeshellarg($projectPath . '/vendor/bin/typo3');
 
         return [
-            'TYPO3_CONTEXT=Testing ' . $binary . ' cache:flush',
+            'TYPO3_CONTEXT=Testing ' . $binary . ' cache:flush --group system',
             'TYPO3_CONTEXT=Testing ' . $binary . ' playwright:prepare',
         ];
     }

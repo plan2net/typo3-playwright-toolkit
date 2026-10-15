@@ -93,6 +93,9 @@ the package a change belongs to.
 
   **Migration:** if your project sets `BE/entryPoint`, add its path to
   `defineToolkitConfig`, for example `backendPath: '/admin'`.
+- **plan2net/playwright-toolkit** — `ddev playwright setup` clears only TYPO3's system
+  caches before it builds the test database template, like `ddev playwright test`
+  does. It cleared every cache, including the page cache of the site you work on.
 
 ## [0.23.1] - 2026-09-28
 
