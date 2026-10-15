@@ -100,6 +100,11 @@ the package a change belongs to.
   `ignoreHTTPSErrors`, `httpCredentials` and `proxy` of your Playwright project, like its
   tests do. It always ignored certificate errors and used neither credentials nor a
   proxy, so the setup of a site behind HTTP authentication failed before it started.
+- **@plan2net/typo3-playwright-toolkit** — a content element in the default language
+  saves for a backend user who may not edit its language. The builder always sent
+  `sys_language_uid`, which the backend form never sends for such a user, so the
+  extension refused every content element the user tried to build. A language the test
+  sets with `withField('sys_language_uid', …)` is still sent.
 
 ## [0.23.1] - 2026-09-28
 

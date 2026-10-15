@@ -406,6 +406,21 @@ final class RecordEditRefusalTest extends FunctionalTestCase
         self::assertSame('', $this->refusal($response));
     }
 
+    #[Test]
+    #[DataProvider('bodiesTheBuildersPost')]
+    public function acceptsWhatTheToolkitsOwnBuildersPostForAnEditorWhoMayNotSetTheLanguage(string $fixture): void
+    {
+        $this->importCSVDataSet(__DIR__ . '/Fixtures/Files.csv');
+        parse_str(http_build_query(ContractFixture::read($fixture)), $body);
+        /** @var array<string, array<string, array<string, mixed>>> $datamap */
+        $datamap = $body['data'];
+        $this->actAsAnEditorOf(array_keys($datamap), exceptColumn: 'sys_language_uid');
+
+        $response = $this->save($datamap);
+
+        self::assertSame('', $this->refusal($response));
+    }
+
     /**
      * @return \Generator<string, array{string}>
      */
@@ -497,6 +512,45 @@ final class RecordEditRefusalTest extends FunctionalTestCase
         $backendUser = $this->setUpBackendUser($backendUserUid);
         $GLOBALS['LANG'] = GeneralUtility::makeInstance(LanguageServiceFactory::class)
             ->createFromUserPreferences($backendUser);
+    }
+
+    /**
+     * @param list<string> $tables
+     */
+    private function actAsAnEditorOf(array $tables, string $exceptColumn): void
+    {
+        $nonExcludeFields = [];
+        $explicitlyAllowed = [];
+        foreach ($tables as $table) {
+            foreach ($GLOBALS['TCA'][$table]['columns'] ?? [] as $column => $configuration) {
+                if (!empty($configuration['exclude']) && $exceptColumn !== $column) {
+                    $nonExcludeFields[] = $table . ':' . $column;
+                }
+                if (isset($configuration['config']['authMode'])) {
+                    foreach ($configuration['config']['items'] ?? [] as $item) {
+                        $explicitlyAllowed[] = $table . ':' . $column . ':' . ($item['value'] ?? '');
+                    }
+                }
+            }
+        }
+        $connectionPool = $this->getConnectionPool();
+        $connectionPool->getConnectionForTable('be_groups')->insert('be_groups', [
+            'uid' => 9,
+            'title' => 'Content editors',
+            'tables_select' => implode(',', $tables),
+            'tables_modify' => implode(',', $tables),
+            'non_exclude_fields' => implode(',', $nonExcludeFields),
+            'explicit_allowdeny' => implode(',', $explicitlyAllowed),
+            'db_mountpoints' => '1',
+        ]);
+        $connectionPool->getConnectionForTable('be_users')->insert('be_users', [
+            'uid' => 9,
+            'username' => 'content-editor',
+            'password' => '*',
+            'usergroup' => '9',
+        ]);
+
+        $this->actAs(9);
     }
 
     private function givenPageTsConfig(string $tsConfig): void

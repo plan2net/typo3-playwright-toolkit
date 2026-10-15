@@ -1,7 +1,6 @@
 {
     "_comment": "What the toolkit posts for an element whose child record carries its own file reference. The npm side asserts create() produces exactly this; the extension feeds it to a real DataHandler and asserts the reference comes back linked to the child, not to the element. tablenames names the child's table, which is the half that is easy to get wrong. tx_relationstest_item is the extension's test table: core ships no inline child of tt_content with a FAL column. The NEW identifiers are minted per request, so they are named here for a reader and renamed in the posted body before comparing.",
     "data[tt_content][NEWcontent][pid]": "2",
-    "data[tt_content][NEWcontent][sys_language_uid]": "0",
     "data[tt_content][NEWcontent][CType]": "text",
     "data[tt_content][NEWcontent][colPos]": "0",
     "data[tt_content][NEWcontent][header]": "With items",

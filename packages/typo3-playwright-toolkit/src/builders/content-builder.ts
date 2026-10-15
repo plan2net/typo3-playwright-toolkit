@@ -172,7 +172,6 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
 
         const row: Record<string, unknown> = {
             pid: positionPid,
-            sys_language_uid: 0,
             CType: fields.CType || this.builder.type,
             colPos: fields.colPos ?? 0,
             ...columnValues,

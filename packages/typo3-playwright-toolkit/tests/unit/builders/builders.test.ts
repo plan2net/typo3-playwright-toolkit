@@ -609,6 +609,30 @@ describe('ContentBuilder', () => {
         expect(only(posted[0].dataMap.tx_demo_accordion_item)).not.toHaveProperty('sys_language_uid')
     })
 
+    it('leaves the language of an element in the default language to the backend', async () => {
+        registerContentTypes({ demo_accordion: AccordionContent })
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page).onPage('12').ofType('demo_accordion').create()
+
+        expect(only(posted[0].dataMap.tt_content)).not.toHaveProperty('sys_language_uid')
+    })
+
+    it('posts the language a test gives an element, and gives its children the same', async () => {
+        registerContentTypes({ demo_accordion: AccordionContent })
+        const { posted, page } = fakePage(42)
+
+        await contentBuilder(page)
+            .onPage('12')
+            .ofType('demo_accordion')
+            .withField('sys_language_uid', 1)
+            .withChild('items', 'tx_demo_accordion_item', (item) => item.withField('title', 'First'))
+            .create()
+
+        expect(only(posted[0].dataMap.tt_content).sys_language_uid).toBe('1')
+        expect(only(posted[0].dataMap.tx_demo_accordion_item).sys_language_uid).toBe('1')
+    })
+
     it('posts one child per item named on the builder', async () => {
         registerContentTypes({ demo_accordion: AccordionContent })
         const { posted, page } = fakePage(42)
