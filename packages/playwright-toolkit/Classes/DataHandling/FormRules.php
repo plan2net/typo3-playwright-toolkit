@@ -12,8 +12,19 @@ use TYPO3\CMS\Backend\Form\FormDataProvider\DatabaseRecordOverrideValues;
 use TYPO3\CMS\Backend\Form\FormDataProvider\DatabaseRecordTypeValue;
 use TYPO3\CMS\Backend\Form\Utility\FormEngineUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+/**
+ * @phpstan-type Compiling array{
+ *     request: ServerRequestInterface,
+ *     data: array<string, array<string, array<string, mixed>>>,
+ *     parents: array<string, array{table: string, identifier: string, field: string}>,
+ *     group: OrderedProviderList,
+ *     forms: array<string, array<string, mixed>|null>,
+ *     failures: list<array{table: string, message: string}>
+ * }
+ */
 final class FormRules
 {
     /**
@@ -46,6 +57,7 @@ final class FormRules
             'parents' => self::parentsOf($data),
             'group' => self::providers(),
             'forms' => [],
+            'failures' => [],
         ];
 
         $refused = [];
@@ -58,17 +70,11 @@ final class FormRules
             }
         }
 
-        return $refused;
+        return [...$compiling['failures'], ...$refused];
     }
 
     /**
-     * @param array{
-     *     request: ServerRequestInterface,
-     *     data: array<string, array<string, array<string, mixed>>>,
-     *     parents: array<string, array{table: string, identifier: string, field: string}>,
-     *     group: OrderedProviderList,
-     *     forms: array<string, array<string, mixed>|null>
-     * } $compiling
+     * @param Compiling $compiling
      *
      * @return array<string, mixed>|null
      */
@@ -136,14 +142,14 @@ final class FormRules
     }
 
     /**
-     * @param array{request: ServerRequestInterface, group: OrderedProviderList} $compiling
-     * @param array<string, mixed>                                               $values
-     * @param array<string, mixed>                                               $inlineContext
+     * @param Compiling            $compiling
+     * @param array<string, mixed> $values
+     * @param array<string, mixed> $inlineContext
      *
      * @return array<string, mixed>|null
      */
     private static function compile(
-        array $compiling,
+        array &$compiling,
         string $table,
         string $identifier,
         array $values,
@@ -163,7 +169,29 @@ final class FormRules
             ], $compiling['group'], $compiling['request']);
         } catch (FormException) {
             return null;
+        } catch (\Throwable $failure) {
+            $compiling['failures'][] = [
+                'table' => $table,
+                'message' => sprintf(
+                    '%s %s: the backend could not open the form of this record: %s: %s (%s:%d).',
+                    $table,
+                    $identifier,
+                    $failure::class,
+                    mb_strimwidth($failure->getMessage(), 0, 300, '…'),
+                    self::projectRelative($failure->getFile()),
+                    $failure->getLine()
+                ),
+            ];
+
+            return null;
         }
+    }
+
+    private static function projectRelative(string $file): string
+    {
+        $root = rtrim(Environment::getProjectPath(), '/') . '/';
+
+        return str_starts_with($file, $root) ? substr($file, \strlen($root)) : $file;
     }
 
     /**

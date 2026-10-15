@@ -11,6 +11,7 @@ use Plan2net\PlaywrightToolkit\Http\RecordEditRefusal;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\Tests\ContractFixture;
 use Plan2net\PlaywrightToolkit\Tests\Functional\Http\Fixtures\LanguageReadingProvider;
+use Plan2net\PlaywrightToolkit\Tests\Functional\Http\Fixtures\ThrowingProvider;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -438,6 +439,24 @@ final class RecordEditRefusalTest extends FunctionalTestCase
         $this->save($datamap);
 
         self::assertSame([['0']], array_map(static fn(array $language): array => array_map(strval(...), $language), LanguageReadingProvider::$languages));
+    }
+
+    #[Test]
+    public function namesTheExceptionThatKeptTheFormFromOpening(): void
+    {
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['formEngine']['formDataGroup']['tcaDatabaseRecord'][ThrowingProvider::class] = [
+            'depends' => [TcaSelectItems::class],
+        ];
+
+        $response = $this->save(['tx_formrulestest_record' => ['NEW1' => ['pid' => 1, 'title' => 'T']]]);
+
+        self::assertSame(422, $response->getStatusCode());
+        self::assertStringContainsString(
+            'tx_formrulestest_record NEW1: the backend could not open the form of this record: '
+            . 'RuntimeException: invalid input syntax for type integer: "" (',
+            $this->refusal($response)
+        );
+        self::assertStringContainsString('/Tests/Functional/Http/Fixtures/ThrowingProvider.php:', $this->refusal($response));
     }
 
     #[Test]

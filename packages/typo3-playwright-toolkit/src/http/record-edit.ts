@@ -98,8 +98,8 @@ export async function saveRecord(
     if (undefined === location) {
         throw new Error(
             `[typo3-playwright-toolkit] ${record.table} did not save (status ${response.status()}). ` +
-                `The backend answers a rejected save with a page, not a redirect: ` +
-                `${(await response.text()).slice(0, 300)}`,
+                `The backend answers a rejected save with a page, not a redirect:\n` +
+                `  ${causeOnPage(await response.text())}`,
         )
     }
 
@@ -115,6 +115,35 @@ export async function saveRecord(
     warnAboutUnrequestedWrites(record, saved.written)
 
     return saved
+}
+
+function causeOnPage(html: string): string {
+    const traces = [...html.matchAll(
+        /class="exception-title">([\s\S]*?)<\/span>[\s\S]*?class="trace-message[^"]*">([\s\S]*?)<\/p>/g,
+    )].map(([, title, message]) => `${textOf(title)}: ${textOf(message)}`)
+    if (traces.length > 0) {
+        return traces.join('\n  caused by ')
+    }
+
+    const title = /class="typo3-error-page-title">([\s\S]*?)<\/h1>/.exec(html)?.[1]
+    const message = /class="typo3-error-page-message">([\s\S]*?)<\/p>/.exec(html)?.[1]
+    if (undefined !== title && undefined !== message) {
+        return `${textOf(title)}: ${textOf(message)}`
+    }
+
+    return textOf(html.replace(/<(style|script)\b[\s\S]*?<\/\1>/gi, ' ')).slice(0, 500)
+}
+
+function textOf(html: string): string {
+    return html
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&quot;/g, '"')
+        .replace(/&#0?39;|&apos;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/\s+/g, ' ')
+        .trim()
 }
 
 /**
@@ -170,10 +199,32 @@ function refuseWhatTypo3Rejected(headers: Record<string, string>, table: string)
         .map((error) => `  table:   ${error.table}\n  message: ${error.message}`)
         .join('\n')
     const more = count > errors.length ? `\n(and ${count - errors.length} more)` : ''
+    const advice = [...new Set(errors.map(({ message }) => adviceFor(message)).filter((line) => '' !== line))]
+    const howToFix = 0 === advice.length ? '' : `\nWhat to do:\n${advice.map((line) => `  - ${line}`).join('\n')}`
 
     throw new Error(
-        `[typo3-playwright-toolkit] TYPO3 refused a record while saving ${table}.\n${listed}${more}`,
+        `[typo3-playwright-toolkit] TYPO3 refused a record while saving ${table}.\n${listed}${more}${howToFix}`,
     )
+}
+
+function adviceFor(message: string): string {
+    if (message.includes('is not editable by user')) {
+        return 'The backend user the tests run as may not edit that field. Add it to the "Allowed excludefields" ' +
+            "of the user's group in your fixtures, or leave it out; .withoutFormRules() does not lift this."
+    }
+    if (message.includes('is not in the form of type')) {
+        return 'The backend form of that type does not show the field (TCA showitem, a display condition or ' +
+            'TSconfig). Leave it out, or call .withoutFormRules() if the test needs a record the form cannot create.'
+    }
+    if (message.includes('could not open the form of this record')) {
+        return 'Building the backend form threw, so an editor could not open it either. The exception names where.'
+    }
+    if (/" (is required|needs at least|allows at most|must be)/.test(message)) {
+        return 'The backend form would not accept that value. Set it the way the form demands, or call ' +
+            '.withoutFormRules() if the test needs it anyway.'
+    }
+
+    return ''
 }
 
 /** `data[table][identifier][field]`, the names FormEngine gives its inputs. */

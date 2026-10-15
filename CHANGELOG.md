@@ -110,6 +110,13 @@ the package a change belongs to.
   request names, and in the default language when nothing names one. It opened it with
   an empty language, which no backend form has, so an extension that reads the language
   while building the form could fail the save with an exception.
+- **plan2net/playwright-toolkit**, **@plan2net/typo3-playwright-toolkit** — a refused or
+  failed save says why and what to do. A refusal now ends with what to change: the
+  field to grant the user's group, the field to leave out, or the value the form
+  demands. An exception while the backend builds the form is refused with its class,
+  message and file instead of answering an error page. Any other page a failed save
+  answers with is quoted as the exception or text it shows, not its first 300
+  characters of markup.
 - **plan2net/playwright-toolkit**, **DDEV add-on** — a project with a cache stored in
   the database can run its tests on a new db-test service. Without a test ID, the
   Testing context uses the service's own `db`, which had no tables, so the cache flush

@@ -304,6 +304,24 @@ describe('saveRecord', () => {
         ).rejects.toThrow(/"title" is required\./)
     })
 
+    it.each([
+        ['tt_content NEW1: "sys_language_uid" is not editable by user "editor".', /Allowed excludefields[\s\S]*\.withoutFormRules\(\) does not lift this/],
+        ['tt_content NEW1: "header_layout" is not in the form of type "text".', /does not show the field[\s\S]*\.withoutFormRules\(\)/],
+        ['tt_content NEW1: "boku_cards" needs at least 3 items, has 2.', /would not accept that value[\s\S]*\.withoutFormRules\(\)/],
+        ['tt_content NEW1: the backend could not open the form of this record: RuntimeException: boom (a.php:1).', /an editor could not open it either/],
+    ])('says what to do about "%s"', async (message, advice) => {
+        const { poster } = fakePoster({ status: 422, refused: { errors: [{ message, table: 'tt_content' }], count: 1 } })
+
+        await expect(
+            saveRecord(poster, context, {
+                table: 'tt_content',
+                identifier: 'NEW1',
+                target: 1,
+                data: { tt_content: { NEW1: { header: 'H' } } },
+            }),
+        ).rejects.toThrow(advice)
+    })
+
     it('prints every refusal the site listed, not only the first', async () => {
         const { poster } = fakePoster({
             status: 422,
@@ -505,6 +523,61 @@ describe('saveRecord', () => {
                 data: { pages: { NEWpage: { title: 'A page' } } },
             }),
         ).rejects.toThrow(/did not save/i)
+    })
+
+    it('names the exception out of the page TYPO3 answers a crashed save with', async () => {
+        const page =
+            '<!DOCTYPE html><html><head><title>TYPO3 Exception</title><style>html { color: red; }</style></head><body>' +
+            '<h1 class="exception-message break-long-words">Whoops, looks like something went wrong.</h1>' +
+            '<div class="trace"><div class="trace-head"><h3 class="trace-class">' +
+            '<span class="text-body-secondary">(1/1)</span>' +
+            '<span class="exception-title">#7 Doctrine\\DBAL\\Exception\\DriverException</span></h3>' +
+            '<p class="trace-message break-long-words">invalid input syntax for type integer: &quot;&quot;</p>' +
+            '</div></div></body></html>'
+        const { poster } = fakePoster({ status: 500, body: page })
+
+        const saving = saveRecord(poster, context, {
+            table: 'tt_content',
+            identifier: 'NEW1',
+            target: 1,
+            data: { tt_content: { NEW1: { header: 'H' } } },
+        })
+
+        await expect(saving).rejects.toThrow(
+            /status 500\)[\s\S]*#7 Doctrine\\DBAL\\Exception\\DriverException: invalid input syntax for type integer: ""/,
+        )
+        await expect(saving).rejects.not.toThrow(/<style|color: red/)
+    })
+
+    it('names the cause out of the production error page', async () => {
+        const page =
+            '<html><head><style>p { margin: 0 }</style></head><body><h1 class="typo3-error-page-title">Oops, an error occurred!</h1>' +
+            '<p class="typo3-error-page-message">The requested page does not exist</p></body></html>'
+        const { poster } = fakePoster({ status: 500, body: page })
+
+        const saving = saveRecord(poster, context, {
+            table: 'tt_content',
+            identifier: 'NEW1',
+            target: 1,
+            data: { tt_content: { NEW1: { header: 'H' } } },
+        })
+
+        await expect(saving).rejects.toThrow(/Oops, an error occurred!: The requested page does not exist/)
+    })
+
+    it('quotes the text of any other page, not its markup', async () => {
+        const page = '<html><head><script>var x = 1</script></head><body><p>Service   Unavailable</p></body></html>'
+        const { poster } = fakePoster({ status: 503, body: page })
+
+        const saving = saveRecord(poster, context, {
+            table: 'tt_content',
+            identifier: 'NEW1',
+            target: 1,
+            data: { tt_content: { NEW1: { header: 'H' } } },
+        })
+
+        await expect(saving).rejects.toThrow(/status 503\)[\s\S]*Service Unavailable$/)
+        await expect(saving).rejects.not.toThrow(/<|var x/)
     })
 
     it('throws when the redirect names no uid for the record', async () => {
