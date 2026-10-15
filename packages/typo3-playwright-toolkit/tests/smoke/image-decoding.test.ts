@@ -61,7 +61,7 @@ describe('waitForImagesDecoded', () => {
         ])
     }, 30000)
 
-    // Stands in for the deferred stylesheet re-selecting a source.
+    // Stands in for a layout change re-selecting a source.
     it('waits for a load that starts while it is already waiting', async () => {
         await page.route('https://example.test/slow.gif', (route) => after(300, route))
         await page.route('https://example.test/late.gif', (route) => after(200, route))

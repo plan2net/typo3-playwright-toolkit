@@ -10,6 +10,30 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Changed
+
+- **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer switches
+  stylesheets with `media="print"` to `all`. It did that to finish the
+  `media="print" onload="this.media='all'"` loading trick, but it also turned a real
+  print stylesheet on for the screen, so the screenshots mixed screen and print layout,
+  and the rest of the test ran against that mix too.
+
+  **Migration:** a site that loads CSS with that trick and screenshots a page before the
+  CSS arrived can finish the swap itself, in `prepareContext`:
+
+  ```ts
+  prepareContext: (context) =>
+      context.addInitScript(() =>
+          addEventListener('load', () =>
+              document.querySelectorAll<HTMLLinkElement>('link[media="print"][onload]')
+                  .forEach((link) => (link.media = 'all')),
+          ),
+      ),
+  ```
+
+  Any other project needs nothing. Remove a workaround that hid a print stylesheet from
+  the toolkit, such as rewriting `media="print"` to `print and (min-width: 0px)`.
+
 ## [0.23.1] - 2026-09-28
 
 The npm package of 0.23.0 was never published: the release stopped on a missing

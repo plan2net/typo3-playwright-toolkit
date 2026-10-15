@@ -263,8 +263,8 @@ export async function waitForImagesDecoded(page: Page, timeout = DECODE_TIMEOUT)
         return stalled
     }
 
-    // A load that starts during a round is not waited for by it, which is how
-    // applyDeferredStylesheets re-selects a source after the image read as complete.
+    // A load that starts during a round is not waited for by it, which is how a
+    // layout change re-selects a source after the image read as complete.
     return settleImages(page, left)
 }
 
@@ -317,43 +317,6 @@ export function warnAboutUndecodedImages(stalled: string[], timeout: number): vo
     )
 }
 
-/**
- * Finishes the `media="print"` async-CSS trick by hand. A stylesheet loaded as
- * print and swapped to `all` on load is not applied while it is still print, so
- * a screenshot taken mid-swap captures the page unstyled.
- */
-async function applyDeferredStylesheets(page: Page): Promise<void> {
-    await page.evaluate(
-        () =>
-            new Promise<void>((resolve) => {
-                const twoFrames = () => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-                const links = Array.from(document.querySelectorAll<HTMLLinkElement>('link[media="print"]'))
-                if (links.length === 0) {
-                    twoFrames()
-                    return
-                }
-
-                const settled = links.map(
-                    (link) =>
-                        new Promise<void>((done) => {
-                            if (link.sheet) {
-                                link.media = 'all'
-                                done()
-                                return
-                            }
-                            link.addEventListener('load', () => done(), { once: true })
-                            link.addEventListener('error', () => done(), { once: true })
-                            link.media = 'all'
-                        }),
-                )
-
-                // Resolving on rejection too: a stylesheet that never settles must
-                // cost a frame, not the whole screenshot.
-                Promise.all(settled).then(twoFrames, resolve)
-            }),
-    )
-}
-
 export function resolveScreenshotTarget(
     target: Page | Locator,
     include?: string,
@@ -399,11 +362,7 @@ export async function expectScreenshot(
         injected.push(await page.addStyleTag({ content: hideStyles }))
     }
 
-    await applyDeferredStylesheets(page)
-    await page.evaluate(() => document.fonts.ready)
-    await waitForAnimations(page, undefined, 3000)
-    await loadLazyElements(page)
-    const stalled = await prepareImagesForCapture(page)
+    const stalled = await prepareForCapture(page)
     if (stalled.length > 0) {
         warnAboutUndecodedImages(stalled, DECODE_TIMEOUT)
     }
@@ -433,6 +392,15 @@ export async function expectScreenshot(
             await style.evaluate((element) => (element as Element).remove()).catch(() => undefined)
         }
     }
+}
+
+/** @returns the sources of the images that never decoded, empty when all did */
+export async function prepareForCapture(page: Page): Promise<string[]> {
+    await page.evaluate(() => document.fonts.ready)
+    await waitForAnimations(page, undefined, 3000)
+    await loadLazyElements(page)
+
+    return prepareImagesForCapture(page)
 }
 
 export function comparisonOptions(
