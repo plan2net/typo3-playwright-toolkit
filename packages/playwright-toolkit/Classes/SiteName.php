@@ -34,7 +34,7 @@ final class SiteName
         }
 
         $testId = TestContext::testId();
-        if ('' === $testId) {
+        if ('' === $testId || '' !== trim((string) ($_SERVER[TestContext::TEST_ID_SERVER_KEY] ?? ''))) {
             return;
         }
 

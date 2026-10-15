@@ -60,6 +60,10 @@ the package a change belongs to.
   the new service, then `ddev stop`, `docker volume rm ddev-<project>_db-test-data`,
   `ddev start` and `ddev playwright-prepare --force`. Baselines of lists sorted in SQL
   can change. Check them, then accept them with `--update-snapshots`.
+- **plan2net/playwright-toolkit** — a test run keeps the site name as it is. The test
+  ID was added to it on every request of a test, and that ID is new on every run, so
+  every screenshot of the backend differed. An inspect link still shows it, so two open
+  tabs stay apart.
 
 ## [0.23.1] - 2026-09-28
 
