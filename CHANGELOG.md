@@ -10,6 +10,34 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-10-15
+
+The toolkit now works on more projects: a moved backend, a backend user without admin
+rights, a cache stored in the database, an XCLASS of an image class. Screenshots stop
+changing the page beyond what a capture needs, so some baselines change. The db-test
+service runs your project's own database version and sorts text like it; update the
+add-on and reset its volume.
+
+### Breaking
+
+- **@plan2net/typo3-playwright-toolkit** — teardown no longer deletes anything in
+  `var/session`, and the `paths.sessionDir` option is gone. It removed every directory
+  there older than an hour, but the tests never write there. TYPO3's install tool keeps
+  its sessions in such a directory, so a test run could log you out of it.
+
+  **Migration:** remove `paths.sessionDir` from `defineToolkitConfig` if you set it.
+
+### Added
+
+- **All three packages** — a project that moved its backend with `BE/entryPoint` can
+  run the tests. The test API answered only below `/typo3`, so on such a project the
+  preflight failed and no scenario could build anything. The endpoints now follow the
+  entry point, and the new `backendPath` option tells the toolkit where it is. The
+  setup wizard checks the right path and writes the option for you.
+
+  **Migration:** if your project sets `BE/entryPoint`, add its path to
+  `defineToolkitConfig`, for example `backendPath: '/admin'`.
+
 ### Changed
 
 - **@plan2net/typo3-playwright-toolkit** — `expectScreenshot` no longer switches
@@ -57,9 +85,9 @@ the package a change belongs to.
   by code point even in `en_US.utf8`.
 
   **Migration:** the old db-test volume keeps the `C` locale. Run `ddev add-on get` for
-  the new service, then `ddev stop`, `docker volume rm ddev-<project>_db-test-data`,
-  `ddev start` and `ddev playwright-prepare --force`. Baselines of lists sorted in SQL
-  can change. Check them, then accept them with `--update-snapshots`.
+  the new service, then `ddev stop`, `docker volume rm ddev-<project>_db-test-data` and
+  `ddev start`. The next `ddev playwright test` builds the template again. Baselines of
+  lists sorted in SQL can change. Check them, then accept them with `--update-snapshots`.
 - **DDEV add-on** — the db-test service runs the version of your project's own
   database. It always ran `mariadb:11`, `mysql:8` or `postgres:16`, so tests ran against
   a server the project never uses, with other defaults and other SQL behaviour. Below
@@ -69,33 +97,29 @@ the package a change belongs to.
   version differs from the old default should also remove the old data, as above, since
   a server of another major version may not read it: `ddev stop`,
   `docker volume rm ddev-<project>_db-test-data`, `ddev start`.
-- **@plan2net/typo3-playwright-toolkit** — teardown no longer deletes anything in
-  `var/session`, and the `paths.sessionDir` option is gone. It removed every directory
-  there older than an hour, but the tests never write there. TYPO3's install tool keeps
-  its sessions in such a directory, so a test run could log you out of it.
-
-  **Migration:** remove `paths.sessionDir` from `defineToolkitConfig` if you set it.
 - **plan2net/playwright-toolkit** — a test run keeps the site name as it is. The test
   ID was added to it on every request of a test, and that ID is new on every run, so
   every screenshot of the backend differed. An inspect link still shows it, so two open
   tabs stay apart.
+- **plan2net/playwright-toolkit** — `ddev playwright setup` clears only TYPO3's system
+  caches before it builds the test database template, like `ddev playwright test`
+  does. It cleared every cache, including the page cache of the site you work on.
+- **plan2net/playwright-toolkit**, **@plan2net/typo3-playwright-toolkit** — a refused or
+  failed save says why and what to do. A refusal now ends with what to change: the
+  field to grant the user's group, the field to leave out, or the value the form
+  demands. An exception while the backend builds the form is refused with its class,
+  message and file instead of answering an error page. Any other page a failed save
+  answers with is quoted as the exception or text it shows, not its first 300
+  characters of markup.
+
+### Fixed
+
 - **plan2net/playwright-toolkit** — a project's XCLASS of `GraphicalFunctions` or
   `GifBuilder` works again. The extension replaced both classes for its per-test image
   scratch names and ignored an XCLASS, even outside tests. Now the project's class is
   used, and in a test it still gets a scratch name per test. An XCLASSed `GifBuilder`
   does not write its output atomically, though, so two tests that request the same
   GIFBUILDER image at once can read a half-written file.
-- **All three packages** — a project that moved its backend with `BE/entryPoint` can
-  run the tests. The test API answered only below `/typo3`, so on such a project the
-  preflight failed and no scenario could build anything. The endpoints now follow the
-  entry point, and the new `backendPath` option tells the toolkit where it is. The
-  setup wizard checks the right path and writes the option for you.
-
-  **Migration:** if your project sets `BE/entryPoint`, add its path to
-  `defineToolkitConfig`, for example `backendPath: '/admin'`.
-- **plan2net/playwright-toolkit** — `ddev playwright setup` clears only TYPO3's system
-  caches before it builds the test database template, like `ddev playwright test`
-  does. It cleared every cache, including the page cache of the site you work on.
 - **@plan2net/typo3-playwright-toolkit** — a scenario's setup runs with the
   `ignoreHTTPSErrors`, `httpCredentials` and `proxy` of your Playwright project, like its
   tests do. It always ignored certificate errors and used neither credentials nor a
@@ -110,13 +134,6 @@ the package a change belongs to.
   request names, and in the default language when nothing names one. It opened it with
   an empty language, which no backend form has, so an extension that reads the language
   while building the form could fail the save with an exception.
-- **plan2net/playwright-toolkit**, **@plan2net/typo3-playwright-toolkit** — a refused or
-  failed save says why and what to do. A refusal now ends with what to change: the
-  field to grant the user's group, the field to leave out, or the value the form
-  demands. An exception while the backend builds the form is refused with its class,
-  message and file instead of answering an error page. Any other page a failed save
-  answers with is quoted as the exception or text it shows, not its first 300
-  characters of markup.
 - **plan2net/playwright-toolkit**, **DDEV add-on** — a project with a cache stored in
   the database can run its tests on a new db-test service. Without a test ID, the
   Testing context uses the service's own `db`, which had no tables, so the cache flush
@@ -1261,7 +1278,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.1...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.24.0...main
+[0.24.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.1...v0.24.0
 [0.23.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.0...v0.23.1
 [0.23.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.22.0...v0.23.0
 [0.22.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.21.1...v0.22.0
