@@ -25,7 +25,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  PW_TEST_DIR          Where your Playwright tests live, default tests/playwright"
     echo "  PW_UI_PORT           Port to serve on, default 3000"
     echo ""
-    echo "Browsers must be installed in this container: ddev exec 'npx playwright install --with-deps'"
+    echo "Browsers must be installed in this container: ddev playwright install chromium"
     exit 0
 fi
 

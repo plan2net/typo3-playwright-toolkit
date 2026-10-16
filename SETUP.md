@@ -161,14 +161,26 @@ web_environment:
 
 ```bash
 ddev restart
-cd tests/playwright && ddev npx playwright install --with-deps chromium
+cd tests/playwright && ddev npx playwright install chromium
 ```
 
-With the add-on installed, `ddev playwright install --with-deps chromium` does the
-same from anywhere in the project: anything that is not a command of its own goes
-straight to `npx playwright`, in your test directory.
+With the add-on installed, `ddev playwright install chromium` does the same from
+anywhere in the project: anything that is not a command of its own goes straight to
+`npx playwright`, in your test directory.
 
 Gitignore `.cache/`.
+
+Leave out `--with-deps`. It installs the system libraries Chromium needs into the
+container, and DDEV creates a new container on every restart, so the browser stops
+starting after the next `ddev restart` with `error while loading shared libraries`.
+The add-on's `.ddev/web-build/Dockerfile.playwright-toolkit` puts those libraries into
+the web image instead. For Firefox or WebKit, add a Dockerfile of your own beside it,
+with the version of `@playwright/test` your project installed:
+
+```dockerfile
+# .ddev/web-build/Dockerfile.playwright-browsers
+RUN npx -y playwright@1.64.0 install-deps firefox webkit
+```
 
 The browsers can also run elsewhere, and so can the whole test run.
 [Where things run](#where-things-run) has the diagram and the settings.

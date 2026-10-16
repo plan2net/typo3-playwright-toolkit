@@ -48,7 +48,7 @@ final class HostCommandsTest extends TestCase
                 'ddev config --additional-hostnames=example-testing \\',
                 '    --web-environment-add=PLAYWRIGHT_BROWSERS_PATH=/var/www/html/.cache/ms-playwright',
                 'ddev restart',
-                'ddev npx playwright install --with-deps chromium',
+                'ddev npx playwright install chromium',
             ],
             HostCommands::block('--additional-hostnames=example-testing', true)
         );
@@ -120,7 +120,7 @@ final class HostCommandsTest extends TestCase
             cd tests/e2e
             ddev npm init -y && ddev npm pkg set type=module
             ddev npm i -D @plan2net/typo3-playwright-toolkit@1.0.0 @playwright/test
-            ddev npx playwright install --with-deps chromium
+            ddev npx playwright install chromium
             SHELL;
 
         $lines = HostCommands::block(

@@ -93,3 +93,17 @@ project_files() {
     run project_files
     [[ "$output" == *"playwright-lib.sh"* ]]
 }
+
+# `playwright install --with-deps` puts the libraries into the container, and DDEV
+# recreates the container on every restart, so they have to come with the image.
+@test "the web image gets the browser libraries of the Playwright version the toolkit locks" {
+    local locked pinned
+    locked=$(node -p "require('${ADDON_DIR}/../typo3-playwright-toolkit/package-lock.json').packages['node_modules/@playwright/test'].version")
+    pinned=$(grep -oE 'playwright@[0-9.]+ install-deps' "${ADDON_DIR}/web-build/Dockerfile.playwright-toolkit" | grep -oE '[0-9.]+')
+
+    [ -n "${pinned}" ]
+    [ "${pinned}" = "${locked}" ]
+
+    run project_files
+    [[ "$output" == *"web-build/Dockerfile.playwright-toolkit"* ]]
+}

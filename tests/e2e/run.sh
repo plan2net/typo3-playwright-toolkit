@@ -171,7 +171,7 @@ say 'installing the Playwright side'
     # --no-save: saving would write the release number into a package.json nothing reads.
     ddev npm install --no-audit --no-fund --no-save \
         "/var/www/html/.artifacts/${TARBALL}" "@playwright/test@${PLAYWRIGHT_VERSION}"
-    ddev npx playwright install --with-deps chromium
+    ddev npx playwright install chromium
 )
 
 # Every processed image and every scratch file of a test request carries its test

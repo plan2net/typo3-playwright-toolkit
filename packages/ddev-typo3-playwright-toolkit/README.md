@@ -95,8 +95,12 @@ web_environment:
 The add-on ships none. Install them in the web container, where the tests run:
 
 ```bash
-cd tests/playwright && ddev npx playwright install --with-deps chromium
+cd tests/playwright && ddev npx playwright install chromium
 ```
+
+The system libraries Chromium needs come with the web image, from
+`.ddev/web-build/Dockerfile.playwright-toolkit`. Do not pass `--with-deps`: it
+installs them into the container, which DDEV replaces on every restart.
 
 They land in the container's home directory, which DDEV drops on a rebuild. Keep them
 under the project instead, `ddev restart`, and gitignore `.cache/`:
@@ -386,8 +390,14 @@ so they work the same way outside DDEV.
 ## Troubleshooting
 
 **Playwright reports a missing browser.** The browsers are not installed in the
-container that runs the command. Run `ddev npx playwright install --with-deps` from
+container that runs the command. Run `ddev npx playwright install chromium` from
 your Playwright directory.
+
+**The browser does not start: `error while loading shared libraries`.** The web image
+lacks the system libraries. This happens after a `ddev restart` when they were
+installed with `--with-deps`, or when the add-on is older than the
+`web-build/Dockerfile.playwright-toolkit` it now ships. Update the add-on and
+`ddev restart`.
 
 **The first test fails with `ERROR 1044 Access denied`.** The MySQL or MariaDB user
 cannot create databases. Reinstall the add-on, which grants the missing rights.

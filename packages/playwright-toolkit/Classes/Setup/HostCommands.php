@@ -62,7 +62,7 @@ final class HostCommands
 
         // The install needs the path in the environment, so it comes after the restart.
         if ($needsBrowsers) {
-            $lines[] = 'ddev npx playwright install --with-deps chromium';
+            $lines[] = 'ddev npx playwright install chromium';
         }
 
         return $lines;

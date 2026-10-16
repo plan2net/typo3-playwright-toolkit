@@ -10,6 +10,23 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **DDEV add-on** — the browser still starts after a `ddev restart`. The setup told you
+  to run `playwright install --with-deps`, which puts Chromium's system libraries into
+  the web container, and DDEV creates a new container on every restart. The browser
+  then failed with `error while loading shared libraries`. The add-on now ships
+  `web-build/Dockerfile.playwright-toolkit`, which puts the libraries into the web
+  image, and the setup, the wizard and the docs no longer pass `--with-deps`.
+
+  **Migration:** update the add-on and `ddev restart`. Firefox and WebKit need a
+  Dockerfile of your own, as [SETUP.md](SETUP.md#3-the-browsers) shows.
+- **plan2net/playwright-toolkit** — the setup check names an include it cannot follow.
+  It reads `additional.php` without running it, so an include whose path is built at
+  run time, such as `'/additional-' . $context . '.php'`, hid the file that calls the
+  toolkit, and the check only said the call was missing. It now gives the line of
+  that include and says to write the path out.
+
 ## [0.24.0] - 2026-10-15
 
 The toolkit now works on more projects: a moved backend, a backend user without admin

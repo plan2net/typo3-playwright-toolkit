@@ -21,6 +21,7 @@ project_files:
   - playwright-commands/replay.sh
   - commands/web/playwright-ui
   - config.playwright-toolkit.yaml
+  - web-build/Dockerfile.playwright-toolkit
   # DDEV records no version for a tarball install, so the extension reads this one.
   - playwright-toolkit.version
 
