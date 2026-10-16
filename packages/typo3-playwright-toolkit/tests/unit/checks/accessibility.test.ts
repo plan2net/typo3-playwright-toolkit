@@ -4,6 +4,7 @@ import {
     DEFAULT_SCAN_TAGS,
     axeSource,
     buildAxeRunInput,
+    optsOutOfAutomaticScan,
     shouldScanAutomatically,
     scanAccessibility,
     shouldScanProject,
@@ -48,6 +49,29 @@ describe('shouldScanAutomatically', () => {
     // The first failure is the one worth reading; a second, derived one buries it.
     it('skips a test that already failed', () => {
         expect(shouldScanAutomatically({ status: 'failed', navigated: true }, { auto: true })).toBe(false)
+    })
+
+    it('skips a test that opted out with a reason', () => {
+        expect(shouldScanAutomatically({
+            status: 'passed',
+            navigated: true,
+            tags: ['@no-accessibility-scan'],
+            annotations: [{ type: 'reason', description: 'core sitemap view' }],
+        }, { auto: true })).toBe(false)
+    })
+})
+
+describe('optsOutOfAutomaticScan', () => {
+    it('lets a test with the tag and a reason out of the scan', () => {
+        expect(optsOutOfAutomaticScan({
+            tags: ['@no-accessibility-scan'],
+            annotations: [{ type: 'reason', description: 'core sitemap view' }],
+        })).toBe(true)
+    })
+
+    it('refuses the tag without a reason, so no exception goes unexplained', () => {
+        expect(() => optsOutOfAutomaticScan({ tags: ['@no-accessibility-scan'], annotations: [] }))
+            .toThrow(/reason/)
     })
 })
 

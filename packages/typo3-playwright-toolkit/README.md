@@ -572,6 +572,20 @@ Every test that opened a page is then scanned after it finishes. A test that nev
 navigated is skipped, because there is nothing to check, and a test that already
 failed is skipped too, so the first failure stays the one you read.
 
+The scan checks the page the test ended on. To check a page on the way there, call
+`runAccessibilityScan(page)` while the test is on it.
+
+A test that ends on a page you don't own, such as a core backend view, can opt out
+with a tag. It must give a reason, which the report then shows; the tag alone fails
+the test:
+
+```ts
+test('lists the pages', {
+    tag: '@no-accessibility-scan',
+    annotation: { type: 'reason', description: 'core sitemap view' },
+}, async ({ page }) => { /* … */ })
+```
+
 `scanAccessibility(page, options)` returns the raw axe result instead of failing the
 test. It returns `null` when the current project does not run checks.
 

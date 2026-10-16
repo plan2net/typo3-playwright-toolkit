@@ -371,7 +371,13 @@ export function defineScenario<S = Record<string, never>>(
                 const config = getToolkitConfig()
                 const navigated = page.url().startsWith('http')
 
-                if (shouldScanAutomatically({ status: testInfo.status ?? '', navigated }, config.accessibility)) {
+                const outcome = {
+                    status: testInfo.status ?? '',
+                    navigated,
+                    tags: testInfo.tags,
+                    annotations: testInfo.annotations,
+                }
+                if (shouldScanAutomatically(outcome, config.accessibility)) {
                     await runAccessibilityScan(page)
                 }
             },

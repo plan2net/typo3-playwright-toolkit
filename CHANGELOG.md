@@ -10,6 +10,13 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **@plan2net/typo3-playwright-toolkit** — a test can opt out of the automatic
+  accessibility scan with the tag `@no-accessibility-scan` and a `reason` annotation,
+  for a page you don't own or a state that is broken on purpose. The report shows
+  the reason. The tag without a reason fails the test.
+
 ### Fixed
 
 - **DDEV add-on** — the browser still starts after a `ddev restart`. The setup told you

@@ -37,10 +37,38 @@ export function axeSource(): string {
 // No configured list means every project: scanning nowhere would leave the suite
 // green while proving nothing.
 export function shouldScanAutomatically(
-    outcome: { status: string; navigated: boolean },
+    outcome: {
+        status: string
+        navigated: boolean
+        tags?: string[]
+        annotations?: Array<{ type: string; description?: string }>
+    },
     config?: { auto?: boolean },
 ): boolean {
-    return true === config?.auto && outcome.navigated && 'failed' !== outcome.status
+    return true === config?.auto && outcome.navigated && 'failed' !== outcome.status &&
+        !optsOutOfAutomaticScan({ tags: outcome.tags ?? [], annotations: outcome.annotations ?? [] })
+}
+
+const NO_SCAN_TAG = '@no-accessibility-scan'
+
+export function optsOutOfAutomaticScan(test: {
+    tags: string[]
+    annotations: Array<{ type: string; description?: string }>
+}): boolean {
+    if (!test.tags.includes(NO_SCAN_TAG)) {
+        return false
+    }
+
+    const reason = test.annotations.find(({ type }) => 'reason' === type)?.description?.trim()
+    if (!reason) {
+        throw new Error(
+            `[typo3-playwright-toolkit] ${NO_SCAN_TAG} needs a reason. Add ` +
+                "annotation: { type: 'reason', description: '…' } to the test, so the report says " +
+                'why this page is not checked.',
+        )
+    }
+
+    return true
 }
 
 export function shouldScanProject(projectName: string, projects: string[] | undefined): boolean {
