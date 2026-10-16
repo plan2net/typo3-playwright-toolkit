@@ -19,7 +19,8 @@ final class AdditionalConfiguration
 
         // TYPO3 auto-loads this one file, but it may include another, and the call then
         // lives in the included one.
-        foreach (self::includedFiles($this->file, $own) as $included) {
+        [$includedFiles, $unreadableIncludeLines] = self::includes($this->file, $own);
+        foreach ($includedFiles as $included) {
             $files[$included] = (string) @file_get_contents($included);
         }
 
@@ -34,23 +35,35 @@ final class AdditionalConfiguration
             }
         }
 
-        return Result::fail($this->file . ' does not call TestContext::configureCurrentRequest()');
+        $reason = $this->file . ' does not call TestContext::configureCurrentRequest()';
+        if ([] !== $unreadableIncludeLines) {
+            $reason .= '. The include on line ' . implode(', ', $unreadableIncludeLines)
+                . ' builds its path at run time, so this check cannot follow it;'
+                . ' write the path out, as in __DIR__ . \'/additional-testing.php\'';
+        }
+
+        return Result::fail($reason);
     }
 
     /**
      * One level deep, and only literal paths: this reads the file, it does not run it.
      *
-     * @return list<string>
+     * @return array{list<string>, list<int>} the included files, and the lines of includes whose path is built at run time
      */
-    private static function includedFiles(string $file, string $php): array
+    private static function includes(string $file, string $php): array
     {
         $includes = [\T_INCLUDE, \T_INCLUDE_ONCE, \T_REQUIRE, \T_REQUIRE_ONCE];
         $files = [];
+        $unreadableLines = [];
         $path = null;
+        $line = 0;
+        $literal = true;
 
         foreach (@token_get_all($php) as $token) {
             if (\is_array($token) && \in_array($token[0], $includes, true)) {
                 $path = '';
+                $line = $token[2];
+                $literal = true;
 
                 continue;
             }
@@ -64,15 +77,19 @@ final class AdditionalConfiguration
             } elseif (\is_array($token) && \T_CONSTANT_ENCAPSED_STRING === $token[0]) {
                 $path .= trim($token[1], '"\'');
             } elseif (';' === $token) {
-                if (is_file($path)) {
+                if (!$literal) {
+                    $unreadableLines[] = $line;
+                } elseif (is_file($path)) {
                     $files[] = $path;
                 }
 
                 $path = null;
+            } elseif (!\in_array($token, ['.', '(', ')'], true) && !(\is_array($token) && \T_WHITESPACE === $token[0])) {
+                $literal = false;
             }
         }
 
-        return $files;
+        return [$files, $unreadableLines];
     }
 
     /**

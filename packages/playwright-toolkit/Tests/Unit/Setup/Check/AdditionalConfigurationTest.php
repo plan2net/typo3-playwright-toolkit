@@ -50,6 +50,20 @@ final class AdditionalConfigurationTest extends TestCase
     }
 
     #[Test]
+    public function namesAnIncludeWhosePathItCannotRead(): void
+    {
+        file_put_contents(
+            $this->file,
+            "<?php\n\$context = 'testing';\nrequire __DIR__ . '/additional-' . \$context . '.php';\n"
+        );
+
+        $result = (new AdditionalConfiguration($this->file))->run();
+
+        self::assertFalse($result->passed);
+        self::assertStringContainsString('line 3', $result->detail);
+    }
+
+    #[Test]
     public function failsWhenTheCallIsOnlyMentionedInAComment(): void
     {
         file_put_contents(
