@@ -579,7 +579,7 @@ Seven commands, each a wrapper you can run yourself:
 | Command | Runs |
 |---|---|
 | `ddev playwright test` | `typo3 cache:flush --group system`, `typo3 playwright:prepare`, then `npx playwright test` |
-| `ddev playwright prepare` | `typo3 playwright:prepare` |
+| `ddev playwright prepare` | `typo3 playwright:prepare`, which also empties the Testing context's file caches in `var/cache-testing/` |
 | `ddev playwright ui` | `npx playwright test --ui` |
 | `ddev playwright replay` | `typo3 playwright:replay-prepare`, then `npx playwright test` with `PW_REPLAY=1` |
 | `ddev playwright inspect` | `npx typo3-playwright-inspect` |

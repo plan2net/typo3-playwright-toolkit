@@ -26,6 +26,13 @@ the package a change belongs to.
   run time, such as `'/additional-' . $context . '.php'`, hid the file that calls the
   toolkit, and the check only said the call was missing. It now gives the line of
   that include and says to write the path out.
+- **plan2net/playwright-toolkit** — a TypoScript change reaches the next test run.
+  The Testing context keeps its file caches in `var/cache-testing/`, and the flush
+  before a run cleared only the system caches. The TypoScript cache of TYPO3 13 and
+  14 is not one of them, so a change to a site set, the site configuration or
+  `setup.typoscript` stayed invisible to the tests until someone emptied that folder.
+  `playwright:prepare` now empties every cache in `var/cache-testing/`. The caches of
+  the context you develop in stay as they are.
 
 ## [0.24.0] - 2026-10-15
 

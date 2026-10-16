@@ -12,6 +12,10 @@ use Plan2net\PlaywrightToolkit\Database\TemplatePreparer;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use TYPO3\CMS\Core\Cache\Backend\SimpleFileBackend;
+use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
+use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 use TYPO3\CMS\Core\Core\ApplicationContext;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
@@ -109,6 +113,7 @@ final class PrepareCommandTest extends FunctionalTestCase
             $this->get(TemplatePreparer::class),
             $this->get(TestApiSecret::class),
             $this->get(ToolkitConfigurationFactory::class),
+            $this->get(CacheManager::class),
             '0.6.0'
         ));
 
@@ -155,6 +160,42 @@ final class PrepareCommandTest extends FunctionalTestCase
         self::assertSame(Command::SUCCESS, $exitCode);
         self::assertStringContainsString('fingerprint', $tester->getDisplay());
         self::assertStringNotContainsString('already current', $tester->getDisplay());
+    }
+
+    #[Test]
+    public function emptiesTheCachesTheTestingContextKeepsApart(): void
+    {
+        $cache = $this->fileCache('relocated_typoscript', Environment::getVarPath() . '/cache-testing/');
+        $cache->set('tree', 'stale');
+
+        (new CommandTester($this->get(PrepareCommand::class)))->execute([]);
+
+        self::assertFalse($cache->has('tree'));
+    }
+
+    #[Test]
+    public function leavesACacheItSharesWithTheContextYouDevelopIn(): void
+    {
+        $cache = $this->fileCache('project_cache', Environment::getVarPath() . '/cache-project/');
+        $cache->set('entry', 'kept');
+
+        (new CommandTester($this->get(PrepareCommand::class)))->execute([]);
+
+        self::assertTrue($cache->has('entry'));
+    }
+
+    private function fileCache(string $name, string $directory): FrontendInterface
+    {
+        $configuration = [
+            'frontend' => VariableFrontend::class,
+            'backend' => SimpleFileBackend::class,
+            'options' => ['cacheDirectory' => $directory],
+        ];
+        $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'][$name] = $configuration;
+        $cacheManager = $this->get(CacheManager::class);
+        $cacheManager->setCacheConfigurations([$name => $configuration]);
+
+        return $cacheManager->getCache($name);
     }
 
     private function reinitializeWith(ApplicationContext $context): void

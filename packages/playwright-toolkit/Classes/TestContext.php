@@ -99,6 +99,11 @@ final class TestContext
         return $testId;
     }
 
+    public static function fileCacheDirectory(): string
+    {
+        return Environment::getVarPath() . '/cache-testing/';
+    }
+
     private static function rawTestId(): string
     {
         $fromHeader = trim((string) ($_SERVER[self::TEST_ID_SERVER_KEY] ?? ''));
@@ -155,7 +160,7 @@ final class TestContext
             }
 
             // TYPO3 appends cache/<code|data>/<identifier>/ to this itself.
-            $settings['SYS/caching/cacheConfigurations/' . $name . '/options/cacheDirectory'] = Environment::getVarPath() . '/cache-testing/';
+            $settings['SYS/caching/cacheConfigurations/' . $name . '/options/cacheDirectory'] = self::fileCacheDirectory();
         }
 
         return $settings;

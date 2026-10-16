@@ -9,11 +9,13 @@ use Plan2net\PlaywrightToolkit\Configuration\AddonVersion;
 use Plan2net\PlaywrightToolkit\Configuration\ToolkitConfigurationFactory;
 use Plan2net\PlaywrightToolkit\Database\TemplatePreparer;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
+use Plan2net\PlaywrightToolkit\TestContext;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Core\Environment;
 
 final class PrepareCommand extends Command
@@ -22,6 +24,7 @@ final class PrepareCommand extends Command
         private readonly TemplatePreparer $preparer,
         private readonly TestApiSecret $secret,
         private readonly ToolkitConfigurationFactory $configurationFactory,
+        private readonly CacheManager $cacheManager,
         private readonly ?string $installedVersion = null,
     ) {
         parent::__construct();
@@ -75,6 +78,8 @@ final class PrepareCommand extends Command
             );
         }
 
+        $this->flushTestingFileCaches();
+
         $result = $this->preparer->prepare((bool) $input->getOption('force'));
         $io->writeln(self::phaseLine($result['timings']));
         $io->success($result['built']
@@ -82,6 +87,21 @@ final class PrepareCommand extends Command
             : 'Test database template already current, nothing rebuilt. Pass --force to rebuild anyway.');
 
         return Command::SUCCESS;
+    }
+
+    // The run's own flush is --group system, and the typoscript cache is in pages.
+    private function flushTestingFileCaches(): void
+    {
+        /** @var array<string, mixed> $configurations */
+        $configurations = $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'] ?? [];
+
+        foreach ($configurations as $name => $configuration) {
+            if (TestContext::fileCacheDirectory() !== ($configuration['options']['cacheDirectory'] ?? null)) {
+                continue;
+            }
+
+            $this->cacheManager->getCache($name)->flush();
+        }
     }
 
     /**
