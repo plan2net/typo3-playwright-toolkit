@@ -22,6 +22,8 @@ function fakeContext(routed: string[]): BrowserContext {
         route: async () => {
             routed.push('toolkit-headers')
         },
+        request: {},
+        on: () => undefined,
     } as unknown as BrowserContext
 }
 

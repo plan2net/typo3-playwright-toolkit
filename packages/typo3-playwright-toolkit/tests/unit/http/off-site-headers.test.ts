@@ -28,6 +28,8 @@ async function handled(
         route: async (_matches: unknown, handler: (route: unknown) => Promise<void>) => {
             handle = handler
         },
+        request: {},
+        on: () => undefined,
     }
 
     await applyToolkitHeaders(context as never, config(), TEST_ID, origins)

@@ -409,10 +409,11 @@ for elements that sit side by side on a page.
 
 ### Calling the site directly
 
-The `request` client, the one `defineScenario` hands your setup and the `request`
-fixture in your tests, carries the test ID for `testingURL`, so it reads and writes
-the same throwaway database the browser does. Requests to any other host get neither
-toolkit header.
+Every request client carries the test ID for `testingURL`: the `request` that
+`defineScenario` hands your setup, the `request` fixture in your tests, and
+`page.request` and `context.request` in both. So they read and write the same
+throwaway database the browser does. Requests to any other host get neither toolkit
+header.
 
 ### Stubbing a third-party script
 

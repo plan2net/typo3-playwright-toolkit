@@ -106,7 +106,7 @@ describe('an origin the toolkit is not configured for', () => {
 })
 
 describe('the request client, which routing never reaches', () => {
-    it('sends no test id unwrapped, which is why it has to be wrapped', async () => {
+    it('carries the test id on the page and context clients too', async () => {
         setToolkitConfig(config(origin))
         const context = await browser.newContext()
         await applyToolkitHeaders(context, config(origin), TEST_ID)
@@ -114,8 +114,9 @@ describe('the request client, which routing never reaches', () => {
         received = []
 
         await page.request.get(origin)
+        await context.request.get(origin)
 
-        expect(received[0]?.['x-playwright-test-id']).toBeUndefined()
+        expect(received.map((headers) => headers['x-playwright-test-id'])).toEqual([TEST_ID, TEST_ID])
 
         await context.close()
     })

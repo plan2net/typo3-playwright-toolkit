@@ -28,6 +28,8 @@ function fakeBrowser(failAt: 'newPage' | 'session' | 'json' | 'cookies' | 'never
 
     const context = {
         route: async () => undefined,
+        request: {},
+        on: () => undefined,
         addCookies: async () => {
             if ('cookies' === failAt) {
                 throw new Error('cookies refused')
@@ -86,6 +88,7 @@ function fakeBrowser(failAt: 'newPage' | 'session' | 'json' | 'cookies' | 'never
             },
         },
         state,
+        context,
     }
 }
 
@@ -171,6 +174,15 @@ describe('openAuthenticatedPage', () => {
         await openAuthenticatedPage(browser as never, config(), 'ABCD1234EFGH5678', 'news', shop)
 
         expect(state.contextOptions).toMatchObject({ baseURL: 'https://shop-testing.test/', serviceWorkers: 'block' })
+    })
+
+    it('names the scenario site on the context, so a relative page.request lands on it', async () => {
+        const { browser, context } = fakeBrowser('never')
+        const shop = { identifier: 'shop', rootPageId: 2573, base: 'https://shop-testing.test/', origin: 'https://shop-testing.test' }
+
+        await openAuthenticatedPage(browser as never, config(), 'ABCD1234EFGH5678', 'news', shop)
+
+        expect((context as { site?: unknown }).site).toBe(shop)
     })
 })
 

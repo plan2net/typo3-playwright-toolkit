@@ -3,6 +3,8 @@ import { SECRET_HEADER } from './api-secret.js'
 import { TEST_ID_HEADER, browserHeaders } from '../contract.js'
 import type { ToolkitConfig } from '../config.js'
 import { testingOrigins } from '../sites/registry.js'
+import type { ContextWithTestId } from '../types/playwright-extensions.js'
+import { toolkitRequest } from './toolkit-request.js'
 
 const TOOLKIT_HEADERS = [TEST_ID_HEADER.toLowerCase(), SECRET_HEADER.toLowerCase()]
 
@@ -39,4 +41,8 @@ export async function applyToolkitHeaders(
             await route.fallback({ headers })
         },
     )
+
+    const request = toolkitRequest(context.request, config, testId, (context as ContextWithTestId).site)
+    Object.defineProperty(context, 'request', { value: request })
+    context.on('page', (page) => Object.defineProperty(page, 'request', { value: request }))
 }

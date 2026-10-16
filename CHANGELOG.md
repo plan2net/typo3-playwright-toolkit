@@ -33,6 +33,10 @@ the package a change belongs to.
   `setup.typoscript` stayed invisible to the tests until someone emptied that folder.
   `playwright:prepare` now empties every cache in `var/cache-testing/`. The caches of
   the context you develop in stay as they are.
+- **@plan2net/typo3-playwright-toolkit** — `page.request` and `context.request` carry
+  the test ID, like the `request` fixture. They went without it, so a request through
+  them reached the Testing context's base database instead of the test's own, and
+  answered with the wrong content and no error.
 
 ## [0.24.0] - 2026-10-15
 

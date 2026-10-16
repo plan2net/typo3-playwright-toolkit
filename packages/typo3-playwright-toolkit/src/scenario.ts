@@ -162,6 +162,7 @@ export async function openAuthenticatedPage(
 
     // The close handle is only returned on success, so a failure closes its own context.
     try {
+        ;(context as ContextWithTestId).site = site
         await applyToolkitHeaders(context, config, testId)
         ;(context as ContextWithTestId).testId = testId
 
