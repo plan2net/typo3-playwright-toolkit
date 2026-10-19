@@ -867,6 +867,10 @@ under "Kept for debugging". It logs you into that test's backend, and the fronte
 is reachable from there. The link is signed with the API secret and lives 15
 minutes.
 
+**A kept database shows old HTML after you changed the code.** It keeps the page
+cache of the run that failed. Use "Flush frontend caches" in its backend to see
+the pages with your current templates and TypoScript.
+
 ## Related packages
 
 - [`plan2net/playwright-toolkit`](https://github.com/plan2net/typo3-playwright-toolkit/tree/main/packages/playwright-toolkit), the Composer extension
