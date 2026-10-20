@@ -10,6 +10,13 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-10-20
+
+Tests see what you changed: a TypoScript or site set change reaches the next run, and
+a request through `page.request` gets the test's own database. Records with a date
+save on TYPO3 14, the browser survives a `ddev restart`, and a test can skip the
+automatic accessibility scan if it says why.
+
 ### Added
 
 - **@plan2net/typo3-playwright-toolkit** — a test can opt out of the automatic
@@ -38,12 +45,12 @@ the package a change belongs to.
   before a run cleared only the system caches. The TypoScript cache of TYPO3 13 and
   14 is not one of them, so a change to a site set, the site configuration or
   `setup.typoscript` stayed invisible to the tests until someone emptied that folder.
+  `playwright:prepare` now empties every cache in `var/cache-testing/`. The caches of
+  the context you develop in stay as they are.
 - **plan2net/playwright-toolkit** — on TYPO3 14, a builder can save a record with a
   date in it. The form checks crashed with "Object of class DateTimeImmutable could
   not be converted to string" on any date field with a value, such as the date every
   news record needs.
-  `playwright:prepare` now empties every cache in `var/cache-testing/`. The caches of
-  the context you develop in stay as they are.
 - **@plan2net/typo3-playwright-toolkit** — `page.request` and `context.request` carry
   the test ID, like the `request` fixture. They went without it, so a request through
   them reached the Testing context's base database instead of the test's own, and
@@ -1317,7 +1324,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.24.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.25.0...main
+[0.25.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.1...v0.24.0
 [0.23.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.0...v0.23.1
 [0.23.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.22.0...v0.23.0
