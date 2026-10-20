@@ -11,6 +11,7 @@ CREATE TABLE tx_formrulestest_record (
     note varchar(255) DEFAULT '' NOT NULL,
     shared varchar(255) DEFAULT '' NOT NULL,
     bonus varchar(255) DEFAULT '' NOT NULL,
+    published int(11) DEFAULT '0' NOT NULL,
     children int(11) unsigned DEFAULT '0' NOT NULL,
     settings mediumtext
 );

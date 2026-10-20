@@ -38,6 +38,10 @@ the package a change belongs to.
   before a run cleared only the system caches. The TypoScript cache of TYPO3 13 and
   14 is not one of them, so a change to a site set, the site configuration or
   `setup.typoscript` stayed invisible to the tests until someone emptied that folder.
+- **plan2net/playwright-toolkit** — on TYPO3 14, a builder can save a record with a
+  date in it. The form checks crashed with "Object of class DateTimeImmutable could
+  not be converted to string" on any date field with a value, such as the date every
+  news record needs.
   `playwright:prepare` now empties every cache in `var/cache-testing/`. The caches of
   the context you develop in stay as they are.
 - **@plan2net/typo3-playwright-toolkit** — `page.request` and `context.request` carry

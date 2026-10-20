@@ -77,7 +77,13 @@ return [
         ],
         'kind' => [
             'label' => 'Kind',
-            'config' => ['type' => 'select', 'renderType' => 'selectSingle', 'items' => $items(['plain', 'extra', 'locked', 'localized', 'flexible']), 'default' => 'plain'],
+            'config' => ['type' => 'select', 'renderType' => 'selectSingle', 'items' => $items(['plain', 'extra', 'locked', 'localized', 'flexible', 'dated']), 'default' => 'plain'],
+        ],
+        'published' => [
+            'label' => 'Published',
+            'config' => $isVersion11
+                ? ['type' => 'input', 'renderType' => 'inputDateTime', 'eval' => 'datetime,int', ...$required]
+                : ['type' => 'datetime', ...$required],
         ],
         'tags' => [
             'label' => 'Tags',
@@ -158,5 +164,6 @@ return [
         'locked' => ['showitem' => 'kind, title, secret'],
         'localized' => ['showitem' => 'kind, title, sys_language_uid, l10n_parent, note, shared'],
         'flexible' => ['showitem' => 'kind, title, settings'],
+        'dated' => ['showitem' => 'kind, title, published'],
     ],
 ];

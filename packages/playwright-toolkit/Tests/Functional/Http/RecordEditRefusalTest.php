@@ -147,6 +147,14 @@ final class RecordEditRefusalTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function savesARecordWithADate(): void
+    {
+        $response = $this->save(['tx_formrulestest_record' => ['NEW1' => ['pid' => 1, 'kind' => 'dated', 'title' => 'T', 'published' => 1767225600]]]);
+
+        self::assertSame(302, $response->getStatusCode());
+    }
+
+    #[Test]
     public function refusesAValueShorterThanTheMinimum(): void
     {
         if ((new Typo3Version())->getMajorVersion() < 12) {

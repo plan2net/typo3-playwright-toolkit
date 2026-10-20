@@ -377,6 +377,10 @@ final class FormRules
      */
     private static function violations(string $field, array $config, mixed $value): array
     {
+        if ($value instanceof \DateTimeInterface) {
+            $value = $value->format(\DateTimeInterface::ATOM);
+        }
+
         $violations = [];
         $count = match (true) {
             \is_array($value) => \count($value),
