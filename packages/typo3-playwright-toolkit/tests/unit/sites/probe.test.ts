@@ -104,4 +104,15 @@ describe('probeSite', () => {
             reason: 'getaddrinfo ENOTFOUND shop-testing.ddev.site',
         })
     })
+
+    it('names the variable that gives a slow site longer', async () => {
+        const fetchImpl = (async () => {
+            throw new DOMException('The operation was aborted due to timeout', 'TimeoutError')
+        }) as unknown as typeof fetch
+
+        expect(await probe(fetchImpl)).toMatchObject({
+            available: false,
+            reason: expect.stringContaining('no answer within 30 seconds. Raise PW_HEALTH_TIMEOUT_MS') as string,
+        })
+    })
 })

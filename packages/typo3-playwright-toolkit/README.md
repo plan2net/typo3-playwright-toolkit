@@ -839,6 +839,10 @@ instead: a redirect, a page with no toolkit behind it (the host is not in the Te
 context), another installation, or another site. Check the site's Testing base variant
 and that its hostname is set up as in step 1 of SETUP.md.
 
+**"No answer within 30 seconds".** The checks before the first test reach the site
+right after its caches were emptied, so TYPO3 builds them first. If your site needs
+longer than that, set `PW_HEALTH_TIMEOUT_MS`, in milliseconds.
+
 **Settings seem to be ignored.** `defineToolkitConfig` ran too late. It must be the
 first thing in `playwright.config.ts`.
 

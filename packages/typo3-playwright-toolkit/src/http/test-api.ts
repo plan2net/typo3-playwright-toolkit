@@ -2,6 +2,20 @@ import * as fs from 'fs'
 
 export const DEFAULT_BACKEND_PATH = '/typo3'
 
+const HEALTH_TIMEOUT_MS = 30_000
+
+export function healthTimeoutMs(): number {
+    return Number(process.env.PW_HEALTH_TIMEOUT_MS) || HEALTH_TIMEOUT_MS
+}
+
+export function requestFailure(error: unknown): string {
+    if (error instanceof Error && 'TimeoutError' === error.name) {
+        return `no answer within ${healthTimeoutMs() / 1000} seconds. Raise PW_HEALTH_TIMEOUT_MS if the site needs longer with empty caches`
+    }
+
+    return error instanceof Error ? error.message : String(error)
+}
+
 export interface TestApiTarget {
     testingURL: string
     backendPath?: string

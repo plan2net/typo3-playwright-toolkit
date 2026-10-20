@@ -10,6 +10,15 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — the checks before the first test wait 30
+  seconds for the site instead of 5. They run right after the caches were emptied, so
+  TYPO3 builds them first, and on a larger site that took longer than 5 seconds: the
+  run stopped with "The operation was aborted due to timeout", or a site was reported
+  unavailable. A timeout now says how long it waited and names `PW_HEALTH_TIMEOUT_MS`,
+  which sets the limit.
+
 ## [0.25.0] - 2026-10-20
 
 Tests see what you changed: a TypoScript or site set change reaches the next run, and

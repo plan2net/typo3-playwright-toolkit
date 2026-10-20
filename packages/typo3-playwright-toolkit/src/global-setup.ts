@@ -4,7 +4,7 @@ import { prepareRun } from './state/run-namespace.js'
 import { announceSetupCache } from './setup-cache/announce.js'
 import { REPLAY_TEST_ID, TEST_ID_HEADER, generateTestId } from './contract.js'
 import { SECRET_HEADER, resolveApiSecret } from './http/api-secret.js'
-import { testApiUrl, type TestApiTarget } from './http/test-api.js'
+import { healthTimeoutMs, requestFailure, testApiUrl, type TestApiTarget } from './http/test-api.js'
 import { registerSetupAttempt } from './state/attempt-registry.js'
 import { parseDiscoveredSites, writeSitesFile, type SiteEntry } from './sites/registry.js'
 import { probeSite } from './sites/probe.js'
@@ -41,13 +41,13 @@ export async function readHealth(
     try {
         response = await doFetch(healthUrl, {
             method: 'GET',
-            signal: AbortSignal.timeout(Number(process.env.PW_HEALTH_TIMEOUT_MS) || 5000),
+            signal: AbortSignal.timeout(healthTimeoutMs()),
             headers,
             // A custom header survives a cross-origin redirect, secret included.
             redirect: 'manual',
         })
     } catch (error) {
-        throw new Error(unreachable(error instanceof Error ? error.message : String(error)))
+        throw new Error(unreachable(requestFailure(error)))
     }
 
     const text = await response.text()

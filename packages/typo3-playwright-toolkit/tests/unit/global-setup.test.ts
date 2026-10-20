@@ -38,6 +38,16 @@ describe('readHealth', () => {
         expect(seen[0].redirect).toBe('manual')
     })
 
+    it('waits 30 seconds and names the variable that raises it', async () => {
+        const fetchImpl = (async () => {
+            throw new DOMException('The operation was aborted due to timeout', 'TimeoutError')
+        }) as unknown as typeof fetch
+
+        await expect(
+            readHealth('https://example-testing.test/typo3/test-api/health', {}, fetchImpl, (reason) => reason),
+        ).rejects.toThrow('no answer within 30 seconds. Raise PW_HEALTH_TIMEOUT_MS')
+    })
+
     it('names backendPath when the site answers with its own not-found page', async () => {
         const fetchImpl = (async () => new Response('<h1>Page not found</h1>', { status: 404 })) as unknown as typeof fetch
 

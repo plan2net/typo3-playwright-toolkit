@@ -1,5 +1,6 @@
 import { createHmac } from 'node:crypto'
 import { PROBE_HEADER, TEST_ID_HEADER } from '../contract.js'
+import { healthTimeoutMs, requestFailure } from '../http/test-api.js'
 import type { DiscoveredSite, SiteEntry } from './registry.js'
 
 const PURPOSE = 'probe'
@@ -19,14 +20,14 @@ export async function probeSite(
         response = await (options.fetchImpl ?? fetch)(site.base, {
             method: 'GET',
             redirect: 'manual',
-            signal: AbortSignal.timeout(Number(process.env.PW_HEALTH_TIMEOUT_MS) || 5000),
+            signal: AbortSignal.timeout(healthTimeoutMs()),
             headers: {
                 [TEST_ID_HEADER]: options.testId,
                 [PROBE_HEADER]: probeSignature(options.secret, options.testId),
             },
         })
     } catch (error) {
-        return unavailable(error instanceof Error ? error.message : String(error))
+        return unavailable(requestFailure(error))
     }
 
     if (response.status >= 300 && response.status < 400) {

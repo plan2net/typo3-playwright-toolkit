@@ -381,6 +381,7 @@ does not work, because these are DDEV web commands.
 | `PW_REPORT_PORT` | `9323` | Port for `show-report` |
 | `PW_SKIP_BUILD` | unset | Same as `--skip-build`; use the flag instead |
 | `PW_SKIP_PREPARE` | unset | Same as `--skip-prepare`; use the flag instead |
+| `PW_HEALTH_TIMEOUT_MS` | `30000` | How long the checks before the first test wait for the site |
 | `PW_TEST_CONNECT_WS_ENDPOINT` | unset | Browser server to drive instead of the local browsers; see [Where things run](https://github.com/plan2net/typo3-playwright-toolkit/blob/main/SETUP.md#where-things-run) |
 | `PW_TEST_CONNECT_EXPOSE_NETWORK` | unset | Lets that browser reach your site through the web container; `*` covers everything |
 
