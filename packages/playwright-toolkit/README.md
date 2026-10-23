@@ -449,6 +449,10 @@ secret, not the secret itself, because it goes to a host before that host is pro
 is applied and verified in one transaction, so a mismatch leaves the plain clone
 behind. They refuse the replay test ID, where one database is shared.
 
+`site-settings` stores settings for one site in the test database. A frontend
+middleware puts them over the site's own settings for that test's requests, in the
+Testing context only. It needs a test ID, so the base database never gets any.
+
 A save through `record/edit` is also checked: a posted column that TCA does not have
 is answered with `422` and the column name, instead of being dropped in silence. Only
 a request carrying the secret is checked, so an editor saving a form is untouched.

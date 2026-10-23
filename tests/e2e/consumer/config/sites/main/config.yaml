@@ -3,6 +3,9 @@ rootPageId: 1
 # is what the off-origin test navigates to.
 base: '/'
 websiteTitle: 'Playwright toolkit e2e'
+settings:
+  e2e:
+    look: calm
 # No site set: they are 13.4 and newer, and the TypoScript this fixture needs comes
 # from the sys_template record every supported core reads.
 languages:

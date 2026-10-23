@@ -20,6 +20,7 @@ import {
     type RequestContext,
 } from './builders/request-context.js'
 import { recordSaver, type RecordToSave, type SavedRecord } from './http/record-edit.js'
+import { saveSiteSettings } from './http/site-settings.js'
 import { ContentBuilder, saveBatch, type QueuedContent } from './builders/content-builder.js'
 import { PageBuilder } from './builders/page-builder.js'
 import { ContextWithTestId, PageWithTestId } from './types/playwright-extensions.js'
@@ -72,6 +73,12 @@ export interface SetupTools {
     builders: ScenarioBuilders
     /** For a table no builder covers. */
     saveRecord(record: RecordToSave): Promise<SavedRecord>
+    /**
+     * Overrides the scenario site's settings in this test's database only, keyed
+     * like `settings.yaml` flattened: `{ 'theme.look': 'wild' }`. A second call
+     * replaces the first. The site's pages then render without the page cache.
+     */
+    siteSettings(settings: Record<string, string | number | boolean>): Promise<void>
 }
 
 export interface ScenarioFixtures<S> {
@@ -269,10 +276,6 @@ export function defineScenario<S = Record<string, never>>(
                 triggerId: testInfo.testId,
                 setupCache: setupCacheUse(config, suiteRootOf(testInfo), siteCacheKey(key, site)),
                 setup: async ({ testId, attempt, signal }) => {
-                    if (!setup) {
-                        return {} as S
-                    }
-
                     const label = attempt > 1 ? `${name} #${attempt}` : name
                     const session = await openAuthenticatedPage(browser, config, testId, label, site, {
                         ignoreHTTPSErrors,
@@ -280,6 +283,10 @@ export function defineScenario<S = Record<string, never>>(
                         proxy,
                     })
                     try {
+                        if (!setup) {
+                            return {} as S
+                        }
+
                         const builderContext = await buildScenarioContext(
                             session.page,
                             config,
@@ -304,6 +311,13 @@ export function defineScenario<S = Record<string, never>>(
                                 session.page.request,
                                 resolveRequestContext(session.page, builderContext),
                             ),
+                            siteSettings: (settings) =>
+                                saveSiteSettings(
+                                    session.page.request,
+                                    resolveRequestContext(session.page, builderContext),
+                                    site.identifier,
+                                    settings,
+                                ),
                         })
                     } finally {
                         await session.close()

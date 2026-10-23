@@ -31,7 +31,11 @@ page.30 {
     file.width = 100
     file.crop = 10,10,180,100
     altText = inside a storage
-}',
+}
+
+page.40 = TEXT
+page.40.value = look:{$e2e.look}
+page.40.wrap = <p data-e2e="look">|</p>',
     0,
     0
 );

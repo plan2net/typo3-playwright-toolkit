@@ -10,6 +10,7 @@ use Plan2net\PlaywrightToolkit\Http\DatabaseCleanupProvider;
 use Plan2net\PlaywrightToolkit\Http\HealthCheckProvider;
 use Plan2net\PlaywrightToolkit\Http\RecordedErrorProvider;
 use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
+use Plan2net\PlaywrightToolkit\Http\SiteSettingsProvider;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
 use Plan2net\PlaywrightToolkit\TestContext;
@@ -66,6 +67,7 @@ final class EndpointAuthenticationTest extends FunctionalTestCase
             'errors' => [RecordedErrorProvider::class, '/test-api/errors', 'GET'],
             'setup-cache restore' => [SetupCacheProvider::class, '/test-api/setup-cache/restore', 'POST'],
             'setup-cache store' => [SetupCacheProvider::class, '/test-api/setup-cache/store', 'POST'],
+            'site-settings' => [SiteSettingsProvider::class, '/test-api/site-settings', 'POST'],
         ];
     }
 

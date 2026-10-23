@@ -415,6 +415,29 @@ Every request client carries the test ID for `testingURL`: the `request` that
 throwaway database the browser does. Requests to any other host get neither toolkit
 header.
 
+### Site settings for one test
+
+A scenario can give its site other settings than `settings.yaml` has, for its own
+test database only:
+
+```ts
+export const test = defineScenario(async ({ siteSettings }) => {
+    await siteSettings({ 'theme.look': 'wild' })
+
+    return {}
+})
+```
+
+Every test that does not do this keeps the site's own values, also while running at
+the same time. A second call replaces the first. The keys are the setting names as
+TypoScript constants know them.
+
+The values reach whatever reads the site from the request: TypoScript constants,
+`{site.settings}` in Fluid, and PHP that calls `$request->getAttribute('site')`. They
+do not reach code that looks the site up again through the `SiteFinder`, or the
+backend. The site's pages render without the page cache in that test, because TYPO3
+does not include settings in its cache keys. Needs TYPO3 12.4 or newer.
+
 ### Stubbing a third-party script
 
 A cookie banner or a tracking script can swallow the clicks your test makes.

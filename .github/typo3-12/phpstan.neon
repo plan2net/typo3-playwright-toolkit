@@ -6,3 +6,17 @@
 parameters:
     excludePaths:
         - '*/Compatibility/AtomicOutputGifBuilder.php'
+    # SiteWithSettings guards getTSconfig(), which arrived in 13.0, and the
+    # overlay test reads noCache, which phpstan-typo3 checks but is not
+    # installed here. Both carry inline ignores that match nothing on this core.
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # Called only when Site has getTSconfig(), which arrived with getTypoScript().
+        -
+            message: '#^Call to an undefined method TYPO3\\CMS\\Core\\Site\\Entity\\Site::getTypoScript\(\)\.$#'
+            identifier: method.notFound
+            path: '*/Compatibility/SiteWithSettings.php'
+        -
+            message: '#^Class TYPO3\\CMS\\Core\\Site\\Entity\\Site constructor invoked with 6 parameters#'
+            identifier: arguments.count
+            path: '*/Compatibility/SiteWithSettings.php'

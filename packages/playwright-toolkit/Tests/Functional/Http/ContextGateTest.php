@@ -14,9 +14,11 @@ use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
 use Plan2net\PlaywrightToolkit\Http\RecordEditRefusal;
 use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
 use Plan2net\PlaywrightToolkit\Http\SiteProbe;
+use Plan2net\PlaywrightToolkit\Http\SiteSettingsProvider;
 use Plan2net\PlaywrightToolkit\Security\ProbeSignature;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
+use Plan2net\PlaywrightToolkit\Site\SiteSettingsOverlay;
 use Plan2net\PlaywrightToolkit\TestContext;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -54,9 +56,11 @@ final class ContextGateTest extends FunctionalTestCase
         SetupCacheProvider::class => ['/typo3/test-api/setup-cache/restore', 'POST'],
         InspectProvider::class => ['/typo3/test-api/inspect', 'GET'],
         RecordedErrorProvider::class => ['/typo3/test-api/errors', 'GET'],
+        SiteSettingsProvider::class => ['/typo3/test-api/site-settings', 'POST'],
         RecordEditDiagnostics::class => ['/typo3/record/edit', 'POST'],
         RecordEditRefusal::class => ['/typo3/record/edit', 'POST'],
         SiteProbe::class => ['/', 'GET'],
+        SiteSettingsOverlay::class => ['/', 'GET'],
     ];
 
     protected array $testExtensionsToLoad = [
@@ -145,6 +149,10 @@ final class ContextGateTest extends FunctionalTestCase
     public static function endpoints(): \Generator
     {
         foreach (self::ENDPOINTS as $middleware => [$path, $method]) {
+            if (SiteSettingsOverlay::class === $middleware) {
+                continue;
+            }
+
             yield substr((string) strrchr($middleware, '\\'), 1) => [$middleware, $path, $method];
         }
     }

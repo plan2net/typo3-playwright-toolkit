@@ -297,6 +297,22 @@ the plain clone the toolkit then runs its setup against. The replay test ID is
 refused outright: replay shares one database between scenarios, and a delta starts by
 emptying the tables it carries.
 
+## Site settings
+
+```
+POST /typo3/test-api/site-settings  { "site": "<identifier>", "settings": { "theme.look": "wild" } }
+```
+
+Needs the secret and a test ID: without one the request reads the base database,
+where the values would apply to every request of the Testing context, so it is
+answered `400`. The extension stores the settings in that test database's
+`sys_registry`, replacing what the site had there, and answers `{ "ok": true }`.
+
+A frontend middleware right after site resolution overlays them on the request's
+`site` attribute, in the Testing context only, and turns caching off for that
+request: TYPO3's TypoScript cache keys do not include settings, and that cache is
+shared by every test.
+
 ## What TYPO3 recorded
 
 While a test runs, TYPO3 writes its own errors into that test's database, in the

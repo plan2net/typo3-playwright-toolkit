@@ -10,8 +10,21 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **@plan2net/typo3-playwright-toolkit**, **plan2net/playwright-toolkit** — a
+  scenario can give its site other settings for its own test:
+  `siteSettings({ 'theme.look': 'wild' })` in the setup. Other tests keep the
+  site's values, also when they run at the same time. The values reach TypoScript
+  constants, `{site.settings}` and PHP that reads the site from the request. The
+  site's pages then render without the page cache. TYPO3 12.4 and newer.
+
 ### Fixed
 
+- **@plan2net/typo3-playwright-toolkit** — a scenario without a setup,
+  `defineScenario()`, gets its own test database too. Before, nothing created one,
+  so its test read and wrote the project's own database and saw none of the
+  template's content.
 - **@plan2net/typo3-playwright-toolkit** — the checks before the first test wait 30
   seconds for the site instead of 5. They run right after the caches were emptied, so
   TYPO3 builds them first, and on a larger site that took longer than 5 seconds: the

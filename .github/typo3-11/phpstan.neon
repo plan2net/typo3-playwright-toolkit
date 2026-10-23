@@ -7,11 +7,22 @@ parameters:
     # AtomicOutputGifBuilder overrides output() as 13.4 and 14.3 declare it.
     excludePaths:
         - '*/Compatibility/AtomicOutputGifBuilder.php'
+        # Builds SiteSettings, which arrived in 12.4; it skips itself on 11.5.
+        - '*/Tests/Functional/Site/SiteSettingsOverlayTest.php'
     # SessionCookieValue's method_exists() guard is redundant on 12+ and carries
     # an inline ignore for it. Here the guard is load-bearing, so that ignore
     # matches nothing — and ignore.unmatchedIdentifier is itself non-ignorable.
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
+        # Called only when Site has getTSconfig(), which arrived with getTypoScript() in 13.4.
+        -
+            message: '#^Call to an undefined method TYPO3\\CMS\\Core\\Site\\Entity\\Site::getTypoScript\(\)\.$#'
+            identifier: method.notFound
+            path: '*/Compatibility/SiteWithSettings.php'
+        -
+            message: '#^Class TYPO3\\CMS\\Core\\Site\\Entity\\Site constructor invoked with 6 parameters#'
+            identifier: arguments.count
+            path: '*/Compatibility/SiteWithSettings.php'
         # v11 documents SchemaMigrator::install() as returning array[] where 12+
         # says array<string, string>. Both return strings; the docblock is wrong.
         -

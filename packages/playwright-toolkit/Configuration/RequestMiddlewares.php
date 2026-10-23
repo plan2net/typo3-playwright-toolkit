@@ -10,7 +10,9 @@ use Plan2net\PlaywrightToolkit\Http\RecordEditDiagnostics;
 use Plan2net\PlaywrightToolkit\Http\RecordEditRefusal;
 use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
 use Plan2net\PlaywrightToolkit\Http\SiteProbe;
+use Plan2net\PlaywrightToolkit\Http\SiteSettingsProvider;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
+use Plan2net\PlaywrightToolkit\Site\SiteSettingsOverlay;
 
 return [
     'backend' => [
@@ -50,6 +52,12 @@ return [
                 'typo3/cms-backend/backend-routing',
             ],
         ],
+        'plan2net/playwright-toolkit/test-site-settings' => [
+            'target' => SiteSettingsProvider::class,
+            'before' => [
+                'typo3/cms-backend/backend-routing',
+            ],
+        ],
         'plan2net/playwright-toolkit/saved-slug' => [
             'target' => RecordEditDiagnostics::class,
             'before' => [
@@ -78,6 +86,15 @@ return [
         ],
         'plan2net/playwright-toolkit/site-probe' => [
             'target' => SiteProbe::class,
+            'after' => [
+                'typo3/cms-frontend/site',
+            ],
+            'before' => [
+                'typo3/cms-frontend/base-redirect-resolver',
+            ],
+        ],
+        'plan2net/playwright-toolkit/site-settings' => [
+            'target' => SiteSettingsOverlay::class,
             'after' => [
                 'typo3/cms-frontend/site',
             ],
