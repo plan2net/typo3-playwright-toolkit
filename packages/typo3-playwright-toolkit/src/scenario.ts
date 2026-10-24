@@ -118,11 +118,8 @@ export async function createScenarioFolder(
     name: string,
 ): Promise<ReplayFolder> {
     const folder = await new PageBuilder(page, builderContext)
-        .withTitle(name)
+        .withTitle(`Replay: ${name}`)
         .withField('doktype', SYSFOLDER_DOKTYPE)
-        // Or TYPO3 derives one from the title and the scenario's own page,
-        // wanting "/news" too, has to take "/news-1".
-        .withField('slug', `/replay-${name}`)
         .atParentId(builderContext.rootPageId ?? FIXTURE_ROOT_ID)
         .create()
 

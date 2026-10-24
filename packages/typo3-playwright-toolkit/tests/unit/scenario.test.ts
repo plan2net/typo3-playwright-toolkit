@@ -246,17 +246,15 @@ describe('createScenarioFolder', () => {
         await createScenarioFolder(page as never, { routeToken: 'tok' }, 'news')
 
         const record = Object.values(dataMap(posted[0].fields).pages)[0]
-        expect(record).toMatchObject({ doktype: '254', title: 'news', pid: '1' })
+        expect(record).toMatchObject({ doktype: '254', title: 'Replay: news', pid: '1' })
     })
 
-    // Without its own slug TYPO3 derives one from the title, and the scenario's
-    // page then has to take "/news-1" because its folder took "/news".
-    it('takes a namespaced slug so it cannot claim a page slug', async () => {
+    it('posts no slug, because a folder form shows that field only with some extensions', async () => {
         const { posted, page } = folderPage(900)
 
         await createScenarioFolder(page as never, { routeToken: 'tok' }, 'news')
 
-        expect(Object.values(dataMap(posted[0].fields).pages)[0].slug).toBe('/replay-news')
+        expect(Object.values(dataMap(posted[0].fields).pages)[0]).not.toHaveProperty('slug')
     })
 
     it('answers the folder uid with nothing claimed yet', async () => {

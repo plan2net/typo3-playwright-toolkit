@@ -25,6 +25,12 @@ the package a change belongs to.
   `defineScenario()`, gets its own test database too. Before, nothing created one,
   so its test read and wrote the project's own database and saw none of the
   template's content.
+- **@plan2net/typo3-playwright-toolkit** — replay mode works on sites whose folder
+  form has no slug field, such as any site running sluggi with its default
+  `exclude_doktypes`. Each scenario's folder posted a slug, and the toolkit refused
+  it: `"slug" is not in the form of type "254"`. The folder is now titled
+  `Replay: <scenario>`, so the slug TYPO3 makes from the title still cannot take a
+  page slug the scenario wants.
 - **@plan2net/typo3-playwright-toolkit** — the checks before the first test wait 30
   seconds for the site instead of 5. They run right after the caches were emptied, so
   TYPO3 builds them first, and on a larger site that took longer than 5 seconds: the
