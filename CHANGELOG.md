@@ -20,6 +20,10 @@ the package a change belongs to.
   that changes a page with `page.route()`. A plain `route.fetch()` there sent the request
   without the test ID, so the site used its normal database and often answered with its
   404 page. `fetchForTest` adds the test ID, but only for the site under test.
+- **@plan2net/typo3-playwright-toolkit** — a test can check the backend: the
+  `backendPage` fixture is logged into the backend on the test's own database, and
+  `editRecord(backendPage, table, uid)` opens a record's edit form and returns the frame
+  it shows in. The page opens only for a test that asks for it.
 
 ## [0.26.0] - 2026-10-27
 

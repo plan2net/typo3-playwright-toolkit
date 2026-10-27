@@ -428,6 +428,21 @@ Every request client carries the test ID for `testingURL`: the `request` that
 throwaway database the browser does. Requests to any other host get neither toolkit
 header.
 
+### Checking the backend
+
+What editors see — the buttons of the rich text editor, the types a column offers, a
+field a form leaves out — is checked on `backendPage`: a page logged into the backend on
+the test's own database, opened only for a test that asks for it. `editRecord` opens a
+record's edit form there and answers the frame it shows in:
+
+```ts
+test('offers no underline in the editor', async ({ backendPage, state }) => {
+    const form = await editRecord(backendPage, 'tt_content', state.text)
+
+    await expect(form.getByRole('button', { name: 'Underline' })).toHaveCount(0)
+})
+```
+
 ### Site settings for one test
 
 A scenario can give its site other settings than `settings.yaml` has, for its own

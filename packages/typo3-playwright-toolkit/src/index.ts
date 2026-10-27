@@ -6,6 +6,7 @@ export {
     type SetupTools,
 } from './scenario.js'
 export { siteURL } from './sites/registry.js'
+export { editRecord } from './backend.js'
 export { expect } from '@playwright/test'
 export {
     defineToolkitConfig,

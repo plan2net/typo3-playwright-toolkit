@@ -84,6 +84,11 @@ export interface SetupTools {
 export interface ScenarioFixtures<S> {
     state: S
     testId: string
+    /**
+     * A page logged into the backend on this test's database, for checks of the forms
+     * editors see; `editRecord()` opens one. Opened only for a test that asks for it.
+     */
+    backendPage: Page
 }
 
 export interface ScenarioOptions {
@@ -359,6 +364,26 @@ export function defineScenario<S = Record<string, never>>(
 
         testId: async ({ resolvedScenario }, use) => {
             await use(resolvedScenario.testId)
+        },
+
+        backendPage: async (
+            { browser, resolvedScenario, ignoreHTTPSErrors, httpCredentials, proxy },
+            use,
+            testInfo: TestInfo,
+        ) => {
+            const session = await openAuthenticatedPage(
+                browser,
+                getToolkitConfig(),
+                resolvedScenario.testId,
+                scenarioName(testInfo.file),
+                resolvedScenario.site,
+                { ignoreHTTPSErrors, httpCredentials, proxy },
+            )
+            try {
+                await use(session.page)
+            } finally {
+                await session.close()
+            }
         },
 
         baseURL: async ({ resolvedScenario }, use) => {
