@@ -10,6 +10,12 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-10-27
+
+A test can give its site other settings than the other tests see. Replay mode works
+with sluggi, a scenario without a setup gets its own database, and the checks before
+a run wait long enough for a larger site.
+
 ### Added
 
 - **@plan2net/typo3-playwright-toolkit**, **plan2net/playwright-toolkit** — a
@@ -1352,7 +1358,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.25.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.26.0...main
+[0.26.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.1...v0.24.0
 [0.23.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.0...v0.23.1
