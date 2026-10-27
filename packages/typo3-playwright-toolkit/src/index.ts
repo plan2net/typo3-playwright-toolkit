@@ -54,6 +54,7 @@ export {
 export { CspVerifier, type CspMode, type CspViolation } from './checks/csp.js'
 
 export { TEST_ID_HEADER, TEST_ID_PATTERN } from './contract.js'
+export { fetchForTest } from './http/off-site-headers.js'
 export { RUN_ID_ENV, RUN_ID_PATTERN } from './state/run-id.js'
 export type { NestedFields } from './types/common.js'
 export type { ContentFields, ContentBuilderInterface } from './types/content-builder.js'

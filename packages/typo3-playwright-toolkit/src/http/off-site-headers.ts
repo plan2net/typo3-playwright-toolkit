@@ -1,7 +1,7 @@
-import type { BrowserContext } from '@playwright/test'
+import type { APIResponse, BrowserContext, Route } from '@playwright/test'
 import { SECRET_HEADER } from './api-secret.js'
 import { TEST_ID_HEADER, browserHeaders } from '../contract.js'
-import type { ToolkitConfig } from '../config.js'
+import { getToolkitConfig, type ToolkitConfig } from '../config.js'
 import { testingOrigins } from '../sites/registry.js'
 import type { ContextWithTestId } from '../types/playwright-extensions.js'
 import { toolkitRequest } from './toolkit-request.js'
@@ -26,23 +26,55 @@ export async function applyToolkitHeaders(
     await context.route(
         () => true,
         async (route) => {
-            const headers = { ...route.request().headers() }
-
-            if (origins.has(new URL(route.request().url()).origin)) {
-                await route.fallback({ headers: { ...headers, ...browserHeaders(testId) } })
-
-                return
-            }
-
-            for (const name of TOOLKIT_HEADERS) {
-                delete headers[name]
-            }
-
-            await route.fallback({ headers })
+            const request = route.request()
+            await route.fallback({ headers: routedHeaders(request.url(), request.headers(), testId, origins) })
         },
     )
 
     const request = toolkitRequest(context.request, config, testId, (context as ContextWithTestId).site)
     Object.defineProperty(context, 'request', { value: request })
     context.on('page', (page) => Object.defineProperty(page, 'request', { value: request }))
+}
+
+/**
+ * route.fetch() with the test ID, for a test's own page.route() handler. That handler
+ * runs before the toolkit adds the ID, so a plain fetch would reach the site's normal
+ * database. Like every other request, only the site under test gets the ID.
+ */
+export function fetchForTest(
+    route: Route,
+    testId: string,
+    options: NonNullable<Parameters<Route['fetch']>[0]> = {},
+): Promise<APIResponse> {
+    const request = route.request()
+    const headers = { ...request.headers(), ...options.headers }
+    // The options may send the request to another address; that address decides
+    const url = options.url ?? request.url()
+
+    return route.fetch({
+        ...options,
+        headers: routedHeaders(url, headers, testId, testingOrigins(getToolkitConfig())),
+    })
+}
+
+function routedHeaders(
+    url: string,
+    requested: Record<string, string>,
+    testId: string,
+    origins: ReadonlySet<string>,
+): Record<string, string> {
+    const headers = { ...requested }
+
+    if (origins.has(new URL(url).origin)) {
+        return { ...headers, ...browserHeaders(testId) }
+    }
+
+    // Header names a test passes may be spelled in any case
+    for (const name of Object.keys(headers)) {
+        if (TOOLKIT_HEADERS.includes(name.toLowerCase())) {
+            delete headers[name]
+        }
+    }
+
+    return headers
 }

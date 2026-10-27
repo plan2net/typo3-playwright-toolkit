@@ -16,6 +16,10 @@ the package a change belongs to.
   record: `refusal()` on the page and content builders saves it and returns TYPO3's
   reasons, and fails when the record was saved after all. Any other failure is passed
   on. `saveRecord()` fails with a `RecordRefusedError`, which carries the same reasons.
+- **@plan2net/typo3-playwright-toolkit** — `fetchForTest(route, testId)`, for a test
+  that changes a page with `page.route()`. A plain `route.fetch()` there sent the request
+  without the test ID, so the site used its normal database and often answered with its
+  404 page. `fetchForTest` adds the test ID, but only for the site under test.
 
 ## [0.26.0] - 2026-10-27
 

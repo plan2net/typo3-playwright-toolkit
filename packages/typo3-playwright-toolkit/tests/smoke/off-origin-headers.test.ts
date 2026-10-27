@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import * as http from 'http'
-import { chromium, type Browser } from '@playwright/test'
-import { applyToolkitHeaders } from '#src/http/off-site-headers.js'
+import { chromium, type APIResponse, type Browser, type Route } from '@playwright/test'
+import { applyToolkitHeaders, fetchForTest } from '#src/http/off-site-headers.js'
 import { prepareScenarioContext } from '#src/http/prepare-context.js'
 import { toolkitRequest } from '#src/http/toolkit-request.js'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
@@ -182,6 +182,34 @@ describe('a redirect off the testing origin', () => {
         expect(receivedElsewhere[0]?.['x-playwright-test-id']).toBe(TEST_ID)
 
         await context.close()
+    })
+})
+
+describe("a test's own page.route() handler", () => {
+    async function testIdSent(fetch: (route: Route) => Promise<APIResponse>): Promise<string | string[] | undefined> {
+        setToolkitConfig(config(origin))
+        const context = await browser.newContext()
+        await prepareScenarioContext(context, config(origin), TEST_ID)
+        const page = await context.newPage()
+        await page.route(`${origin}/changed`, async (route) => {
+            const response = await fetch(route)
+            await route.fulfill({ response, body: (await response.text()).replace('ok', 'changed') })
+        })
+        received = []
+
+        await page.goto(`${origin}/changed`)
+        expect(await page.textContent('body')).toBe('changed')
+        await context.close()
+
+        return received[0]?.['x-playwright-test-id']
+    }
+
+    it('sends no test id with a plain route.fetch()', async () => {
+        expect(await testIdSent((route) => route.fetch())).toBeUndefined()
+    })
+
+    it('sends the test id with fetchForTest()', async () => {
+        expect(await testIdSent((route) => fetchForTest(route, TEST_ID))).toBe(TEST_ID)
     })
 })
 

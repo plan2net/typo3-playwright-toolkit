@@ -464,6 +464,24 @@ prepareContext: async (context) => {
 },
 ```
 
+### Changing a response in a test
+
+The toolkit adds the test ID to every request, so the site uses the test's database.
+A test that changes a page with `page.route()` gets its handler called before the
+toolkit adds the ID. A plain `route.fetch()` in it then reaches the site's normal
+database, where the test's pages do not exist, and you get the 404 page. Use
+`fetchForTest` instead: it adds the test ID, but only for the site under test.
+
+```ts
+test('works without the script', async ({ page, state, testId }) => {
+    await page.route(`**${state.slug}`, async (route) => {
+        const response = await fetchForTest(route, testId)
+        await route.fulfill({ response, body: (await response.text()).replace(/<script\b[\s\S]*?<\/script>/g, '') })
+    })
+    await page.goto(state.slug)
+})
+```
+
 ### Reusing a scenario's setup
 
 A scenario's setup posts its content through the real backend, which is the slowest

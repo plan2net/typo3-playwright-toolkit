@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { SECRET_HEADER } from '#src/http/api-secret.js'
 import { TEST_ID_HEADER } from '#src/contract.js'
-import { applyToolkitHeaders } from '#src/http/off-site-headers.js'
-import type { ToolkitConfig } from '#src/config.js'
+import { applyToolkitHeaders, fetchForTest } from '#src/http/off-site-headers.js'
+import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
 
 const TEST_ID = 'ABCD1234EFGH5678'
 
@@ -98,6 +98,61 @@ describe('applyToolkitHeaders', () => {
 
     it('hands a third party on as well, stripped rather than swallowed', async () => {
         expect((await handled('https://cdn.example.test/app.js', {})).via).toBe('fallback')
+    })
+})
+
+describe('fetchForTest', () => {
+    async function fetched(url: string, options?: { url?: string; headers?: Record<string, string> }) {
+        setToolkitConfig(config())
+        let sent: Record<string, string> = {}
+        const route = {
+            request: () => ({ url: () => url, headers: () => ({ accept: 'text/html' }) }),
+            fetch: async (fetchOptions: { headers: Record<string, string> }) => {
+                sent = fetchOptions.headers
+
+                return 'the response'
+            },
+        }
+
+        const response = await fetchForTest(route as never, TEST_ID, options)
+
+        return { response, sent }
+    }
+
+    it('sends the test id to the site under test and returns the response', async () => {
+        const { response, sent } = await fetched('https://site-testing.test/page')
+
+        expect(response).toBe('the response')
+        expect(sent[TEST_ID_HEADER]).toBe(TEST_ID)
+        expect(sent.accept).toBe('text/html')
+    })
+
+    it('keeps the headers the test adds', async () => {
+        const { sent } = await fetched('https://site-testing.test/page', { headers: { 'x-own': 'yes' } })
+
+        expect(sent['x-own']).toBe('yes')
+    })
+
+    it('sends no toolkit header to another server, even one the test passes', async () => {
+        const { sent } = await fetched('https://cdn.example.test/app.js', {
+            headers: { [TEST_ID_HEADER.toLowerCase()]: TEST_ID },
+        })
+
+        expect(sent).toEqual({ accept: 'text/html' })
+    })
+
+    it('sends no toolkit header to another server, in any spelling', async () => {
+        const { sent } = await fetched('https://cdn.example.test/app.js', {
+            headers: { [TEST_ID_HEADER]: TEST_ID, [SECRET_HEADER.toUpperCase()]: 'the-secret' },
+        })
+
+        expect(sent).toEqual({ accept: 'text/html' })
+    })
+
+    it('checks the address it really fetches, when the test gives another one', async () => {
+        const { sent } = await fetched('https://site-testing.test/page', { url: 'https://cdn.example.test/app.js' })
+
+        expect(sent[TEST_ID_HEADER]).toBeUndefined()
     })
 })
 
