@@ -3,7 +3,7 @@ import * as path from 'path'
 import { fileURLToPath } from 'url'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
-import { recordSaver, saveRecord, type FormPoster } from '#src/http/record-edit.js'
+import { recordSaver, RecordRefusedError, saveRecord, type FormPoster } from '#src/http/record-edit.js'
 import { SAVED_RECORD_HEADER } from '#src/contract.js'
 
 const TEST_ID = 'ABCD1234EFGH5678'
@@ -226,6 +226,21 @@ describe('saveRecord', () => {
                 data: { pages: { NEW1: { title: 'x' } } },
             }),
         ).rejects.toThrow(/sys_file_reference[\s\S]*not allowed[\s\S]*1 more/)
+    })
+
+    it('fails with a RecordRefusedError that holds what TYPO3 refused, so a test can expect it', async () => {
+        const message = 'The record "tt_content:NEW1" with CType "hero" in colPos "0" couldn\'t be saved'
+        const { poster } = fakePoster({ status: 422, refused: { errors: [{ message, table: 'tt_content' }], count: 1 } })
+
+        const error = await saveRecord(poster, context, {
+            table: 'tt_content',
+            identifier: 'NEW1',
+            target: 1,
+            data: { tt_content: { NEW1: { CType: 'hero' } } },
+        }).catch((caught: unknown) => caught)
+
+        expect(error).toBeInstanceOf(RecordRefusedError)
+        expect((error as RecordRefusedError).reasons).toEqual([message])
     })
 
     it('fails with what the site refused when it answered 422 and no redirect', async () => {

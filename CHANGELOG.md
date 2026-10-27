@@ -10,6 +10,13 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Added
+
+- **@plan2net/typo3-playwright-toolkit** — a test can expect the backend to refuse a
+  record: `refusal()` on the page and content builders saves it and returns TYPO3's
+  reasons, and fails when the record was saved after all. Any other failure is passed
+  on. `saveRecord()` fails with a `RecordRefusedError`, which carries the same reasons.
+
 ## [0.26.0] - 2026-10-27
 
 A test can give its site other settings than the other tests see. Replay mode works

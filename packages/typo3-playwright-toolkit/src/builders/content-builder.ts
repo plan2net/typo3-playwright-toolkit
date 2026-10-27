@@ -2,7 +2,7 @@ import { Page } from '@playwright/test'
 import { ContentBuilderInterface, type ContentFields } from '../types/content-builder.js'
 import { createContent } from './content-factory.js'
 import type { ContentTypeFor, ContentTypeKey } from './core-content.js'
-import { saveRecord, type RecordDataMap } from '../http/record-edit.js'
+import { refusalOf, saveRecord, type RecordDataMap } from '../http/record-edit.js'
 import { mergeRecords, RelationSet, type ChildRecord } from './relations.js'
 import { toColumnValues } from './fields.js'
 import { replayParentId, resolveRequestContext, type RequestContext } from './request-context.js'
@@ -146,6 +146,11 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         lastElementOnPage.get(this.page)?.set(pageId, saved.uid)
 
         return { id: String(saved.uid) }
+    }
+
+    /** Saves the element as create() does, for a test that expects the backend to refuse it: TYPO3's reasons. */
+    refusal(): Promise<string[]> {
+        return refusalOf(() => this.create())
     }
 
     prepared(

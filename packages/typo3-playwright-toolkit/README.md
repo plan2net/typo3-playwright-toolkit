@@ -237,6 +237,19 @@ A test that means to create such a record, say to cover an import, says so:
 await builders.content().onPage(pageId).ofType('text').withoutFormRules().create()
 ```
 
+A test that checks the backend refuses a record, a content type kept out of a column for
+example, saves it with `refusal()` instead of `create()`. It returns TYPO3's reasons, and
+fails when the record was saved after all. Any other failure, such as a lost session,
+passes through as an error, so it cannot pass as a refusal:
+
+```ts
+const reasons = await builders.page().atParentId(1).refusal()
+// in the test: expect(state.reasons).toContainEqual(expect.stringContaining('"title" is required.'))
+```
+
+A record saved with `saveRecord()` fails with a `RecordRefusedError`, whose `reasons`
+hold the same messages.
+
 <picture>
   <source media="(max-width: 700px)" srcset="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/scenario-fan-out-narrow.svg">
   <img width="880" src="https://raw.githubusercontent.com/plan2net/typo3-playwright-toolkit/main/diagrams/scenario-fan-out.svg"

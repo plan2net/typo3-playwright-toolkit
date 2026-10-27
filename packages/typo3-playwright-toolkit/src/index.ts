@@ -40,7 +40,7 @@ export {
     type ContentTypeMap,
     type CoreContentTypeMap,
 } from './builders/core-content.js'
-export type { RecordDataMap, RecordToSave } from './http/record-edit.js'
+export { RecordRefusedError, type RecordDataMap, type RecordToSave } from './http/record-edit.js'
 export { newRecordIdentifier } from './builders/identifier.js'
 export { flexForm, imageCrop, imageCrops } from './builders/fields.js'
 

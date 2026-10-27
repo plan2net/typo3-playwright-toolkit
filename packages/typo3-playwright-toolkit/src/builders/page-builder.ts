@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test'
 import { NestedFields } from '../types/common.js'
-import { saveRecord, type RecordDataMap } from '../http/record-edit.js'
+import { refusalOf, saveRecord, type RecordDataMap } from '../http/record-edit.js'
 import { replayParentId, requireTestId, resolveRequestContext, type RequestContext } from './request-context.js'
 import { toColumnValues } from './fields.js'
 import { newRecordIdentifier } from './identifier.js'
@@ -121,6 +121,11 @@ export class PageBuilder {
         context.replayFolder?.ownPages.add(String(saved.uid))
 
         return { id: String(saved.uid), slug: saved.slug ?? ((this.fields.slug as string) || '') }
+    }
+
+    /** Saves the page as create() does, for a test that expects the backend to refuse it: TYPO3's reasons. */
+    refusal(): Promise<string[]> {
+        return refusalOf(() => this.create())
     }
 
     async update(pageId: string): Promise<{ id: string; slug: string }> {

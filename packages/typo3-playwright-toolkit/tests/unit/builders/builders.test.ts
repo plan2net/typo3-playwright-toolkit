@@ -10,6 +10,7 @@ import { flexForm, imageCrop } from '#src/builders/fields.js'
 import { CoreContent } from '#src/builders/core-content.js'
 import type { ContentBuilderInterface, ContentFields } from '#src/types/content-builder.js'
 import type { RecordDataMap } from '#src/http/record-edit.js'
+import { RECORD_DIAGNOSTICS_HEADER } from '#src/contract.js'
 
 const TEST_ID = 'ABCD1234EFGH5678'
 const ROUTE_TOKEN = 'route-token'
@@ -100,6 +101,29 @@ function fakePage(uid: number | number[], refusalBody?: string, testId: string =
     }
 
     return { posted, page: page as unknown as ConstructorParameters<typeof PageBuilder>[0] }
+}
+
+/** Answers as the extension does when TYPO3 refused the record: 422, the reasons in a header. */
+function refusingPage(message: string): ConstructorParameters<typeof PageBuilder>[0] {
+    const page = {
+        url: () => 'https://example-testing.test/typo3/module/web/layout',
+        context: () => ({ testId: TEST_ID }),
+        testId: TEST_ID,
+        request: {
+            post: async () => ({
+                status: () => 422,
+                headers: () => ({
+                    [RECORD_DIAGNOSTICS_HEADER.toLowerCase()]: JSON.stringify({
+                        errors: [{ message, table: 'pages' }],
+                        count: 1,
+                    }),
+                }),
+                text: async () => '',
+            }),
+        },
+    }
+
+    return page as unknown as ConstructorParameters<typeof PageBuilder>[0]
 }
 
 function pageBuilder(page: ConstructorParameters<typeof PageBuilder>[0]): PageBuilder {
@@ -224,6 +248,24 @@ describe('PageBuilder', () => {
         const { page } = fakePage(1, 'pid 7 does not exist')
 
         await expect(pageBuilder(page).withTitle('A page').create()).rejects.toThrow(/pid 7 does not exist/)
+    })
+
+    it('answers what TYPO3 refused when a test expects the save to be refused', async () => {
+        const reason = 'The record "pages:NEW1" couldn\'t be saved due to disallowed value(s).'
+
+        await expect(pageBuilder(refusingPage(reason)).withTitle('A page').refusal()).resolves.toEqual([reason])
+    })
+
+    it('fails a refusal the test expected when TYPO3 saved the page after all', async () => {
+        const { page } = fakePage(7)
+
+        await expect(pageBuilder(page).withTitle('A page').refusal()).rejects.toThrow(/saved it as uid 7/)
+    })
+
+    it('passes on an error that is not a refusal, such as a page instead of a redirect', async () => {
+        const { page } = fakePage(1, 'pid 7 does not exist')
+
+        await expect(pageBuilder(page).withTitle('A page').refusal()).rejects.toThrow(/pid 7 does not exist/)
     })
 
     // update() used to post the *creation* URL, so it created a second record
@@ -413,6 +455,15 @@ describe('ContentBuilder', () => {
         const result = await contentBuilder(page).onPage('12').ofType('media_demo').create()
 
         expect(result.id).toBe('908')
+    })
+
+    it('answers what TYPO3 refused for a content element a test expects to be refused', async () => {
+        registerContentTypes({ media_demo: MediaContent })
+        const reason = 'The record "tt_content:NEW1" with CType "media_demo" in colPos "0" couldn\'t be saved.'
+
+        await expect(contentBuilder(refusingPage(reason)).onPage('12').ofType('media_demo').refusal()).resolves.toEqual([
+            reason,
+        ])
     })
 
     it('refuses to build a content element with no page', () => {

@@ -37,6 +37,42 @@ export interface SavedRecord {
     written?: Record<string, number>
 }
 
+/**
+ * TYPO3 itself refused the record, as opposed to a save that failed for want of a
+ * session or a token; `reasons` are its own messages.
+ */
+export class RecordRefusedError extends Error {
+    constructor(
+        message: string,
+        readonly reasons: string[],
+    ) {
+        super(message)
+        this.name = 'RecordRefusedError'
+    }
+}
+
+/**
+ * For a test that expects the backend to refuse a record: the reasons, or a
+ * failure when the record was saved after all. Any other error is passed on, so a
+ * broken setup does not pass as a refusal.
+ */
+export async function refusalOf(save: () => Promise<{ id: string }>): Promise<string[]> {
+    let saved: { id: string }
+    try {
+        saved = await save()
+    } catch (error) {
+        if (error instanceof RecordRefusedError) {
+            return error.reasons
+        }
+
+        throw error
+    }
+
+    throw new Error(
+        `[typo3-playwright-toolkit] The test expected TYPO3 to refuse this record, but it saved it as uid ${saved.id}.`,
+    )
+}
+
 /** saveRecord with the poster and context already bound. */
 export function recordSaver(
     poster: FormPoster,
@@ -202,8 +238,9 @@ function refuseWhatTypo3Rejected(headers: Record<string, string>, table: string)
     const advice = [...new Set(errors.map(({ message }) => adviceFor(message)).filter((line) => '' !== line))]
     const howToFix = 0 === advice.length ? '' : `\nWhat to do:\n${advice.map((line) => `  - ${line}`).join('\n')}`
 
-    throw new Error(
+    throw new RecordRefusedError(
         `[typo3-playwright-toolkit] TYPO3 refused a record while saving ${table}.\n${listed}${more}${howToFix}`,
+        errors.map(({ message }) => message),
     )
 }
 
