@@ -1,3 +1,8 @@
 {
-    "hero.png": { "title": "The hero", "alternative": "seeded by name" }
+    "hero.png": {
+        "title": "The hero",
+        "alternative": "seeded by name",
+        "translations": { "1": { "alternative": "vom Namen gesät" } }
+    },
+    "badge.svg": { "alternative": "a badge" }
 }

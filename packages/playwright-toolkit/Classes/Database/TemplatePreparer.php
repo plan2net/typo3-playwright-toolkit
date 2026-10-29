@@ -140,13 +140,13 @@ final class TemplatePreparer
             return;
         }
 
-        /** @var array<string, int> $map */
-        $map = $this->borrowedConnection->use(
+        /** @var array{array<string, int>, array<string, int>} $maps */
+        $maps = $this->borrowedConnection->use(
             $driver->templateConnectionOverrides(),
-            fn(): array => $this->mediaSeeder->readMap($mediaStorage)
+            fn(): array => [$this->mediaSeeder->readMap($mediaStorage), $this->mediaSeeder->readMetadataMap($mediaStorage)]
         );
 
-        $this->mediaManifest->write($map);
+        $this->mediaManifest->write(...$maps);
     }
 
     /**

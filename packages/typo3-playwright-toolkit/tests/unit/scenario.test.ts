@@ -70,7 +70,11 @@ function fakeBrowser(failAt: 'newPage' | 'session' | 'json' | 'cookies' | 'never
                                     throw new Error('not json')
                                 }
 
-                                return { cookieName: 'be_typo_user', cookieValue: 'jwt', tokens: {} }
+                                return {
+                                    cookieName: 'be_typo_user',
+                                    cookieValue: 'jwt',
+                                    tokens: { record_edit: 'edit-token', tce_db: 'command-token' },
+                                }
                             },
                         }
                     },
@@ -110,6 +114,14 @@ describe('openAuthenticatedPage', () => {
             expect(state.closed).toBe(true)
         },
     )
+
+    it('hands out the token the backend wants for a command', async () => {
+        const { browser } = fakeBrowser('never')
+
+        const session = await openAuthenticatedPage(browser as never, config(), 'ABCD1234EFGH5678')
+
+        expect(session.commandToken).toBe('command-token')
+    })
 
     it('leaves the context open when it succeeds', async () => {
         const { browser, state } = fakeBrowser('never')
@@ -267,8 +279,16 @@ describe('createScenarioFolder', () => {
     })
 
     describe('the context a scenario setup receives', () => {
-        const session = { backendPath: '/typo3', routeToken: 'tok' }
+        const session = { backendPath: '/typo3', routeToken: 'tok', commandToken: 'command-tok' }
         const replayConfig = (): ToolkitConfig => ({ ...config(), replay: true })
+
+        it('carries the token for a command', async () => {
+            const { page } = folderPage(900)
+
+            const context = await buildScenarioContext(page as never, config(), session, REPLAY_TEST_ID, 'news')
+
+            expect(context.commandToken).toBe('command-tok')
+        })
 
         it('carries the folder in replay mode', async () => {
             const { page } = folderPage(900)

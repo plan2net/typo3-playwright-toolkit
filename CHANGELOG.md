@@ -28,6 +28,29 @@ the package a change belongs to.
   `"translations": { "1": { "alternative": "…" } }` on a file or on a folder prefix.
   Prepare writes each language as a translation of the file's metadata, so a page in
   that language shows it.
+- **@plan2net/typo3-playwright-toolkit**, **plan2net/playwright-toolkit** — a scenario
+  can translate pages and content elements the way an editor does:
+  `page().translate(id, language)`, `content().translate(id, language, type?)`, and
+  `content().copyTo(id, language)` for a free copy. TYPO3 copies the files and child
+  records; `withCopiedFileReference(column, position, fields)` changes a copied file
+  reference, and `withFileReference()` adds one after the copies. The toolkit shows the
+  translation, which TYPO3 creates hidden. `fileMetadata(name)` changes a media
+  fixture's metadata and translates it with `.translate(language)`, and
+  `translateRecord()` translates a record of any other table. The extension answers
+  the backend's translate command with the new record and its file references, and
+  hands out the token for it. Translations need both packages of this release.
+- **plan2net/playwright-toolkit** — a translation that sets a field TCA keeps the same
+  in every language (`l10n_mode: exclude`) is refused with the field's name. TYPO3 shows
+  that field read-only on a translation and writes the original's value over it.
+
+### Fixed
+
+- **plan2net/playwright-toolkit** — a change to an existing file reference or other
+  inline child was refused as "not in the form", because its form was checked
+  collapsed, without its fields.
+- **plan2net/playwright-toolkit** — prepare no longer changes an SVG media fixture.
+  TYPO3 cleaned the file it added in place, which rewrote the fixture itself, and
+  the next run then reported the template as out of date.
 
 ## [0.26.0] - 2026-10-27
 

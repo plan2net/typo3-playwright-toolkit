@@ -61,11 +61,14 @@ final class MediaSeeder
 
         $files = [];
         foreach (MediaSources::scan($mediaPath) as $name => $path) {
+            // TYPO3 sanitizes what it adds in place, which would change the fixture
+            // after the template fingerprint was taken from it.
+            $copy = GeneralUtility::tempnam('playwright-media-');
+            copy($path, $copy);
             $files[$name] = self::asFile($storage->addFile(
-                $path,
+                $copy,
                 $this->folderFor($storage, $target['folder'], \dirname($name)),
-                basename($name),
-                removeOriginal: false
+                basename($name)
             ));
         }
 
@@ -152,6 +155,32 @@ final class MediaSeeder
         }
 
         ksort($map);
+
+        return $map;
+    }
+
+    /**
+     * @return array<string, int> name => default-language sys_file_metadata uid
+     */
+    public function readMetadataMap(string $mediaStorage = ''): array
+    {
+        $files = $this->readMap($mediaStorage);
+
+        $rows = $this->connectionPool->getConnectionForTable('sys_file_metadata')
+            ->executeQuery(
+                'SELECT m.uid, m.file FROM sys_file_metadata m INNER JOIN sys_file f ON f.uid = m.file'
+                . ' WHERE f.storage = ? AND m.sys_language_uid = 0',
+                [$this->resolveTarget($mediaStorage)['uid']]
+            )
+            ->fetchAllAssociative();
+
+        $metadataByFile = array_column($rows, 'uid', 'file');
+        $map = [];
+        foreach ($files as $name => $fileUid) {
+            if (isset($metadataByFile[$fileUid])) {
+                $map[$name] = (int) $metadataByFile[$fileUid];
+            }
+        }
 
         return $map;
     }

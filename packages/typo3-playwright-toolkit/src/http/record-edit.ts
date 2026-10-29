@@ -221,7 +221,7 @@ function warnAboutUnrequestedWrites(record: RecordToSave, written?: Record<strin
  * A refused child leaves the parent saved, so the request looks like a success
  * and the failure would only show up much later, somewhere else.
  */
-function refuseWhatTypo3Rejected(headers: Record<string, string>, table: string): void {
+export function refuseWhatTypo3Rejected(headers: Record<string, string>, table: string): void {
     const raw = header(headers, RECORD_DIAGNOSTICS_HEADER)
     if (undefined === raw) {
         return
@@ -321,12 +321,12 @@ function redirectTarget(status: number, headers: Record<string, string>): string
     return header(headers, 'location')
 }
 
-function header(headers: Record<string, string>, name: string): string | undefined {
+export function header(headers: Record<string, string>, name: string): string | undefined {
     return headers[name.toLowerCase()] ?? headers[name]
 }
 
 /** A malformed envelope is not worth failing a save over: the uid still stands. */
-function savedRecord(headers: Record<string, string>): { slug?: string; written?: Record<string, number> } {
+export function savedRecord(headers: Record<string, string>): { slug?: string; written?: Record<string, number> } {
     const value = header(headers, SAVED_RECORD_HEADER)
     if (undefined === value) {
         return {}

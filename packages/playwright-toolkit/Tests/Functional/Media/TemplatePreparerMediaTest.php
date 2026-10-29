@@ -68,6 +68,18 @@ final class TemplatePreparerMediaTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function writesTheMetadataRecordOfEveryFixtureBesideTheManifest(): void
+    {
+        $this->get(TemplatePreparer::class)->prepare();
+
+        $file = $this->get(MediaManifest::class)->metadataFile();
+        self::assertFileExists($file);
+        $metadata = (array) json_decode((string) file_get_contents($file), true, flags: JSON_THROW_ON_ERROR);
+        self::assertSame(['hero.png'], array_keys($metadata));
+        self::assertGreaterThan(0, $metadata['hero.png']);
+    }
+
+    #[Test]
     public function rebuildsNothingWhenTheSourcesAndTheDestinationAreUnchanged(): void
     {
         $preparer = $this->get(TemplatePreparer::class);

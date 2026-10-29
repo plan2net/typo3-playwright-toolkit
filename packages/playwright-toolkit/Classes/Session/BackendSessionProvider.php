@@ -41,7 +41,7 @@ final class BackendSessionProvider implements MiddlewareInterface, LoggerAwareIn
     /**
      * @var list<string>
      */
-    private const TOKENED_ROUTES = ['record_edit'];
+    private const TOKENED_ROUTES = ['record_edit', 'tce_db'];
 
     public function __construct(
         private readonly ToolkitConfigurationFactory $configurationFactory,

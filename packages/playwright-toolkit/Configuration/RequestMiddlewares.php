@@ -11,6 +11,7 @@ use Plan2net\PlaywrightToolkit\Http\RecordEditRefusal;
 use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
 use Plan2net\PlaywrightToolkit\Http\SiteProbe;
 use Plan2net\PlaywrightToolkit\Http\SiteSettingsProvider;
+use Plan2net\PlaywrightToolkit\Http\TranslatedRecordReport;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
 use Plan2net\PlaywrightToolkit\Site\SiteSettingsOverlay;
 
@@ -60,6 +61,12 @@ return [
         ],
         'plan2net/playwright-toolkit/saved-slug' => [
             'target' => RecordEditDiagnostics::class,
+            'before' => [
+                'typo3/cms-backend/backend-routing',
+            ],
+        ],
+        'plan2net/playwright-toolkit/translated-record' => [
+            'target' => TranslatedRecordReport::class,
             'before' => [
                 'typo3/cms-backend/backend-routing',
             ],

@@ -192,6 +192,17 @@ final class MediaSeederTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function leavesAFixtureAsItWasEvenWhenTypo3RewritesWhatItStores(): void
+    {
+        $source = '<svg xmlns="http://www.w3.org/2000/svg" width="4" height="3"><rect width="4" height="3"/></svg>';
+        $this->givenFile('badge.svg', $source);
+
+        $this->get(MediaSeeder::class)->seed($this->mediaPath);
+
+        self::assertSame($source, file_get_contents($this->mediaPath . '/badge.svg'));
+    }
+
+    #[Test]
     public function writesTheTranslatedMetadataAsATranslationOfTheDefaultRow(): void
     {
         $this->givenImage('hero.png');

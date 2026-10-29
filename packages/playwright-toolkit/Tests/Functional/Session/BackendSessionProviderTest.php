@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Plan2net\PlaywrightToolkit\Tests\Functional\Session;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Plan2net\PlaywrightToolkit\Database\SeededBackendUser;
 use Plan2net\PlaywrightToolkit\Database\SeededSession;
@@ -81,8 +82,20 @@ final class BackendSessionProviderTest extends FunctionalTestCase
      * refuses without a route token. Asserting core validates it, rather than
      * asserting a shape, is what keeps us from reimplementing its hashing.
      */
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function tokenedRoutes(): array
+    {
+        return [
+            'saving a record' => ['record_edit'],
+            'running a command' => ['tce_db'],
+        ];
+    }
+
     #[Test]
-    public function theSessionResponseCarriesARouteTokenCoreAccepts(): void
+    #[DataProvider('tokenedRoutes')]
+    public function theSessionResponseCarriesARouteTokenCoreAccepts(string $route): void
     {
         $this->seedSessionAndBackendUser();
 
@@ -95,7 +108,7 @@ final class BackendSessionProviderTest extends FunctionalTestCase
         $payload = json_decode((string) $response->getBody(), true);
         self::assertTrue($payload['success'] ?? false, (string) $response->getBody());
 
-        $token = $payload['tokens']['record_edit'] ?? null;
+        $token = $payload['tokens'][$route] ?? null;
         self::assertIsString($token);
 
         $backendUser = GeneralUtility::makeInstance(BackendUserAuthentication::class);
@@ -112,7 +125,7 @@ final class BackendSessionProviderTest extends FunctionalTestCase
             $backendUser,
             GeneralUtility::makeInstance(Registry::class),
         );
-        self::assertTrue($formProtection->validateToken($token, 'route', 'record_edit'));
+        self::assertTrue($formProtection->validateToken($token, 'route', $route));
     }
 
     /**

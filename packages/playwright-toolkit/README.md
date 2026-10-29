@@ -475,6 +475,16 @@ Testing context only. It needs a test ID, so the base database never gets any.
 A save through `record/edit` is also checked: a posted column that TCA does not have
 is answered with `422` and the column name, instead of being dropped in silence. Only
 a request carrying the secret is checked, so an editor saving a form is untouched.
+On a translation, a field TCA keeps the same in every language (`l10n_mode: exclude`)
+is refused the same way, since TYPO3 would replace the posted value with the
+original's.
+
+A translation goes through `record/commit`, the route the backend's own "translate"
+link uses, with TYPO3's `localize` or `copyToLanguage` command. For a request carrying
+the secret, the answer names the new record in `X-Playwright-Translated-Record`: its
+uid, its page, and its file references per column in the order they show. A page also
+gets its slug, as on `record/edit`. The session endpoint hands out a route token for
+both routes.
 
 ### Looking at a kept database
 

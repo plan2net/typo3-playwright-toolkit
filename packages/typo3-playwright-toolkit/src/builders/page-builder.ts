@@ -2,9 +2,10 @@ import { Page } from '@playwright/test'
 import { NestedFields } from '../types/common.js'
 import { refusalOf, saveRecord, type RecordDataMap } from '../http/record-edit.js'
 import { replayParentId, requireTestId, resolveRequestContext, type RequestContext } from './request-context.js'
-import { toColumnValues } from './fields.js'
+import { ownValues, toColumnValues } from './fields.js'
 import { newRecordIdentifier } from './identifier.js'
-import { mergeRecords, RelationSet } from './relations.js'
+import { keepCopies, mergeRecords, RelationSet, type CopiedReferenceEdit } from './relations.js'
+import { translateRecord } from '../http/record-commit.js'
 import type { ContentFields } from '../types/content-builder.js'
 import { getToolkitConfig } from '../config.js'
 
@@ -34,11 +35,16 @@ const CREATE_DEFAULTS: Fields = {
     hidden: false,
 }
 
+/** TYPO3 hides what it translates, for an editor to check first. */
+export const TRANSLATION_DEFAULTS: Fields = { hidden: false }
+
 export class PageBuilder {
     protected fields: Fields = {}
 
     private page: Page
     private optedOutOfFormRules = false
+    private translation?: { origin: number; language: number }
+    private readonly copiedEdits: CopiedReferenceEdit[] = []
     private readonly relations = new RelationSet('pages', (column) => column in this.fields)
     private readonly requestContext?: Partial<RequestContext>
 
@@ -83,6 +89,23 @@ export class PageBuilder {
         return this
     }
 
+    /**
+     * Makes create() translate the page the way the backend does, connected to it.
+     * The other setters then fill the translation.
+     */
+    translate(pageId: number | string, language: number): this {
+        this.translation = { origin: Number(pageId), language }
+
+        return this
+    }
+
+    /** Changes the reference the translation copied from that position (from 0) of the origin's column. */
+    withCopiedFileReference(column: string, position: number, fields: ContentFields): this {
+        this.copiedEdits.push({ column, position, fields })
+
+        return this
+    }
+
     /** A name core ships, or a number if your project registered its own doktype. */
     withDoktype(type: Doktype | number): this {
         this.fields.doktype = 'number' === typeof type ? type : DOKTYPES[type]
@@ -97,6 +120,10 @@ export class PageBuilder {
     }
 
     async create(): Promise<{ id: string; slug: string }> {
+        if (undefined !== this.translation) {
+            return this.createTranslation(this.translation)
+        }
+
         const context = resolveRequestContext(this.page, this.requestContext)
         const fields = { ...CREATE_DEFAULTS, pid: context.rootPageId ?? CREATE_DEFAULTS.pid, ...this.fields }
         const identifier = newRecordIdentifier()
@@ -144,6 +171,44 @@ export class PageBuilder {
         })
 
         return { id: pageId, slug: saved.slug ?? ((this.fields.slug as string) || '') }
+    }
+
+    private async createTranslation(translation: { origin: number; language: number }): Promise<{ id: string; slug: string }> {
+        if ('pid' in this.fields || 'doktype' in this.fields) {
+            throw new Error(
+                '[typo3-playwright-toolkit] A page translation takes its parent and its type from the page it ' +
+                    'translates. Leave out atParentId() and withDoktype().',
+            )
+        }
+
+        const context = resolveRequestContext(this.page, this.requestContext)
+        const translated = await translateRecord(this.page.request, context, {
+            table: 'pages',
+            uid: translation.origin,
+            language: translation.language,
+            mode: 'localize',
+        })
+        const id = String(translated.uid)
+
+        const { columns, records } = keepCopies(
+            this.relations.materialise({ pid: translated.uid, sys_language_uid: translation.language }),
+            translated,
+            this.copiedEdits,
+        )
+        const row = { ...toColumnValues({ ...TRANSLATION_DEFAULTS, ...this.fields }), ...columns }
+        const data: RecordDataMap = { pages: { [id]: { ...row, l10n_state: ownValues(Object.keys(row)) } } }
+        mergeRecords(data, records)
+
+        const saved = await saveRecord(this.page.request, context, {
+            table: 'pages',
+            identifier: id,
+            target: translated.uid,
+            data,
+            withoutFormRules: this.optedOutOfFormRules,
+        })
+        this.rememberSlug(context, saved.slug)
+
+        return { id, slug: saved.slug ?? translated.slug ?? '' }
     }
 
     private rememberSlug(context: RequestContext, stored: string | undefined): void {

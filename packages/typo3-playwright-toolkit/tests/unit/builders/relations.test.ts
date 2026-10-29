@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-import { ChildRecord, mergeRecords, RelationSet } from '#src/builders/relations.js'
+import { ChildRecord, keepCopies, mergeRecords, RelationSet } from '#src/builders/relations.js'
 import { setToolkitConfig, type ToolkitConfig } from '#src/config.js'
 import { mediaManifestFileFor } from '#src/media/media-manifest.js'
 
@@ -240,5 +240,58 @@ describe('merging two sets of records', () => {
         expect(() => mergeRecords(into, { tt_content: { NEWsame: { header: 'Second' } } })).toThrow(
             /tt_content/,
         )
+    })
+})
+
+describe('the references a translation copied', () => {
+    const copied = { references: { assets: [21, 22] }, truncated: false }
+
+    it('come first in a column the translation adds to, in the order of the origin', () => {
+        const kept = keepCopies({ columns: { assets: 'NEWa' }, records: {} }, copied, [])
+
+        expect(kept.columns).toEqual({ assets: '21,22,NEWa' })
+    })
+
+    it('leave a column the translation does not touch out of the post', () => {
+        const kept = keepCopies({ columns: {}, records: {} }, copied, [])
+
+        expect(kept.columns).toEqual({})
+    })
+
+    it('take the fields of an edit at their position, and keep the column as it was', () => {
+        const kept = keepCopies({ columns: {}, records: {} }, copied, [
+            { column: 'assets', position: 1, fields: { alternative: 'Zwei' } },
+        ])
+
+        expect(kept).toEqual({
+            columns: { assets: '21,22' },
+            records: { sys_file_reference: { '22': { alternative: 'Zwei' } } },
+        })
+    })
+
+    it('refuse an edit past the last copy', () => {
+        expect(() =>
+            keepCopies({ columns: {}, records: {} }, copied, [{ column: 'assets', position: 2, fields: {} }]),
+        ).toThrow(/2 references in assets/)
+    })
+
+    it('refuse to touch a column when the copies did not fit the header', () => {
+        expect(() =>
+            keepCopies({ columns: { assets: 'NEWa' }, records: {} }, { references: {}, truncated: true }, []),
+        ).toThrow(/too many references/)
+    })
+
+    it('do not stand in the way of a translation that only sets fields', () => {
+        const kept = keepCopies({ columns: {}, records: {} }, { references: {}, truncated: true }, [])
+
+        expect(kept).toEqual({ columns: {}, records: {} })
+    })
+
+    it('refuse an edit that would point a copy elsewhere', () => {
+        expect(() =>
+            keepCopies({ columns: {}, records: {} }, copied, [
+                { column: 'assets', position: 0, fields: { uid_foreign: 9 } },
+            ]),
+        ).toThrow(/uid_foreign/)
     })
 })

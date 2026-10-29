@@ -5,6 +5,7 @@ import * as rootEntry from '#src/index.js'
 import * as playwrightEntry from '#src/playwright/index.js'
 import { defineBasePlaywrightConfig, defineToolkitConfig } from '#src/playwright/index.js'
 import { GenericTextContent } from '../fixtures/generic-content.js'
+import type { SetupTools } from '#src/scenario.js'
 
 const README = fs.readFileSync(path.join(import.meta.dirname, '../../README.md'), 'utf-8')
 
@@ -87,6 +88,37 @@ describe('the documented configuration example', () => {
                 expect(Object.keys(rootEntry)).toContain(name)
             }
         }
+    })
+
+    it('compiles the translation examples', () => {
+        const translations = async ({ builders, translateRecord, saveRecord }: SetupTools) => {
+            const products = await builders.page().withTitle('Products').withSlug('/products')
+                .withFileReference('media', 'hero.png')
+                .create()
+            const gallery = await builders.content().onPage(products.id).ofType('textmedia')
+                .configure((element) => element.withHeader('Gallery').withFiles(['hero.png', 'lawn.jpg']))
+                .create()
+
+            const german = await builders.page().translate(products.id, 1)
+                .withTitle('Produkte')
+                .withSlug('/produkte')
+                .create()
+            await builders.content().translate(gallery.id, 1, 'textmedia')
+                .configure((element) => element.withHeader('Galerie'))
+                .withCopiedFileReference('assets', 1, { alternative: 'Rasen' })
+                .withFileReference('assets', 'badge.svg')
+                .create()
+            await builders.content().copyTo(gallery.id, 1).withField('header', 'Galerie').create()
+            await builders.fileMetadata('badge.svg').translate(1).withField('alternative', 'Abzeichen').create()
+
+            const { uid } = await translateRecord({ table: 'tx_shop_product', uid: 7, language: 1, mode: 'localize' })
+            await saveRecord({ table: 'tx_shop_product', identifier: String(uid), target: uid,
+                data: { tx_shop_product: { [uid]: { title: 'Gartenschere', hidden: 0 } } } })
+
+            return { slug: german.slug }
+        }
+
+        expect(typeof translations).toBe('function')
     })
 
     it('imports only names the /playwright entry actually exports', () => {

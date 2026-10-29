@@ -89,4 +89,28 @@ final class MediaManifestTest extends TestCase
             (string) file_get_contents($file)
         );
     }
+
+    #[Test]
+    public function writesTheMetadataRecordsToAFileOfTheirOwn(): void
+    {
+        $manifest = new MediaManifest($this->directory . '/media.json');
+
+        $manifest->write(['hero.png' => 900001], ['hero.png' => 41, 'gallery/lawn-01.jpg' => 42]);
+
+        self::assertJsonStringEqualsJsonString(
+            ContractFixture::contents('media-metadata-manifest'),
+            (string) file_get_contents($manifest->metadataFile())
+        );
+    }
+
+    #[Test]
+    public function removesTheMetadataRecordsWithTheManifest(): void
+    {
+        $manifest = new MediaManifest($this->directory . '/media.json');
+        $manifest->write(['hero.png' => 900001], ['hero.png' => 41]);
+
+        $manifest->remove();
+
+        self::assertFileDoesNotExist($manifest->metadataFile());
+    }
 }

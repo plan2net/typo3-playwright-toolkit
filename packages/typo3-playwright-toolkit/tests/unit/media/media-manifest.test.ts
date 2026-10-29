@@ -3,7 +3,12 @@ import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
 import type { ToolkitConfig } from '#src/config.js'
-import { mediaManifestFileFor, resolveMediaUid } from '#src/media/media-manifest.js'
+import {
+    mediaManifestFileFor,
+    metadataManifestFileFor,
+    resolveMediaUid,
+    resolveMetadataUid,
+} from '#src/media/media-manifest.js'
 
 let root: string
 
@@ -51,6 +56,31 @@ describe('resolveMediaUid', () => {
         expect(() => resolveMediaUid(configFor(root), 'hero.png')).toThrow(
             /No media manifest at[\s\S]*playwright-prepare[\s\S]*numeric sys_file uid/,
         )
+    })
+})
+
+describe('resolveMetadataUid', () => {
+    it('resolves a name to the metadata record prepare wrote beside the manifest', () => {
+        const file = metadataManifestFileFor(configFor(root))
+        fs.mkdirSync(path.dirname(file), { recursive: true })
+        fs.writeFileSync(file, JSON.stringify({ 'hero.png': 41 }))
+
+        expect(resolveMetadataUid(configFor(root), 'hero.png')).toBe(41)
+    })
+
+    it('says which extension writes the file when it is missing', () => {
+        expect(() => resolveMetadataUid(configFor(root), 'hero.png')).toThrow(
+            /plan2net\/playwright-toolkit 0\.27\.0[\s\S]*playwright-prepare/,
+        )
+    })
+
+    it('resolves the names in the contract fixture', () => {
+        const repoRoot = path.resolve(new URL(import.meta.url).pathname, '../../../../../..')
+        const file = metadataManifestFileFor(configFor(root))
+        fs.mkdirSync(path.dirname(file), { recursive: true })
+        fs.copyFileSync(path.join(repoRoot, 'contract', 'media-metadata-manifest.json'), file)
+
+        expect(resolveMetadataUid(configFor(root), 'gallery/lawn-01.jpg')).toBe(42)
     })
 })
 

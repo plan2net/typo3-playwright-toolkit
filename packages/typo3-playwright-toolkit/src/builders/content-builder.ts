@@ -3,8 +3,10 @@ import { ContentBuilderInterface, type ContentFields } from '../types/content-bu
 import { createContent } from './content-factory.js'
 import type { ContentTypeFor, ContentTypeKey } from './core-content.js'
 import { refusalOf, saveRecord, type RecordDataMap } from '../http/record-edit.js'
-import { mergeRecords, RelationSet, type ChildRecord } from './relations.js'
-import { toColumnValues } from './fields.js'
+import { keepCopies, mergeRecords, RelationSet, type ChildRecord, type CopiedReferenceEdit } from './relations.js'
+import { ownValues, toColumnValues } from './fields.js'
+import { translateRecord, type TranslationMode } from '../http/record-commit.js'
+import { TRANSLATION_DEFAULTS } from './page-builder.js'
 import { replayParentId, resolveRequestContext, type RequestContext } from './request-context.js'
 import { newRecordIdentifier } from './identifier.js'
 
@@ -41,13 +43,52 @@ export class ContentBuilder {
 
         return new TypedContentBuilder(this.page, this.pageId, type, this.requestContext)
     }
+
+    /**
+     * Makes create() translate the element the way the backend does, connected to
+     * it. Name its type to reach that type's setters through configure().
+     */
+    translate<K extends ContentTypeKey>(contentId: number | string, language: number, type: K): TypedContentBuilder<ContentTypeFor<K>>
+    translate(contentId: number | string, language: number, type?: string): TypedContentBuilder<ContentBuilderInterface>
+    translate(contentId: number | string, language: number, type?: string): TypedContentBuilder<ContentBuilderInterface> {
+        return this.translation(contentId, language, 'localize', type)
+    }
+
+    /** Like translate(), as a free copy: connected to nothing, so it follows no change of the origin. */
+    copyTo<K extends ContentTypeKey>(contentId: number | string, language: number, type: K): TypedContentBuilder<ContentTypeFor<K>>
+    copyTo(contentId: number | string, language: number, type?: string): TypedContentBuilder<ContentBuilderInterface>
+    copyTo(contentId: number | string, language: number, type?: string): TypedContentBuilder<ContentBuilderInterface> {
+        return this.translation(contentId, language, 'copyToLanguage', type)
+    }
+
+    private translation(
+        contentId: number | string,
+        language: number,
+        mode: TranslationMode,
+        type?: string,
+    ): TypedContentBuilder<ContentBuilderInterface> {
+        return new TypedContentBuilder(this.page, this.pageId, type, this.requestContext, {
+            origin: Number(contentId),
+            language,
+            mode,
+        })
+    }
 }
+
+interface ContentTranslation {
+    origin: number
+    language: number
+    mode: TranslationMode
+}
+
+const UNTYPED: ContentBuilderInterface = { type: '', getFields: () => ({}) }
 
 /** What `batch()` needs of a queued element, whatever CType it builds. */
 export interface QueuedContent {
     readonly identifier: string
     readonly targetPageId: string
     readonly skipsFormRules: boolean
+    readonly translates?: boolean
     prepared(
         context: RequestContext,
         positionPid: string,
@@ -62,15 +103,17 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
     private builder: ContentBuilderInterface
     private optedOutOfFormRules = false
     private readonly fields: ContentFields = {}
+    private readonly copiedEdits: CopiedReferenceEdit[] = []
     private readonly relations = new RelationSet('tt_content', (column) => column in this.fields)
 
     constructor(
         private page: Page,
         private pageId: string,
-        type: string,
+        type: string | undefined,
         private requestContext?: Partial<RequestContext>,
+        private readonly translation?: ContentTranslation,
     ) {
-        this.builder = createContent(type)
+        this.builder = undefined === type ? UNTYPED : createContent(type)
     }
 
     get targetPageId(): string {
@@ -79,6 +122,10 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
 
     get skipsFormRules(): boolean {
         return this.optedOutOfFormRules
+    }
+
+    get translates(): boolean {
+        return undefined !== this.translation
     }
 
     configure(fn: (builder: B) => void): this {
@@ -127,7 +174,18 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
         return this
     }
 
+    /** On a translation: changes the reference it copied from that position (from 0) of the origin's column. */
+    withCopiedFileReference(column: string, position: number, fields: ContentFields): this {
+        this.copiedEdits.push({ column, position, fields })
+
+        return this
+    }
+
     async create(): Promise<{ id: string }> {
+        if (undefined !== this.translation) {
+            return this.createTranslation(this.translation)
+        }
+
         const context = resolveRequestContext(this.page, this.requestContext)
         const pageId = replayParentId(context, this.pageId)
         const { row, records } = this.prepared(context, insertPosition(this.page, pageId))
@@ -191,6 +249,49 @@ class TypedContentBuilder<B extends ContentBuilderInterface = ContentBuilderInte
 
         return { row, records }
     }
+
+    private async createTranslation(translation: ContentTranslation): Promise<{ id: string }> {
+        const context = resolveRequestContext(this.page, this.requestContext)
+        const translated = await translateRecord(this.page.request, context, {
+            table: 'tt_content',
+            uid: translation.origin,
+            language: translation.language,
+            mode: translation.mode,
+        })
+        const id = String(translated.uid)
+
+        const owner = { pid: translated.pid, sys_language_uid: translation.language }
+        const inner = this.builder.getRelations?.(owner) ?? { columns: {}, records: {} }
+        const outer = this.relations.materialise(owner)
+        refuseSharedColumns(inner.columns, outer.columns)
+        const added: RecordDataMap = {}
+        mergeRecords(added, inner.records)
+        mergeRecords(added, outer.records)
+        const { columns, records } = keepCopies(
+            { columns: { ...inner.columns, ...outer.columns }, records: added },
+            translated,
+            this.copiedEdits,
+        )
+
+        const own = Object.fromEntries(Object.entries(this.builder.getFields()).filter(([column]) => 'CType' !== column))
+        const row: Record<string, unknown> = {
+            ...toColumnValues({ ...TRANSLATION_DEFAULTS, ...own, ...this.fields }),
+            ...columns,
+        }
+        const state = 'localize' === translation.mode ? { l10n_state: ownValues(Object.keys(row)) } : {}
+        const data: RecordDataMap = { tt_content: { [id]: { ...row, ...state } } }
+        mergeRecords(data, records)
+
+        await saveRecord(this.page.request, context, {
+            table: 'tt_content',
+            identifier: id,
+            target: translated.uid,
+            data,
+            withoutFormRules: this.optedOutOfFormRules,
+        })
+
+        return { id }
+    }
 }
 
 /**
@@ -206,6 +307,13 @@ export async function saveBatch(
 ): Promise<Array<{ id: string }>> {
     if (0 === queued.length) {
         throw new Error('[typo3-playwright-toolkit] batch() was given nothing to build.')
+    }
+
+    if (queued.some((element) => element.translates)) {
+        throw new Error(
+            '[typo3-playwright-toolkit] A translation cannot join a batch: the backend makes it with a ' +
+                'command of its own. Call create() on it instead.',
+        )
     }
 
     const context = resolveRequestContext(page, requestContext)

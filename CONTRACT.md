@@ -14,10 +14,12 @@ Read this before you change anything that touches a test ID.
 | Secret header | `X-Playwright-Toolkit-Secret` | npm `SECRET_HEADER`, PHP `TestApiSecret::HEADER` |
 | Saved record header | `X-Playwright-Saved-Record` | npm `SAVED_RECORD_HEADER`, PHP `SavedRecord::HEADER` |
 | Refused record header | `X-Playwright-Record-Diagnostics` | npm `RECORD_DIAGNOSTICS_HEADER`, PHP `RecordDiagnostics::HEADER` |
+| Translated record header | `X-Playwright-Translated-Record` | npm `TRANSLATED_RECORD_HEADER`, PHP `TranslatedRecord::HEADER` |
 | Skip form rules header | `X-Playwright-Skip-Form-Rules` | npm `SKIP_FORM_RULES_HEADER`, PHP `RecordEditRefusal::SKIP_FORM_RULES_HEADER` |
 | Site probe header | `X-Playwright-Probe` | npm `PROBE_HEADER`, PHP `SiteProbe::HEADER` |
 | Secret file | `var/playwright/api-secret` | PHP writes it, npm reads it |
 | Media manifest | `var/playwright/media.json` | PHP writes it, npm reads it |
+| Media metadata manifest | `var/playwright/media-metadata.json` | PHP writes it, npm reads it |
 | Secret override | `PLAYWRIGHT_TOOLKIT_SECRET` | environment, read by both |
 | Server key | `HTTP_X_PLAYWRIGHT_TEST_ID` | PHP `TestContext::TEST_ID_SERVER_KEY` |
 | Database prefix | `db` | PHP `TestContext::DATABASE_PREFIX` |
@@ -185,7 +187,10 @@ order:
 - what the backend form would not save for that user: a posted field the form of the
   posted type and values does not show, and a field breaking `required`, `minitems`,
   `maxitems`, `range` or `min`, FlexForm fields and inline children included
-  (`contract/record-diagnostics-form-rule.json`).
+  (`contract/record-diagnostics-form-rule.json`);
+- on a translation, a posted field TCA keeps the same in every language
+  (`l10n_mode: exclude`): the form shows it read-only and DataHandler writes the
+  original's value over it.
 
 `count` is the number of refusals; `errors` holds as many as fit in a header a webserver
 will pass on, so it can hold fewer. A caller with a `count` larger than that reads the
@@ -204,9 +209,12 @@ secret; the toolkit sends it for a builder that called `.withoutFormRules()`.
     "cookieName": "be_typo_user",
     "cookieValue": "<cookie>",
     "backendPath": "/typo3",
-    "tokens": { "record_edit": "…" }
+    "tokens": { "record_edit": "…", "tce_db": "…" }
 }
 ```
+
+`tce_db` is the token of `record/commit`, below. An extension older than 0.27.0 hands
+out only `record_edit`, and the toolkit then refuses a translation by name.
 
 **The names are reported, never assumed.** `BE/cookieName` and `BE/entryPoint` are
 both a project's to change, so the extension reads them and the toolkit uses what
@@ -240,6 +248,40 @@ When you post a record:
 
 **Never add a way to skip the request token.** The tests exist to exercise the real
 one.
+
+### Translating records
+
+A translation is the backend's own command, posted to `record/commit` (route `tce_db`),
+the route its "translate" link uses:
+
+- put the `tce_db` token in `?token=`
+- post `cmd[<table>][<uid>][localize]=<language>` for a translation connected to its
+  original, or `cmd[<table>][<uid>][copyToLanguage]=<language>` for a free copy
+- send one command per request, and do not follow a redirect.
+
+For a request carrying the secret, `TranslatedRecordReport` reads the new record from
+the database after the command ran and answers (`contract/translated-record-header.json`):
+
+```
+X-Playwright-Translated-Record: {"uid":3,"pid":2,"references":{"media":[6,7]}}
+```
+
+`references` lists the record's file references per column, in the order they show.
+TYPO3 copies an original's references in their order, so position *n* is the copy of
+the original's position *n*. When the list does not fit 2000 bytes it is left out and
+`"truncated": true` takes its place; `uid` and `pid` are always there. A page also gets
+`X-Playwright-Saved-Record` with its slug. When TYPO3 made no translation, the
+translated-record header is absent and `X-Playwright-Record-Diagnostics` carries its
+reasons. Fill the translation through `record/edit` afterwards, posting
+`l10n_state[<column>]=custom` for each column of a connected translation, as the backend
+form does when an editor gives it a value of its own.
+
+A column posted for a file field is the whole list of its references. TYPO3 keeps a
+reference the list leaves out, so a translation that adds one posts the copies first,
+then the new ones.
+
+`media-metadata.json` names each media fixture's metadata record in the default language
+(`contract/media-metadata-manifest.json`), for a translation of a file's metadata.
 
 ## Cleanup
 

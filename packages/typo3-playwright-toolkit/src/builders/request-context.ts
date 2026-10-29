@@ -15,6 +15,8 @@ export interface RequestContext {
     testId: string
     /** For `record_edit`; the session endpoint hands it out. */
     routeToken: string
+    /** For `tce_db`, which runs a command such as a translation. */
+    commandToken?: string
     replayFolder?: ReplayFolder
     /** Slugs this scenario already created. */
     usedSlugs?: Set<string>
@@ -73,5 +75,6 @@ export function resolveRequestContext(
         backendPath: explicit.backendPath ?? getToolkitConfig().backendPath ?? DEFAULT_BACKEND_PATH,
         testId: requireTestId(page, explicit.testId),
         routeToken: explicit.routeToken ?? '',
+        commandToken: explicit.commandToken ?? '',
     }
 }

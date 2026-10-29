@@ -346,8 +346,10 @@ fails at the line that used it and lists the names that do, which is the reason 
 prefer a name over a number: `42` cannot tell you it used to be a different image.
 
 The order you call them in is the order the records get. A child takes `pid` and
-`sys_language_uid` from the record above it, so a translation sets the language once,
-at the top.
+`sys_language_uid` from the record above it. For a translation, see
+[Translations](#translations).
+
+On `update()`, the references you set replace what the column held.
 
 Never set `uid_local`, `uid_foreign`, `tablenames`, `fieldname` or `sorting_foreign`:
 the toolkit writes them, and your own value fails. A wrong `uid_foreign` saves a row
@@ -377,6 +379,90 @@ override getRelations(owner: RelationOwner): RelationOutput {
     return super.getRelations(owner)
 }
 ```
+
+### Translations
+
+`translate()` makes a translation the way an editor does in the backend: it sends
+TYPO3's own translate command, so the translation is connected to the record it came
+from, and TYPO3 copies its files and child records. Whatever you set on the builder
+then fills the translation:
+
+```ts
+export const test = defineScenario(async ({ builders }) => {
+    const products = await builders.page().withTitle('Products').withSlug('/products')
+        .withFileReference('media', 'hero.png')
+        .create()
+    const gallery = await builders.content().onPage(products.id).ofType('textmedia')
+        .configure((element) => element.withHeader('Gallery').withFiles(['hero.png', 'lawn.jpg']))
+        .create()
+
+    const german = await builders.page().translate(products.id, 1)
+        .withTitle('Produkte')
+        .withSlug('/produkte')
+        .create()
+    await builders.content().translate(gallery.id, 1, 'textmedia')
+        .configure((element) => element.withHeader('Galerie'))
+        .withCopiedFileReference('assets', 1, { alternative: 'Rasen' })
+        .withFileReference('assets', 'badge.svg')
+        .create()
+
+    return { slug: german.slug }
+})
+
+test('shows the German gallery', async ({ page, state }) => {
+    await page.goto(`/de${state.slug}`)
+
+    await expect(page.getByRole('heading', { name: 'Galerie' })).toBeVisible()
+})
+```
+
+The second argument is the language ID of the site. The page builder answers the
+translation's `id` and `slug`; the slug has no language base, so the test puts the
+`/de` in front itself.
+
+- **A free copy:** `content().copyTo(id, language)` copies an element into a
+  language without connecting it, as the "copy" mode of the page module does. Pages
+  have no free mode in TYPO3, so there is no `page().copyTo()`.
+- **Its content type:** name the type as the third argument to reach its setters
+  through `configure()`. Without it you have `withField()` and the file setters.
+- **Copied files:** TYPO3 copies each file reference of the original.
+  `withCopiedFileReference(column, position, fields)` changes the copy at that
+  position, counted from 0. `withFileReference()` adds a reference after the copies;
+  the copies stay where they are.
+- **What TYPO3 does by itself:** it hides a translation and puts
+  `[Translate to German:]` in front of its texts. The toolkit shows the translation
+  unless you set `hidden`; the prefix stays wherever you do not set a value of your
+  own.
+- **What the backend refuses:** a field TCA keeps the same in every language
+  (`l10n_mode: exclude`, such as a page's `layout`) cannot be set on a translation,
+  and the save fails with TYPO3's reason. So does a record that already has a
+  translation in that language, a language the site does not have, and a table
+  without languages. `refusal()` works here as everywhere.
+
+A file's metadata, its alternative text and title, can be translated too:
+
+```ts
+await builders.fileMetadata('badge.svg').translate(1).withField('alternative', 'Abzeichen').create()
+```
+
+Without `translate()`, `fileMetadata()` changes the default language. It takes the
+name of a media fixture; for metadata every test shares, use `translations` in
+`media.json` — see [Media fixtures](../playwright-toolkit/README.md#media-fixtures).
+A file whose metadata `media.json` already translates cannot be translated again in
+that language.
+
+For a table without a builder, `translateRecord()` in the setup tools sends the same
+command and answers the new `uid`; fill it with `saveRecord()`:
+
+```ts
+export const test = defineScenario(async ({ translateRecord, saveRecord }) => {
+    const { uid } = await translateRecord({ table: 'tx_shop_product', uid: 7, language: 1, mode: 'localize' })
+    await saveRecord({ table: 'tx_shop_product', identifier: String(uid), target: uid,
+        data: { tx_shop_product: { [uid]: { title: 'Gartenschere', hidden: 0 } } } })
+})
+```
+
+Translations need the extension of the same release, 0.27.0 or newer.
 
 ### One request for several elements
 
@@ -415,6 +501,9 @@ await builders.batch(
         .configure((element) => element.inContainer(Number(container.id))),
 )
 ```
+
+A translation cannot join a batch either: TYPO3 makes it with a command of its own,
+so call `create()` on it.
 
 A content type whose children hang off a column of its own needs none of this:
 `withChildren` already writes them in the same request as their parent. Batching is
@@ -911,6 +1000,16 @@ and that its hostname is set up as in step 1 of SETUP.md.
 **"No answer within 30 seconds".** The checks before the first test reach the site
 right after its caches were emptied, so TYPO3 builds them first. If your site needs
 longer than that, set `PW_HEALTH_TIMEOUT_MS`, in milliseconds.
+
+**"No route token for tce_db".** The extension is older than 0.27.0 and hands out no
+token for the translate command. Update it to the release of this package.
+
+**"TYPO3 created no translation of …".** The record already has a translation in
+that language, or the site has no such language. Translate a record once per
+language, and check the language ID in the site configuration.
+
+**"No media metadata at …".** `fileMetadata()` reads a file the extension writes
+from 0.27.0 on. Update it and run `ddev playwright-prepare`.
 
 **Settings seem to be ignored.** `defineToolkitConfig` ran too late. It must be the
 first thing in `playwright.config.ts`.

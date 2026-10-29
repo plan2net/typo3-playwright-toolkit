@@ -31,6 +31,72 @@ export function mergeRecords(into: RecordDataMap, from: RecordDataMap): void {
     }
 }
 
+export interface CopiedReferenceEdit {
+    column: string
+    position: number
+    fields: ContentFields
+}
+
+export interface CopiedReferences {
+    references: Record<string, number[]>
+    truncated: boolean
+}
+
+/**
+ * A file column posts every reference it keeps: one the post leaves out stays
+ * attached in a slot the new ones then share, so a translation lists its copies first.
+ */
+export function keepCopies(
+    output: RelationOutput,
+    copied: CopiedReferences,
+    edits: CopiedReferenceEdit[],
+): RelationOutput {
+    const touched = [...new Set([...Object.keys(output.columns), ...edits.map(({ column }) => column)])]
+    if (copied.truncated && touched.length > 0) {
+        throw new Error(
+            `[typo3-playwright-toolkit] The translation copied too many references to report, so ` +
+                `${touched.join(', ')} cannot be changed without losing their order. Set fields only, ` +
+                'or give the origin fewer references.',
+        )
+    }
+
+    const records: RecordDataMap = {}
+    mergeRecords(records, output.records)
+    for (const { column, position, fields } of edits) {
+        refuseWiredColumns(fields)
+        const copies = copied.references[column] ?? []
+        const copy = copies[position]
+        if (undefined === copy) {
+            throw new Error(
+                `[typo3-playwright-toolkit] The translation copied ${copies.length} references in ${column}, ` +
+                    `so there is none at position ${position}. Positions count from 0.`,
+            )
+        }
+        mergeRecords(records, { sys_file_reference: { [String(copy)]: fields } })
+    }
+
+    const columns = Object.fromEntries(
+        touched.map((column) => {
+            const added = output.columns[column] ? output.columns[column].split(',') : []
+
+            return [column, [...(copied.references[column] ?? []).map(String), ...added].join(',')]
+        }),
+    )
+
+    return { columns, records }
+}
+
+function refuseWiredColumns(fields: ContentFields): void {
+    const wired = Object.keys(fields).filter((column) => WIRED_COLUMNS.includes(column))
+    if (wired.length > 0) {
+        throw new Error(
+            `[typo3-playwright-toolkit] ${wired.join(', ')} cannot be set on a relation — ` +
+                'the toolkit writes it, and a value of your own would point the row ' +
+                'somewhere the parent column does not.',
+        )
+    }
+}
+
 interface FileReference {
     column: string
     identifier: string
@@ -94,7 +160,7 @@ export class RelationSet {
     ) {}
 
     withFileReference(column: string, file: string | number, fields: ContentFields = {}): this {
-        this.refuseWiredColumns(fields)
+        refuseWiredColumns(fields)
         this.claim(column, 'sys_file_reference')
         this.references.push({ column, identifier: newRecordIdentifier(), fileUid: mediaUid(file), fields })
 
@@ -189,16 +255,5 @@ export class RelationSet {
         }
 
         this.claims.set(column, table)
-    }
-
-    private refuseWiredColumns(fields: ContentFields): void {
-        const wired = Object.keys(fields).filter((column) => WIRED_COLUMNS.includes(column))
-        if (wired.length > 0) {
-            throw new Error(
-                `[typo3-playwright-toolkit] ${wired.join(', ')} cannot be set on a relation — ` +
-                    'the toolkit writes it, and a value of your own would point the row ' +
-                    'somewhere the parent column does not.',
-            )
-        }
     }
 }

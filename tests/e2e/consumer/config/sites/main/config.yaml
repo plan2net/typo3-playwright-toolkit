@@ -15,3 +15,10 @@ languages:
     base: '/'
     locale: en_US.UTF-8
     flag: gb
+  - languageId: 1
+    title: German
+    navigationTitle: Deutsch
+    base: '/de/'
+    locale: de_DE.UTF-8
+    flag: de
+    fallbackType: strict

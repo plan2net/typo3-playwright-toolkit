@@ -20,9 +20,11 @@ import {
     type RequestContext,
 } from './builders/request-context.js'
 import { recordSaver, type RecordToSave, type SavedRecord } from './http/record-edit.js'
+import { translateRecord, type RecordToTranslate, type TranslatedRecord } from './http/record-commit.js'
 import { saveSiteSettings } from './http/site-settings.js'
 import { ContentBuilder, saveBatch, type QueuedContent } from './builders/content-builder.js'
 import { PageBuilder } from './builders/page-builder.js'
+import { FileMetadataBuilder } from './builders/file-metadata-builder.js'
 import { ContextWithTestId, PageWithTestId } from './types/playwright-extensions.js'
 import { applyToolkitHeaders } from './http/off-site-headers.js'
 import { prepareScenarioContext } from './http/prepare-context.js'
@@ -56,6 +58,8 @@ export async function resolveSetupOutcome<T>(
 export interface ScenarioBuilders {
     page(): PageBuilder
     content(): ContentBuilder
+    /** The metadata record of a media fixture, by its name. */
+    fileMetadata(name: string): FileMetadataBuilder
     /**
      * Builds several elements of one page in a single request, in the order given.
      * They may not reference one another — that needs a uid, which only a save
@@ -72,7 +76,9 @@ export interface SetupTools {
     request: APIRequestContext
     builders: ScenarioBuilders
     /** For a table no builder covers. */
-    saveRecord(record: RecordToSave): Promise<SavedRecord>
+    saveRecord: (record: RecordToSave) => Promise<SavedRecord>
+    /** For a table no builder covers: the backend's translate command. saveRecord() then fills the translation. */
+    translateRecord: (record: RecordToTranslate) => Promise<TranslatedRecord>
     /**
      * Overrides the scenario site's settings in this test's database only, keyed
      * like `settings.yaml` flattened: `{ 'theme.look': 'wild' }`. A second call
@@ -134,7 +140,7 @@ export async function createScenarioFolder(
 export async function buildScenarioContext(
     page: Page,
     config: ToolkitConfig,
-    session: { backendPath: string; routeToken: string },
+    session: { backendPath: string; routeToken: string; commandToken?: string },
     testId: string,
     name: string,
     site?: ScenarioSite,
@@ -144,6 +150,7 @@ export async function buildScenarioContext(
         baseUrl: config.testingURL,
         backendPath: session.backendPath,
         routeToken: session.routeToken,
+        commandToken: session.commandToken,
         usedSlugs: new Set(),
         rootPageId: site?.rootPageId,
     }
@@ -165,7 +172,13 @@ export async function openAuthenticatedPage(
     name = '',
     site?: ScenarioSite,
     projectOptions: ProjectContextOptions = {},
-): Promise<{ page: Page; routeToken: string; backendPath: string; close: () => Promise<void> }> {
+): Promise<{
+    page: Page
+    routeToken: string
+    commandToken: string
+    backendPath: string
+    close: () => Promise<void>
+}> {
     const headers = toolkitHeaders(config, testId)
     const context = await browser.newContext({ ...projectOptions, baseURL: site?.base, serviceWorkers: 'block' })
 
@@ -208,6 +221,7 @@ export async function openAuthenticatedPage(
         return {
             page,
             routeToken: session.tokens?.record_edit ?? '',
+            commandToken: session.tokens?.tce_db ?? '',
             backendPath: session.backendPath ?? DEFAULT_BACKEND_PATH,
             close: () => context.close(),
         }
@@ -307,12 +321,19 @@ export function defineScenario<S = Record<string, never>>(
                             builders: {
                                 page: () => new PageBuilder(session.page, builderContext),
                                 content: () => new ContentBuilder(session.page, builderContext),
+                                fileMetadata: (name) => new FileMetadataBuilder(session.page, name, builderContext),
                                 batch: (...queued) => saveBatch(session.page, builderContext, queued),
                             },
                             saveRecord: recordSaver(
                                 session.page.request,
                                 resolveRequestContext(session.page, builderContext),
                             ),
+                            translateRecord: (record) =>
+                                translateRecord(
+                                    session.page.request,
+                                    resolveRequestContext(session.page, builderContext),
+                                    record,
+                                ),
                             siteSettings: (settings) =>
                                 saveSiteSettings(
                                     session.page.request,

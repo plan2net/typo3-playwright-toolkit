@@ -101,6 +101,8 @@ final class FormRules
 
         return $compiling['forms'][$key] = self::compile($compiling, $table, $identifier, $values, (int) $parentForm['effectivePid'], [
             'isInlineChild' => true,
+            // Collapsed, an existing child has no fields; a posted one was opened.
+            'isInlineChildExpanded' => true,
             'inlineParentUid' => $parent['identifier'],
             'inlineParentTableName' => $parent['table'],
             'inlineParentFieldName' => $parent['field'],
@@ -230,16 +232,29 @@ final class FormRules
             ...array_values(array_intersect_key($parentConfig, array_flip(['foreign_field', 'foreign_sortby', 'foreign_table_field']))),
             ...array_keys($parentConfig['foreign_match_fields'] ?? []),
         ];
+        $isTranslation = self::isTranslation($form);
         foreach (array_keys($values) as $column) {
-            if (!\in_array($column, $accepted, true) && !isset($form['processedTca']['columns'][$column])) {
+            if (\in_array($column, $accepted, true)) {
+                continue;
+            }
+
+            if (!isset($form['processedTca']['columns'][$column])) {
                 $refused[] = [
                     'table' => $table,
                     'message' => sprintf('%s %s: "%s" is not in the form of type "%s".', $table, $identifier, $column, $form['recordTypeValue']),
                 ];
+
+                continue;
+            }
+
+            if ($isTranslation && 'exclude' === ($form['processedTca']['columns'][$column]['l10n_mode'] ?? '')) {
+                $refused[] = [
+                    'table' => $table,
+                    'message' => sprintf('%s %s: "%s" cannot be translated; a translation takes it from its origin.', $table, $identifier, $column),
+                ];
             }
         }
 
-        $isTranslation = self::isTranslation($form);
         foreach ($form['processedTca']['columns'] as $column => $configuration) {
             if ($isTranslation && empty($configuration['l10n_display']) && 'exclude' === ($configuration['l10n_mode'] ?? '')) {
                 continue;

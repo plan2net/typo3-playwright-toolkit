@@ -21,6 +21,7 @@ export { defineBasePlaywrightConfig, type BasePlaywrightOverrides } from './play
 
 export { ContentBuilder, type QueuedContent } from './builders/content-builder.js'
 export { PageBuilder } from './builders/page-builder.js'
+export { FileMetadataBuilder } from './builders/file-metadata-builder.js'
 // getRelations takes and returns these, so a builder that defers its relations
 // cannot be written without them.
 export type { ChildRecord, RelationOwner, RelationOutput } from './builders/relations.js'
@@ -42,6 +43,7 @@ export {
     type CoreContentTypeMap,
 } from './builders/core-content.js'
 export { RecordRefusedError, type RecordDataMap, type RecordToSave } from './http/record-edit.js'
+export type { RecordToTranslate, TranslatedRecord, TranslationMode } from './http/record-commit.js'
 export { newRecordIdentifier } from './builders/identifier.js'
 export { flexForm, imageCrop, imageCrops } from './builders/fields.js'
 

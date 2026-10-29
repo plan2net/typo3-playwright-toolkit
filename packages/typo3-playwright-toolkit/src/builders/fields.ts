@@ -66,6 +66,14 @@ export function flexForm(
 }
 
 /**
+ * The `l10n_state` a backend form posts when an editor gives a connected translation
+ * its own value; core ignores the columns that never follow the origin.
+ */
+export function ownValues(columns: string[]): Record<string, 'custom'> {
+    return Object.fromEntries(columns.map((column) => [column, 'custom']))
+}
+
+/**
  * A boolean is a 0/1 int column. An undefined field is left out rather than sent
  * as null, which DataHandler would write.
  */

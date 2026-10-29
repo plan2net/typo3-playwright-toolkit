@@ -15,6 +15,7 @@ use Plan2net\PlaywrightToolkit\Http\RecordEditRefusal;
 use Plan2net\PlaywrightToolkit\Http\SetupCacheProvider;
 use Plan2net\PlaywrightToolkit\Http\SiteProbe;
 use Plan2net\PlaywrightToolkit\Http\SiteSettingsProvider;
+use Plan2net\PlaywrightToolkit\Http\TranslatedRecordReport;
 use Plan2net\PlaywrightToolkit\Security\ProbeSignature;
 use Plan2net\PlaywrightToolkit\Security\TestApiSecret;
 use Plan2net\PlaywrightToolkit\Session\BackendSessionProvider;
@@ -58,6 +59,7 @@ final class ContextGateTest extends FunctionalTestCase
         RecordedErrorProvider::class => ['/typo3/test-api/errors', 'GET'],
         SiteSettingsProvider::class => ['/typo3/test-api/site-settings', 'POST'],
         RecordEditDiagnostics::class => ['/typo3/record/edit', 'POST'],
+        TranslatedRecordReport::class => ['/typo3/record/commit', 'POST'],
         RecordEditRefusal::class => ['/typo3/record/edit', 'POST'],
         SiteProbe::class => ['/', 'GET'],
         SiteSettingsOverlay::class => ['/', 'GET'],
@@ -149,7 +151,9 @@ final class ContextGateTest extends FunctionalTestCase
     public static function endpoints(): \Generator
     {
         foreach (self::ENDPOINTS as $middleware => [$path, $method]) {
-            if (SiteSettingsOverlay::class === $middleware) {
+            // TranslatedRecordReport only answers for a record a real command created;
+            // TranslatedRecordReportTest covers it inside the context.
+            if (\in_array($middleware, [SiteSettingsOverlay::class, TranslatedRecordReport::class], true)) {
                 continue;
             }
 

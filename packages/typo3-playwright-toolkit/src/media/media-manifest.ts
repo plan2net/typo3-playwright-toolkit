@@ -9,11 +9,44 @@ export function mediaManifestFileFor(config: ToolkitConfig): string {
     return path.join(config.paths.consumerRoot, 'var', 'playwright', 'media.json')
 }
 
+/** Beside the manifest: each fixture's metadata record in the default language. */
+export function metadataManifestFileFor(config: ToolkitConfig): string {
+    return path.join(path.dirname(mediaManifestFileFor(config)), 'media-metadata.json')
+}
+
 export function resolveMediaUid(config: ToolkitConfig, name: string): number {
     const file = mediaManifestFileFor(config)
-    const manifest = cache.get(file) ?? read(file)
-    cache.set(file, manifest)
 
+    return uidOf(
+        read(
+            file,
+            `[typo3-playwright-toolkit] No media manifest at ${file}.\n` +
+                'Run `ddev playwright-prepare` to write it — or, if this project seeds no media,\n' +
+                '`withFileReference` needs a numeric sys_file uid rather than a name.',
+        ),
+        name,
+    )
+}
+
+export function resolveMetadataUid(config: ToolkitConfig, name: string): number {
+    const file = metadataManifestFileFor(config)
+
+    return uidOf(
+        read(
+            file,
+            `[typo3-playwright-toolkit] No media metadata at ${file}.\n` +
+                'plan2net/playwright-toolkit 0.27.0 and newer write it: update the extension and run ' +
+                '`ddev playwright-prepare`.',
+        ),
+        name,
+    )
+}
+
+export function mediaUid(file: string | number): number {
+    return typeof file === 'number' ? file : resolveMediaUid(getToolkitConfig(), file)
+}
+
+function uidOf(manifest: Record<string, number>, name: string): number {
     const uid = manifest[name]
     if (uid === undefined) {
         throw new Error(
@@ -25,18 +58,18 @@ export function resolveMediaUid(config: ToolkitConfig, name: string): number {
     return uid
 }
 
-export function mediaUid(file: string | number): number {
-    return typeof file === 'number' ? file : resolveMediaUid(getToolkitConfig(), file)
-}
-
-function read(file: string): Record<string, number> {
-    if (!fs.existsSync(file)) {
-        throw new Error(
-            `[typo3-playwright-toolkit] No media manifest at ${file}.\n` +
-                'Run `ddev playwright-prepare` to write it — or, if this project seeds no media,\n' +
-                '`withFileReference` needs a numeric sys_file uid rather than a name.',
-        )
+function read(file: string, missing: string): Record<string, number> {
+    const cached = cache.get(file)
+    if (undefined !== cached) {
+        return cached
     }
 
-    return JSON.parse(fs.readFileSync(file, 'utf-8')) as Record<string, number>
+    if (!fs.existsSync(file)) {
+        throw new Error(missing)
+    }
+
+    const manifest = JSON.parse(fs.readFileSync(file, 'utf-8')) as Record<string, number>
+    cache.set(file, manifest)
+
+    return manifest
 }
