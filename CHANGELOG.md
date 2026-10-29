@@ -10,6 +10,12 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-10-29
+
+A scenario can translate pages, content elements and file metadata the way an editor
+does, files and all. A test can expect the backend to refuse a record, check the
+backend itself, and change a page with `page.route()` without losing its database.
+
 ### Added
 
 - **@plan2net/typo3-playwright-toolkit** — a test can expect the backend to refuse a
@@ -1400,7 +1406,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.26.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.27.0...main
+[0.27.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.23.1...v0.24.0
