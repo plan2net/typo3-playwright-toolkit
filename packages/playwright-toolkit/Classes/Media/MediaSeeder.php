@@ -10,6 +10,7 @@ use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\FileInterface;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
+use TYPO3\CMS\Core\Resource\Security\SvgSanitizer;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -117,7 +118,7 @@ final class MediaSeeder
 
         foreach (MediaSources::scan($mediaPath) as $name => $path) {
             $published = $directory . $name;
-            if (!is_file($published) || sha1_file($published) !== sha1_file($path)) {
+            if (!is_file($published) || !self::publishedFrom($published, $path)) {
                 return false;
             }
         }
@@ -258,6 +259,19 @@ final class MediaSeeder
         return (string) $this->connectionPool->getConnectionForTable('sys_file_storage')
             ->executeQuery('SELECT driver FROM sys_file_storage WHERE uid = ?', [$uid])
             ->fetchOne();
+    }
+
+    private static function publishedFrom(string $published, string $source): bool
+    {
+        $publishedContent = (string) file_get_contents($published);
+        $sourceContent = (string) file_get_contents($source);
+
+        if ($publishedContent === $sourceContent) {
+            return true;
+        }
+
+        return 'svg' === strtolower(pathinfo($source, \PATHINFO_EXTENSION))
+            && $publishedContent === GeneralUtility::makeInstance(SvgSanitizer::class)->sanitizeContent($sourceContent);
     }
 
     private function storageOf(int $uid): ResourceStorage

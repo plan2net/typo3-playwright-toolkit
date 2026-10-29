@@ -280,6 +280,16 @@ final class MediaSeederTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function reportsAnSvgTypo3RewroteOnTheWayInAsMatching(): void
+    {
+        $this->givenFile('badge.svg', '<svg xmlns="http://www.w3.org/2000/svg" width="4" height="3"><rect width="4" height="3"/></svg>');
+        $seeder = $this->get(MediaSeeder::class);
+        $seeder->seed($this->mediaPath);
+
+        self::assertTrue($seeder->destinationMatches($this->mediaPath));
+    }
+
+    #[Test]
     public function reportsAModifiedPublishedFileAsNotMatching(): void
     {
         $this->givenImage('hero.png');
