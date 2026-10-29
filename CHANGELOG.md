@@ -24,6 +24,10 @@ the package a change belongs to.
   `backendPage` fixture is logged into the backend on the test's own database, and
   `editRecord(backendPage, table, uid)` opens a record's edit form and returns the frame
   it shows in. The page opens only for a test that asks for it.
+- **plan2net/playwright-toolkit** — `media.json` can translate a file's metadata:
+  `"translations": { "1": { "alternative": "…" } }` on a file or on a folder prefix.
+  Prepare writes each language as a translation of the file's metadata, so a page in
+  that language shows it.
 
 ## [0.26.0] - 2026-10-27
 

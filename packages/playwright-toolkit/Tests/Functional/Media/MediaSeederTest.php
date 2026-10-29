@@ -192,6 +192,51 @@ final class MediaSeederTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function writesTheTranslatedMetadataAsATranslationOfTheDefaultRow(): void
+    {
+        $this->givenImage('hero.png');
+        $this->givenConfiguration([
+            'hero.png' => ['alternative' => 'A lawn', 'translations' => ['1' => ['alternative' => 'Ein Rasen']]],
+        ]);
+
+        $this->get(MediaSeeder::class)->seed($this->mediaPath);
+
+        $rows = $this->get(ConnectionPool::class)
+            ->getConnectionForTable('sys_file_metadata')
+            ->executeQuery(
+                'SELECT uid, file, sys_language_uid, l10n_parent, alternative FROM sys_file_metadata'
+                . ' WHERE file = ? ORDER BY sys_language_uid',
+                [$this->uidOf('/hero.png')]
+            )
+            ->fetchAllAssociative();
+
+        self::assertCount(2, $rows);
+        self::assertSame(
+            [$this->uidOf('/hero.png'), 1, (int) $rows[0]['uid'], 'Ein Rasen'],
+            [(int) $rows[1]['file'], (int) $rows[1]['sys_language_uid'], (int) $rows[1]['l10n_parent'], $rows[1]['alternative']]
+        );
+    }
+
+    #[Test]
+    public function translatesAFileThatDeclaresNoDefaultLanguageMetadata(): void
+    {
+        $this->givenImage('hero.png');
+        $this->givenConfiguration(['hero.png' => ['translations' => ['1' => ['alternative' => 'Ein Rasen']]]]);
+
+        $this->get(MediaSeeder::class)->seed($this->mediaPath);
+
+        $parent = $this->get(ConnectionPool::class)
+            ->getConnectionForTable('sys_file_metadata')
+            ->executeQuery(
+                'SELECT p.file FROM sys_file_metadata t INNER JOIN sys_file_metadata p ON p.uid = t.l10n_parent'
+                . ' WHERE t.sys_language_uid = 1'
+            )
+            ->fetchOne();
+
+        self::assertSame($this->uidOf('/hero.png'), (int) $parent);
+    }
+
+    #[Test]
     public function createsAnOnlineMediaPseudoFileFromItsIdAlone(): void
     {
         $this->givenConfiguration([
@@ -473,7 +518,7 @@ final class MediaSeederTest extends FunctionalTestCase
     }
 
     /**
-     * @param array<string, array<string, string>> $declared
+     * @param array<string, array<string, mixed>> $declared
      */
     private function givenConfiguration(array $declared): void
     {

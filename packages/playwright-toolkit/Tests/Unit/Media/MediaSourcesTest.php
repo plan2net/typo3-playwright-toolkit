@@ -151,6 +151,80 @@ final class MediaSourcesTest extends TestCase
     }
 
     #[Test]
+    public function readsTheTranslatedMetadataDeclaredForAFixture(): void
+    {
+        $this->givenFile('hero.png', 'one');
+        $this->givenConfiguration([
+            'hero.png' => ['alternative' => 'A lawn', 'translations' => ['1' => ['alternative' => 'Ein Rasen']]],
+        ]);
+
+        self::assertSame(
+            ['hero.png' => [1 => ['alternative' => 'Ein Rasen']]],
+            MediaSources::translatedMetadata($this->directory)
+        );
+    }
+
+    #[Test]
+    public function aPrefixTranslatesItsFilesAndAFileOverridesItFieldByField(): void
+    {
+        $this->givenFile('gallery/lawn-01.jpg', 'one');
+        $this->givenFile('gallery/lawn-02.jpg', 'two');
+        $this->givenConfiguration([
+            'gallery/' => ['translations' => ['1' => ['copyright' => 'Beispiel', 'alternative' => 'Ein Rasen']]],
+            'gallery/lawn-02.jpg' => ['translations' => ['1' => ['alternative' => 'Ein zweiter Rasen']]],
+        ]);
+
+        self::assertSame(
+            [
+                'gallery/lawn-01.jpg' => [1 => ['copyright' => 'Beispiel', 'alternative' => 'Ein Rasen']],
+                'gallery/lawn-02.jpg' => [1 => ['copyright' => 'Beispiel', 'alternative' => 'Ein zweiter Rasen']],
+            ],
+            MediaSources::translatedMetadata($this->directory)
+        );
+    }
+
+    /**
+     * @return array<string, array{mixed, string}>
+     */
+    public static function unusableTranslations(): array
+    {
+        return [
+            'language zero' => [['0' => ['alternative' => 'A lawn']], '"0"'],
+            'a language name' => [['de' => ['alternative' => 'Ein Rasen']], '"de"'],
+            'a negative language' => [['-1' => ['alternative' => 'Ein Rasen']], '"-1"'],
+            'not an object' => ['Ein Rasen', 'translations'],
+            'fields that are no object' => [['1' => 'Ein Rasen'], '"1"'],
+            'an online media id' => [['1' => ['onlineMediaId' => 'dQw4w9WgXcQ']], 'onlineMediaId'],
+            'a creation date' => [['1' => ['creationDate' => '2024-01-01']], 'creationDate'],
+            'a modification date' => [['1' => ['modificationDate' => '2024-01-01']], 'modificationDate'],
+        ];
+    }
+
+    #[Test]
+    #[DataProvider('unusableTranslations')]
+    public function refusesAnUnusableTranslation(mixed $translations, string $named): void
+    {
+        $this->givenFile('hero.png', 'one');
+        $this->givenConfiguration(['hero.png' => ['translations' => $translations]]);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessageMatches('/hero\.png.*' . preg_quote($named, '/') . '/');
+
+        MediaSources::translatedMetadata($this->directory);
+    }
+
+    #[Test]
+    public function keepsTranslationsOutOfTheDefaultLanguageMetadata(): void
+    {
+        $this->givenFile('hero.png', 'one');
+        $this->givenConfiguration([
+            'hero.png' => ['alternative' => 'A lawn', 'translations' => ['1' => ['alternative' => 'Ein Rasen']]],
+        ]);
+
+        self::assertSame(['hero.png' => ['alternative' => 'A lawn']], MediaSources::metadata($this->directory));
+    }
+
+    #[Test]
     public function readsFileDatesInUtcWithoutPassingThemToMetadata(): void
     {
         $this->givenFile('hero.png', 'one');
@@ -392,7 +466,7 @@ final class MediaSourcesTest extends TestCase
     }
 
     /**
-     * @param array<string, array<string, string>> $declared
+     * @param array<string, array<string, mixed>> $declared
      */
     private function givenConfiguration(array $declared): void
     {

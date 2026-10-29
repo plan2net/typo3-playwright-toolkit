@@ -19,6 +19,11 @@ final class MediaSources
     /**
      * @var string
      */
+    private const TRANSLATIONS_FIELD = 'translations';
+
+    /**
+     * @var string
+     */
     private const ONLINE_MEDIA_ID_PATTERN = '#^[A-Za-z0-9_\-/]+$#';
 
     private const FILE_DATE_FIELDS = [
@@ -76,6 +81,30 @@ final class MediaSources
     }
 
     /**
+     * @return array<string, array<int, array<string, string>>> name => language => fields
+     */
+    public static function translatedMetadata(string $mediaPath): array
+    {
+        $declared = self::declared($mediaPath);
+        $translations = self::declaredTranslations($mediaPath);
+        $names = array_merge(array_keys(self::scan($mediaPath)), array_keys(self::onlineMedia($mediaPath)));
+        self::assertEveryEntryIsClaimed($declared, $names);
+
+        $resolved = [];
+        foreach ($names as $name) {
+            $inherited = $translations[self::longestPrefix(array_keys($declared), $name)] ?? [];
+            $own = $translations[$name] ?? [];
+            foreach (array_keys($inherited + $own) as $language) {
+                $resolved[$name][(int) $language] = array_merge($inherited[$language] ?? [], $own[$language] ?? []);
+            }
+        }
+
+        ksort($resolved);
+
+        return $resolved;
+    }
+
+    /**
      * @return array<string, array{creation_date?: int, modification_date?: int}>
      */
     public static function fileDates(string $mediaPath): array
@@ -119,6 +148,34 @@ final class MediaSources
      */
     private static function declared(string $mediaPath): array
     {
+        $declared = self::configuration($mediaPath);
+        foreach (array_keys($declared) as $key) {
+            unset($declared[$key][self::TRANSLATIONS_FIELD]);
+        }
+
+        return $declared;
+    }
+
+    /**
+     * @return array<string, array<int|string, array<string, string>>> key => language => fields
+     */
+    private static function declaredTranslations(string $mediaPath): array
+    {
+        $translations = [];
+        foreach (self::configuration($mediaPath) as $key => $fields) {
+            if (isset($fields[self::TRANSLATIONS_FIELD])) {
+                $translations[$key] = $fields[self::TRANSLATIONS_FIELD];
+            }
+        }
+
+        return $translations;
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private static function configuration(string $mediaPath): array
+    {
         $file = rtrim($mediaPath, '/') . '/' . self::CONFIGURATION_FILE;
         if (!is_file($file)) {
             return [];
@@ -139,6 +196,8 @@ final class MediaSources
         }
 
         foreach ($declared as $key => $fields) {
+            self::assertUsableTranslations((string) $key, $fields[self::TRANSLATIONS_FIELD] ?? []);
+
             foreach (array_keys(self::FILE_DATE_FIELDS) as $field) {
                 if (!\array_key_exists($field, $fields)) {
                     continue;
@@ -183,6 +242,38 @@ final class MediaSources
         return $declared;
     }
 
+    private static function assertUsableTranslations(string $key, mixed $translations): void
+    {
+        if (!\is_array($translations)) {
+            throw new \RuntimeException(sprintf(
+                'The media configuration of "%s" declares %s that do not map language IDs to metadata fields.',
+                $key,
+                self::TRANSLATIONS_FIELD
+            ));
+        }
+
+        foreach ($translations as $language => $fields) {
+            if (1 !== preg_match('/^[1-9]\d*$/D', (string) $language) || !\is_array($fields)) {
+                throw new \RuntimeException(sprintf(
+                    'The %s of "%s" names language "%s". Use a language ID above 0 and give it an object of metadata fields.',
+                    self::TRANSLATIONS_FIELD,
+                    $key,
+                    $language
+                ));
+            }
+
+            $fileFields = array_intersect([self::ONLINE_MEDIA_FIELD, ...array_keys(self::FILE_DATE_FIELDS)], array_keys($fields));
+            if ([] !== $fileFields) {
+                throw new \RuntimeException(sprintf(
+                    'The %s of "%s" set %s, which describes the file and has no translation.',
+                    self::TRANSLATIONS_FIELD,
+                    $key,
+                    implode(', ', $fileFields)
+                ));
+            }
+        }
+    }
+
     /**
      * @param array<string, array<string, string>> $declared
      * @param list<string>                         $names
@@ -210,8 +301,16 @@ final class MediaSources
      */
     private static function defaultsFor(array $declared, string $name): array
     {
+        return $declared[self::longestPrefix(array_keys($declared), $name)] ?? [];
+    }
+
+    /**
+     * @param list<string> $keys
+     */
+    private static function longestPrefix(array $keys, string $name): string
+    {
         $longest = '';
-        foreach (array_keys($declared) as $key) {
+        foreach ($keys as $key) {
             if (!str_ends_with($key, '/') || !str_starts_with($name, $key)) {
                 continue;
             }
@@ -221,7 +320,7 @@ final class MediaSources
             }
         }
 
-        return '' === $longest ? [] : $declared[$longest];
+        return $longest;
     }
 
     /**

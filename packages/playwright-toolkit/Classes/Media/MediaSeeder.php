@@ -82,6 +82,19 @@ final class MediaSeeder
             $files[$name]->getMetaData()->add($fields)->save();
         }
 
+        $metadataConnection = $this->connectionPool->getConnectionForTable('sys_file_metadata');
+        foreach (MediaSources::translatedMetadata($mediaPath) as $name => $languages) {
+            foreach ($languages as $language => $fields) {
+                $metadataConnection->insert('sys_file_metadata', [
+                    ...$fields,
+                    'pid' => 0,
+                    'file' => $files[$name]->getUid(),
+                    'sys_language_uid' => $language,
+                    'l10n_parent' => (int) $files[$name]->getMetaData()->offsetGet('uid'),
+                ]);
+            }
+        }
+
         $fileDates = MediaSources::fileDates($mediaPath);
         foreach ($files as $name => $file) {
             $dates = ($fileDates[$name] ?? []) + [

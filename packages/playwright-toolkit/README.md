@@ -342,6 +342,25 @@ A key ending in `/` gives defaults to everything under it. An exact entry overri
 field by field, and `"alternative": ""` is an answer too, so it wins over an inherited
 value.
 
+`translations` gives the metadata in other languages, by language ID:
+
+```json
+{
+    "hero.png": {
+        "alternative": "Rolling green lawn",
+        "translations": { "1": { "alternative": "Grüner Rasen" } }
+    },
+    "gallery/": { "translations": { "1": { "alternative": "Rasen im Sommer" } } }
+}
+```
+
+Each language becomes a translation of the file's metadata, which TYPO3 shows on a
+page in that language. A field without a translation shows the default language's
+value. Translations under a key ending in `/` work like the other defaults, per
+language and field by field. Use a language ID above 0. `onlineMediaId`,
+`creationDate` and `modificationDate` describe the file itself, so they cannot be
+translated.
+
 An entry with `onlineMediaId` has no committed file. It becomes the pseudo-file TYPO3
 writes for a YouTube or Vimeo reference, built from the ID alone, so prepare makes no
 network request. Give the ID, not a URL.

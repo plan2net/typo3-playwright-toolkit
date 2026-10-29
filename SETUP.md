@@ -342,8 +342,8 @@ tests/playwright/fixtures/media/hero.png
 .configure((content) => content.withHeader('Gallery').withFile('hero.png'))
 ```
 
-Alternative texts, titles and YouTube references go in an optional `media.json` beside
-the files — see
+Alternative texts, titles, their translations and YouTube references go in an optional
+`media.json` beside the files — see
 [Media fixtures](packages/playwright-toolkit/README.md#media-fixtures).
 
 ## 6. Run it
