@@ -115,7 +115,7 @@ final class TranslatedRecordReportTest extends FunctionalTestCase
     {
         $response = $this->commit(['pages' => [2 => ['localize' => 1]]]);
 
-        self::assertCount(1, $this->translatedRecord($response)['references']['media'] ?? []);
+        self::assertCount(2, $this->translatedRecord($response)['references']['media'] ?? []);
     }
 
     #[Test]
@@ -153,10 +153,7 @@ final class TranslatedRecordReportTest extends FunctionalTestCase
     {
         $response = $this->commit(['pages' => [2 => ['localize' => 1]]]);
 
-        self::assertSame(
-            array_keys(ContractFixture::read('translated-record-header')),
-            array_keys($this->translatedRecord($response))
-        );
+        self::assertSame(ContractFixture::read('translated-record-header'), $this->translatedRecord($response));
     }
 
     /**

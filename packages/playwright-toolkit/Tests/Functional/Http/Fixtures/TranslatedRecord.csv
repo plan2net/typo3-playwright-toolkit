@@ -4,7 +4,7 @@
 "pages",,,,,,,,,,
 ,"uid","pid","title","doktype","slug","deleted","hidden","sys_language_uid","l10n_parent","media"
 ,1,0,"Root",1,"/",0,0,0,0,0
-,2,1,"Products",1,"/products",0,0,0,0,1
+,2,1,"Products",1,"/products",0,0,0,0,2
 "tt_content",,,,,,,,,,
 ,"uid","pid","CType","colPos","header","assets","sys_language_uid","l18n_parent","deleted","hidden"
 ,1,2,"textmedia",0,"Two images",2,0,0,0,0
@@ -19,3 +19,4 @@
 ,1,2,1,1,"tt_content","assets",1,0,0,0
 ,2,2,1,1,"tt_content","assets",2,0,0,0
 ,3,2,1,2,"pages","media",1,0,0,0
+,4,2,1,2,"pages","media",2,0,0,0

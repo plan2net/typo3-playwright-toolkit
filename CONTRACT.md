@@ -263,7 +263,7 @@ For a request carrying the secret, `TranslatedRecordReport` reads the new record
 the database after the command ran and answers (`contract/translated-record-header.json`):
 
 ```
-X-Playwright-Translated-Record: {"uid":3,"pid":2,"references":{"media":[6,7]}}
+X-Playwright-Translated-Record: {"uid":3,"pid":1,"references":{"media":[5,6]}}
 ```
 
 `references` lists the record's file references per column, in the order they show.

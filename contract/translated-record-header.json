@@ -1,8 +1,8 @@
 {
-    "_comment": "The exact X-Playwright-Translated-Record envelope a record/commit translation answers with: the new record's uid and pid, and its file references per column in the order they show. The extension asserts its real header has these keys; the toolkit asserts its client parses this body. When the references do not fit a header, they are left out and \"truncated\": true takes their place.",
+    "_comment": "The exact X-Playwright-Translated-Record envelope a record/commit translation answers with: the new record's uid and pid, and its file references per column in the order they show. The extension asserts its real header equals this envelope; the toolkit asserts its client parses this body. When the references do not fit a header, they are left out and \"truncated\": true takes their place.",
     "uid": 3,
-    "pid": 2,
+    "pid": 1,
     "references": {
-        "media": [6, 7]
+        "media": [5, 6]
     }
 }
