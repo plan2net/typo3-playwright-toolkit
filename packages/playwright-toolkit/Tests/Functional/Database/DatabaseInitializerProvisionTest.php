@@ -114,17 +114,22 @@ final class DatabaseInitializerProvisionTest extends FunctionalTestCase
         $locks = LockFiles::inVarPath();
         $locks->shared(LockFiles::TEMPLATE_LOCK, static fn(): mixed => null);
         $locks->exclusively($locks->databaseLock('db' . self::TEST_ID), static fn(): mixed => null);
-        chmod($locks->directory(), 0500);
+        $this->makeUnwritable($locks->directory());
+
+        $refusal = null;
 
         try {
             $this->initializer()->provision($this->driver(), self::TEST_ID);
-            self::fail('Expected the unwritable claim to abort provisioning.');
         } catch (\RuntimeException $exception) {
-            self::assertStringContainsString('claim', $exception->getMessage());
+            $refusal = $exception;
         } finally {
             chmod($locks->directory(), 0700);
         }
 
+        // Asserting inside the try would be swallowed: a PHPUnit failure is a
+        // RuntimeException too.
+        self::assertNotNull($refusal, 'Expected the unwritable claim to abort provisioning.');
+        self::assertStringContainsString('claim', $refusal->getMessage());
         self::assertFileDoesNotExist(
             $this->databaseDirectory() . '/db' . self::TEST_ID . '.sqlite',
             'created a database that no claim names'
@@ -164,6 +169,22 @@ final class DatabaseInitializerProvisionTest extends FunctionalTestCase
         $this->expectExceptionMessageMatches('/playwright prepare/');
 
         $this->initializer()->provision($this->driver(), self::TEST_ID);
+    }
+
+    // DDEV's bind mount on macOS keeps the mode but lets the owner write anyway, so
+    // the only reliable check is to try a write.
+    private function makeUnwritable(string $directory): void
+    {
+        chmod($directory, 0500);
+
+        $probe = $directory . '/write-probe';
+        if (!@touch($probe)) {
+            return;
+        }
+
+        @unlink($probe);
+        chmod($directory, 0700);
+        self::markTestSkipped('This filesystem does not enforce chmod, so a claim cannot be made unwritable.');
     }
 
     private function claimFile(): string
