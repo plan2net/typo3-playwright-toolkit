@@ -47,6 +47,23 @@ final class TestScopedProcessingFolder
         $record->setValue($storage, $row);
 
         self::createFolder($storage, $testId);
+        self::registerFolderFilter($storage);
+    }
+
+    // Core hides only this storage's own processing folder, so every other test's
+    // shows up in a listing.
+    /**
+     * @return true|-1 Core throws when a filter answers false
+     */
+    public static function filterProcessingFolders(string $itemName, string $itemIdentifier): bool|int
+    {
+        $prefix = ProcessedFileIsolation::folderFor('');
+        if (!str_ends_with($itemIdentifier, '/') || !str_starts_with($itemName, $prefix)) {
+            return true;
+        }
+        $testId = substr($itemName, \strlen($prefix));
+
+        return '' === $testId || 1 === preg_match(TestContext::TEST_ID_PATTERN, $testId) ? -1 : true;
     }
 
     // Core creates it only when missing, so of two parallel requests one fails.
@@ -59,6 +76,20 @@ final class TestScopedProcessingFolder
 
         GeneralUtility::mkdir_deep($root . '/' . ProcessedFileIsolation::folderFor($testId));
         ProcessedFileIsolation::record($root);
+    }
+
+    // The file list and the folder tree reset a storage's filters to the defaults
+    // before listing, so the filter goes in the defaults as well as on this storage.
+    private static function registerFolderFilter(ResourceStorage $storage): void
+    {
+        $filter = [self::class, 'filterProcessingFolders'];
+        if (!\in_array($filter, $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['defaultFilterCallbacks'], true)) {
+            $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['defaultFilterCallbacks'][] = $filter;
+        }
+
+        if (!\in_array($filter, $storage->getFileAndFolderNameFilters(), true)) {
+            $storage->addFileAndFolderNameFilter($filter);
+        }
     }
 
     // The fallback storage is mounted on the public path, where TYPO3 processes

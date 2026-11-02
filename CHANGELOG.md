@@ -10,6 +10,13 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **plan2net/playwright-toolkit** — the file list and the file browser no longer show
+  the processing folders of other tests. A failed test keeps its folder for a day, so
+  after a few failures they filled the first page of a storage, and a test looking for
+  a file there no longer found it.
+
 ## [0.27.0] - 2026-10-29
 
 A scenario can translate pages, content elements and file metadata the way an editor
