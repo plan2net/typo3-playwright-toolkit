@@ -10,12 +10,14 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.27.1] - 2026-11-02
+
 ### Fixed
 
-- **plan2net/playwright-toolkit** — the file list and the file browser no longer show
-  the processing folders of other tests. A failed test keeps its folder for a day, so
-  after a few failures they filled the first page of a storage, and a test looking for
-  a file there no longer found it.
+- **plan2net/playwright-toolkit** — the file list, the file browser and the folder tree
+  no longer show the processing folders of other tests. A failed test keeps its folder
+  for a day, so after a few failures they filled the first page of a storage, and the
+  file a test was looking for landed on the page after it.
 
 ## [0.27.0] - 2026-10-29
 
@@ -1413,7 +1415,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.27.0...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.27.1...main
+[0.27.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.27.0...v0.27.1
 [0.27.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.24.0...v0.25.0
