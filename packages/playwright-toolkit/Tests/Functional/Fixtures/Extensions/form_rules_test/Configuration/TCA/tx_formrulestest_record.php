@@ -77,7 +77,7 @@ return [
         ],
         'kind' => [
             'label' => 'Kind',
-            'config' => ['type' => 'select', 'renderType' => 'selectSingle', 'items' => $items(['plain', 'extra', 'locked', 'localized', 'flexible', 'dated']), 'default' => 'plain'],
+            'config' => ['type' => 'select', 'renderType' => 'selectSingle', 'items' => $items(['plain', 'extra', 'locked', 'localized', 'flexible', 'dated', 'switched']), 'default' => 'plain'],
         ],
         'published' => [
             'label' => 'Published',
@@ -157,6 +157,15 @@ return [
             'label' => 'Subtitle',
             'config' => ['type' => 'input', ...$required],
         ],
+        'display' => [
+            'label' => 'Display',
+            'config' => ['type' => 'select', 'renderType' => 'selectSingle', 'items' => $items(['a', 'b'])],
+        ],
+        'filter' => [
+            'label' => 'Filter',
+            'displayCond' => 'FIELD:display:=:b',
+            'config' => ['type' => 'input'],
+        ],
     ],
     'types' => [
         'plain' => ['showitem' => 'kind, title, tags, amount, stock, bonus, code, children'],
@@ -165,5 +174,11 @@ return [
         'localized' => ['showitem' => 'kind, title, sys_language_uid, l10n_parent, note, shared'],
         'flexible' => ['showitem' => 'kind, title, settings'],
         'dated' => ['showitem' => 'kind, title, published'],
+        'switched' => [
+            'showitem' => 'kind, title, display, filter',
+            'columnsOverrides' => [
+                'display' => ['config' => ['default' => 'a']],
+            ],
+        ],
     ],
 ];

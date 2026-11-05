@@ -34,6 +34,9 @@ final class PostedValuesOverlay implements FormDataProviderInterface
             }
 
             $result['databaseRow'][$column] = $value;
+            if ('new' === $result['command']) {
+                $result['defaultValues'][$result['tableName']][$column] = $value;
+            }
         }
 
         return $result;

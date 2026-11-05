@@ -10,6 +10,14 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **plan2net/playwright-toolkit** — a new record is no longer refused for a field that
+  its posted values show. When a record type set a default for a field in
+  `columnsOverrides`, the form check used that default instead of the posted value, so
+  a display condition reading the field hid what the editor's choice would show. Every
+  Content Blocks element with a display condition on a field with a default was affected.
+
 ## [0.27.1] - 2026-11-02
 
 ### Fixed

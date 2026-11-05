@@ -274,6 +274,33 @@ final class RecordEditRefusalTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function decidesADisplayConditionByThePostedValueOverTheDefaultOfTheType(): void
+    {
+        $response = $this->save(['tx_formrulestest_record' => ['NEW1' => [
+            'pid' => 1,
+            'kind' => 'switched',
+            'title' => 'T',
+            'display' => 'b',
+            'filter' => 'x',
+        ]]]);
+
+        self::assertSame(302, $response->getStatusCode(), $this->refusal($response));
+    }
+
+    #[Test]
+    public function acceptsAPostedValueThatEqualsTheDefaultOfTheType(): void
+    {
+        $response = $this->save(['tx_formrulestest_record' => ['NEW1' => [
+            'pid' => 1,
+            'kind' => 'switched',
+            'title' => 'T',
+            'display' => 'a',
+        ]]]);
+
+        self::assertSame(302, $response->getStatusCode(), $this->refusal($response));
+    }
+
+    #[Test]
     public function checksAChildAgainstTheFormItsParentFieldGivesIt(): void
     {
         $response = $this->save([
