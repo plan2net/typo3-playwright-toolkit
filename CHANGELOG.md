@@ -10,6 +10,8 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+## [0.27.3] - 2026-11-18
+
 ### Fixed
 
 - **@plan2net/typo3-playwright-toolkit** — a page that Chromium fetches ahead because of
@@ -1436,7 +1438,8 @@ used to fail with a driver's or a framework's own error now say what to do about
 - `CONTRACT.md` and the `contract/` response fixtures, which pin the wire shape
   both packages depend on.
 
-[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.27.2...main
+[Unreleased]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.27.3...main
+[0.27.3]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.27.2...v0.27.3
 [0.27.2]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.27.1...v0.27.2
 [0.27.1]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.27.0...v0.27.1
 [0.27.0]: https://github.com/plan2net/typo3-playwright-toolkit/compare/v0.26.0...v0.27.0
