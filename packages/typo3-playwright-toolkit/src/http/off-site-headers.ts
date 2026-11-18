@@ -1,6 +1,6 @@
 import type { APIResponse, BrowserContext, Route } from '@playwright/test'
 import { SECRET_HEADER } from './api-secret.js'
-import { TEST_ID_HEADER, browserHeaders } from '../contract.js'
+import { TEST_ID_COOKIE, TEST_ID_HEADER, browserHeaders } from '../contract.js'
 import { getToolkitConfig, type ToolkitConfig } from '../config.js'
 import { testingOrigins } from '../sites/registry.js'
 import type { ContextWithTestId } from '../types/playwright-extensions.js'
@@ -29,6 +29,17 @@ export async function applyToolkitHeaders(
             const request = route.request()
             await route.fallback({ headers: routedHeaders(request.url(), request.headers(), testId, origins) })
         },
+    )
+
+    await context.addCookies(
+        [...origins].map((origin) => ({
+            name: TEST_ID_COOKIE,
+            value: testId,
+            url: origin,
+            httpOnly: true,
+            secure: 'https:' === new URL(origin).protocol,
+            sameSite: 'Lax' as const,
+        })),
     )
 
     const request = toolkitRequest(context.request, config, testId, (context as ContextWithTestId).site)

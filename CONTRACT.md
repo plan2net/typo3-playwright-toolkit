@@ -11,6 +11,8 @@ Read this before you change anything that touches a test ID.
 |---|---|---|
 | Test ID header | `X-Playwright-Test-Id` | npm `TEST_ID_HEADER`, PHP `TestContext::TEST_ID_HEADER` |
 | Test ID format | `^[A-Z0-9]{16}$` | npm `TEST_ID_PATTERN`, PHP `TestContext::TEST_ID_PATTERN` |
+| Test ID cookie | `playwright_test_id` | npm `TEST_ID_COOKIE`, PHP `TestContext::TEST_ID_COOKIE` |
+| Inspect cookie | `playwright_inspect` | PHP `InspectProvider::INSPECT_COOKIE`, set and read by PHP only |
 | Secret header | `X-Playwright-Toolkit-Secret` | npm `SECRET_HEADER`, PHP `TestApiSecret::HEADER` |
 | Saved record header | `X-Playwright-Saved-Record` | npm `SAVED_RECORD_HEADER`, PHP `SavedRecord::HEADER` |
 | Refused record header | `X-Playwright-Record-Diagnostics` | npm `RECORD_DIAGNOSTICS_HEADER`, PHP `RecordDiagnostics::HEADER` |
@@ -31,6 +33,13 @@ The database for a test is `db` plus its test ID.
 **Send the test ID as a header.** The toolkit puts it on every request to a testing
 host: the testing URL, and every site the probe below proved. Apache and nginx pass it to PHP on their own. Do not add webserver
 configuration for it, and do not let the DDEV add-on write any.
+
+**Set the test ID as a cookie too.** A page that Chromium fetches ahead for speculation
+rules never reaches the toolkit's routing, so it arrives without the header, but it
+carries the context's cookies. The toolkit therefore also sets `playwright_test_id` for
+each testing host, host-only, `HttpOnly`, and `Secure` on an https host. A cookie is
+scoped to a host and not to a port, so another server on the same host gets it as
+well. The header still wins wherever both arrive.
 
 **Send the secret to every `/typo3/test-api/*` endpoint.** Without it the endpoint
 answers `401` and nothing else. The test ID alone selects a database; only the
@@ -107,9 +116,14 @@ The link is valid for 900 seconds. The secret is never in the URL.
 `contract/inspect-token.json` holds one example token. Both packages must produce
 exactly that token for those inputs.
 
-The endpoint checks the signature, sets two cookies (the test ID and the backend
-session) and redirects to the backend. Both cookies are `HttpOnly`, `Secure` and
-`SameSite=Lax`, and both end when the browser closes.
+The endpoint checks the signature, sets three cookies (the test ID, the backend
+session and `playwright_inspect`) and redirects to the backend. All three are
+`HttpOnly`, `Secure` and `SameSite=Lax`, and all end when the browser closes.
+
+Only `playwright_inspect` marks a browser as an inspect session, and only then does
+the backend show the test ID beside the site name. The test ID cookie cannot mark it,
+because a test run sets that cookie as well, and neither can the backend session,
+which a test's own backend page carries too.
 
 **Read the header first and the cookie only if there is no header.** Otherwise a
 cookie left in a browser changes what a test run does.

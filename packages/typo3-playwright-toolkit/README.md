@@ -586,6 +586,12 @@ test('works without the script', async ({ page, state, testId }) => {
 })
 ```
 
+A page that Chromium fetches ahead for the site's speculation rules never reaches
+`page.route()` at all, so a handler like this one does not change it. The toolkit
+still sends it to the test's database, through a `playwright_test_id` cookie it sets
+on the context. `context.clearCookies()` removes that cookie as well, after which such
+a page comes from the site's normal database again.
+
 ### Reusing a scenario's setup
 
 A scenario's setup posts its content through the real backend, which is the slowest

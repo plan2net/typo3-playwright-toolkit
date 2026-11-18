@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { TEST_ID_HEADER, TEST_ID_PATTERN, generateTestId } from '#src/contract.js'
+import { TEST_ID_COOKIE, TEST_ID_HEADER, TEST_ID_PATTERN, generateTestId } from '#src/contract.js'
 
 describe('contract constants', () => {
     it('exposes the wire-contract header name', () => {
         expect(TEST_ID_HEADER).toBe('X-Playwright-Test-Id')
+    })
+
+    it('names the cookie the way TestContext::TEST_ID_COOKIE does', () => {
+        expect(TEST_ID_COOKIE).toBe('playwright_test_id')
     })
 
     it('exposes the test-ID pattern', () => {

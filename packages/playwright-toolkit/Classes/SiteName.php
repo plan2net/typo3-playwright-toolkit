@@ -6,6 +6,7 @@ namespace Plan2net\PlaywrightToolkit;
 
 use Plan2net\PlaywrightToolkit\Database\Cleanup\LockFiles;
 use Plan2net\PlaywrightToolkit\Database\DatabaseName;
+use Plan2net\PlaywrightToolkit\Http\InspectProvider;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Core\Event\BootCompletedEvent;
 
@@ -34,7 +35,11 @@ final class SiteName
         }
 
         $testId = TestContext::testId();
-        if ('' === $testId || '' !== trim((string) ($_SERVER[TestContext::TEST_ID_SERVER_KEY] ?? ''))) {
+        if (
+            '' === $testId
+            || '' !== trim((string) ($_SERVER[TestContext::TEST_ID_SERVER_KEY] ?? ''))
+            || !isset($_COOKIE[InspectProvider::INSPECT_COOKIE])
+        ) {
             return;
         }
 

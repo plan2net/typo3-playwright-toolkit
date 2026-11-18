@@ -28,6 +28,11 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
     /**
      * @var string
      */
+    public const INSPECT_COOKIE = 'playwright_inspect';
+
+    /**
+     * @var string
+     */
     private const INSPECT_PATH = '/test-api/inspect';
 
     public function __construct(
@@ -86,6 +91,7 @@ final class InspectProvider implements MiddlewareInterface, LoggerAwareInterface
             'Set-Cookie' => [
                 self::cookieHeader(TestContext::TEST_ID_COOKIE, $testId),
                 self::cookieHeader(BackendSettings::cookieName(), $cookieValue),
+                self::cookieHeader(self::INSPECT_COOKIE, '1'),
             ],
         ]);
     }

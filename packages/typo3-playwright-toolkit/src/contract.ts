@@ -4,6 +4,7 @@ import { SECRET_HEADER, resolveApiSecret } from './http/api-secret.js'
 
 export const TEST_ID_HEADER = 'X-Playwright-Test-Id'
 export const TEST_ID_PATTERN = /^[A-Z0-9]{16}$/
+export const TEST_ID_COOKIE = 'playwright_test_id'
 
 /** JSON, so a value stays ASCII in a header field and a later field needs no second header. */
 export const SAVED_RECORD_HEADER = 'X-Playwright-Saved-Record'

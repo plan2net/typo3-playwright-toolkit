@@ -28,6 +28,7 @@ async function handled(
         route: async (_matches: unknown, handler: (route: unknown) => Promise<void>) => {
             handle = handler
         },
+        addCookies: async () => undefined,
         request: {},
         on: () => undefined,
     }

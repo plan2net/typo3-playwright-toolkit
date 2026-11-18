@@ -10,6 +10,17 @@ the package a change belongs to.
 
 ## [Unreleased]
 
+### Fixed
+
+- **@plan2net/typo3-playwright-toolkit** — a page that Chromium fetches ahead because of
+  the site's speculation rules now comes from the test's database. Such a request never
+  passes through Playwright's routing, so it carried no test ID, and a click on a link
+  could land on a page built from the site's own content. The toolkit now also sets the
+  test ID as a `playwright_test_id` cookie for the site under test.
+- **plan2net/playwright-toolkit** — only a browser opened through an inspect link shows
+  the test ID beside the site name. A request with the test ID cookie and no header was
+  marked as well, which a test run's pages fetched ahead now are.
+
 ## [0.27.2] - 2026-11-05
 
 ### Fixed

@@ -65,8 +65,16 @@ final class InspectRedirectTest extends TestCase
 
         $cookies = InspectProvider::backendRedirect(self::TEST_ID, 'the-jwt')->getHeader('Set-Cookie');
 
-        self::assertCount(2, $cookies);
+        self::assertCount(3, $cookies);
         self::assertStringStartsWith(TestContext::TEST_ID_COOKIE . '=' . self::TEST_ID . ';', $cookies[0]);
         self::assertStringStartsWith('be_project_user=the-jwt;', $cookies[1]);
+    }
+
+    #[Test]
+    public function marksTheBrowserAsAnInspectSession(): void
+    {
+        $cookies = InspectProvider::backendRedirect(self::TEST_ID, 'the-jwt')->getHeader('Set-Cookie');
+
+        self::assertStringStartsWith('playwright_inspect=1;', $cookies[2] ?? '');
     }
 }
